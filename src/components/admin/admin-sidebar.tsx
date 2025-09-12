@@ -59,7 +59,7 @@ const menuItems = [
     id: "price-lists",
     label: "Lista de Precios",
     icon: FileText,
-    href: "/admin/lista-precios",
+    href: "/admin/listas-precios",
     color: "from-yellow-500 to-orange-500"
   },
   {
