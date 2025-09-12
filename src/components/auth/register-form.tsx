@@ -16,6 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth";
+import { useTheme } from "@/contexts/theme-context";
 
 const registerSchema = z
   .object({
@@ -41,6 +42,7 @@ interface RegisterFormProps {
 export function RegisterForm({ onSuccess }: RegisterFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { themeColors } = useTheme();
 
   const { register: registerUser, isLoading } = useAuthStore();
 
@@ -107,6 +109,17 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
     return { strength, text, color, requirements };
   };
 
+  const inputStyle = {
+    backgroundColor: themeColors.surface + '40',
+    borderColor: themeColors.primary + '30',
+    color: themeColors.text.primary,
+  };
+
+  const inputFocusStyle = {
+    borderColor: themeColors.primary,
+    boxShadow: `0 0 0 2px ${themeColors.primary}50`,
+  };
+
   const passwordStrength = getPasswordStrength(password || "");
 
   return (
@@ -115,7 +128,11 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 p-8 shadow-2xl"
+        className="backdrop-blur-lg rounded-2xl border p-8 shadow-2xl"
+        style={{
+          backgroundColor: themeColors.surface + '40',
+          borderColor: themeColors.primary + '30'
+        }}
       >
         {/* Header */}
         <div className="text-center mb-8">
@@ -126,9 +143,22 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             className="w-16 h-16 mx-auto mb-4"
           >
             <div className="relative">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-500" />
-              <div className="absolute inset-2 rounded-full bg-slate-900 flex items-center justify-center">
-                <span className="text-2xl font-bold text-white">V</span>
+              <div 
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.accent})`
+                }}
+              />
+              <div 
+                className="absolute inset-2 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: themeColors.background }}
+              >
+                <span 
+                  className="text-2xl font-bold"
+                  style={{ color: themeColors.primary }}
+                >
+                  V
+                </span>
               </div>
             </div>
           </motion.div>
@@ -137,7 +167,8 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="text-3xl font-bold text-white mb-2"
+            className="text-3xl font-bold mb-2"
+            style={{ color: themeColors.text.primary }}
           >
             Crear Cuenta
           </motion.h1>
@@ -146,7 +177,8 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.6 }}
-            className="text-white/70 flex items-center justify-center gap-2"
+            className="flex items-center justify-center gap-2"
+            style={{ color: themeColors.text.secondary }}
           >
             <Building2 className="h-4 w-4" />
             Registro para empresas B2B
@@ -162,18 +194,29 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5, duration: 0.6 }}
             >
-              <label className="block text-white/90 text-sm font-medium mb-2">
+              <label 
+                className="block text-sm font-medium mb-2"
+                style={{ color: themeColors.text.primary }}
+              >
                 Nombre *
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 h-5 w-5" />
+                <User 
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" 
+                  style={{ color: themeColors.text.secondary }}
+                />
                 <input
                   {...register("firstName")}
                   className={cn(
-                    "w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50",
-                    "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
+                    "w-full pl-10 pr-4 py-3 border rounded-lg transition-all focus:outline-none focus:ring-2 focus:border-transparent",
                     errors.firstName && "border-red-500 focus:ring-red-500",
                   )}
+                  style={{
+                    backgroundColor: themeColors.surface + '40',
+                    borderColor: errors.firstName ? '#ef4444' : themeColors.primary + '30',
+                    color: themeColors.text.primary,
+                    '::placeholder': { color: themeColors.text.secondary }
+                  }}
                   placeholder="Juan"
                 />
               </div>
@@ -189,18 +232,27 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.6, duration: 0.6 }}
             >
-              <label className="block text-white/90 text-sm font-medium mb-2">
+              <label 
+                className="block text-sm font-medium mb-2"
+                style={{ color: themeColors.text.primary }}
+              >
                 Apellido *
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 h-5 w-5" />
+                <User 
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" 
+                  style={{ color: themeColors.text.secondary }}
+                />
                 <input
                   {...register("lastName")}
                   className={cn(
-                    "w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50",
-                    "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
+                    "w-full pl-10 pr-4 py-3 border rounded-lg transition-all focus:outline-none focus:ring-2 focus:border-transparent",
                     errors.lastName && "border-red-500 focus:ring-red-500",
                   )}
+                  style={{
+                    ...inputStyle,
+                    ...(errors.lastName && { borderColor: '#ef4444' })
+                  }}
                   placeholder="Pérez"
                 />
               </div>
@@ -354,12 +406,14 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             disabled={isLoading}
             className={cn(
               "w-full py-3 px-6 rounded-lg font-semibold text-white transition-all duration-300",
-              "bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-500",
-              "hover:from-purple-600 hover:via-pink-600 hover:to-cyan-600",
-              "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-transparent",
+              "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent",
               "disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2",
               isLoading && "animate-pulse",
             )}
+            style={{
+              background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
+              boxShadow: `0 0 0 2px ${themeColors.primary}50`
+            }}
           >
             {isLoading ? (
               <>
@@ -382,9 +436,15 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
           transition={{ delay: 1.1, duration: 0.6 }}
           className="mt-6 text-center"
         >
-          <p className="text-white/70 text-sm">
+          <p 
+            className="text-sm"
+            style={{ color: themeColors.text.secondary }}
+          >
             ¿Ya tienes cuenta?{" "}
-            <button className="text-purple-400 hover:text-purple-300 font-medium transition-colors">
+            <button 
+              className="font-medium transition-colors"
+              style={{ color: themeColors.primary }}
+            >
               Iniciar sesión
             </button>
           </p>

@@ -15,8 +15,10 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { CartButton } from "@/components/cart/cart-button";
 import { useAuthStore } from "@/lib/auth-store";
+import { useTheme } from "@/contexts/theme-context";
+import { CartButton } from "@/components/cart/cart-button";
+import { ThemeSelector } from "@/components/ui/theme-selector";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +36,7 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { user, isAuthenticated, logout } = useAuthStore();
+  const { themeColors } = useTheme();
   const router = useRouter();
 
   const handleLogout = () => {
@@ -61,13 +64,28 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                 transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
                 className="w-8 h-8"
               >
-                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-500" />
+                <div 
+                  className="absolute inset-0 rounded-lg"
+                  style={{ 
+                    background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.accent})` 
+                  }}
+                />
                 <div className="absolute inset-0.5 rounded-lg bg-background flex items-center justify-center">
-                  <span className="text-xs font-bold text-primary">V</span>
+                  <span 
+                    className="text-xs font-bold"
+                    style={{ color: themeColors.primary }}
+                  >
+                    V
+                  </span>
                 </div>
               </motion.div>
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <span 
+              className="text-xl font-bold bg-clip-text text-transparent"
+              style={{ 
+                backgroundImage: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})` 
+              }}
+            >
               VIRTAGO
             </span>
           </motion.div>
@@ -84,7 +102,12 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                   isSearchFocused && "drop-shadow-lg",
                 )}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-cyan-500/20 rounded-full blur-sm" />
+                <div 
+                  className="absolute inset-0 rounded-full blur-sm opacity-30"
+                  style={{ 
+                    background: `linear-gradient(90deg, ${themeColors.primary}20, ${themeColors.secondary}20, ${themeColors.accent}20)` 
+                  }}
+                />
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                   <input
@@ -96,9 +119,15 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                     onBlur={() => setIsSearchFocused(false)}
                     className={cn(
                       "w-full pl-10 pr-4 py-2 rounded-full border bg-background/50 backdrop-blur",
-                      "transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/50",
+                      "transition-all duration-300 focus:outline-none focus:ring-2",
                       isSearchFocused && "bg-background/80 shadow-lg",
                     )}
+                    style={{
+                      ...(isSearchFocused && {
+                        borderColor: themeColors.primary + '50',
+                        boxShadow: `0 0 0 2px ${themeColors.primary}50`
+                      })
+                    }}
                   />
                   {searchQuery && (
                     <motion.button
@@ -117,6 +146,9 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
 
           {/* Acciones de la derecha */}
           <div className="flex items-center space-x-4">
+            {/* Selector de temas */}
+            <ThemeSelector />
+            
             {/* Carrito */}
             {!isAdminMode && <CartButton />}
 
@@ -127,14 +159,18 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="flex items-center space-x-2 p-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 transition-all"
+                    className="flex items-center space-x-2 p-2 rounded-xl border transition-all"
+                    style={{
+                      backgroundColor: themeColors.surface + '20',
+                      borderColor: themeColors.primary + '30',
+                    }}
                   >
                     <div className="text-2xl">{user.avatar}</div>
                     <div className="text-left hidden sm:block">
-                      <p className="text-sm font-medium text-white">
+                      <p className="text-sm font-medium text-foreground">
                         {user.name}
                       </p>
-                      <p className="text-xs text-white/70 capitalize">
+                      <p className="text-xs text-muted-foreground capitalize">
                         {user.role}
                       </p>
                     </div>
@@ -142,23 +178,28 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                   align="end"
-                  className="w-56 bg-purple-900/50 backdrop-blur-lg border border-purple-500/30 shadow-xl"
+                  className="w-56 border shadow-xl"
+                  style={{
+                    backgroundColor: themeColors.surface + 'CC',
+                    borderColor: themeColors.primary + '30',
+                    backdropFilter: 'blur(12px)',
+                  }}
                 >
                   <DropdownMenuLabel>
                     <div className="flex items-center space-x-2">
                       <div className="text-lg">{user.avatar}</div>
                       <div>
-                        <p className="font-medium text-white">{user.name}</p>
-                        <p className="text-xs text-purple-200">{user.email}</p>
+                        <p className="font-medium text-foreground">{user.name}</p>
+                        <p className="text-xs text-muted-foreground">{user.email}</p>
                       </div>
                     </div>
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-purple-500/30" />
+                  <DropdownMenuSeparator style={{ backgroundColor: themeColors.primary + '30' }} />
 
                   <DropdownMenuItem asChild>
                     <Link
                       href="/perfil"
-                      className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1"
+                      className="flex items-center text-foreground hover:text-foreground transition-all duration-200 rounded-md mx-1 hover:bg-accent/20"
                     >
                       <User className="mr-2 h-4 w-4" />
                       <span>Mi Perfil</span>
@@ -170,7 +211,7 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                       <DropdownMenuItem asChild>
                         <Link
                           href="/mis-pedidos"
-                          className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1"
+                          className="flex items-center text-foreground hover:text-foreground transition-all duration-200 rounded-md mx-1 hover:bg-accent/20"
                         >
                           <ShoppingBag className="mr-2 h-4 w-4" />
                           <span>Mis Pedidos</span>
@@ -179,7 +220,7 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                       <DropdownMenuItem asChild>
                         <Link
                           href="/favoritos"
-                          className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1"
+                          className="flex items-center text-foreground hover:text-foreground transition-all duration-200 rounded-md mx-1 hover:bg-accent/20"
                         >
                           <Heart className="mr-2 h-4 w-4" />
                           <span>Favoritos</span>
@@ -191,7 +232,7 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                       <DropdownMenuItem asChild>
                         <Link
                           href="/admin"
-                          className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1"
+                          className="flex items-center text-foreground hover:text-foreground transition-all duration-200 rounded-md mx-1 hover:bg-accent/20"
                         >
                           <Shield className="mr-2 h-4 w-4" />
                           <span>Administración</span>
@@ -200,7 +241,7 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                       <DropdownMenuItem asChild>
                         <Link
                           href="/mis-pedidos"
-                          className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1"
+                          className="flex items-center text-foreground hover:text-foreground transition-all duration-200 rounded-md mx-1 hover:bg-accent/20"
                         >
                           <ShoppingBag className="mr-2 h-4 w-4" />
                           <span>Mis Pedidos</span>
@@ -209,7 +250,7 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                       <DropdownMenuItem asChild>
                         <Link
                           href="/favoritos"
-                          className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1"
+                          className="flex items-center text-foreground hover:text-foreground transition-all duration-200 rounded-md mx-1 hover:bg-accent/20"
                         >
                           <Heart className="mr-2 h-4 w-4" />
                           <span>Favoritos</span>
@@ -221,17 +262,17 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                   <DropdownMenuItem asChild>
                     <Link
                       href="/configuracion"
-                      className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1"
+                      className="flex items-center text-foreground hover:text-foreground transition-all duration-200 rounded-md mx-1 hover:bg-accent/20"
                     >
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Configuración</span>
                     </Link>
                   </DropdownMenuItem>
 
-                  <DropdownMenuSeparator className="bg-purple-500/30" />
+                  <DropdownMenuSeparator style={{ backgroundColor: themeColors.primary + '30' }} />
                   <DropdownMenuItem
                     onClick={handleLogout}
-                    className="text-red-300 hover:text-red-200 hover:bg-red-500/20 focus:text-red-200 focus:bg-red-500/20 transition-all duration-200 rounded-md mx-1"
+                    className="text-red-400 hover:text-red-300 hover:bg-red-500/20 focus:text-red-300 focus:bg-red-500/20 transition-all duration-200 rounded-md mx-1"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Cerrar Sesión</span>
@@ -253,7 +294,10 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                   <motion.span
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all cursor-pointer inline-block"
+                    className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-all cursor-pointer inline-block"
+                    style={{
+                      background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
+                    }}
                   >
                     Iniciar sesión
                   </motion.span>
@@ -289,6 +333,7 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
             { name: "Marcas", href: "/marcas" },
             { name: "Proveedores", href: "/suppliers" },
             { name: "Ofertas", href: "/ofertas" },
+            { name: "Temas", href: "/themes" },
             { name: "Contacto", href: "/contacto" },
           ].map((item) => (
             <Link key={item.name} href={item.href}>
@@ -297,7 +342,12 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative group cursor-pointer"
               >
                 {item.name}
-                <motion.div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500 group-hover:w-full transition-all duration-300" />
+                <motion.div 
+                  className="absolute -bottom-1 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300"
+                  style={{
+                    background: `linear-gradient(90deg, ${themeColors.primary}, ${themeColors.secondary})`
+                  }}
+                />
               </motion.span>
             </Link>
           ))}

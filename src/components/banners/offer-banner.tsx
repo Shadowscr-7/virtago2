@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, Sparkles, Zap } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/contexts/theme-context";
 
 interface OfferBannerProps {
   title: string;
@@ -29,6 +30,7 @@ export function OfferBanner({
   className,
 }: OfferBannerProps) {
   const isPrimary = variant === "primary";
+  const { themeColors } = useTheme();
 
   return (
     <motion.div
@@ -44,12 +46,12 @@ export function OfferBanner({
     >
       {/* Fondo con gradiente */}
       <div
-        className={cn(
-          "absolute inset-0",
-          isPrimary
-            ? "bg-gradient-to-br from-purple-600 via-pink-600 to-cyan-600"
-            : "bg-gradient-to-br from-slate-800 via-purple-800 to-slate-900",
-        )}
+        className="absolute inset-0"
+        style={{
+          background: isPrimary
+            ? `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.accent})`
+            : `linear-gradient(135deg, ${themeColors.surface}, ${themeColors.primary}80, ${themeColors.surface})`
+        }}
       />
 
       {/* Patrón de fondo animado */}
@@ -160,7 +162,10 @@ export function OfferBanner({
             href={ctaLink}
             whileHover={{ scale: 1.05, x: 5 }}
             whileTap={{ scale: 0.95 }}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full font-semibold text-white transition-all duration-300 group/cta"
+            className="inline-flex items-center gap-2 px-6 py-3 backdrop-blur-sm rounded-full font-semibold text-white transition-all duration-300 group/cta"
+            style={{
+              backgroundColor: isPrimary ? 'rgba(255,255,255,0.2)' : `${themeColors.accent}40`
+            }}
           >
             <Zap className="h-4 w-4" />
             {ctaText}

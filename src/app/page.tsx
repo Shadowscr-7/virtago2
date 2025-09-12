@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { OfferBanner } from "@/components/banners/offer-banner";
 import { ProductCard } from "@/components/products/product-card";
+import { useTheme } from "@/contexts/theme-context";
 import { ArrowRight, Star, TrendingUp, Users, ShieldCheck } from "lucide-react";
 
 // Mock data para productos
@@ -63,6 +64,7 @@ const featuredProducts = [
 export default function Home() {
   // Simular estado de autenticación (false por defecto)
   const isAuthenticated = false;
+  const { themeColors } = useTheme();
 
   return (
     <div className="min-h-screen bg-background">
@@ -75,7 +77,12 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="text-center mb-8"
           >
-            <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 bg-clip-text text-transparent mb-4">
+            <h1 
+              className="text-4xl md:text-6xl font-bold bg-clip-text text-transparent mb-4"
+              style={{
+                backgroundImage: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.accent})`
+              }}
+            >
               Bienvenido a Virtago
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -138,7 +145,10 @@ export default function Home() {
               transition={{ delay: 0.1 * index, duration: 0.4 }}
               className="text-center p-6 rounded-xl bg-card border hover:shadow-lg transition-shadow"
             >
-              <stat.icon className="h-8 w-8 mx-auto mb-2 text-primary" />
+              <stat.icon 
+                className="h-8 w-8 mx-auto mb-2" 
+                style={{ color: themeColors.primary }}
+              />
               <p className="text-2xl font-bold text-foreground">{stat.value}</p>
               <p className="text-sm text-muted-foreground">{stat.label}</p>
             </motion.div>
@@ -151,12 +161,22 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.6 }}
-            className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border border-purple-200 dark:border-purple-800 rounded-xl p-6 text-center"
+            className="border rounded-xl p-6 text-center"
+            style={{
+              background: `linear-gradient(135deg, ${themeColors.primary}10, ${themeColors.secondary}10)`,
+              borderColor: themeColors.primary + '30'
+            }}
           >
-            <h3 className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-2">
+            <h3 
+              className="text-lg font-semibold mb-2"
+              style={{ color: themeColors.primary }}
+            >
               ¿Eres una empresa? Accede a precios exclusivos B2B
             </h3>
-            <p className="text-purple-600 dark:text-purple-400 mb-4">
+            <p 
+              className="mb-4"
+              style={{ color: themeColors.text.secondary }}
+            >
               Regístrate o inicia sesión para ver precios mayoristas y
               descuentos especiales
             </p>
@@ -164,14 +184,19 @@ export default function Home() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                className="px-6 py-2 text-white rounded-lg font-medium transition-all"
+                style={{ backgroundColor: themeColors.primary }}
               >
                 Iniciar Sesión
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-6 py-2 border border-primary text-primary rounded-lg font-medium hover:bg-primary/10 transition-colors"
+                className="px-6 py-2 border rounded-lg font-medium transition-all"
+                style={{ 
+                  borderColor: themeColors.primary,
+                  color: themeColors.primary
+                }}
               >
                 Registrarse
               </motion.button>
@@ -195,7 +220,8 @@ export default function Home() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.6, duration: 0.6 }}
               href="#"
-              className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors group"
+              className="flex items-center gap-2 transition-colors group"
+              style={{ color: themeColors.primary }}
             >
               Ver todos
               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -240,42 +266,54 @@ export default function Home() {
               {
                 name: "Electrónicos",
                 count: "15,420",
-                color: "from-blue-500 to-cyan-500",
+                colorIndex: 0,
               },
               {
                 name: "Informática",
                 count: "8,340",
-                color: "from-purple-500 to-pink-500",
+                colorIndex: 1,
               },
               {
                 name: "Hogar",
                 count: "12,180",
-                color: "from-green-500 to-emerald-500",
+                colorIndex: 2,
               },
               {
                 name: "Oficina",
                 count: "6,920",
-                color: "from-orange-500 to-red-500",
+                colorIndex: 3,
               },
-            ].map((category) => (
-              <motion.div
-                key={category.name}
-                whileHover={{ scale: 1.05, y: -5 }}
-                className="relative p-6 rounded-xl bg-card border hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden group"
-              >
-                <div
-                  className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-5 group-hover:opacity-10 transition-opacity`}
-                />
-                <div className="relative z-10">
-                  <h3 className="font-semibold text-foreground mb-1">
-                    {category.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {category.count} productos
-                  </p>
-                </div>
-              </motion.div>
-            ))}
+            ].map((category) => {
+              // Rotar entre los colores del tema
+              const colors = [themeColors.primary, themeColors.secondary, themeColors.accent, themeColors.primary];
+              const categoryColor = colors[category.colorIndex];
+              
+              return (
+                <motion.div
+                  key={category.name}
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  className="relative p-6 rounded-xl bg-card border hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden group"
+                  style={{
+                    background: `linear-gradient(135deg, ${categoryColor}05, ${categoryColor}10)`
+                  }}
+                >
+                  <div 
+                    className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity"
+                    style={{
+                      background: `linear-gradient(135deg, ${categoryColor}, ${categoryColor}80)`
+                    }}
+                  />
+                  <div className="relative z-10">
+                    <h3 className="font-semibold text-foreground mb-1">
+                      {category.name}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {category.count} productos
+                    </p>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </motion.section>
       </main>

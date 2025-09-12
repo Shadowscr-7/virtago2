@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+/* Variables CSS personalizadas para temas de Virtago */
+:root {
+  --theme-primary: #8b5cf6;
+  --theme-secondary: #ec4899;
+  --theme-accent: #06b6d4;
+  --theme-background: #0f172a;
+  --theme-surface: #1e293b;
+  --theme-text-primary: #f8fafc;
+  --theme-text-secondary: #cbd5e1;
+  --theme-text-muted: #64748b;
+}
+
+/* Variables originales del sistema */
 :root {
   --background: 0 0% 100%;
   --foreground: 240 10% 3.9%;
@@ -99,4 +112,42 @@ body {
     transparent 100%
   );
   background-size: 200px 100%;
+}
+
+/* Clases utilitarias para temas personalizados */
+.theme-bg-primary {
+  background-color: var(--theme-primary);
+}
+
+.theme-bg-secondary {
+  background-color: var(--theme-secondary);
+}
+
+.theme-bg-accent {
+  background-color: var(--theme-accent);
+}
+
+.theme-bg-surface {
+  background-color: var(--theme-surface);
+}
+
+.theme-text-primary {
+  color: var(--theme-text-primary);
+}
+
+.theme-text-secondary {
+  color: var(--theme-text-secondary);
+}
+
+.theme-text-muted {
+  color: var(--theme-text-muted);
+}
+
+/* Gradientes dinámicos basados en el tema actual */
+.theme-gradient-primary {
+  background: linear-gradient(135deg, var(--theme-primary), var(--theme-secondary));
+}
+
+.theme-gradient-secondary {
+  background: linear-gradient(135deg, var(--theme-secondary), var(--theme-accent));
 }

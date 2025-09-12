@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Manrope } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/providers/theme-provider";
+import { ThemeProvider as NextThemeProvider } from "@/components/providers/theme-provider";
+import { ThemeProvider } from "@/contexts/theme-context";
 import { LoadingProvider } from "@/components/providers/loading-provider";
 import { ClientLayout } from "@/components/layout/client-layout";
 import { ToastProvider } from "@/components/ui/toast";
@@ -51,20 +52,22 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${jetbrainsMono.variable} ${manrope.variable} font-sans antialiased`}
       >
-        <ThemeProvider
+        <NextThemeProvider
           attribute="class"
           defaultTheme="dark"
           enableSystem={false}
           disableTransitionOnChange={false}
         >
-          <ToastProvider>
-            <ToastIntegration />
-            <Toaster position="top-right" richColors />
-            <LoadingProvider>
-              <ClientLayout>{children}</ClientLayout>
-            </LoadingProvider>
-          </ToastProvider>
-        </ThemeProvider>
+          <ThemeProvider>
+            <ToastProvider>
+              <ToastIntegration />
+              <Toaster position="top-right" richColors />
+              <LoadingProvider>
+                <ClientLayout>{children}</ClientLayout>
+              </LoadingProvider>
+            </ToastProvider>
+          </ThemeProvider>
+        </NextThemeProvider>
       </body>
     </html>
   );
