@@ -1,10 +1,8 @@
-import { Navbar } from "@/components/layout/navbar"
 import { ContactSection } from "@/components/contact"
 
 export default function ContactPage() {
   return (
     <div className="min-h-screen">
-      <Navbar />
       <ContactSection />
     </div>
   )

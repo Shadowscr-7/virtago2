@@ -3,6 +3,13 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+// Toast function will be set from the component
+let toastFunction: ((toast: { title: string; description?: string; type: "success" | "error" | "info" | "warning" }) => void) | null = null
+
+export const setToastFunction = (toast: (toast: { title: string; description?: string; type: "success" | "error" | "info" | "warning" }) => void) => {
+  toastFunction = toast
+}
+
 export interface CartItem {
   id: string
   productId: string
@@ -63,6 +70,15 @@ export const useCartStore = create<CartStore>()(
               ...existingItem,
               quantity: newQuantity
             }
+            
+            if (toastFunction) {
+              toastFunction({
+                title: "Producto actualizado",
+                description: `Se actualizó la cantidad de ${existingItem.name} en el carrito`,
+                type: "success"
+              })
+            }
+            
             return { items: updatedItems }
           } else {
             // Add new item
@@ -70,38 +86,81 @@ export const useCartStore = create<CartStore>()(
               ...newItem,
               id: `${newItem.productId}-${Date.now()}`
             }
+            
+            if (toastFunction) {
+              toastFunction({
+                title: "Producto agregado",
+                description: `${newItem.name} se agregó al carrito`,
+                type: "success"
+              })
+            }
+            
             return { items: [...state.items, cartItem] }
           }
         })
       },
 
       removeItem: (itemId) => {
+        const item = get().items.find(item => item.id === itemId)
+        
         set((state) => ({
           items: state.items.filter((item) => item.id !== itemId)
         }))
+        
+        if (item && toastFunction) {
+          toastFunction({
+            title: "Producto eliminado",
+            description: `${item.name} se eliminó del carrito`,
+            type: "info"
+          })
+        }
       },
 
       updateQuantity: (itemId, quantity) => {
+        const item = get().items.find(item => item.id === itemId)
+        
         set((state) => {
           if (quantity <= 0) {
+            if (item && toastFunction) {
+              toastFunction({
+                title: "Producto eliminado",
+                description: `${item.name} se eliminó del carrito`,
+                type: "info"
+              })
+            }
             return { items: state.items.filter((item) => item.id !== itemId) }
           }
 
-          return {
-            items: state.items.map((item) =>
-              item.id === itemId
-                ? { 
-                    ...item, 
-                    quantity: Math.min(quantity, item.stockQuantity) 
-                  }
-                : item
-            )
+          const updatedItems = state.items.map((item) =>
+            item.id === itemId
+              ? { 
+                  ...item, 
+                  quantity: Math.min(quantity, item.stockQuantity) 
+                }
+              : item
+          )
+          
+          if (item && toastFunction) {
+            toastFunction({
+              title: "Cantidad actualizada",
+              description: `Se actualizó la cantidad de ${item.name}`,
+              type: "success"
+            })
           }
+          
+          return { items: updatedItems }
         })
       },
 
       clearCart: () => {
         set({ items: [] })
+        if (toastFunction) {
+          toastFunction({
+            title: "Carrito vaciado",
+            description: "Se eliminaron todos los productos del carrito",
+            type: "info"
+          })
+        }
       },
 
       openCart: () => {

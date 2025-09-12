@@ -1,29 +1,79 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { Eye, EyeOff, Mail, Lock, ArrowLeft, Building2 } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, ArrowLeft, Building2, User } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useAuthStore } from "@/lib/auth-store"
+import { useToast } from "@/components/ui/toast"
+import { setToastFunction } from "@/components/cart/cart-store"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    rememberMe: false
-  })
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  
+  const { login } = useAuthStore()
+  const { showToast } = useToast()
+  const router = useRouter()
+
+  // Set up toast function
+  useEffect(() => {
+    setToastFunction(showToast)
+  }, [showToast])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!email || !password) {
+      showToast({
+        title: "Campos requeridos",
+        description: "Por favor completa email y contraseña",
+        type: "warning"
+      })
+      return
+    }
+
     setIsLoading(true)
     
-    // Simular autenticación
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    setIsLoading(false)
-    // Aquí iría la lógica de autenticación real
+    try {
+      const success = await login(email, password)
+      
+      if (success) {
+        showToast({
+          title: "¡Bienvenido!",
+          description: "Has iniciado sesión exitosamente",
+          type: "success"
+        })
+        router.push("/")
+      } else {
+        showToast({
+          title: "Error de autenticación",
+          description: "Email o contraseña incorrectos",
+          type: "error"
+        })
+      }
+    } catch {
+      showToast({
+        title: "Error",
+        description: "Ocurrió un error inesperado",
+        type: "error"
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const fillTestUser = (userType: 'cliente' | 'distribuidor') => {
+    if (userType === 'cliente') {
+      setEmail('cliente@virtago.com')
+    } else {
+      setEmail('distribuidor@virtago.com')
+    }
+    setPassword('123456')
   }
 
   return (
@@ -113,6 +163,34 @@ export default function LoginPage() {
             </motion.p>
           </div>
 
+          {/* Test Users Info */}
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            className="bg-blue-500/20 border border-blue-400/30 rounded-xl p-4 mb-6"
+          >
+            <p className="text-blue-200 text-sm mb-3">🔐 Datos de prueba disponibles:</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => fillTestUser('cliente')}
+                className="text-left p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+              >
+                <div className="text-white text-xs font-medium">👩‍💼 Cliente</div>
+                <div className="text-white/70 text-xs">María González</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => fillTestUser('distribuidor')}
+                className="text-left p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+              >
+                <div className="text-white text-xs font-medium">👨‍💼 Distribuidor</div>
+                <div className="text-white/70 text-xs">Carlos Rodríguez</div>
+              </button>
+            </div>
+            <p className="text-blue-200/70 text-xs mt-2">Contraseña para ambos: <code>123456</code></p>
+          </motion.div>
+
           {/* Formulario */}
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email */}
@@ -129,8 +207,8 @@ export default function LoginPage() {
                 <input
                   type="email"
                   required
-                  value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="tu@empresa.com"
                 />
@@ -151,8 +229,8 @@ export default function LoginPage() {
                 <input
                   type={showPassword ? "text" : "password"}
                   required
-                  value={formData.password}
-                  onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-10 pr-12 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="••••••••"
                 />
@@ -176,8 +254,6 @@ export default function LoginPage() {
               <label className="flex items-center">
                 <input
                   type="checkbox"
-                  checked={formData.rememberMe}
-                  onChange={(e) => setFormData(prev => ({ ...prev, rememberMe: e.target.checked }))}
                   className="w-4 h-4 text-purple-500 bg-white/10 border-white/20 rounded focus:ring-purple-500 focus:ring-2"
                 />
                 <span className="ml-2 text-sm text-white/70">Recordarme</span>
@@ -225,7 +301,7 @@ export default function LoginPage() {
           >
             <p className="text-white/70">
               ¿No tienes cuenta?{" "}
-              <Link href="/registro" className="text-purple-400 hover:text-purple-300 font-medium transition-colors">
+              <Link href="/register" className="text-purple-400 hover:text-purple-300 font-medium transition-colors">
                 Regístrate aquí
               </Link>
             </p>

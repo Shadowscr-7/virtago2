@@ -1,7 +1,6 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { Navbar } from "@/components/layout/navbar"
 import { OfferBanner } from "@/components/banners/offer-banner"
 import { ProductCard } from "@/components/products/product-card"
 import { ArrowRight, Star, TrendingUp, Users, ShieldCheck } from "lucide-react"
@@ -67,8 +66,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-      
       <main className="container mx-auto px-4 py-8 space-y-12">
         {/* Hero Section con banners */}
         <section className="space-y-6">
@@ -239,7 +236,7 @@ export default function Home() {
               { name: "Informática", count: "8,340", color: "from-purple-500 to-pink-500" },
               { name: "Hogar", count: "12,180", color: "from-green-500 to-emerald-500" },
               { name: "Oficina", count: "6,920", color: "from-orange-500 to-red-500" }
-            ].map((category, index) => (
+            ].map((category) => (
               <motion.div
                 key={category.name}
                 whileHover={{ scale: 1.05, y: -5 }}

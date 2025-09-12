@@ -16,12 +16,14 @@ import {
   AlertCircle,
   Check
 } from "lucide-react"
+import { useCartStore } from "@/components/cart/cart-store"
 
 interface ProductInfo {
   id: string
   name: string
   brand: string
   supplier: string
+  images: string[]
   price: number
   originalPrice?: number
   description: string
@@ -55,6 +57,8 @@ interface ProductInfoPanelProps {
 export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
   const [quantity, setQuantity] = useState(1)
   const [isFavorite, setIsFavorite] = useState(false)
+  
+  const { addItem } = useCartStore()
 
   const isOnSale = product.originalPrice && product.originalPrice > product.price
   const discountPercentage = isOnSale 
@@ -67,6 +71,25 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
     if (newQuantity >= 1 && newQuantity <= product.stockQuantity) {
       setQuantity(newQuantity)
     }
+  }
+
+  const handleAddToCart = () => {
+    addItem({
+      productId: product.id,
+      name: product.name,
+      brand: product.brand,
+      supplier: product.supplier_info.name,
+      supplierId: product.supplier_info.name.toLowerCase().replace(/\s+/g, '-'),
+      image: product.images[0] || '',
+      price: product.price,
+      originalPrice: product.originalPrice,
+      quantity: quantity,
+      inStock: product.inStock,
+      stockQuantity: product.stockQuantity,
+      category: product.category
+    })
+    // Reset quantity after adding
+    setQuantity(1)
   }
 
   const totalPrice = product.price * quantity
@@ -256,6 +279,7 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
       {/* Action Buttons */}
       <div className="space-y-3">
         <motion.button
+          onClick={handleAddToCart}
           disabled={!product.inStock}
           whileHover={{ scale: product.inStock ? 1.02 : 1 }}
           whileTap={{ scale: product.inStock ? 0.98 : 1 }}

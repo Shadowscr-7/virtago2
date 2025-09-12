@@ -1,4 +1,3 @@
-import { Navbar } from "@/components/layout/navbar"
 import { ProductDetailSection } from "@/components/product-detail/product-detail-section"
 import { notFound } from "next/navigation"
 
@@ -134,7 +133,8 @@ interface ProductPageProps {
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  const product = await getProductById(params.id)
+  const { id } = await params
+  const product = await getProductById(id)
 
   if (!product) {
     notFound()
@@ -142,7 +142,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <Navbar />
       <ProductDetailSection product={product} />
     </div>
   )

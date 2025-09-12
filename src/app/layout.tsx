@@ -3,6 +3,10 @@ import { Inter, JetBrains_Mono, Manrope } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { LoadingProvider } from "@/components/providers/loading-provider";
+import { ClientLayout } from "@/components/layout/client-layout";
+import { ToastProvider } from "@/components/ui/toast";
+import { ToastIntegration } from "@/components/cart/toast-integration";
+import { Toaster } from "sonner";
 
 const inter = Inter({ 
   subsets: ["latin"], 
@@ -48,13 +52,19 @@ export default function RootLayout({
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="dark"
+          enableSystem={false}
           disableTransitionOnChange={false}
         >
-          <LoadingProvider>
-            {children}
-          </LoadingProvider>
+          <ToastProvider>
+            <ToastIntegration />
+            <Toaster position="top-right" richColors />
+            <LoadingProvider>
+              <ClientLayout>
+                {children}
+              </ClientLayout>
+            </LoadingProvider>
+          </ToastProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -17,6 +17,7 @@ import { ProductFilters } from "./products-section"
 import { QuantityModal } from "./quantity-modal"
 import Image from "next/image"
 import Link from "next/link"
+import { useCartStore } from "@/components/cart/cart-store"
 
 interface Product {
   id: string
@@ -59,6 +60,8 @@ export function ProductsGrid({
   const [quantityModalProduct, setQuantityModalProduct] = useState<Product | null>(null)
   const [isQuantityModalOpen, setIsQuantityModalOpen] = useState(false)
   const itemsPerPage = 12
+  
+  const { addItem } = useCartStore()
 
   const sortOptions = [
     { value: "relevance", label: "Relevancia" },
@@ -100,9 +103,21 @@ export function ProductsGrid({
   }
 
   const handleCartConfirm = (product: Product, quantity: number) => {
-    // Aquí manejarías la lógica de agregar al carrito
-    console.log(`Agregando al carrito: ${quantity} x ${product.name}`)
-    // Podrías usar un store como Zustand para manejar el carrito
+    addItem({
+      productId: product.id,
+      name: product.name,
+      brand: product.brand,
+      supplier: product.supplier,
+      supplierId: product.supplier.toLowerCase().replace(/\s+/g, '-'),
+      image: product.image,
+      price: product.price,
+      originalPrice: product.originalPrice,
+      quantity: quantity,
+      inStock: product.inStock,
+      stockQuantity: product.stockQuantity,
+      category: product.category,
+      specifications: product.specifications
+    })
     setIsQuantityModalOpen(false)
   }
 

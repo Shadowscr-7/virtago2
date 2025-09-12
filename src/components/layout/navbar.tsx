@@ -1,21 +1,29 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { motion } from "framer-motion"
-import { Search, ShoppingCart, User, Menu, Moon, Sun } from "lucide-react"
-import { useTheme } from "next-themes"
+import { Search, User, Menu, Settings, LogOut, ShoppingBag, Heart, Shield } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
+import { CartButton } from "@/components/cart/cart-button"
+import { useAuthStore } from "@/lib/auth-store"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export function Navbar() {
   const [isSearchFocused, setIsSearchFocused] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
-  const [mounted, setMounted] = useState(false)
-  const { theme, setTheme } = useTheme()
+  const { user, isAuthenticated, logout } = useAuthStore()
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const handleLogout = () => {
+    logout()
+  }
 
   return (
     <motion.header
@@ -91,59 +99,118 @@ export function Navbar() {
 
           {/* Acciones de la derecha */}
           <div className="flex items-center space-x-4">
-            {/* Selector de tema */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="p-2 rounded-full hover:bg-accent transition-colors"
-            >
-              {!mounted ? (
-                <div className="h-5 w-5" />
-              ) : theme === "dark" ? (
-                <Sun className="h-5 w-5" />
-              ) : (
-                <Moon className="h-5 w-5" />
-              )}
-            </motion.button>
-
             {/* Carrito */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="relative p-2 rounded-full hover:bg-accent transition-colors"
-            >
-              <ShoppingCart className="h-5 w-5" />
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center"
-              >
-                3
-              </motion.span>
-            </motion.button>
+            <CartButton />
 
             {/* Usuario/Auth */}
-            <div className="flex items-center space-x-2">
-              <Link href="/register">
-                <motion.span
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer inline-block"
-                >
-                  Registro
-                </motion.span>
-              </Link>
-              <Link href="/login">
-                <motion.span
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all cursor-pointer inline-block"
-                >
-                  Iniciar sesión
-                </motion.span>
-              </Link>
-            </div>
+            {isAuthenticated && user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="flex items-center space-x-2 p-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 transition-all"
+                  >
+                    <div className="text-2xl">{user.avatar}</div>
+                    <div className="text-left hidden sm:block">
+                      <p className="text-sm font-medium text-white">{user.name}</p>
+                      <p className="text-xs text-white/70 capitalize">{user.role}</p>
+                    </div>
+                  </motion.button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-purple-900/50 backdrop-blur-lg border border-purple-500/30 shadow-xl">
+                  <DropdownMenuLabel>
+                    <div className="flex items-center space-x-2">
+                      <div className="text-lg">{user.avatar}</div>
+                      <div>
+                        <p className="font-medium text-white">{user.name}</p>
+                        <p className="text-xs text-purple-200">{user.email}</p>
+                      </div>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-purple-500/30" />
+                  
+                  <DropdownMenuItem asChild>
+                    <Link href="/perfil" className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Mi Perfil</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  
+                  {user.role === 'cliente' ? (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link href="/mis-pedidos" className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1">
+                          <ShoppingBag className="mr-2 h-4 w-4" />
+                          <span>Mis Pedidos</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/favoritos" className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1">
+                          <Heart className="mr-2 h-4 w-4" />
+                          <span>Favoritos</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin" className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1">
+                          <Shield className="mr-2 h-4 w-4" />
+                          <span>Administración</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/mis-pedidos" className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1">
+                          <ShoppingBag className="mr-2 h-4 w-4" />
+                          <span>Mis Pedidos</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/favoritos" className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1">
+                          <Heart className="mr-2 h-4 w-4" />
+                          <span>Favoritos</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  
+                  <DropdownMenuItem asChild>
+                    <Link href="/configuracion" className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Configuración</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  
+                  <DropdownMenuSeparator className="bg-purple-500/30" />
+                  <DropdownMenuItem onClick={handleLogout} className="text-red-300 hover:text-red-200 hover:bg-red-500/20 focus:text-red-200 focus:bg-red-500/20 transition-all duration-200 rounded-md mx-1">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Cerrar Sesión</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <Link href="/register">
+                  <motion.span
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer inline-block"
+                  >
+                    Registro
+                  </motion.span>
+                </Link>
+                <Link href="/login">
+                  <motion.span
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all cursor-pointer inline-block"
+                  >
+                    Iniciar sesión
+                  </motion.span>
+                </Link>
+              </div>
+            )}
 
             {/* Usuario logueado (oculto por ahora) */}
             <motion.button
