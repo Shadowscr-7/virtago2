@@ -1,0 +1,7 @@
+export { RegisterForm } from './register-form'
+export { OTPVerification } from './otp-verification'
+export { UserTypeSelection } from './user-type-selection'
+export { PersonalInfoForm } from './personal-info-form'
+export { BusinessInfoForm } from './business-info-form'
+export { RegistrationSuccess } from './registration-success'
+export { MultiStepRegistration } from './multi-step-registration'

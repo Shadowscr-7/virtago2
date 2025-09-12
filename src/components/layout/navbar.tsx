@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Search, ShoppingCart, User, Menu, Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
+import Link from "next/link"
 import { cn } from "@/lib/utils"
 
 export function Navbar() {
@@ -122,11 +123,33 @@ export function Navbar() {
               </motion.span>
             </motion.button>
 
-            {/* Usuario */}
+            {/* Usuario/Auth */}
+            <div className="flex items-center space-x-2">
+              <Link href="/register">
+                <motion.span
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer inline-block"
+                >
+                  Registro
+                </motion.span>
+              </Link>
+              <Link href="/login">
+                <motion.span
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all cursor-pointer inline-block"
+                >
+                  Iniciar sesión
+                </motion.span>
+              </Link>
+            </div>
+
+            {/* Usuario logueado (oculto por ahora) */}
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              className="p-2 rounded-full hover:bg-accent transition-colors"
+              className="p-2 rounded-full hover:bg-accent transition-colors hidden"
             >
               <User className="h-5 w-5" />
             </motion.button>
