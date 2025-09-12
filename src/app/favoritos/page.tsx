@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { 
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
   Heart,
   ShoppingCart,
   Search,
@@ -11,24 +11,24 @@ import {
   Star,
   Package,
   Tag,
-  ArrowRight
-} from "lucide-react"
-import { useAuthStore } from "@/lib/auth-store"
-import { useCartStore } from "@/components/cart/cart-store"
-import { toast } from "sonner"
-import Link from "next/link"
+  ArrowRight,
+} from "lucide-react";
+import { useAuthStore } from "@/lib/auth-store";
+import { useCartStore } from "@/components/cart/cart-store";
+import { toast } from "sonner";
+import Link from "next/link";
 
 export default function FavoritesPage() {
-  const { user, favorites, removeFromFavorites } = useAuthStore()
-  const { addItem } = useCartStore()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [sortBy, setSortBy] = useState("dateAdded")
+  const { user, favorites, removeFromFavorites } = useAuthStore();
+  const { addItem } = useCartStore();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("dateAdded");
 
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
         <div className="flex items-center justify-center min-h-[80vh]">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="text-center p-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20"
@@ -39,8 +39,10 @@ export default function FavoritesPage() {
             <h1 className="text-2xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               Acceso Denegado
             </h1>
-            <p className="text-muted-foreground mb-6">Debes iniciar sesión para ver tus favoritos</p>
-            <Link 
+            <p className="text-muted-foreground mb-6">
+              Debes iniciar sesión para ver tus favoritos
+            </p>
+            <Link
               href="/login"
               className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
             >
@@ -49,50 +51,53 @@ export default function FavoritesPage() {
           </motion.div>
         </div>
       </div>
-    )
+    );
   }
 
   const filteredFavorites = favorites
-    .filter(item => 
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.supplier.toLowerCase().includes(searchQuery.toLowerCase())
+    .filter(
+      (item) =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.supplier.toLowerCase().includes(searchQuery.toLowerCase()),
     )
     .sort((a, b) => {
       switch (sortBy) {
         case "name":
-          return a.name.localeCompare(b.name)
+          return a.name.localeCompare(b.name);
         case "price":
-          return a.price - b.price
+          return a.price - b.price;
         case "brand":
-          return a.brand.localeCompare(b.brand)
+          return a.brand.localeCompare(b.brand);
         case "dateAdded":
         default:
-          return new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime()
+          return (
+            new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime()
+          );
       }
-    })
+    });
 
-  const handleAddToCart = (item: typeof favorites[0]) => {
+  const handleAddToCart = (item: (typeof favorites)[0]) => {
     addItem({
       productId: item.productId,
       name: item.name,
       brand: item.brand,
       supplier: item.supplier,
-      supplierId: 'supplier-1', // Default supplier ID
+      supplierId: "supplier-1", // Default supplier ID
       image: item.image,
       price: item.price,
       quantity: 1,
       inStock: true,
       stockQuantity: 100,
-      category: 'general'
-    })
-    toast.success(`${item.name} añadido al carrito`)
-  }
+      category: "general",
+    });
+    toast.success(`${item.name} añadido al carrito`);
+  };
 
   const handleRemoveFromFavorites = (productId: string, itemName: string) => {
-    removeFromFavorites(productId)
-    toast.success(`${itemName} eliminado de favoritos`)
-  }
+    removeFromFavorites(productId);
+    toast.success(`${itemName} eliminado de favoritos`);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
@@ -104,7 +109,7 @@ export default function FavoritesPage() {
         >
           {/* Header */}
           <div className="mb-8 text-center">
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
@@ -112,7 +117,7 @@ export default function FavoritesPage() {
             >
               Mis Favoritos
             </motion.h1>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
@@ -130,26 +135,26 @@ export default function FavoritesPage() {
             className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"
           >
             {[
-              { 
-                label: "Productos Favoritos", 
-                value: favorites.length, 
-                color: "from-purple-500 to-pink-500", 
-                icon: Heart 
+              {
+                label: "Productos Favoritos",
+                value: favorites.length,
+                color: "from-purple-500 to-pink-500",
+                icon: Heart,
               },
-              { 
-                label: "Valor Total", 
-                value: `$${favorites.reduce((sum, item) => sum + item.price, 0).toLocaleString()}`, 
-                color: "from-blue-500 to-cyan-500", 
-                icon: Tag 
+              {
+                label: "Valor Total",
+                value: `$${favorites.reduce((sum, item) => sum + item.price, 0).toLocaleString()}`,
+                color: "from-blue-500 to-cyan-500",
+                icon: Tag,
               },
-              { 
-                label: "Marcas Diferentes", 
-                value: new Set(favorites.map(item => item.brand)).size, 
-                color: "from-green-500 to-emerald-500", 
-                icon: Star 
-              }
+              {
+                label: "Marcas Diferentes",
+                value: new Set(favorites.map((item) => item.brand)).size,
+                color: "from-green-500 to-emerald-500",
+                icon: Star,
+              },
             ].map((stat, index) => {
-              const Icon = stat.icon
+              const Icon = stat.icon;
               return (
                 <motion.div
                   key={stat.label}
@@ -158,16 +163,24 @@ export default function FavoritesPage() {
                   transition={{ delay: 0.4 + index * 0.1 }}
                   className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20 p-6 relative overflow-hidden"
                 >
-                  <div className={`absolute inset-0 bg-gradient-to-r ${stat.color} opacity-5`} />
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-r ${stat.color} opacity-5`}
+                  />
                   <div className="relative">
-                    <div className={`w-12 h-12 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center mb-4`}>
+                    <div
+                      className={`w-12 h-12 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center mb-4`}
+                    >
                       <Icon className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">{stat.value}</h3>
-                    <p className="text-slate-600 dark:text-slate-400 text-sm">{stat.label}</p>
+                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
+                      {stat.value}
+                    </h3>
+                    <p className="text-slate-600 dark:text-slate-400 text-sm">
+                      {stat.label}
+                    </p>
                   </div>
                 </motion.div>
-              )
+              );
             })}
           </motion.div>
 
@@ -218,13 +231,14 @@ export default function FavoritesPage() {
               >
                 <Heart className="w-20 h-20 text-slate-400 mx-auto mb-6" />
                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-                  {favorites.length === 0 ? "No tienes favoritos aún" : "No se encontraron productos"}
+                  {favorites.length === 0
+                    ? "No tienes favoritos aún"
+                    : "No se encontraron productos"}
                 </h3>
                 <p className="text-slate-600 dark:text-slate-400 mb-8 max-w-md mx-auto">
-                  {favorites.length === 0 
+                  {favorites.length === 0
                     ? "Explora nuestro catálogo y guarda los productos que más te gusten"
-                    : "Prueba a ajustar los filtros de búsqueda"
-                  }
+                    : "Prueba a ajustar los filtros de búsqueda"}
                 </p>
                 {favorites.length === 0 && (
                   <Link
@@ -256,7 +270,9 @@ export default function FavoritesPage() {
 
                       {/* Heart Button */}
                       <button
-                        onClick={() => handleRemoveFromFavorites(item.productId, item.name)}
+                        onClick={() =>
+                          handleRemoveFromFavorites(item.productId, item.name)
+                        }
                         className="absolute top-4 right-4 w-10 h-10 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-full flex items-center justify-center text-red-500 hover:bg-white dark:hover:bg-slate-800 transition-all"
                       >
                         <Heart className="w-5 h-5 fill-current" />
@@ -275,7 +291,8 @@ export default function FavoritesPage() {
                           <span>{item.supplier}</span>
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
-                          Añadido el {new Date(item.dateAdded).toLocaleDateString()}
+                          Añadido el{" "}
+                          {new Date(item.dateAdded).toLocaleDateString()}
                         </p>
                       </div>
 
@@ -295,7 +312,7 @@ export default function FavoritesPage() {
                           <ShoppingCart className="w-4 h-4" />
                           Añadir al Carrito
                         </button>
-                        
+
                         <Link
                           href={`/productos/${item.productId}`}
                           className="w-12 h-12 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-xl flex items-center justify-center transition-colors"
@@ -312,5 +329,5 @@ export default function FavoritesPage() {
         </motion.div>
       </div>
     </div>
-  )
+  );
 }

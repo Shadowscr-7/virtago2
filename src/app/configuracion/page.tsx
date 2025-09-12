@@ -1,48 +1,48 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { 
-  Settings, 
-  User, 
-  Bell, 
-  Shield, 
-  Eye, 
-  Mail, 
-  Phone, 
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Settings,
+  User,
+  Bell,
+  Shield,
+  Eye,
+  Mail,
+  Phone,
   Lock,
   CreditCard,
   Truck,
   Save,
-  RefreshCw
-} from "lucide-react"
-import { useAuthStore } from "@/lib/auth-store"
-import { StyledSelect } from "@/components/ui/styled-select"
-import { StyledSwitch } from "@/components/ui/styled-switch"
-import Link from "next/link"
+  RefreshCw,
+} from "lucide-react";
+import { useAuthStore } from "@/lib/auth-store";
+import { StyledSelect } from "@/components/ui/styled-select";
+import { StyledSwitch } from "@/components/ui/styled-switch";
+import Link from "next/link";
 
 export default function ConfiguracionPage() {
-  const { user } = useAuthStore()
-  const [activeTab, setActiveTab] = useState("perfil")
-  const [darkMode, setDarkMode] = useState(true)
+  const { user } = useAuthStore();
+  const [activeTab, setActiveTab] = useState("perfil");
+  const [darkMode, setDarkMode] = useState(true);
   const [notifications, setNotifications] = useState({
     email: true,
     push: false,
     sms: true,
-    marketing: false
-  })
+    marketing: false,
+  });
   const [privacy, setPrivacy] = useState({
     profileVisible: true,
     showEmail: false,
     showPhone: false,
-    analytics: true
-  })
+    analytics: true,
+  });
 
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
         <div className="flex items-center justify-center min-h-[80vh]">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="text-center p-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20"
@@ -53,8 +53,10 @@ export default function ConfiguracionPage() {
             <h1 className="text-2xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               Acceso Denegado
             </h1>
-            <p className="text-muted-foreground mb-6">Debes iniciar sesión para acceder a la configuración</p>
-            <Link 
+            <p className="text-muted-foreground mb-6">
+              Debes iniciar sesión para acceder a la configuración
+            </p>
+            <Link
               href="/login"
               className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
             >
@@ -63,7 +65,7 @@ export default function ConfiguracionPage() {
           </motion.div>
         </div>
       </div>
-    )
+    );
   }
 
   const tabs = [
@@ -71,8 +73,8 @@ export default function ConfiguracionPage() {
     { id: "notificaciones", label: "Notificaciones", icon: Bell },
     { id: "privacidad", label: "Privacidad", icon: Shield },
     { id: "apariencia", label: "Apariencia", icon: Eye },
-    { id: "cuenta", label: "Cuenta", icon: Lock }
-  ]
+    { id: "cuenta", label: "Cuenta", icon: Lock },
+  ];
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -86,25 +88,31 @@ export default function ConfiguracionPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-200 mb-2">Nombre completo</label>
-                  <input 
-                    type="text" 
+                  <label className="block text-sm font-medium text-gray-200 mb-2">
+                    Nombre completo
+                  </label>
+                  <input
+                    type="text"
                     defaultValue={user.name}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-200 mb-2">Email</label>
-                  <input 
-                    type="email" 
+                  <label className="block text-sm font-medium text-gray-200 mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
                     defaultValue={user.email}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-200 mb-2">Teléfono</label>
-                  <input 
-                    type="tel" 
+                  <label className="block text-sm font-medium text-gray-200 mb-2">
+                    Teléfono
+                  </label>
+                  <input
+                    type="tel"
                     defaultValue="+54 11 1234-5678"
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   />
@@ -112,16 +120,20 @@ export default function ConfiguracionPage() {
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-200 mb-2">Empresa</label>
-                  <input 
-                    type="text" 
+                  <label className="block text-sm font-medium text-gray-200 mb-2">
+                    Empresa
+                  </label>
+                  <input
+                    type="text"
                     defaultValue={user.company}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-200 mb-2">Dirección</label>
-                  <textarea 
+                  <label className="block text-sm font-medium text-gray-200 mb-2">
+                    Dirección
+                  </label>
+                  <textarea
                     defaultValue="Av. Corrientes 1234, Buenos Aires, Argentina"
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent h-24 resize-none"
                   />
@@ -133,14 +145,14 @@ export default function ConfiguracionPage() {
                     { value: "UTC-3", label: "Argentina (UTC-3)", icon: "🇦🇷" },
                     { value: "UTC-5", label: "Colombia (UTC-5)", icon: "🇨🇴" },
                     { value: "UTC-6", label: "México (UTC-6)", icon: "🇲🇽" },
-                    { value: "UTC+1", label: "España (UTC+1)", icon: "🇪🇸" }
+                    { value: "UTC+1", label: "España (UTC+1)", icon: "🇪🇸" },
                   ]}
                   label="Zona horaria"
                 />
               </div>
             </div>
           </motion.div>
-        )
+        );
 
       case "notificaciones":
         return (
@@ -156,13 +168,30 @@ export default function ConfiguracionPage() {
                   Notificaciones por Email
                 </h3>
                 {[
-                  { key: "email" as keyof typeof notifications, label: "Confirmaciones de pedido", description: "Recibe confirmaciones cuando realices un pedido", checked: notifications.email },
-                  { key: "marketing" as keyof typeof notifications, label: "Promociones y ofertas", description: "Entérate de nuestras mejores ofertas y descuentos", checked: notifications.marketing }
-                ].map(item => (
+                  {
+                    key: "email" as keyof typeof notifications,
+                    label: "Confirmaciones de pedido",
+                    description:
+                      "Recibe confirmaciones cuando realices un pedido",
+                    checked: notifications.email,
+                  },
+                  {
+                    key: "marketing" as keyof typeof notifications,
+                    label: "Promociones y ofertas",
+                    description:
+                      "Entérate de nuestras mejores ofertas y descuentos",
+                    checked: notifications.marketing,
+                  },
+                ].map((item) => (
                   <StyledSwitch
                     key={item.key}
                     checked={item.checked}
-                    onChange={(checked) => setNotifications(prev => ({ ...prev, [item.key]: checked }))}
+                    onChange={(checked) =>
+                      setNotifications((prev) => ({
+                        ...prev,
+                        [item.key]: checked,
+                      }))
+                    }
                     label={item.label}
                     description={item.description}
                     color="purple"
@@ -176,13 +205,30 @@ export default function ConfiguracionPage() {
                   Notificaciones Móviles
                 </h3>
                 {[
-                  { key: "push" as keyof typeof notifications, label: "Notificaciones push", description: "Recibe notificaciones en tu dispositivo móvil", checked: notifications.push },
-                  { key: "sms" as keyof typeof notifications, label: "SMS importantes", description: "Solo para notificaciones críticas de seguridad", checked: notifications.sms }
-                ].map(item => (
+                  {
+                    key: "push" as keyof typeof notifications,
+                    label: "Notificaciones push",
+                    description:
+                      "Recibe notificaciones en tu dispositivo móvil",
+                    checked: notifications.push,
+                  },
+                  {
+                    key: "sms" as keyof typeof notifications,
+                    label: "SMS importantes",
+                    description:
+                      "Solo para notificaciones críticas de seguridad",
+                    checked: notifications.sms,
+                  },
+                ].map((item) => (
                   <StyledSwitch
                     key={item.key}
                     checked={item.checked}
-                    onChange={(checked) => setNotifications(prev => ({ ...prev, [item.key]: checked }))}
+                    onChange={(checked) =>
+                      setNotifications((prev) => ({
+                        ...prev,
+                        [item.key]: checked,
+                      }))
+                    }
                     label={item.label}
                     description={item.description}
                     color="blue"
@@ -192,7 +238,7 @@ export default function ConfiguracionPage() {
               </div>
             </div>
           </motion.div>
-        )
+        );
 
       case "privacidad":
         return (
@@ -202,17 +248,42 @@ export default function ConfiguracionPage() {
             className="space-y-6"
           >
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-white">Configuración de Privacidad</h3>
+              <h3 className="text-lg font-semibold text-white">
+                Configuración de Privacidad
+              </h3>
               {[
-                { key: "profileVisible" as keyof typeof privacy, label: "Perfil visible para otros usuarios", description: "Otros usuarios podrán ver tu información básica", checked: privacy.profileVisible },
-                { key: "showEmail" as keyof typeof privacy, label: "Mostrar email en el perfil", description: "Tu email será visible en tu perfil público", checked: privacy.showEmail },
-                { key: "showPhone" as keyof typeof privacy, label: "Mostrar teléfono en el perfil", description: "Tu teléfono será visible en tu perfil público", checked: privacy.showPhone },
-                { key: "analytics" as keyof typeof privacy, label: "Permitir análisis de uso", description: "Ayúdanos a mejorar la plataforma", checked: privacy.analytics }
-              ].map(item => (
+                {
+                  key: "profileVisible" as keyof typeof privacy,
+                  label: "Perfil visible para otros usuarios",
+                  description:
+                    "Otros usuarios podrán ver tu información básica",
+                  checked: privacy.profileVisible,
+                },
+                {
+                  key: "showEmail" as keyof typeof privacy,
+                  label: "Mostrar email en el perfil",
+                  description: "Tu email será visible en tu perfil público",
+                  checked: privacy.showEmail,
+                },
+                {
+                  key: "showPhone" as keyof typeof privacy,
+                  label: "Mostrar teléfono en el perfil",
+                  description: "Tu teléfono será visible en tu perfil público",
+                  checked: privacy.showPhone,
+                },
+                {
+                  key: "analytics" as keyof typeof privacy,
+                  label: "Permitir análisis de uso",
+                  description: "Ayúdanos a mejorar la plataforma",
+                  checked: privacy.analytics,
+                },
+              ].map((item) => (
                 <StyledSwitch
                   key={item.key}
                   checked={item.checked}
-                  onChange={(checked) => setPrivacy(prev => ({ ...prev, [item.key]: checked }))}
+                  onChange={(checked) =>
+                    setPrivacy((prev) => ({ ...prev, [item.key]: checked }))
+                  }
                   label={item.label}
                   description={item.description}
                   color="green"
@@ -221,7 +292,7 @@ export default function ConfiguracionPage() {
               ))}
             </div>
           </motion.div>
-        )
+        );
 
       case "apariencia":
         return (
@@ -231,8 +302,10 @@ export default function ConfiguracionPage() {
             className="space-y-6"
           >
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-white">Personalización de Apariencia</h3>
-              
+              <h3 className="text-lg font-semibold text-white">
+                Personalización de Apariencia
+              </h3>
+
               <StyledSwitch
                 checked={darkMode}
                 onChange={setDarkMode}
@@ -248,14 +321,14 @@ export default function ConfiguracionPage() {
                 options={[
                   { value: "es", label: "Español", icon: "🇪🇸" },
                   { value: "en", label: "English", icon: "🇺🇸" },
-                  { value: "pt", label: "Português", icon: "🇧🇷" }
+                  { value: "pt", label: "Português", icon: "🇧🇷" },
                 ]}
                 label="Idioma"
                 className="p-4 bg-white/5 rounded-xl border border-white/10"
               />
             </div>
           </motion.div>
-        )
+        );
 
       case "cuenta":
         return (
@@ -265,8 +338,10 @@ export default function ConfiguracionPage() {
             className="space-y-6"
           >
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-white">Seguridad de la Cuenta</h3>
-              
+              <h3 className="text-lg font-semibold text-white">
+                Seguridad de la Cuenta
+              </h3>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Link href="/configuracion/cambiar-contrasena">
                   <motion.div
@@ -276,9 +351,13 @@ export default function ConfiguracionPage() {
                   >
                     <div className="flex items-center gap-3 mb-2">
                       <Lock className="w-5 h-5 text-purple-400" />
-                      <span className="text-white font-medium">Cambiar Contraseña</span>
+                      <span className="text-white font-medium">
+                        Cambiar Contraseña
+                      </span>
                     </div>
-                    <p className="text-sm text-gray-400">Actualiza tu contraseña de acceso</p>
+                    <p className="text-sm text-gray-400">
+                      Actualiza tu contraseña de acceso
+                    </p>
                   </motion.div>
                 </Link>
 
@@ -290,9 +369,13 @@ export default function ConfiguracionPage() {
                   >
                     <div className="flex items-center gap-3 mb-2">
                       <Shield className="w-5 h-5 text-green-400" />
-                      <span className="text-white font-medium">Autenticación 2FA</span>
+                      <span className="text-white font-medium">
+                        Autenticación 2FA
+                      </span>
                     </div>
-                    <p className="text-sm text-gray-400">Activa la verificación en dos pasos</p>
+                    <p className="text-sm text-gray-400">
+                      Activa la verificación en dos pasos
+                    </p>
                   </motion.div>
                 </Link>
 
@@ -304,9 +387,13 @@ export default function ConfiguracionPage() {
                   >
                     <div className="flex items-center gap-3 mb-2">
                       <CreditCard className="w-5 h-5 text-blue-400" />
-                      <span className="text-white font-medium">Métodos de Pago</span>
+                      <span className="text-white font-medium">
+                        Métodos de Pago
+                      </span>
                     </div>
-                    <p className="text-sm text-gray-400">Gestiona tus tarjetas y cuentas</p>
+                    <p className="text-sm text-gray-400">
+                      Gestiona tus tarjetas y cuentas
+                    </p>
                   </motion.div>
                 </Link>
 
@@ -318,20 +405,24 @@ export default function ConfiguracionPage() {
                   >
                     <div className="flex items-center gap-3 mb-2">
                       <Truck className="w-5 h-5 text-orange-400" />
-                      <span className="text-white font-medium">Direcciones de Envío</span>
+                      <span className="text-white font-medium">
+                        Direcciones de Envío
+                      </span>
                     </div>
-                    <p className="text-sm text-gray-400">Administra tus direcciones</p>
+                    <p className="text-sm text-gray-400">
+                      Administra tus direcciones
+                    </p>
                   </motion.div>
                 </Link>
               </div>
             </div>
           </motion.div>
-        )
+        );
 
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-6">
@@ -343,7 +434,7 @@ export default function ConfiguracionPage() {
         >
           {/* Header */}
           <div className="mb-8 text-center">
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
@@ -351,13 +442,14 @@ export default function ConfiguracionPage() {
             >
               Configuración
             </motion.h1>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
               className="text-gray-300 max-w-2xl mx-auto"
             >
-              Personaliza tu experiencia en VIRTAGO. Configura tu perfil, notificaciones y preferencias.
+              Personaliza tu experiencia en VIRTAGO. Configura tu perfil,
+              notificaciones y preferencias.
             </motion.p>
           </div>
 
@@ -372,7 +464,7 @@ export default function ConfiguracionPage() {
               <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
                 <nav className="space-y-2">
                   {tabs.map((tab, index) => {
-                    const IconComponent = tab.icon
+                    const IconComponent = tab.icon;
                     return (
                       <motion.button
                         key={tab.id}
@@ -381,15 +473,15 @@ export default function ConfiguracionPage() {
                         transition={{ delay: 0.4 + index * 0.1 }}
                         onClick={() => setActiveTab(tab.id)}
                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
-                          activeTab === tab.id 
-                            ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' 
-                            : 'text-gray-300 hover:bg-white/10 hover:text-white'
+                          activeTab === tab.id
+                            ? "bg-purple-500/20 text-purple-300 border border-purple-500/30"
+                            : "text-gray-300 hover:bg-white/10 hover:text-white"
                         }`}
                       >
                         <IconComponent className="w-5 h-5" />
                         <span className="font-medium">{tab.label}</span>
                       </motion.button>
-                    )
+                    );
                   })}
                 </nav>
               </div>
@@ -420,7 +512,7 @@ export default function ConfiguracionPage() {
                     <Save className="w-4 h-4" />
                     Guardar Cambios
                   </motion.button>
-                  
+
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
@@ -436,5 +528,5 @@ export default function ConfiguracionPage() {
         </motion.div>
       </div>
     </div>
-  )
+  );
 }

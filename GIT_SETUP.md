@@ -33,6 +33,7 @@
 ## 🔄 Flujo de Trabajo Recomendado
 
 ### Para Nuevas Features:
+
 ```bash
 # Crear feature branch desde dev
 git checkout dev
@@ -48,6 +49,7 @@ git push origin feature/nueva-funcionalidad
 ```
 
 ### Para Hotfixes:
+
 ```bash
 # Crear hotfix desde master
 git checkout master
@@ -69,6 +71,7 @@ git push origin dev
 ```
 
 ### Para Releases:
+
 ```bash
 # Merge dev a prod para testing
 git checkout prod
@@ -86,6 +89,7 @@ git push origin v1.0.0
 ## 📝 Convenciones de Commit
 
 ### Tipos de Commit:
+
 - `feat:` Nueva funcionalidad
 - `fix:` Corrección de bug
 - `docs:` Cambios en documentación
@@ -95,6 +99,7 @@ git push origin v1.0.0
 - `chore:` Tareas de mantenimiento
 
 ### Ejemplo:
+
 ```bash
 git commit -m "feat: agregar sistema de carrito de compras
 
@@ -107,6 +112,7 @@ git commit -m "feat: agregar sistema de carrito de compras
 ## 🚀 Estado Actual
 
 ### ✅ Completado:
+
 - [x] Git inicializado
 - [x] Remote configurado
 - [x] Ramas base creadas (master, dev, prod, test)
@@ -114,11 +120,13 @@ git commit -m "feat: agregar sistema de carrito de compras
 - [x] Código subido a GitHub
 
 ### 📦 Primer Commit:
+
 **Hash:** `43c4c67`  
 **Mensaje:** `feat: initial commit - Virtago B2B e-commerce platform`  
 **Archivos:** 18 archivos, 3421 insertions, 227 deletions
 
 ### 🔗 Enlaces Útiles:
+
 - **Repositorio:** https://github.com/Shadowscr-7/virtago2
 - **Issues:** https://github.com/Shadowscr-7/virtago2/issues
 - **Pull Requests:** https://github.com/Shadowscr-7/virtago2/pulls

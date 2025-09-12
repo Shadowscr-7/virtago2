@@ -10,7 +10,12 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-inter)", "var(--font-manrope)", "system-ui", "sans-serif"],
+        sans: [
+          "var(--font-inter)",
+          "var(--font-manrope)",
+          "system-ui",
+          "sans-serif",
+        ],
         mono: ["var(--font-mono)", "Monaco", "Consolas", "monospace"],
         manrope: ["var(--font-manrope)", "sans-serif"],
       },
@@ -80,7 +85,8 @@ export default {
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
-        "gradient-conic": "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+        "gradient-conic":
+          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
         "gradient-hero": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
         "gradient-card": "linear-gradient(145deg, #ffffff 0%, #f8fafc 100%)",
         "gradient-dark": "linear-gradient(145deg, #1a1a1a 0%, #2d2d2d 100%)",

@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import Link from "next/link"
-import { 
-  Search, 
-  Download, 
-  Upload, 
-  Plus, 
-  Eye, 
-  Edit, 
+import { useState } from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import {
+  Search,
+  Download,
+  Upload,
+  Plus,
+  Eye,
+  Edit,
   Trash2,
   DollarSign,
   Calendar,
@@ -18,23 +18,23 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
-  Package
-} from "lucide-react"
-import { AdminLayout } from "@/components/admin/admin-layout"
-import { StyledSelect } from "@/components/ui/styled-select"
+  Package,
+} from "lucide-react";
+import { AdminLayout } from "@/components/admin/admin-layout";
+import { StyledSelect } from "@/components/ui/styled-select";
 
 interface PriceList {
-  id: string
-  nombre: string
-  moneda: 'USD' | 'UYU' | 'EUR' | 'BRL'
-  fechaInicio: string
-  fechaFin: string
-  estado: 'ACTIVO' | 'INACTIVO' | 'VENCIDO' | 'PROGRAMADO'
-  cantidadProductos: number
-  valorPromedio: number
-  ultimaActualizacion: string
-  creadoPor: string
-  tipo: 'GENERAL' | 'MAYORISTA' | 'MINORISTA' | 'PROMOCIONAL' | 'ESPECIAL'
+  id: string;
+  nombre: string;
+  moneda: "USD" | "UYU" | "EUR" | "BRL";
+  fechaInicio: string;
+  fechaFin: string;
+  estado: "ACTIVO" | "INACTIVO" | "VENCIDO" | "PROGRAMADO";
+  cantidadProductos: number;
+  valorPromedio: number;
+  ultimaActualizacion: string;
+  creadoPor: string;
+  tipo: "GENERAL" | "MAYORISTA" | "MINORISTA" | "PROMOCIONAL" | "ESPECIAL";
 }
 
 // Datos de ejemplo
@@ -50,7 +50,7 @@ const mockPriceLists: PriceList[] = [
     valorPromedio: 40230,
     ultimaActualizacion: "2025-09-12T15:30:00Z",
     creadoPor: "Admin",
-    tipo: "GENERAL"
+    tipo: "GENERAL",
   },
   {
     id: "PL002",
@@ -63,7 +63,7 @@ const mockPriceLists: PriceList[] = [
     valorPromedio: 1250,
     ultimaActualizacion: "2025-09-11T12:45:00Z",
     creadoPor: "Admin",
-    tipo: "MAYORISTA"
+    tipo: "MAYORISTA",
   },
   {
     id: "PL003",
@@ -76,7 +76,7 @@ const mockPriceLists: PriceList[] = [
     valorPromedio: 1890,
     ultimaActualizacion: "2025-09-10T09:20:00Z",
     creadoPor: "Admin",
-    tipo: "MINORISTA"
+    tipo: "MINORISTA",
   },
   {
     id: "PL004",
@@ -89,7 +89,7 @@ const mockPriceLists: PriceList[] = [
     valorPromedio: 36750,
     ultimaActualizacion: "2025-09-09T16:10:00Z",
     creadoPor: "Admin",
-    tipo: "PROMOCIONAL"
+    tipo: "PROMOCIONAL",
   },
   {
     id: "PL005",
@@ -102,7 +102,7 @@ const mockPriceLists: PriceList[] = [
     valorPromedio: 52100,
     ultimaActualizacion: "2025-09-08T14:35:00Z",
     creadoPor: "Admin",
-    tipo: "ESPECIAL"
+    tipo: "ESPECIAL",
   },
   {
     id: "PL006",
@@ -115,7 +115,7 @@ const mockPriceLists: PriceList[] = [
     valorPromedio: 670,
     ultimaActualizacion: "2025-09-07T11:25:00Z",
     creadoPor: "Admin",
-    tipo: "GENERAL"
+    tipo: "GENERAL",
   },
   {
     id: "PL007",
@@ -128,7 +128,7 @@ const mockPriceLists: PriceList[] = [
     valorPromedio: 1120,
     ultimaActualizacion: "2025-09-06T13:20:00Z",
     creadoPor: "Admin",
-    tipo: "MAYORISTA"
+    tipo: "MAYORISTA",
   },
   {
     id: "PL008",
@@ -141,7 +141,7 @@ const mockPriceLists: PriceList[] = [
     valorPromedio: 41800,
     ultimaActualizacion: "2025-09-05T10:10:00Z",
     creadoPor: "Admin",
-    tipo: "MINORISTA"
+    tipo: "MINORISTA",
   },
   {
     id: "PL009",
@@ -154,7 +154,7 @@ const mockPriceLists: PriceList[] = [
     valorPromedio: 47300,
     ultimaActualizacion: "2025-09-04T08:55:00Z",
     creadoPor: "Admin",
-    tipo: "GENERAL"
+    tipo: "GENERAL",
   },
   {
     id: "PL010",
@@ -167,107 +167,117 @@ const mockPriceLists: PriceList[] = [
     valorPromedio: 47300,
     ultimaActualizacion: "2025-09-03T17:40:00Z",
     creadoPor: "Admin",
-    tipo: "GENERAL"
-  }
-]
+    tipo: "GENERAL",
+  },
+];
 
 export default function PriceListsPage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [currencyFilter, setCurrencyFilter] = useState("all")
-  const [typeFilter, setTypeFilter] = useState("all")
-  const [selectedLists, setSelectedLists] = useState<string[]>([])
-  const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage] = useState(10)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [currencyFilter, setCurrencyFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [selectedLists, setSelectedLists] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
 
   // Filtrar listas
-  const filteredLists = mockPriceLists.filter(list => {
-    const matchesSearch = list.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         list.moneda.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesStatus = statusFilter === "all" || list.estado === statusFilter
-    const matchesCurrency = currencyFilter === "all" || list.moneda === currencyFilter
-    const matchesType = typeFilter === "all" || list.tipo === typeFilter
-    return matchesSearch && matchesStatus && matchesCurrency && matchesType
-  })
+  const filteredLists = mockPriceLists.filter((list) => {
+    const matchesSearch =
+      list.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      list.moneda.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus =
+      statusFilter === "all" || list.estado === statusFilter;
+    const matchesCurrency =
+      currencyFilter === "all" || list.moneda === currencyFilter;
+    const matchesType = typeFilter === "all" || list.tipo === typeFilter;
+    return matchesSearch && matchesStatus && matchesCurrency && matchesType;
+  });
 
   // Ordenar listas por fecha de actualización
-  const sortedLists = filteredLists.sort((a, b) => 
-    new Date(b.ultimaActualizacion).getTime() - new Date(a.ultimaActualizacion).getTime()
-  )
+  const sortedLists = filteredLists.sort(
+    (a, b) =>
+      new Date(b.ultimaActualizacion).getTime() -
+      new Date(a.ultimaActualizacion).getTime(),
+  );
 
   // Paginación
-  const totalPages = Math.ceil(sortedLists.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const currentLists = sortedLists.slice(startIndex, startIndex + itemsPerPage)
+  const totalPages = Math.ceil(sortedLists.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentLists = sortedLists.slice(startIndex, startIndex + itemsPerPage);
 
   // Estadísticas
   const stats = {
     totalLists: mockPriceLists.length,
-    activeLists: mockPriceLists.filter(list => list.estado === 'ACTIVO').length,
-    inactiveLists: mockPriceLists.filter(list => list.estado === 'INACTIVO').length,
-    totalProducts: mockPriceLists.reduce((acc, list) => acc + list.cantidadProductos, 0)
-  }
+    activeLists: mockPriceLists.filter((list) => list.estado === "ACTIVO")
+      .length,
+    inactiveLists: mockPriceLists.filter((list) => list.estado === "INACTIVO")
+      .length,
+    totalProducts: mockPriceLists.reduce(
+      (acc, list) => acc + list.cantidadProductos,
+      0,
+    ),
+  };
 
   const handleSelectList = (listId: string) => {
-    setSelectedLists(prev => 
-      prev.includes(listId) 
-        ? prev.filter(id => id !== listId)
-        : [...prev, listId]
-    )
-  }
+    setSelectedLists((prev) =>
+      prev.includes(listId)
+        ? prev.filter((id) => id !== listId)
+        : [...prev, listId],
+    );
+  };
 
   const handleSelectAll = () => {
     setSelectedLists(
-      selectedLists.length === currentLists.length 
-        ? [] 
-        : currentLists.map(list => list.id)
-    )
-  }
+      selectedLists.length === currentLists.length
+        ? []
+        : currentLists.map((list) => list.id),
+    );
+  };
 
   const formatCurrency = (value: number, currency: string) => {
-    const symbols = { USD: '$', UYU: '$U', EUR: '€', BRL: 'R$' }
-    return `${symbols[currency as keyof typeof symbols] || '$'} ${value.toLocaleString()}`
-  }
+    const symbols = { USD: "$", UYU: "$U", EUR: "€", BRL: "R$" };
+    return `${symbols[currency as keyof typeof symbols] || "$"} ${value.toLocaleString()}`;
+  };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    })
-  }
+    return new Date(dateString).toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ACTIVO':
-        return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-      case 'INACTIVO':
-        return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-      case 'VENCIDO':
-        return 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
-      case 'PROGRAMADO':
-        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+      case "ACTIVO":
+        return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300";
+      case "INACTIVO":
+        return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300";
+      case "VENCIDO":
+        return "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300";
+      case "PROGRAMADO":
+        return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300";
       default:
-        return 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
+        return "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300";
     }
-  }
+  };
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'GENERAL':
-        return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-      case 'MAYORISTA':
-        return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-      case 'MINORISTA':
-        return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-      case 'PROMOCIONAL':
-        return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'
-      case 'ESPECIAL':
-        return 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300'
+      case "GENERAL":
+        return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300";
+      case "MAYORISTA":
+        return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300";
+      case "MINORISTA":
+        return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300";
+      case "PROMOCIONAL":
+        return "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300";
+      case "ESPECIAL":
+        return "bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300";
       default:
-        return 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'
+        return "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300";
     }
-  }
+  };
 
   return (
     <AdminLayout>
@@ -284,7 +294,8 @@ export default function PriceListsPage() {
                 Listas De Precios
               </h1>
               <p className="text-gray-600 dark:text-gray-300 mt-2">
-                Administra y gestiona las listas de precios para diferentes tipos de clientes
+                Administra y gestiona las listas de precios para diferentes
+                tipos de clientes
               </p>
             </div>
 
@@ -327,10 +338,30 @@ export default function PriceListsPage() {
           className="grid grid-cols-1 md:grid-cols-4 gap-4"
         >
           {[
-            { title: "Total Listas", value: stats.totalLists, icon: FileText, color: "from-blue-500 to-cyan-500" },
-            { title: "Activas", value: stats.activeLists, icon: TrendingUp, color: "from-green-500 to-emerald-500" },
-            { title: "Inactivas", value: stats.inactiveLists, icon: Calendar, color: "from-red-500 to-pink-500" },
-            { title: "Total Productos", value: stats.totalProducts, icon: Package, color: "from-purple-500 to-violet-500" }
+            {
+              title: "Total Listas",
+              value: stats.totalLists,
+              icon: FileText,
+              color: "from-blue-500 to-cyan-500",
+            },
+            {
+              title: "Activas",
+              value: stats.activeLists,
+              icon: TrendingUp,
+              color: "from-green-500 to-emerald-500",
+            },
+            {
+              title: "Inactivas",
+              value: stats.inactiveLists,
+              icon: Calendar,
+              color: "from-red-500 to-pink-500",
+            },
+            {
+              title: "Total Productos",
+              value: stats.totalProducts,
+              icon: Package,
+              color: "from-purple-500 to-violet-500",
+            },
           ].map((stat, index) => (
             <motion.div
               key={stat.title}
@@ -341,14 +372,20 @@ export default function PriceListsPage() {
               className="bg-gradient-to-br from-white/70 to-gray-50/70 dark:from-slate-800/70 dark:to-slate-700/70 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 rounded-2xl p-6 shadow-xl"
             >
               <div className="flex items-center justify-between mb-3">
-                <div className={`w-12 h-12 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center shadow-lg`}>
+                <div
+                  className={`w-12 h-12 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center shadow-lg`}
+                >
                   <stat.icon className="w-6 h-6 text-white" />
                 </div>
                 <div className="text-right">
-                  <p className={`text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                  <p
+                    className={`text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                  >
                     {stat.value.toLocaleString()}
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">{stat.title}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    {stat.title}
+                  </p>
                 </div>
               </div>
             </motion.div>
@@ -386,7 +423,7 @@ export default function PriceListsPage() {
                     { value: "ACTIVO", label: "Activo" },
                     { value: "INACTIVO", label: "Inactivo" },
                     { value: "VENCIDO", label: "Vencido" },
-                    { value: "PROGRAMADO", label: "Programado" }
+                    { value: "PROGRAMADO", label: "Programado" },
                   ]}
                 />
               </div>
@@ -400,7 +437,7 @@ export default function PriceListsPage() {
                     { value: "USD", label: "USD" },
                     { value: "UYU", label: "UYU" },
                     { value: "EUR", label: "EUR" },
-                    { value: "BRL", label: "BRL" }
+                    { value: "BRL", label: "BRL" },
                   ]}
                 />
               </div>
@@ -415,7 +452,7 @@ export default function PriceListsPage() {
                     { value: "MAYORISTA", label: "Mayorista" },
                     { value: "MINORISTA", label: "Minorista" },
                     { value: "PROMOCIONAL", label: "Promocional" },
-                    { value: "ESPECIAL", label: "Especial" }
+                    { value: "ESPECIAL", label: "Especial" },
                   ]}
                 />
               </div>
@@ -447,7 +484,10 @@ export default function PriceListsPage() {
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={selectedLists.length === currentLists.length && currentLists.length > 0}
+                        checked={
+                          selectedLists.length === currentLists.length &&
+                          currentLists.length > 0
+                        }
                         onChange={handleSelectAll}
                         className="sr-only peer"
                       />
@@ -504,14 +544,16 @@ export default function PriceListsPage() {
                           <DollarSign className="w-5 h-5" />
                         </div>
                         <div>
-                          <Link 
+                          <Link
                             href={`/admin/listas-precios/${list.id}`}
                             className="font-semibold text-gray-900 dark:text-white text-sm group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors duration-200 hover:underline cursor-pointer"
                           >
                             {list.nombre}
                           </Link>
                           <div className="flex items-center gap-2 mt-1">
-                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${getTypeColor(list.tipo)}`}>
+                            <span
+                              className={`text-xs px-2 py-1 rounded-full font-medium ${getTypeColor(list.tipo)}`}
+                            >
                               {list.tipo}
                             </span>
                             <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -526,7 +568,8 @@ export default function PriceListsPage() {
                         {list.moneda}
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">
-                        Promedio: {formatCurrency(list.valorPromedio, list.moneda)}
+                        Promedio:{" "}
+                        {formatCurrency(list.valorPromedio, list.moneda)}
                       </div>
                     </td>
                     <td className="px-4 py-3">
@@ -536,11 +579,15 @@ export default function PriceListsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="text-sm text-gray-900 dark:text-white">
-                        {list.fechaFin === "Invalid Date" ? "Sin fecha" : formatDate(list.fechaFin)}
+                        {list.fechaFin === "Invalid Date"
+                          ? "Sin fecha"
+                          : formatDate(list.fechaFin)}
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(list.estado)}`}>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(list.estado)}`}
+                      >
                         {list.estado}
                       </span>
                     </td>
@@ -580,42 +627,50 @@ export default function PriceListsPage() {
             <div className="px-6 py-4 border-t border-gray-200/50 dark:border-gray-700/50">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-600 dark:text-gray-300">
-                  Mostrando {startIndex + 1} a {Math.min(startIndex + itemsPerPage, sortedLists.length)} de {sortedLists.length} resultados
+                  Mostrando {startIndex + 1} a{" "}
+                  {Math.min(startIndex + itemsPerPage, sortedLists.length)} de{" "}
+                  {sortedLists.length} resultados
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
                     disabled={currentPage === 1}
                     className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </motion.button>
-                  
+
                   <div className="flex gap-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <motion.button
-                        key={page}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => setCurrentPage(page)}
-                        className={`w-8 h-8 rounded-lg text-sm font-medium transition-all ${
-                          currentPage === page
-                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                            : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        }`}
-                      >
-                        {page}
-                      </motion.button>
-                    ))}
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (page) => (
+                        <motion.button
+                          key={page}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                          onClick={() => setCurrentPage(page)}
+                          className={`w-8 h-8 rounded-lg text-sm font-medium transition-all ${
+                            currentPage === page
+                              ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                              : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                          }`}
+                        >
+                          {page}
+                        </motion.button>
+                      ),
+                    )}
                   </div>
-                  
+
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                    }
                     disabled={currentPage === totalPages}
                     className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
@@ -628,5 +683,5 @@ export default function PriceListsPage() {
         </motion.div>
       </div>
     </AdminLayout>
-  )
+  );
 }

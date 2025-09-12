@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { OfferBanner } from "@/components/banners/offer-banner"
-import { ProductCard } from "@/components/products/product-card"
-import { ArrowRight, Star, TrendingUp, Users, ShieldCheck } from "lucide-react"
+import { motion } from "framer-motion";
+import { OfferBanner } from "@/components/banners/offer-banner";
+import { ProductCard } from "@/components/products/product-card";
+import { ArrowRight, Star, TrendingUp, Users, ShieldCheck } from "lucide-react";
 
 // Mock data para productos
 const featuredProducts = [
@@ -14,7 +14,7 @@ const featuredProducts = [
     image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400",
     price: 899000,
     originalPrice: 999000,
-    description: "Último modelo con tecnología avanzada y cámara profesional"
+    description: "Último modelo con tecnología avanzada y cámara profesional",
   },
   {
     name: "Laptop Gaming RGB 16GB",
@@ -22,7 +22,7 @@ const featuredProducts = [
     supplier: "Gaming Solutions",
     image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400",
     price: 1299000,
-    description: "Potencia extrema para gaming y trabajo profesional"
+    description: "Potencia extrema para gaming y trabajo profesional",
   },
   {
     name: "Auriculares Inalámbricos Pro",
@@ -31,15 +31,15 @@ const featuredProducts = [
     image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400",
     price: 199000,
     originalPrice: 249000,
-    description: "Cancelación de ruido activa y sonido de alta fidelidad"
+    description: "Cancelación de ruido activa y sonido de alta fidelidad",
   },
   {
-    name: "Tablet Profesional 12.9\"",
+    name: 'Tablet Profesional 12.9"',
     brand: "TabletPro",
     supplier: "Digital Devices",
     image: "https://images.unsplash.com/photo-1561154464-82e9adf32764?w=400",
     price: 799000,
-    description: "Perfecta para diseño y productividad profesional"
+    description: "Perfecta para diseño y productividad profesional",
   },
   {
     name: "Smartwatch Serie 8",
@@ -48,7 +48,7 @@ const featuredProducts = [
     image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400",
     price: 349000,
     originalPrice: 399000,
-    description: "Monitoreo avanzado de salud y fitness"
+    description: "Monitoreo avanzado de salud y fitness",
   },
   {
     name: "Cámara Mirrorless 4K",
@@ -56,13 +56,13 @@ const featuredProducts = [
     supplier: "Camera Experts",
     image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400",
     price: 1199000,
-    description: "Calidad profesional para fotografía y video"
-  }
-]
+    description: "Calidad profesional para fotografía y video",
+  },
+];
 
 export default function Home() {
   // Simular estado de autenticación (false por defecto)
-  const isAuthenticated = false
+  const isAuthenticated = false;
 
   return (
     <div className="min-h-screen bg-background">
@@ -79,8 +79,8 @@ export default function Home() {
               Bienvenido a Virtago
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              La plataforma B2B más avanzada para compras mayoristas. 
-              Conectamos marcas, proveedores y distribuidores en un solo lugar.
+              La plataforma B2B más avanzada para compras mayoristas. Conectamos
+              marcas, proveedores y distribuidores en un solo lugar.
             </p>
           </motion.div>
 
@@ -125,7 +125,11 @@ export default function Home() {
             { icon: Users, label: "Empresas Registradas", value: "10,000+" },
             { icon: Star, label: "Productos Disponibles", value: "50,000+" },
             { icon: TrendingUp, label: "Marcas Aliadas", value: "500+" },
-            { icon: ShieldCheck, label: "Proveedores Verificados", value: "1,200+" }
+            {
+              icon: ShieldCheck,
+              label: "Proveedores Verificados",
+              value: "1,200+",
+            },
           ].map((stat, index) => (
             <motion.div
               key={stat.label}
@@ -153,7 +157,8 @@ export default function Home() {
               ¿Eres una empresa? Accede a precios exclusivos B2B
             </h3>
             <p className="text-purple-600 dark:text-purple-400 mb-4">
-              Regístrate o inicia sesión para ver precios mayoristas y descuentos especiales
+              Regístrate o inicia sesión para ver precios mayoristas y
+              descuentos especiales
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <motion.button
@@ -232,20 +237,42 @@ export default function Home() {
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { name: "Electrónicos", count: "15,420", color: "from-blue-500 to-cyan-500" },
-              { name: "Informática", count: "8,340", color: "from-purple-500 to-pink-500" },
-              { name: "Hogar", count: "12,180", color: "from-green-500 to-emerald-500" },
-              { name: "Oficina", count: "6,920", color: "from-orange-500 to-red-500" }
+              {
+                name: "Electrónicos",
+                count: "15,420",
+                color: "from-blue-500 to-cyan-500",
+              },
+              {
+                name: "Informática",
+                count: "8,340",
+                color: "from-purple-500 to-pink-500",
+              },
+              {
+                name: "Hogar",
+                count: "12,180",
+                color: "from-green-500 to-emerald-500",
+              },
+              {
+                name: "Oficina",
+                count: "6,920",
+                color: "from-orange-500 to-red-500",
+              },
             ].map((category) => (
               <motion.div
                 key={category.name}
                 whileHover={{ scale: 1.05, y: -5 }}
                 className="relative p-6 rounded-xl bg-card border hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden group"
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-5 group-hover:opacity-10 transition-opacity`} />
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-5 group-hover:opacity-10 transition-opacity`}
+                />
                 <div className="relative z-10">
-                  <h3 className="font-semibold text-foreground mb-1">{category.name}</h3>
-                  <p className="text-sm text-muted-foreground">{category.count} productos</p>
+                  <h3 className="font-semibold text-foreground mb-1">
+                    {category.name}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {category.count} productos
+                  </p>
                 </div>
               </motion.div>
             ))}
@@ -253,5 +280,5 @@ export default function Home() {
         </motion.section>
       </main>
     </div>
-  )
+  );
 }

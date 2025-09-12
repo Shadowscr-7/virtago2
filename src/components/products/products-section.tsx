@@ -26,11 +26,11 @@ const mockProducts = [
     reviews: 324,
     tags: ["5G", "Pro", "Premium", "iOS"],
     specifications: {
-      pantalla: "6.7 pulgadas",
+      pantalla: "6.1 pulgadas Super Retina XDR",
       almacenamiento: "256GB",
       ram: "8GB",
-      bateria: "4422 mAh",
-    },
+      bateria: "Hasta 29 horas de video",
+    } as Record<string, string>,
   },
   {
     id: "2",

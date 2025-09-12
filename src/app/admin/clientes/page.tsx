@@ -1,25 +1,25 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { useRouter } from "next/navigation"
-import { 
-  Search, 
-  Download, 
-  Upload, 
-  Mail, 
-  Eye, 
-  Edit, 
-  User, 
-  UserCheck, 
-  ChevronLeft, 
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import {
+  Search,
+  Download,
+  Upload,
+  Mail,
+  Eye,
+  Edit,
+  User,
+  UserCheck,
+  ChevronLeft,
   ChevronRight,
   AlertTriangle,
-  Check
-} from "lucide-react"
-import { AdminLayout } from "@/components/admin/admin-layout"
-import { useAuthStore } from "@/lib/auth-store"
-import { StyledSelect } from "@/components/ui/styled-select"
+  Check,
+} from "lucide-react";
+import { AdminLayout } from "@/components/admin/admin-layout";
+import { useAuthStore } from "@/lib/auth-store";
+import { StyledSelect } from "@/components/ui/styled-select";
 
 // Datos de ejemplo - después esto vendrá del servidor
 const mockClients = [
@@ -33,7 +33,7 @@ const mockClients = [
     pedidos: 15,
     estado: true,
     verificado: true,
-    fechaRegistro: "2024-01-15"
+    fechaRegistro: "2024-01-15",
   },
   {
     id: 2,
@@ -45,7 +45,7 @@ const mockClients = [
     pedidos: 8,
     estado: true,
     verificado: false,
-    fechaRegistro: "2024-02-10"
+    fechaRegistro: "2024-02-10",
   },
   {
     id: 3,
@@ -57,7 +57,7 @@ const mockClients = [
     pedidos: 23,
     estado: false,
     verificado: true,
-    fechaRegistro: "2023-12-05"
+    fechaRegistro: "2023-12-05",
   },
   {
     id: 4,
@@ -69,7 +69,7 @@ const mockClients = [
     pedidos: 4,
     estado: true,
     verificado: true,
-    fechaRegistro: "2024-03-20"
+    fechaRegistro: "2024-03-20",
   },
   {
     id: 5,
@@ -81,117 +81,124 @@ const mockClients = [
     pedidos: 12,
     estado: true,
     verificado: false,
-    fechaRegistro: "2024-01-30"
-  }
-]
+    fechaRegistro: "2024-01-30",
+  },
+];
 
 interface Client {
-  id: number
-  nombre: string
-  tipoDocumento: string
-  documento: string
-  email: string
-  telefono: string
-  pedidos: number
-  estado: boolean
-  verificado: boolean
-  fechaRegistro: string
+  id: number;
+  nombre: string;
+  tipoDocumento: string;
+  documento: string;
+  email: string;
+  telefono: string;
+  pedidos: number;
+  estado: boolean;
+  verificado: boolean;
+  fechaRegistro: string;
 }
 
 export default function ClientsPage() {
-  const { user } = useAuthStore()
-  const router = useRouter()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedClients, setSelectedClients] = useState<number[]>([])
-  const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage, setItemsPerPage] = useState(10)
+  const { user } = useAuthStore();
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedClients, setSelectedClients] = useState<number[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [showConfirmDialog, setShowConfirmDialog] = useState<{
-    show: boolean
-    clientId: number
-    currentState: boolean
-  }>({ show: false, clientId: 0, currentState: false })
+    show: boolean;
+    clientId: number;
+    currentState: boolean;
+  }>({ show: false, clientId: 0, currentState: false });
 
-  if (!user || user.role !== 'distribuidor') {
+  if (!user || user.role !== "distribuidor") {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center h-full">
           <div className="text-center p-8 bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20">
             <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-gray-800 mb-2">Acceso Denegado</h2>
-            <p className="text-gray-600">No tienes permisos para acceder a esta sección.</p>
+            <h2 className="text-xl font-bold text-gray-800 mb-2">
+              Acceso Denegado
+            </h2>
+            <p className="text-gray-600">
+              No tienes permisos para acceder a esta sección.
+            </p>
           </div>
         </div>
       </AdminLayout>
-    )
+    );
   }
 
   // Filtrar clientes basado en la búsqueda
-  const filteredClients = mockClients.filter(client =>
-    client.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    client.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    client.documento.includes(searchQuery) ||
-    client.telefono.includes(searchQuery)
-  )
+  const filteredClients = mockClients.filter(
+    (client) =>
+      client.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      client.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      client.documento.includes(searchQuery) ||
+      client.telefono.includes(searchQuery),
+  );
 
   // Paginación
-  const totalPages = Math.ceil(filteredClients.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const currentClients = filteredClients.slice(startIndex, endIndex)
+  const totalPages = Math.ceil(filteredClients.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentClients = filteredClients.slice(startIndex, endIndex);
 
   const handleSelectClient = (clientId: number) => {
-    setSelectedClients(prev =>
+    setSelectedClients((prev) =>
       prev.includes(clientId)
-        ? prev.filter(id => id !== clientId)
-        : [...prev, clientId]
-    )
-  }
+        ? prev.filter((id) => id !== clientId)
+        : [...prev, clientId],
+    );
+  };
 
   const handleSelectAll = () => {
     if (selectedClients.length === currentClients.length) {
-      setSelectedClients([])
+      setSelectedClients([]);
     } else {
-      setSelectedClients(currentClients.map(client => client.id))
+      setSelectedClients(currentClients.map((client) => client.id));
     }
-  }
+  };
 
   const handleToggleStatus = (clientId: number, currentState: boolean) => {
     setShowConfirmDialog({
       show: true,
       clientId,
-      currentState
-    })
-  }
+      currentState,
+    });
+  };
 
   const confirmStatusChange = () => {
     // Aquí iría la lógica para cambiar el estado del cliente
-    console.log(`Cambiando estado del cliente ${showConfirmDialog.clientId}`)
-    setShowConfirmDialog({ show: false, clientId: 0, currentState: false })
-  }
+    console.log(`Cambiando estado del cliente ${showConfirmDialog.clientId}`);
+    setShowConfirmDialog({ show: false, clientId: 0, currentState: false });
+  };
 
   const handleDownloadTemplate = () => {
-    console.log("Descargando plantilla Excel...")
-  }
+    console.log("Descargando plantilla Excel...");
+  };
 
   const handleImportClients = () => {
-    console.log("Abriendo selector de archivo...")
-  }
+    console.log("Abriendo selector de archivo...");
+  };
 
   const handleSendInvitations = () => {
     if (selectedClients.length > 0) {
-      console.log(`Enviando invitaciones a ${selectedClients.length} clientes seleccionados`)
+      console.log(
+        `Enviando invitaciones a ${selectedClients.length} clientes seleccionados`,
+      );
     } else {
-      console.log("Enviando invitaciones a todos los clientes")
+      console.log("Enviando invitaciones a todos los clientes");
     }
-  }
+  };
 
   const handleViewClient = (clientId: number) => {
-    router.push(`/admin/clientes/${clientId}`)
-  }
+    router.push(`/admin/clientes/${clientId}`);
+  };
 
   const handleEditClient = (clientId: number) => {
-    router.push(`/admin/clientes/${clientId}?mode=edit`)
-  }
+    router.push(`/admin/clientes/${clientId}?mode=edit`);
+  };
 
   return (
     <AdminLayout>
@@ -240,7 +247,7 @@ export default function ClientsPage() {
                 { value: "5", label: "5 filas" },
                 { value: "10", label: "10 filas" },
                 { value: "25", label: "25 filas" },
-                { value: "50", label: "50 filas" }
+                { value: "50", label: "50 filas" },
               ]}
             />
           </div>
@@ -275,7 +282,10 @@ export default function ClientsPage() {
             >
               <Mail className="w-4 h-4" />
               <span className="hidden sm:inline font-medium">
-                Invitar {selectedClients.length > 0 ? `(${selectedClients.length})` : 'Todos'}
+                Invitar{" "}
+                {selectedClients.length > 0
+                  ? `(${selectedClients.length})`
+                  : "Todos"}
               </span>
             </motion.button>
           </div>
@@ -297,7 +307,10 @@ export default function ClientsPage() {
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={selectedClients.length === currentClients.length && currentClients.length > 0}
+                          checked={
+                            selectedClients.length === currentClients.length &&
+                            currentClients.length > 0
+                          }
                           onChange={handleSelectAll}
                           className="sr-only peer"
                         />
@@ -354,18 +367,25 @@ export default function ClientsPage() {
                     </td>
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-4">
-                        <motion.div 
+                        <motion.div
                           whileHover={{ scale: 1.1 }}
                           className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg"
                         >
-                          {client.nombre.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                          {client.nombre
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .substring(0, 2)}
                         </motion.div>
                         <div>
                           <div className="font-semibold text-gray-900 dark:text-white text-sm">
                             {client.nombre}
                           </div>
                           <div className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100/50 dark:bg-slate-700/50 px-2 py-1 rounded-full inline-block mt-1">
-                            Desde {new Date(client.fechaRegistro).toLocaleDateString()}
+                            Desde{" "}
+                            {new Date(
+                              client.fechaRegistro,
+                            ).toLocaleDateString()}
                           </div>
                         </div>
                       </div>
@@ -404,14 +424,16 @@ export default function ClientsPage() {
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => handleToggleStatus(client.id, client.estado)}
+                        onClick={() =>
+                          handleToggleStatus(client.id, client.estado)
+                        }
                         className={`inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold transition-all backdrop-blur-sm border ${
                           client.estado
-                            ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-700 dark:text-green-300 border-green-500/30 hover:from-green-500/30 hover:to-emerald-500/30'
-                            : 'bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-700 dark:text-red-300 border-red-500/30 hover:from-red-500/30 hover:to-rose-500/30'
+                            ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-700 dark:text-green-300 border-green-500/30 hover:from-green-500/30 hover:to-emerald-500/30"
+                            : "bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-700 dark:text-red-300 border-red-500/30 hover:from-red-500/30 hover:to-rose-500/30"
                         }`}
                       >
-                        {client.estado ? 'Activo' : 'Inactivo'}
+                        {client.estado ? "Activo" : "Inactivo"}
                       </motion.button>
                     </td>
                     <td className="px-6 py-5">
@@ -465,9 +487,21 @@ export default function ClientsPage() {
           <div className="px-6 py-5 border-t border-gray-200/30 dark:border-gray-700/30 bg-gray-50/30 dark:bg-slate-700/30 backdrop-blur-sm">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-sm text-gray-600 dark:text-gray-300 bg-white/50 dark:bg-slate-600/50 px-3 py-2 rounded-lg backdrop-blur-sm">
-                Mostrando <span className="font-semibold text-purple-600">{startIndex + 1}</span> a <span className="font-semibold text-purple-600">{Math.min(endIndex, filteredClients.length)}</span> de <span className="font-semibold text-purple-600">{filteredClients.length}</span> clientes
+                Mostrando{" "}
+                <span className="font-semibold text-purple-600">
+                  {startIndex + 1}
+                </span>{" "}
+                a{" "}
+                <span className="font-semibold text-purple-600">
+                  {Math.min(endIndex, filteredClients.length)}
+                </span>{" "}
+                de{" "}
+                <span className="font-semibold text-purple-600">
+                  {filteredClients.length}
+                </span>{" "}
+                clientes
               </div>
-              
+
               <div className="flex items-center gap-3">
                 <motion.button
                   whileHover={{ scale: 1.05, x: -2 }}
@@ -478,10 +512,10 @@ export default function ClientsPage() {
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </motion.button>
-                
+
                 <div className="flex items-center gap-2">
                   {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                    const pageNum = i + 1
+                    const pageNum = i + 1;
                     return (
                       <motion.button
                         key={pageNum}
@@ -490,20 +524,22 @@ export default function ClientsPage() {
                         onClick={() => setCurrentPage(pageNum)}
                         className={`w-10 h-10 rounded-xl text-sm font-semibold transition-all backdrop-blur-sm ${
                           currentPage === pageNum
-                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg border border-purple-400'
-                            : 'bg-white/60 dark:bg-slate-700/60 border border-white/30 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 text-gray-700 dark:text-gray-300'
+                            ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg border border-purple-400"
+                            : "bg-white/60 dark:bg-slate-700/60 border border-white/30 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 text-gray-700 dark:text-gray-300"
                         }`}
                       >
                         {pageNum}
                       </motion.button>
-                    )
+                    );
                   })}
                 </div>
-                
+
                 <motion.button
                   whileHover={{ scale: 1.05, x: 2 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  onClick={() =>
+                    setCurrentPage(Math.min(totalPages, currentPage + 1))
+                  }
                   disabled={currentPage === totalPages}
                   className="p-3 rounded-xl bg-white/60 dark:bg-slate-700/60 border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/80 dark:hover:bg-slate-600/80 transition-all backdrop-blur-sm"
                 >
@@ -539,16 +575,24 @@ export default function ClientsPage() {
                   </p>
                 </div>
               </div>
-              
+
               <p className="text-gray-600 dark:text-gray-300 mb-6">
-                ¿Estás seguro que deseas {showConfirmDialog.currentState ? 'desactivar' : 'activar'} este cliente?
+                ¿Estás seguro que deseas{" "}
+                {showConfirmDialog.currentState ? "desactivar" : "activar"} este
+                cliente?
               </p>
-              
+
               <div className="flex gap-3 justify-end">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setShowConfirmDialog({ show: false, clientId: 0, currentState: false })}
+                  onClick={() =>
+                    setShowConfirmDialog({
+                      show: false,
+                      clientId: 0,
+                      currentState: false,
+                    })
+                  }
                   className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-all"
                 >
                   Cancelar
@@ -567,5 +611,5 @@ export default function ClientsPage() {
         )}
       </div>
     </AdminLayout>
-  )
+  );
 }

@@ -1,25 +1,25 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { 
-  CreditCard, 
-  ArrowLeft, 
-  Plus, 
-  Trash2, 
-  Edit3, 
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  CreditCard,
+  ArrowLeft,
+  Plus,
+  Trash2,
+  Edit3,
   Check,
   AlertCircle,
   Calendar,
   Lock,
-  Building
-} from "lucide-react"
-import { useAuthStore } from "@/lib/auth-store"
-import Link from "next/link"
+  Building,
+} from "lucide-react";
+import { useAuthStore } from "@/lib/auth-store";
+import Link from "next/link";
 
 export default function MetodosPagoPage() {
-  const { user } = useAuthStore()
-  const [showAddCard, setShowAddCard] = useState(false)
+  const { user } = useAuthStore();
+  const [showAddCard, setShowAddCard] = useState(false);
   const [cards, setCards] = useState([
     {
       id: 1,
@@ -28,7 +28,7 @@ export default function MetodosPagoPage() {
       expiryMonth: "12",
       expiryYear: "26",
       holderName: "María González",
-      isDefault: true
+      isDefault: true,
     },
     {
       id: 2,
@@ -37,23 +37,23 @@ export default function MetodosPagoPage() {
       expiryMonth: "08",
       expiryYear: "25",
       holderName: "María González",
-      isDefault: false
-    }
-  ])
+      isDefault: false,
+    },
+  ]);
   const [newCard, setNewCard] = useState({
     number: "",
     expiryMonth: "",
     expiryYear: "",
     cvv: "",
     holderName: "",
-    isDefault: false
-  })
+    isDefault: false,
+  });
 
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
         <div className="flex items-center justify-center min-h-[80vh]">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="text-center p-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20"
@@ -64,8 +64,10 @@ export default function MetodosPagoPage() {
             <h1 className="text-2xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               Acceso Denegado
             </h1>
-            <p className="text-muted-foreground mb-6">Debes iniciar sesión para gestionar métodos de pago</p>
-            <Link 
+            <p className="text-muted-foreground mb-6">
+              Debes iniciar sesión para gestionar métodos de pago
+            </p>
+            <Link
               href="/login"
               className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
             >
@@ -74,7 +76,7 @@ export default function MetodosPagoPage() {
           </motion.div>
         </div>
       </div>
-    )
+    );
   }
 
   const getCardIcon = (type: string) => {
@@ -82,65 +84,67 @@ export default function MetodosPagoPage() {
       visa: "🔵",
       mastercard: "🟠",
       amex: "🟦",
-      default: "💳"
-    }
-    return icons[type as keyof typeof icons] || icons.default
-  }
+      default: "💳",
+    };
+    return icons[type as keyof typeof icons] || icons.default;
+  };
 
   const formatCardNumber = (value: string) => {
-    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '')
-    const matches = v.match(/\d{4,16}/g)
-    const match = matches && matches[0] || ''
-    const parts = []
+    const v = value.replace(/\s+/g, "").replace(/[^0-9]/gi, "");
+    const matches = v.match(/\d{4,16}/g);
+    const match = (matches && matches[0]) || "";
+    const parts = [];
 
     for (let i = 0, len = match.length; i < len; i += 4) {
-      parts.push(match.substring(i, i + 4))
+      parts.push(match.substring(i, i + 4));
     }
 
     if (parts.length) {
-      return parts.join(' ')
+      return parts.join(" ");
     } else {
-      return v
+      return v;
     }
-  }
+  };
 
   const addCard = () => {
     const card = {
       id: Date.now(),
-      type: newCard.number.startsWith('4') ? 'visa' : 'mastercard',
+      type: newCard.number.startsWith("4") ? "visa" : "mastercard",
       last4: newCard.number.slice(-4),
       expiryMonth: newCard.expiryMonth,
       expiryYear: newCard.expiryYear,
       holderName: newCard.holderName,
-      isDefault: newCard.isDefault
-    }
-    
+      isDefault: newCard.isDefault,
+    };
+
     if (newCard.isDefault) {
-      setCards(prev => prev.map(c => ({ ...c, isDefault: false })))
+      setCards((prev) => prev.map((c) => ({ ...c, isDefault: false })));
     }
-    
-    setCards(prev => [...prev, card])
+
+    setCards((prev) => [...prev, card]);
     setNewCard({
       number: "",
       expiryMonth: "",
       expiryYear: "",
       cvv: "",
       holderName: "",
-      isDefault: false
-    })
-    setShowAddCard(false)
-  }
+      isDefault: false,
+    });
+    setShowAddCard(false);
+  };
 
   const removeCard = (id: number) => {
-    setCards(prev => prev.filter(card => card.id !== id))
-  }
+    setCards((prev) => prev.filter((card) => card.id !== id));
+  };
 
   const setAsDefault = (id: number) => {
-    setCards(prev => prev.map(card => ({
-      ...card,
-      isDefault: card.id === id
-    })))
-  }
+    setCards((prev) =>
+      prev.map((card) => ({
+        ...card,
+        isDefault: card.id === id,
+      })),
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-6">
@@ -152,15 +156,15 @@ export default function MetodosPagoPage() {
         >
           {/* Header */}
           <div className="mb-8">
-            <Link 
+            <Link
               href="/configuracion"
               className="inline-flex items-center gap-2 text-purple-300 hover:text-white mb-6 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Volver a Configuración
             </Link>
-            
-            <motion.h1 
+
+            <motion.h1
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
@@ -168,7 +172,7 @@ export default function MetodosPagoPage() {
             >
               Métodos de Pago
             </motion.h1>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
@@ -187,7 +191,9 @@ export default function MetodosPagoPage() {
               className="space-y-4"
             >
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-white">Tus Tarjetas</h2>
+                <h2 className="text-xl font-semibold text-white">
+                  Tus Tarjetas
+                </h2>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -207,9 +213,9 @@ export default function MetodosPagoPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 + index * 0.1 }}
                     className={`relative p-6 rounded-2xl border transition-all ${
-                      card.isDefault 
-                        ? 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border-blue-500/30' 
-                        : 'bg-white/10 border-white/20 hover:bg-white/15'
+                      card.isDefault
+                        ? "bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border-blue-500/30"
+                        : "bg-white/10 border-white/20 hover:bg-white/15"
                     }`}
                   >
                     {card.isDefault && (
@@ -222,7 +228,9 @@ export default function MetodosPagoPage() {
 
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <span className="text-2xl">{getCardIcon(card.type)}</span>
+                        <span className="text-2xl">
+                          {getCardIcon(card.type)}
+                        </span>
                         <div>
                           <p className="text-white font-medium">
                             •••• •••• •••• {card.last4}
@@ -234,7 +242,9 @@ export default function MetodosPagoPage() {
                       </div>
                     </div>
 
-                    <p className="text-gray-300 text-sm mb-4">{card.holderName}</p>
+                    <p className="text-gray-300 text-sm mb-4">
+                      {card.holderName}
+                    </p>
 
                     <div className="flex gap-2">
                       {!card.isDefault && (
@@ -276,8 +286,12 @@ export default function MetodosPagoPage() {
                     className="text-center py-12"
                   >
                     <CreditCard className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                    <p className="text-gray-400">No tienes tarjetas agregadas</p>
-                    <p className="text-gray-500 text-sm">Agrega una tarjeta para realizar compras</p>
+                    <p className="text-gray-400">
+                      No tienes tarjetas agregadas
+                    </p>
+                    <p className="text-gray-500 text-sm">
+                      Agrega una tarjeta para realizar compras
+                    </p>
                   </motion.div>
                 )}
               </div>
@@ -291,9 +305,17 @@ export default function MetodosPagoPage() {
                 transition={{ delay: 0.3 }}
                 className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20"
               >
-                <h3 className="text-xl font-semibold text-white mb-6">Agregar Nueva Tarjeta</h3>
-                
-                <form onSubmit={(e) => { e.preventDefault(); addCard(); }} className="space-y-4">
+                <h3 className="text-xl font-semibold text-white mb-6">
+                  Agregar Nueva Tarjeta
+                </h3>
+
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    addCard();
+                  }}
+                  className="space-y-4"
+                >
                   <div>
                     <label className="block text-sm font-medium text-gray-200 mb-2">
                       Número de tarjeta
@@ -301,7 +323,12 @@ export default function MetodosPagoPage() {
                     <input
                       type="text"
                       value={formatCardNumber(newCard.number)}
-                      onChange={(e) => setNewCard(prev => ({ ...prev, number: e.target.value.replace(/\s/g, '') }))}
+                      onChange={(e) =>
+                        setNewCard((prev) => ({
+                          ...prev,
+                          number: e.target.value.replace(/\s/g, ""),
+                        }))
+                      }
                       maxLength={19}
                       className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="1234 5678 9012 3456"
@@ -315,17 +342,26 @@ export default function MetodosPagoPage() {
                       </label>
                       <select
                         value={newCard.expiryMonth}
-                        onChange={(e) => setNewCard(prev => ({ ...prev, expiryMonth: e.target.value }))}
+                        onChange={(e) =>
+                          setNewCard((prev) => ({
+                            ...prev,
+                            expiryMonth: e.target.value,
+                          }))
+                        }
                         className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="">Mes</option>
                         {Array.from({ length: 12 }, (_, i) => {
-                          const month = (i + 1).toString().padStart(2, '0')
+                          const month = (i + 1).toString().padStart(2, "0");
                           return (
-                            <option key={month} value={month} className="bg-slate-800">
+                            <option
+                              key={month}
+                              value={month}
+                              className="bg-slate-800"
+                            >
                               {month}
                             </option>
-                          )
+                          );
                         })}
                       </select>
                     </div>
@@ -335,17 +371,28 @@ export default function MetodosPagoPage() {
                       </label>
                       <select
                         value={newCard.expiryYear}
-                        onChange={(e) => setNewCard(prev => ({ ...prev, expiryYear: e.target.value }))}
+                        onChange={(e) =>
+                          setNewCard((prev) => ({
+                            ...prev,
+                            expiryYear: e.target.value,
+                          }))
+                        }
                         className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="">Año</option>
                         {Array.from({ length: 10 }, (_, i) => {
-                          const year = (new Date().getFullYear() + i).toString().slice(-2)
+                          const year = (new Date().getFullYear() + i)
+                            .toString()
+                            .slice(-2);
                           return (
-                            <option key={year} value={year} className="bg-slate-800">
+                            <option
+                              key={year}
+                              value={year}
+                              className="bg-slate-800"
+                            >
                               {year}
                             </option>
-                          )
+                          );
                         })}
                       </select>
                     </div>
@@ -358,7 +405,9 @@ export default function MetodosPagoPage() {
                     <input
                       type="text"
                       value={newCard.cvv}
-                      onChange={(e) => setNewCard(prev => ({ ...prev, cvv: e.target.value }))}
+                      onChange={(e) =>
+                        setNewCard((prev) => ({ ...prev, cvv: e.target.value }))
+                      }
                       maxLength={4}
                       className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="123"
@@ -372,7 +421,12 @@ export default function MetodosPagoPage() {
                     <input
                       type="text"
                       value={newCard.holderName}
-                      onChange={(e) => setNewCard(prev => ({ ...prev, holderName: e.target.value }))}
+                      onChange={(e) =>
+                        setNewCard((prev) => ({
+                          ...prev,
+                          holderName: e.target.value,
+                        }))
+                      }
                       className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Nombre como aparece en la tarjeta"
                     />
@@ -383,10 +437,18 @@ export default function MetodosPagoPage() {
                       type="checkbox"
                       id="isDefault"
                       checked={newCard.isDefault}
-                      onChange={(e) => setNewCard(prev => ({ ...prev, isDefault: e.target.checked }))}
+                      onChange={(e) =>
+                        setNewCard((prev) => ({
+                          ...prev,
+                          isDefault: e.target.checked,
+                        }))
+                      }
                       className="w-4 h-4 text-blue-500 bg-white/10 border-white/20 rounded focus:ring-blue-500"
                     />
-                    <label htmlFor="isDefault" className="text-sm text-gray-200">
+                    <label
+                      htmlFor="isDefault"
+                      className="text-sm text-gray-200"
+                    >
                       Establecer como tarjeta principal
                     </label>
                   </div>
@@ -394,8 +456,8 @@ export default function MetodosPagoPage() {
                   <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                     <p className="text-blue-200 text-sm flex items-start gap-2">
                       <Lock className="w-4 h-4 mt-0.5" />
-                      Tu información está protegida con encriptación de extremo a extremo. 
-                      No almacenamos tu número completo ni CVV.
+                      Tu información está protegida con encriptación de extremo
+                      a extremo. No almacenamos tu número completo ni CVV.
                     </p>
                   </div>
 
@@ -458,9 +520,13 @@ export default function MetodosPagoPage() {
                     Información Importante
                   </h3>
                   <ul className="space-y-2 text-sm text-gray-300">
-                    <li>• Las tarjetas están protegidas con encriptación SSL</li>
+                    <li>
+                      • Las tarjetas están protegidas con encriptación SSL
+                    </li>
                     <li>• Solo almacenamos los últimos 4 dígitos</li>
-                    <li>• Puedes cambiar tu tarjeta principal en cualquier momento</li>
+                    <li>
+                      • Puedes cambiar tu tarjeta principal en cualquier momento
+                    </li>
                     <li>• Los pagos se procesan de forma segura</li>
                   </ul>
                 </div>
@@ -470,5 +536,5 @@ export default function MetodosPagoPage() {
         </motion.div>
       </div>
     </div>
-  )
+  );
 }

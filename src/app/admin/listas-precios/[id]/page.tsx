@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { useRouter } from "next/navigation"
-import { 
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import {
   ArrowLeft,
   Save,
   Edit,
@@ -14,39 +14,39 @@ import {
   TrendingUp,
   Package,
   Download,
-  Search
-} from "lucide-react"
-import { AdminLayout } from "@/components/admin/admin-layout"
-import { StyledSelect } from "@/components/ui/styled-select"
+  Search,
+} from "lucide-react";
+import { AdminLayout } from "@/components/admin/admin-layout";
+import { StyledSelect } from "@/components/ui/styled-select";
 
 interface PriceListDetail {
-  id: string
-  nombre: string
-  moneda: 'USD' | 'UYU' | 'EUR' | 'BRL'
-  fechaInicio: string
-  fechaFin: string
-  estado: 'ACTIVO' | 'INACTIVO' | 'VENCIDO' | 'PROGRAMADO'
-  tipo: 'GENERAL' | 'MAYORISTA' | 'MINORISTA' | 'PROMOCIONAL' | 'ESPECIAL'
-  descripcion: string
-  descuentoGeneral: number
-  montoMinimo: number
-  productos: ProductPrice[]
-  creadoPor: string
-  fechaCreacion: string
-  ultimaModificacion: string
+  id: string;
+  nombre: string;
+  moneda: "USD" | "UYU" | "EUR" | "BRL";
+  fechaInicio: string;
+  fechaFin: string;
+  estado: "ACTIVO" | "INACTIVO" | "VENCIDO" | "PROGRAMADO";
+  tipo: "GENERAL" | "MAYORISTA" | "MINORISTA" | "PROMOCIONAL" | "ESPECIAL";
+  descripcion: string;
+  descuentoGeneral: number;
+  montoMinimo: number;
+  productos: ProductPrice[];
+  creadoPor: string;
+  fechaCreacion: string;
+  ultimaModificacion: string;
 }
 
 interface ProductPrice {
-  id: string
-  productId: string
-  nombre: string
-  sku: string
-  categoria: string
-  precioBase: number
-  precioLista: number
-  descuento: number
-  margen: number
-  ultimaActualizacion: string
+  id: string;
+  productId: string;
+  nombre: string;
+  sku: string;
+  categoria: string;
+  precioBase: number;
+  precioLista: number;
+  descuento: number;
+  margen: number;
+  ultimaActualizacion: string;
 }
 
 // Datos de ejemplo
@@ -58,7 +58,8 @@ const mockPriceListDetail: PriceListDetail = {
   fechaFin: "2025-12-31",
   estado: "ACTIVO",
   tipo: "GENERAL",
-  descripcion: "Lista de precios para la temporada de invierno 2025, incluye productos estacionales y promociones especiales.",
+  descripcion:
+    "Lista de precios para la temporada de invierno 2025, incluye productos estacionales y promociones especiales.",
   descuentoGeneral: 0,
   montoMinimo: 1000,
   creadoPor: "Admin",
@@ -75,19 +76,19 @@ const mockPriceListDetail: PriceListDetail = {
       precioLista: 24999,
       descuento: 0,
       margen: 38.9,
-      ultimaActualizacion: "2025-09-10T14:20:00Z"
+      ultimaActualizacion: "2025-09-10T14:20:00Z",
     },
     {
       id: "PP002",
       productId: "PRO002",
-      nombre: "MacBook Pro 16\" M3",
+      nombre: 'MacBook Pro 16" M3',
       sku: "SKU-39188",
       categoria: "Informática",
       precioBase: 35000,
       precioLista: 45999,
       descuento: 5,
       margen: 31.4,
-      ultimaActualizacion: "2025-09-09T11:15:00Z"
+      ultimaActualizacion: "2025-09-09T11:15:00Z",
     },
     {
       id: "PP003",
@@ -99,7 +100,7 @@ const mockPriceListDetail: PriceListDetail = {
       precioLista: 22999,
       descuento: 0,
       margen: 43.7,
-      ultimaActualizacion: "2025-09-08T16:45:00Z"
+      ultimaActualizacion: "2025-09-08T16:45:00Z",
     },
     {
       id: "PP004",
@@ -111,7 +112,7 @@ const mockPriceListDetail: PriceListDetail = {
       precioLista: 5999,
       descuento: 10,
       margen: 42.8,
-      ultimaActualizacion: "2025-09-07T09:30:00Z"
+      ultimaActualizacion: "2025-09-07T09:30:00Z",
     },
     {
       id: "PP005",
@@ -123,73 +124,99 @@ const mockPriceListDetail: PriceListDetail = {
       precioLista: 28999,
       descuento: 0,
       margen: 31.8,
-      ultimaActualizacion: "2025-09-06T13:20:00Z"
-    }
-  ]
-}
+      ultimaActualizacion: "2025-09-06T13:20:00Z",
+    },
+  ],
+};
 
-export default function PriceListDetailPage({ params }: { params: { id: string } }) {
-  const router = useRouter()
-  const [priceList, setPriceList] = useState<PriceListDetail>(mockPriceListDetail)
-  const [isEditing, setIsEditing] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [categoryFilter, setCategoryFilter] = useState("all")
-  const [hasChanges, setHasChanges] = useState(false)
+export default function PriceListDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const router = useRouter();
+  const [priceList, setPriceList] =
+    useState<PriceListDetail>(mockPriceListDetail);
+  const [isEditing, setIsEditing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [hasChanges, setHasChanges] = useState(false);
 
-  // Nota: El ID de la lista se obtendría de params.id en una implementación real
-  console.log('Price list ID:', params.id)
+  // Efecto para obtener el ID de la lista de precios
+  useEffect(() => {
+    params.then((resolvedParams) => {
+      console.log("Price list ID:", resolvedParams.id);
+    });
+  }, [params]);
 
   // Filtrar productos
-  const filteredProducts = priceList.productos.filter(product => {
-    const matchesSearch = product.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.sku.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = categoryFilter === "all" || product.categoria === categoryFilter
-    return matchesSearch && matchesCategory
-  })
+  const filteredProducts = priceList.productos.filter((product) => {
+    const matchesSearch =
+      product.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.sku.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory =
+      categoryFilter === "all" || product.categoria === categoryFilter;
+    return matchesSearch && matchesCategory;
+  });
 
   const handleSave = () => {
     // Aquí iría la lógica para guardar los cambios
-    setIsEditing(false)
-    setHasChanges(false)
-  }
+    setIsEditing(false);
+    setHasChanges(false);
+  };
 
-  const handleFieldChange = (field: keyof PriceListDetail, value: string | number) => {
-    setPriceList(prev => ({ ...prev, [field]: value }))
-    setHasChanges(true)
-  }
+  const handleFieldChange = (
+    field: keyof PriceListDetail,
+    value: string | number,
+  ) => {
+    setPriceList((prev) => ({ ...prev, [field]: value }));
+    setHasChanges(true);
+  };
 
-  const handleProductPriceChange = (productId: string, field: keyof ProductPrice, value: number) => {
-    setPriceList(prev => ({
+  const handleProductPriceChange = (
+    productId: string,
+    field: keyof ProductPrice,
+    value: number,
+  ) => {
+    setPriceList((prev) => ({
       ...prev,
-      productos: prev.productos.map(product => 
-        product.id === productId 
-          ? { ...product, [field]: value, ultimaActualizacion: new Date().toISOString() }
-          : product
-      )
-    }))
-    setHasChanges(true)
-  }
+      productos: prev.productos.map((product) =>
+        product.id === productId
+          ? {
+              ...product,
+              [field]: value,
+              ultimaActualizacion: new Date().toISOString(),
+            }
+          : product,
+      ),
+    }));
+    setHasChanges(true);
+  };
 
   const formatCurrency = (value: number) => {
-    const symbols = { USD: '$', UYU: '$U', EUR: '€', BRL: 'R$' }
-    return `${symbols[priceList.moneda] || '$'} ${value.toLocaleString()}`
-  }
+    const symbols = { USD: "$", UYU: "$U", EUR: "€", BRL: "R$" };
+    return `${symbols[priceList.moneda] || "$"} ${value.toLocaleString()}`;
+  };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    })
-  }
+    return new Date(dateString).toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
 
   // Estadísticas
   const stats = {
     totalProductos: priceList.productos.length,
-    valorPromedio: priceList.productos.reduce((acc, p) => acc + p.precioLista, 0) / priceList.productos.length,
-    margenPromedio: priceList.productos.reduce((acc, p) => acc + p.margen, 0) / priceList.productos.length,
-    valorTotal: priceList.productos.reduce((acc, p) => acc + p.precioLista, 0)
-  }
+    valorPromedio:
+      priceList.productos.reduce((acc, p) => acc + p.precioLista, 0) /
+      priceList.productos.length,
+    margenPromedio:
+      priceList.productos.reduce((acc, p) => acc + p.margen, 0) /
+      priceList.productos.length,
+    valorTotal: priceList.productos.reduce((acc, p) => acc + p.precioLista, 0),
+  };
 
   return (
     <AdminLayout>
@@ -210,7 +237,7 @@ export default function PriceListDetailPage({ params }: { params: { id: string }
               >
                 <ArrowLeft className="w-5 h-5" />
               </motion.button>
-              
+
               <div>
                 <div className="flex items-center gap-3">
                   <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -218,23 +245,28 @@ export default function PriceListDetailPage({ params }: { params: { id: string }
                       <input
                         type="text"
                         value={priceList.nombre}
-                        onChange={(e) => handleFieldChange('nombre', e.target.value)}
+                        onChange={(e) =>
+                          handleFieldChange("nombre", e.target.value)
+                        }
                         className="bg-transparent border-b-2 border-purple-500 focus:outline-none"
                       />
                     ) : (
                       priceList.nombre
                     )}
                   </h1>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    priceList.estado === 'ACTIVO' 
-                      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                      : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-                  }`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      priceList.estado === "ACTIVO"
+                        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300"
+                        : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
+                    }`}
+                  >
                     {priceList.estado}
                   </span>
                 </div>
                 <p className="text-gray-600 dark:text-gray-300 text-sm mt-1">
-                  {priceList.tipo} • {priceList.moneda} • {stats.totalProductos} productos
+                  {priceList.tipo} • {priceList.moneda} • {stats.totalProductos}{" "}
+                  productos
                 </p>
               </div>
             </div>
@@ -265,8 +297,8 @@ export default function PriceListDetailPage({ params }: { params: { id: string }
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => {
-                      setIsEditing(false)
-                      setHasChanges(false)
+                      setIsEditing(false);
+                      setHasChanges(false);
                     }}
                     className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 transition-colors"
                   >
@@ -305,10 +337,30 @@ export default function PriceListDetailPage({ params }: { params: { id: string }
           className="grid grid-cols-1 md:grid-cols-4 gap-4"
         >
           {[
-            { title: "Total Productos", value: stats.totalProductos, icon: Package, color: "from-blue-500 to-cyan-500" },
-            { title: "Valor Promedio", value: formatCurrency(stats.valorPromedio), icon: DollarSign, color: "from-green-500 to-emerald-500" },
-            { title: "Margen Promedio", value: `${stats.margenPromedio.toFixed(1)}%`, icon: TrendingUp, color: "from-purple-500 to-pink-500" },
-            { title: "Valor Total", value: formatCurrency(stats.valorTotal), icon: FileText, color: "from-orange-500 to-red-500" }
+            {
+              title: "Total Productos",
+              value: stats.totalProductos,
+              icon: Package,
+              color: "from-blue-500 to-cyan-500",
+            },
+            {
+              title: "Valor Promedio",
+              value: formatCurrency(stats.valorPromedio),
+              icon: DollarSign,
+              color: "from-green-500 to-emerald-500",
+            },
+            {
+              title: "Margen Promedio",
+              value: `${stats.margenPromedio.toFixed(1)}%`,
+              icon: TrendingUp,
+              color: "from-purple-500 to-pink-500",
+            },
+            {
+              title: "Valor Total",
+              value: formatCurrency(stats.valorTotal),
+              icon: FileText,
+              color: "from-orange-500 to-red-500",
+            },
           ].map((stat, index) => (
             <motion.div
               key={stat.title}
@@ -319,14 +371,22 @@ export default function PriceListDetailPage({ params }: { params: { id: string }
               className="bg-gradient-to-br from-white/70 to-gray-50/70 dark:from-slate-800/70 dark:to-slate-700/70 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 rounded-2xl p-6 shadow-xl"
             >
               <div className="flex items-center justify-between mb-3">
-                <div className={`w-12 h-12 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center shadow-lg`}>
+                <div
+                  className={`w-12 h-12 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center shadow-lg`}
+                >
                   <stat.icon className="w-6 h-6 text-white" />
                 </div>
                 <div className="text-right">
-                  <p className={`text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
-                    {typeof stat.value === 'string' ? stat.value : stat.value.toLocaleString()}
+                  <p
+                    className={`text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
+                  >
+                    {typeof stat.value === "string"
+                      ? stat.value
+                      : stat.value.toLocaleString()}
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">{stat.title}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    {stat.title}
+                  </p>
                 </div>
               </div>
             </motion.div>
@@ -343,7 +403,7 @@ export default function PriceListDetailPage({ params }: { params: { id: string }
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Información de la Lista
           </h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -352,12 +412,16 @@ export default function PriceListDetailPage({ params }: { params: { id: string }
               {isEditing ? (
                 <textarea
                   value={priceList.descripcion}
-                  onChange={(e) => handleFieldChange('descripcion', e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("descripcion", e.target.value)
+                  }
                   rows={3}
                   className="w-full px-3 py-2 bg-white/60 dark:bg-slate-700/60 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                 />
               ) : (
-                <p className="text-gray-900 dark:text-white">{priceList.descripcion}</p>
+                <p className="text-gray-900 dark:text-white">
+                  {priceList.descripcion}
+                </p>
               )}
             </div>
 
@@ -368,17 +432,19 @@ export default function PriceListDetailPage({ params }: { params: { id: string }
               {isEditing ? (
                 <StyledSelect
                   value={priceList.tipo}
-                  onChange={(value) => handleFieldChange('tipo', value)}
+                  onChange={(value) => handleFieldChange("tipo", value)}
                   options={[
                     { value: "GENERAL", label: "General" },
                     { value: "MAYORISTA", label: "Mayorista" },
                     { value: "MINORISTA", label: "Minorista" },
                     { value: "PROMOCIONAL", label: "Promocional" },
-                    { value: "ESPECIAL", label: "Especial" }
+                    { value: "ESPECIAL", label: "Especial" },
                   ]}
                 />
               ) : (
-                <p className="text-gray-900 dark:text-white">{priceList.tipo}</p>
+                <p className="text-gray-900 dark:text-white">
+                  {priceList.tipo}
+                </p>
               )}
             </div>
 
@@ -390,11 +456,15 @@ export default function PriceListDetailPage({ params }: { params: { id: string }
                 <input
                   type="date"
                   value={priceList.fechaInicio}
-                  onChange={(e) => handleFieldChange('fechaInicio', e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("fechaInicio", e.target.value)
+                  }
                   className="w-full px-3 py-2 bg-white/60 dark:bg-slate-700/60 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                 />
               ) : (
-                <p className="text-gray-900 dark:text-white">{formatDate(priceList.fechaInicio)}</p>
+                <p className="text-gray-900 dark:text-white">
+                  {formatDate(priceList.fechaInicio)}
+                </p>
               )}
             </div>
 
@@ -406,11 +476,15 @@ export default function PriceListDetailPage({ params }: { params: { id: string }
                 <input
                   type="date"
                   value={priceList.fechaFin}
-                  onChange={(e) => handleFieldChange('fechaFin', e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("fechaFin", e.target.value)
+                  }
                   className="w-full px-3 py-2 bg-white/60 dark:bg-slate-700/60 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                 />
               ) : (
-                <p className="text-gray-900 dark:text-white">{formatDate(priceList.fechaFin)}</p>
+                <p className="text-gray-900 dark:text-white">
+                  {formatDate(priceList.fechaFin)}
+                </p>
               )}
             </div>
 
@@ -424,11 +498,18 @@ export default function PriceListDetailPage({ params }: { params: { id: string }
                   min="0"
                   max="100"
                   value={priceList.descuentoGeneral}
-                  onChange={(e) => handleFieldChange('descuentoGeneral', Number(e.target.value))}
+                  onChange={(e) =>
+                    handleFieldChange(
+                      "descuentoGeneral",
+                      Number(e.target.value),
+                    )
+                  }
                   className="w-full px-3 py-2 bg-white/60 dark:bg-slate-700/60 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                 />
               ) : (
-                <p className="text-gray-900 dark:text-white">{priceList.descuentoGeneral}%</p>
+                <p className="text-gray-900 dark:text-white">
+                  {priceList.descuentoGeneral}%
+                </p>
               )}
             </div>
 
@@ -441,11 +522,15 @@ export default function PriceListDetailPage({ params }: { params: { id: string }
                   type="number"
                   min="0"
                   value={priceList.montoMinimo}
-                  onChange={(e) => handleFieldChange('montoMinimo', Number(e.target.value))}
+                  onChange={(e) =>
+                    handleFieldChange("montoMinimo", Number(e.target.value))
+                  }
                   className="w-full px-3 py-2 bg-white/60 dark:bg-slate-700/60 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                 />
               ) : (
-                <p className="text-gray-900 dark:text-white">{formatCurrency(priceList.montoMinimo)}</p>
+                <p className="text-gray-900 dark:text-white">
+                  {formatCurrency(priceList.montoMinimo)}
+                </p>
               )}
             </div>
           </div>
@@ -485,7 +570,7 @@ export default function PriceListDetailPage({ params }: { params: { id: string }
                     { value: "all", label: "Todas las categorías" },
                     { value: "Electrónicos", label: "Electrónicos" },
                     { value: "Informática", label: "Informática" },
-                    { value: "Oficina", label: "Oficina" }
+                    { value: "Oficina", label: "Oficina" },
                   ]}
                 />
               </div>
@@ -562,7 +647,13 @@ export default function PriceListDetailPage({ params }: { params: { id: string }
                         <input
                           type="number"
                           value={product.precioBase}
-                          onChange={(e) => handleProductPriceChange(product.id, 'precioBase', Number(e.target.value))}
+                          onChange={(e) =>
+                            handleProductPriceChange(
+                              product.id,
+                              "precioBase",
+                              Number(e.target.value),
+                            )
+                          }
                           className="w-24 px-2 py-1 bg-white/60 dark:bg-slate-700/60 border border-gray-300 dark:border-gray-600 rounded text-sm"
                         />
                       ) : (
@@ -576,7 +667,13 @@ export default function PriceListDetailPage({ params }: { params: { id: string }
                         <input
                           type="number"
                           value={product.precioLista}
-                          onChange={(e) => handleProductPriceChange(product.id, 'precioLista', Number(e.target.value))}
+                          onChange={(e) =>
+                            handleProductPriceChange(
+                              product.id,
+                              "precioLista",
+                              Number(e.target.value),
+                            )
+                          }
                           className="w-24 px-2 py-1 bg-white/60 dark:bg-slate-700/60 border border-gray-300 dark:border-gray-600 rounded text-sm"
                         />
                       ) : (
@@ -592,27 +689,37 @@ export default function PriceListDetailPage({ params }: { params: { id: string }
                           min="0"
                           max="100"
                           value={product.descuento}
-                          onChange={(e) => handleProductPriceChange(product.id, 'descuento', Number(e.target.value))}
+                          onChange={(e) =>
+                            handleProductPriceChange(
+                              product.id,
+                              "descuento",
+                              Number(e.target.value),
+                            )
+                          }
                           className="w-16 px-2 py-1 bg-white/60 dark:bg-slate-700/60 border border-gray-300 dark:border-gray-600 rounded text-sm"
                         />
                       ) : (
-                        <span className={`text-sm font-medium ${
-                          product.descuento > 0 
-                            ? 'text-orange-600 dark:text-orange-400' 
-                            : 'text-gray-500 dark:text-gray-400'
-                        }`}>
+                        <span
+                          className={`text-sm font-medium ${
+                            product.descuento > 0
+                              ? "text-orange-600 dark:text-orange-400"
+                              : "text-gray-500 dark:text-gray-400"
+                          }`}
+                        >
                           {product.descuento}%
                         </span>
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`text-sm font-medium ${
-                        product.margen >= 40 
-                          ? 'text-green-600 dark:text-green-400' 
-                          : product.margen >= 25 
-                          ? 'text-yellow-600 dark:text-yellow-400' 
-                          : 'text-red-600 dark:text-red-400'
-                      }`}>
+                      <span
+                        className={`text-sm font-medium ${
+                          product.margen >= 40
+                            ? "text-green-600 dark:text-green-400"
+                            : product.margen >= 25
+                              ? "text-yellow-600 dark:text-yellow-400"
+                              : "text-red-600 dark:text-red-400"
+                        }`}
+                      >
                         {product.margen.toFixed(1)}%
                       </span>
                     </td>
@@ -635,5 +742,5 @@ export default function PriceListDetailPage({ params }: { params: { id: string }
         </motion.div>
       </div>
     </AdminLayout>
-  )
+  );
 }

@@ -1,17 +1,16 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
-import { AdminLayout } from "@/components/admin/admin-layout"
-import { useAuthStore } from "@/lib/auth-store"
-import { ClientHeader } from "@/components/clients/client-header"
-import { ClientPersonalInfo } from "@/components/clients/client-personal-info"
-import { ClientCommercialInfo } from "@/components/clients/client-commercial-info"
-import { ClientAdditionalInfo } from "@/components/clients/client-additional-info"
-import { ClientStatusPanel } from "@/components/clients/client-status-panel"
-import { ClientStats } from "@/components/clients/client-stats"
-import { ClientLocationMap } from "@/components/clients/client-location-map"
-import { UnsavedChangesNotification } from "@/components/clients/unsaved-changes-notification"
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { AdminLayout } from "@/components/admin/admin-layout";
+import { ClientHeader } from "@/components/clients/client-header";
+import { ClientPersonalInfo } from "@/components/clients/client-personal-info";
+import { ClientCommercialInfo } from "@/components/clients/client-commercial-info";
+import { ClientAdditionalInfo } from "@/components/clients/client-additional-info";
+import { ClientStatusPanel } from "@/components/clients/client-status-panel";
+import { ClientStats } from "@/components/clients/client-stats";
+import { ClientLocationMap } from "@/components/clients/client-location-map";
+import { UnsavedChangesNotification } from "@/components/clients/unsaved-changes-notification";
 
 // Datos de ejemplo - en producción vendría del servidor
 const mockClientData = {
@@ -21,7 +20,7 @@ const mockClientData = {
   rut: "21.345.678.901",
   rutCode: "21345678901",
   phone: "+598 99 123 456",
-  phoneSecond: "+598 99 765 432", 
+  phoneSecond: "+598 99 765 432",
   email: "contacto@techcorp.com.uy",
   taxStatus: "Contribuyente",
   paymentTerm: 30,
@@ -42,82 +41,95 @@ const mockClientData = {
   isBlocked: false,
   isVip: true,
   hasDebt: false,
-  observations: "Cliente preferencial con historial de pagos excelente. Ha demostrado consistencia en sus compras y siempre cumple con los plazos de pago establecidos.",
+  observations:
+    "Cliente preferencial con historial de pagos excelente. Ha demostrado consistencia en sus compras y siempre cumple con los plazos de pago establecidos.",
   registrationDate: "2024-01-15",
   lastPurchase: "2024-03-10",
   totalPurchases: 1250000,
   latitude: -34.9051,
-  longitude: -56.1915
-}
+  longitude: -56.1915,
+};
 
 interface ClientData {
-  id: string
-  name: string
-  businessName: string
-  rut: string
-  rutCode: string
-  phone: string
-  phoneSecond: string
-  email: string
-  taxStatus: string
-  paymentTerm: number
-  creditLimit: number
-  currencyCode: string
-  paymentMethodCode: string
-  contactName: string
-  contactPhone: string
-  contactEmail: string
-  fiscalName: string
-  city: string
-  district: string
-  neighborhood: string
-  address: string
-  postalCode: string
-  country: string
-  isActive: boolean
-  isBlocked: boolean
-  isVip: boolean
-  hasDebt: boolean
-  observations: string
-  registrationDate: string
-  lastPurchase: string
-  totalPurchases: number
-  latitude: number
-  longitude: number
+  id: string;
+  name: string;
+  businessName: string;
+  rut: string;
+  rutCode: string;
+  phone: string;
+  phoneSecond: string;
+  email: string;
+  taxStatus: string;
+  paymentTerm: number;
+  creditLimit: number;
+  currencyCode: string;
+  paymentMethodCode: string;
+  contactName: string;
+  contactPhone: string;
+  contactEmail: string;
+  fiscalName: string;
+  city: string;
+  district: string;
+  neighborhood: string;
+  address: string;
+  postalCode: string;
+  country: string;
+  isActive: boolean;
+  isBlocked: boolean;
+  isVip: boolean;
+  hasDebt: boolean;
+  observations: string;
+  registrationDate: string;
+  lastPurchase: string;
+  totalPurchases: number;
+  latitude: number;
+  longitude: number;
 }
 
-export default function ClientDetail({ params }: { params: { id: string } }) {
-  const searchParams = useSearchParams()
-  const mode = searchParams.get('mode') || 'view'
-  const [isEditing, setIsEditing] = useState(mode === 'edit')
-  const [clientData, setClientData] = useState<ClientData>(mockClientData)
-  const [hasChanges, setHasChanges] = useState(false)
-  const [originalData, setOriginalData] = useState<ClientData>(mockClientData)
+export default function ClientDetail({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const searchParams = useSearchParams();
+  const mode = searchParams.get("mode") || "view";
+  const [isEditing, setIsEditing] = useState(mode === "edit");
+  const [clientData, setClientData] = useState<ClientData>(mockClientData);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [originalData, setOriginalData] = useState<ClientData>(mockClientData);
 
-  // En el futuro se usará params.id para cargar datos específicos del cliente
-  console.log('Client ID:', params.id)
+  // Efecto para obtener el ID del cliente
+  useEffect(() => {
+    params.then((resolvedParams) => {
+      console.log("Client ID:", resolvedParams.id);
+    });
+  }, [params]);
 
   // Efecto para detectar cambios
   useEffect(() => {
-    const hasDataChanged = JSON.stringify(clientData) !== JSON.stringify(originalData)
-    setHasChanges(hasDataChanged && isEditing)
-  }, [clientData, originalData, isEditing])
+    const hasDataChanged =
+      JSON.stringify(clientData) !== JSON.stringify(originalData);
+    setHasChanges(hasDataChanged && isEditing);
+  }, [clientData, originalData, isEditing]);
 
-  const handleInputChange = (field: keyof ClientData, value: string | number | boolean) => {
-    if (!isEditing) return
-    
-    setClientData(prev => ({
+  const handleInputChange = (
+    field: keyof ClientData,
+    value: string | number | boolean,
+  ) => {
+    if (!isEditing) return;
+
+    setClientData((prev) => ({
       ...prev,
-      [field]: value
-    }))
-  }
+      [field]: value,
+    }));
+  };
 
   const handleSave = () => {
-    console.log('Guardando cambios:', clientData)
-    setOriginalData(clientData)
-    setHasChanges(false)
-    setIsEditing(false)
-    
+    console.log("Guardando cambios:", clientData);
+    setOriginalData(clientData);
+    setHasChanges(false);
+    setIsEditing(false);
+
     // Aquí iría la llamada a la API para guardar los datos
     // try {
     //   await updateClient(params.id, clientData)
@@ -125,22 +137,22 @@ export default function ClientDetail({ params }: { params: { id: string } }) {
     // } catch (error) {
     //   toast.error('Error al actualizar el cliente')
     // }
-  }
+  };
 
   const handleCancel = () => {
-    setClientData(originalData)
-    setHasChanges(false)
-    setIsEditing(false)
-  }
+    setClientData(originalData);
+    setHasChanges(false);
+    setIsEditing(false);
+  };
 
   const handleEdit = () => {
-    setIsEditing(true)
-  }
+    setIsEditing(true);
+  };
 
   const handleDiscard = () => {
-    setClientData(originalData)
-    setHasChanges(false)
-  }
+    setClientData(originalData);
+    setHasChanges(false);
+  };
 
   return (
     <AdminLayout>
@@ -167,7 +179,7 @@ export default function ClientDetail({ params }: { params: { id: string } }) {
                   rut: clientData.rut,
                   email: clientData.email,
                   phone: clientData.phone,
-                  phoneSecond: clientData.phoneSecond
+                  phoneSecond: clientData.phoneSecond,
                 }}
                 isEditing={isEditing}
                 onInputChange={handleInputChange}
@@ -179,7 +191,7 @@ export default function ClientDetail({ params }: { params: { id: string } }) {
                   taxStatus: clientData.taxStatus,
                   paymentTerm: clientData.paymentTerm,
                   creditLimit: clientData.creditLimit,
-                  currencyCode: clientData.currencyCode
+                  currencyCode: clientData.currencyCode,
                 }}
                 isEditing={isEditing}
                 onInputChange={handleInputChange}
@@ -198,7 +210,7 @@ export default function ClientDetail({ params }: { params: { id: string } }) {
                   address: clientData.address,
                   postalCode: clientData.postalCode,
                   country: clientData.country,
-                  observations: clientData.observations
+                  observations: clientData.observations,
                 }}
                 isEditing={isEditing}
                 onInputChange={handleInputChange}
@@ -213,7 +225,7 @@ export default function ClientDetail({ params }: { params: { id: string } }) {
                   isActive: clientData.isActive,
                   isBlocked: clientData.isBlocked,
                   isVip: clientData.isVip,
-                  hasDebt: clientData.hasDebt
+                  hasDebt: clientData.hasDebt,
                 }}
                 isEditing={isEditing}
                 onInputChange={handleInputChange}
@@ -226,7 +238,7 @@ export default function ClientDetail({ params }: { params: { id: string } }) {
                   lastPurchase: clientData.lastPurchase,
                   totalPurchases: clientData.totalPurchases,
                   creditLimit: clientData.creditLimit,
-                  currencyCode: clientData.currencyCode
+                  currencyCode: clientData.currencyCode,
                 }}
               />
 
@@ -238,7 +250,7 @@ export default function ClientDetail({ params }: { params: { id: string } }) {
                   neighborhood: clientData.neighborhood,
                   country: clientData.country,
                   latitude: clientData.latitude,
-                  longitude: clientData.longitude
+                  longitude: clientData.longitude,
                 }}
               />
             </div>
@@ -253,5 +265,5 @@ export default function ClientDetail({ params }: { params: { id: string } }) {
         </div>
       </div>
     </AdminLayout>
-  )
+  );
 }

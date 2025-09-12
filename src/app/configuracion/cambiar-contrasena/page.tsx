@@ -1,36 +1,44 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Lock, Eye, EyeOff, ArrowLeft, Check, X, AlertCircle } from "lucide-react"
-import { useAuthStore } from "@/lib/auth-store"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Lock,
+  Eye,
+  EyeOff,
+  ArrowLeft,
+  Check,
+  X,
+  AlertCircle,
+} from "lucide-react";
+import { useAuthStore } from "@/lib/auth-store";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function CambiarContrasenaPage() {
-  const { user } = useAuthStore()
-  const router = useRouter()
+  const { user } = useAuthStore();
+  const router = useRouter();
   const [showPasswords, setShowPasswords] = useState({
     current: false,
     new: false,
-    confirm: false
-  })
+    confirm: false,
+  });
   const [passwords, setPasswords] = useState({
     current: "",
     new: "",
-    confirm: ""
-  })
+    confirm: "",
+  });
   const [errors, setErrors] = useState({
     current: "",
     new: "",
-    confirm: ""
-  })
+    confirm: "",
+  });
 
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
         <div className="flex items-center justify-center min-h-[80vh]">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="text-center p-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20"
@@ -41,8 +49,10 @@ export default function CambiarContrasenaPage() {
             <h1 className="text-2xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               Acceso Denegado
             </h1>
-            <p className="text-muted-foreground mb-6">Debes iniciar sesión para cambiar la contraseña</p>
-            <Link 
+            <p className="text-muted-foreground mb-6">
+              Debes iniciar sesión para cambiar la contraseña
+            </p>
+            <Link
               href="/login"
               className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
             >
@@ -51,7 +61,7 @@ export default function CambiarContrasenaPage() {
           </motion.div>
         </div>
       </div>
-    )
+    );
   }
 
   const validatePassword = (password: string) => {
@@ -60,19 +70,23 @@ export default function CambiarContrasenaPage() {
       { test: /[A-Z]/.test(password), text: "Una mayúscula" },
       { test: /[a-z]/.test(password), text: "Una minúscula" },
       { test: /\d/.test(password), text: "Un número" },
-      { test: /[!@#$%^&*]/.test(password), text: "Un carácter especial" }
-    ]
-    return requirements
-  }
+      { test: /[!@#$%^&*]/.test(password), text: "Un carácter especial" },
+    ];
+    return requirements;
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     // Aquí iría la lógica de validación y cambio de contraseña
-    console.log("Cambiando contraseña...")
-  }
+    console.log("Cambiando contraseña...");
+  };
 
-  const passwordRequirements = validatePassword(passwords.new)
-  const isFormValid = passwords.current && passwords.new && passwords.confirm && passwords.new === passwords.confirm
+  const passwordRequirements = validatePassword(passwords.new);
+  const isFormValid =
+    passwords.current &&
+    passwords.new &&
+    passwords.confirm &&
+    passwords.new === passwords.confirm;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-6">
@@ -84,15 +98,15 @@ export default function CambiarContrasenaPage() {
         >
           {/* Header */}
           <div className="mb-8">
-            <Link 
+            <Link
               href="/configuracion"
               className="inline-flex items-center gap-2 text-purple-300 hover:text-white mb-6 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Volver a Configuración
             </Link>
-            
-            <motion.h1 
+
+            <motion.h1
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
@@ -100,7 +114,7 @@ export default function CambiarContrasenaPage() {
             >
               Cambiar Contraseña
             </motion.h1>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
@@ -127,16 +141,30 @@ export default function CambiarContrasenaPage() {
                   <input
                     type={showPasswords.current ? "text" : "password"}
                     value={passwords.current}
-                    onChange={(e) => setPasswords(prev => ({ ...prev, current: e.target.value }))}
+                    onChange={(e) =>
+                      setPasswords((prev) => ({
+                        ...prev,
+                        current: e.target.value,
+                      }))
+                    }
                     className="w-full px-4 py-3 pr-12 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     placeholder="Ingresa tu contraseña actual"
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPasswords(prev => ({ ...prev, current: !prev.current }))}
+                    onClick={() =>
+                      setShowPasswords((prev) => ({
+                        ...prev,
+                        current: !prev.current,
+                      }))
+                    }
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
                   >
-                    {showPasswords.current ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showPasswords.current ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -150,16 +178,24 @@ export default function CambiarContrasenaPage() {
                   <input
                     type={showPasswords.new ? "text" : "password"}
                     value={passwords.new}
-                    onChange={(e) => setPasswords(prev => ({ ...prev, new: e.target.value }))}
+                    onChange={(e) =>
+                      setPasswords((prev) => ({ ...prev, new: e.target.value }))
+                    }
                     className="w-full px-4 py-3 pr-12 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     placeholder="Ingresa tu nueva contraseña"
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))}
+                    onClick={() =>
+                      setShowPasswords((prev) => ({ ...prev, new: !prev.new }))
+                    }
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
                   >
-                    {showPasswords.new ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showPasswords.new ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
                   </button>
                 </div>
 
@@ -170,7 +206,9 @@ export default function CambiarContrasenaPage() {
                     animate={{ opacity: 1, height: "auto" }}
                     className="mt-3 p-4 bg-white/5 rounded-lg border border-white/10"
                   >
-                    <p className="text-sm text-gray-300 mb-3">Requisitos de contraseña:</p>
+                    <p className="text-sm text-gray-300 mb-3">
+                      Requisitos de contraseña:
+                    </p>
                     <div className="space-y-2">
                       {passwordRequirements.map((req, index) => (
                         <div key={index} className="flex items-center gap-2">
@@ -179,7 +217,9 @@ export default function CambiarContrasenaPage() {
                           ) : (
                             <X className="w-4 h-4 text-red-400" />
                           )}
-                          <span className={`text-sm ${req.test ? 'text-green-400' : 'text-red-400'}`}>
+                          <span
+                            className={`text-sm ${req.test ? "text-green-400" : "text-red-400"}`}
+                          >
                             {req.text}
                           </span>
                         </div>
@@ -198,16 +238,30 @@ export default function CambiarContrasenaPage() {
                   <input
                     type={showPasswords.confirm ? "text" : "password"}
                     value={passwords.confirm}
-                    onChange={(e) => setPasswords(prev => ({ ...prev, confirm: e.target.value }))}
+                    onChange={(e) =>
+                      setPasswords((prev) => ({
+                        ...prev,
+                        confirm: e.target.value,
+                      }))
+                    }
                     className="w-full px-4 py-3 pr-12 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     placeholder="Confirma tu nueva contraseña"
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))}
+                    onClick={() =>
+                      setShowPasswords((prev) => ({
+                        ...prev,
+                        confirm: !prev.confirm,
+                      }))
+                    }
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
                   >
-                    {showPasswords.confirm ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    {showPasswords.confirm ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
                   </button>
                 </div>
                 {passwords.confirm && passwords.new !== passwords.confirm && (
@@ -217,7 +271,9 @@ export default function CambiarContrasenaPage() {
                     className="flex items-center gap-2 mt-2 text-red-400"
                   >
                     <AlertCircle className="w-4 h-4" />
-                    <span className="text-sm">Las contraseñas no coinciden</span>
+                    <span className="text-sm">
+                      Las contraseñas no coinciden
+                    </span>
                   </motion.div>
                 )}
               </div>
@@ -234,7 +290,7 @@ export default function CambiarContrasenaPage() {
                   <Lock className="w-4 h-4" />
                   Cambiar Contraseña
                 </motion.button>
-                
+
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -269,5 +325,5 @@ export default function CambiarContrasenaPage() {
         </motion.div>
       </div>
     </div>
-  )
+  );
 }

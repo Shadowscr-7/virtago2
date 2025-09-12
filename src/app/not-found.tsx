@@ -1,58 +1,64 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { Search, Home, ArrowLeft, RefreshCw, AlertTriangle } from "lucide-react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { motion } from "framer-motion";
+import {
+  Search,
+  Home,
+  ArrowLeft,
+  RefreshCw,
+  AlertTriangle,
+} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function NotFound() {
-  const router = useRouter()
+  const router = useRouter();
 
   const handleGoBack = () => {
-    router.back()
-  }
+    router.back();
+  };
 
   const handleRefresh = () => {
-    window.location.reload()
-  }
+    window.location.reload();
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
       {/* Elementos de fondo animados */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
-          animate={{ 
+          animate={{
             rotate: 360,
-            scale: [1, 1.1, 1]
+            scale: [1, 1.1, 1],
           }}
-          transition={{ 
-            duration: 20, 
-            repeat: Infinity, 
-            ease: "linear" 
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear",
           }}
           className="absolute -top-40 -left-40 w-80 h-80 rounded-full bg-gradient-to-r from-purple-600/20 to-pink-600/20 blur-3xl"
         />
         <motion.div
-          animate={{ 
+          animate={{
             rotate: -360,
-            scale: [1, 1.2, 1]
+            scale: [1, 1.2, 1],
           }}
-          transition={{ 
-            duration: 25, 
-            repeat: Infinity, 
-            ease: "linear" 
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "linear",
           }}
           className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-gradient-to-r from-cyan-600/20 to-blue-600/20 blur-3xl"
         />
         <motion.div
-          animate={{ 
+          animate={{
             y: [-20, 20, -20],
-            x: [-10, 10, -10]
+            x: [-10, 10, -10],
           }}
-          transition={{ 
-            duration: 15, 
-            repeat: Infinity, 
-            ease: "easeInOut" 
+          transition={{
+            duration: 15,
+            repeat: Infinity,
+            ease: "easeInOut",
           }}
           className="absolute top-1/3 right-1/4 w-64 h-64 rounded-full bg-gradient-to-r from-pink-600/10 to-purple-600/10 blur-2xl"
         />
@@ -69,18 +75,23 @@ export default function NotFound() {
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          transition={{ delay: 0.2, duration: 0.6, type: "spring", bounce: 0.4 }}
+          transition={{
+            delay: 0.2,
+            duration: 0.6,
+            type: "spring",
+            bounce: 0.4,
+          }}
           className="mb-8"
         >
           <motion.div
-            animate={{ 
+            animate={{
               rotate: [0, 5, -5, 0],
-              scale: [1, 1.05, 1]
+              scale: [1, 1.05, 1],
             }}
-            transition={{ 
-              duration: 4, 
-              repeat: Infinity, 
-              ease: "easeInOut" 
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut",
             }}
             className="relative mx-auto w-48 h-48 rounded-3xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-xl border border-white/10 flex items-center justify-center"
           >
@@ -92,7 +103,7 @@ export default function NotFound() {
             >
               <AlertTriangle className="w-20 h-20 text-purple-300" />
             </motion.div>
-            
+
             {/* Número 404 */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -123,8 +134,8 @@ export default function NotFound() {
             Página no encontrada
           </h2>
           <p className="text-lg text-purple-200 max-w-lg mx-auto leading-relaxed">
-            La página que buscas no existe o ha sido movida. No te preocupes, 
-            te ayudamos a encontrar lo que necesitas.
+            La página que buscas no existe o ha sido movida. No te preocupes, te
+            ayudamos a encontrar lo que necesitas.
           </p>
         </motion.div>
 
@@ -137,7 +148,9 @@ export default function NotFound() {
         >
           {/* Sugerencias */}
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">¿Qué puedes hacer?</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">
+              ¿Qué puedes hacer?
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div className="flex items-center text-purple-200">
                 <Search className="w-4 h-4 mr-2 text-purple-400" />
@@ -204,7 +217,7 @@ export default function NotFound() {
               { name: "Productos", href: "/productos" },
               { name: "Marcas", href: "/marcas" },
               { name: "Ofertas", href: "/ofertas" },
-              { name: "Contacto", href: "/contacto" }
+              { name: "Contacto", href: "/contacto" },
             ].map((link, index) => (
               <motion.div
                 key={link.name}
@@ -232,21 +245,21 @@ export default function NotFound() {
           animate={{
             y: [-20, -40, -20],
             x: [-10, 10, -10],
-            opacity: [0.3, 0.6, 0.3]
+            opacity: [0.3, 0.6, 0.3],
           }}
           transition={{
             duration: 4 + i,
             repeat: Infinity,
             ease: "easeInOut",
-            delay: i * 0.5
+            delay: i * 0.5,
           }}
           className={`absolute w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full blur-sm`}
           style={{
             left: `${15 + i * 15}%`,
-            top: `${20 + i * 10}%`
+            top: `${20 + i * 10}%`,
           }}
         />
       ))}
     </div>
-  )
+  );
 }

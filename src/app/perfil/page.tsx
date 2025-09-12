@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Building2, 
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Building2,
   Calendar,
   Edit3,
   Save,
@@ -16,29 +16,29 @@ import {
   Shield,
   Award,
   Bell,
-  Lock
-} from "lucide-react"
-import { useAuthStore } from "@/lib/auth-store"
-import { toast } from "sonner"
-import Link from "next/link"
+  Lock,
+} from "lucide-react";
+import { useAuthStore } from "@/lib/auth-store";
+import { toast } from "sonner";
+import Link from "next/link";
 
 export default function ProfilePage() {
-  const { user, updateProfile } = useAuthStore()
-  const [isEditing, setIsEditing] = useState(false)
+  const { user, updateProfile } = useAuthStore();
+  const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
     phone: user?.phone || "",
     company: user?.company || "",
     address: user?.address || "",
-    avatar: user?.avatar || "👤"
-  })
+    avatar: user?.avatar || "👤",
+  });
 
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
         <div className="flex items-center justify-center min-h-[80vh]">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="text-center p-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20"
@@ -49,8 +49,10 @@ export default function ProfilePage() {
             <h1 className="text-2xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               Acceso Denegado
             </h1>
-            <p className="text-muted-foreground mb-6">Debes iniciar sesión para ver tu perfil</p>
-            <Link 
+            <p className="text-muted-foreground mb-6">
+              Debes iniciar sesión para ver tu perfil
+            </p>
+            <Link
               href="/login"
               className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
             >
@@ -59,16 +61,16 @@ export default function ProfilePage() {
           </motion.div>
         </div>
       </div>
-    )
+    );
   }
 
   const handleSave = () => {
     if (user) {
-      updateProfile(formData)
-      setIsEditing(false)
-      toast.success("Perfil actualizado correctamente")
+      updateProfile(formData);
+      setIsEditing(false);
+      toast.success("Perfil actualizado correctamente");
     }
-  }
+  };
 
   const handleCancel = () => {
     if (user) {
@@ -78,13 +80,24 @@ export default function ProfilePage() {
         phone: user.phone || "",
         company: user.company || "",
         address: user.address || "",
-        avatar: user.avatar || "👤"
-      })
+        avatar: user.avatar || "👤",
+      });
     }
-    setIsEditing(false)
-  }
+    setIsEditing(false);
+  };
 
-  const avatarOptions = ["👤", "👨", "👩", "🧑", "👨‍💼", "👩‍💼", "🚀", "💼", "🎯", "⭐"]
+  const avatarOptions = [
+    "👤",
+    "👨",
+    "👩",
+    "🧑",
+    "👨‍💼",
+    "👩‍💼",
+    "🚀",
+    "💼",
+    "🎯",
+    "⭐",
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
@@ -96,7 +109,7 @@ export default function ProfilePage() {
         >
           {/* Header */}
           <div className="mb-8 text-center">
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
@@ -104,7 +117,7 @@ export default function ProfilePage() {
             >
               Mi Perfil
             </motion.h1>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
@@ -123,15 +136,18 @@ export default function ProfilePage() {
           >
             {/* Background Pattern */}
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-cyan-500/10" />
-            <div className="absolute inset-0" style={{ 
-              backgroundImage: `radial-gradient(circle at 25% 25%, rgba(139, 92, 246, 0.1) 0%, transparent 50%)`,
-            }} />
-            
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `radial-gradient(circle at 25% 25%, rgba(139, 92, 246, 0.1) 0%, transparent 50%)`,
+              }}
+            />
+
             <div className="relative">
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-6">
                   <div className="relative group">
-                    <motion.div 
+                    <motion.div
                       whileHover={{ scale: 1.05 }}
                       className="w-24 h-24 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-4xl text-white shadow-lg ring-4 ring-white/20"
                     >
@@ -143,24 +159,36 @@ export default function ProfilePage() {
                       </div>
                     )}
                   </div>
-                  
+
                   <div>
-                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{user.name}</h2>
+                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
+                      {user.name}
+                    </h2>
                     <div className="flex items-center gap-3 mb-3">
-                      <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
-                        user.role === 'distribuidor' 
-                          ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-                          : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                      }`}>
-                        {user.role === 'distribuidor' ? <Shield className="w-4 h-4" /> : <User className="w-4 h-4" />}
+                      <div
+                        className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
+                          user.role === "distribuidor"
+                            ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                            : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                        }`}
+                      >
+                        {user.role === "distribuidor" ? (
+                          <Shield className="w-4 h-4" />
+                        ) : (
+                          <User className="w-4 h-4" />
+                        )}
                         <span className="capitalize">{user.role}</span>
                       </div>
                       <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                         <Calendar className="w-4 h-4" />
-                        <span className="text-sm">Miembro desde septiembre 2024</span>
+                        <span className="text-sm">
+                          Miembro desde septiembre 2024
+                        </span>
                       </div>
                     </div>
-                    <p className="text-slate-600 dark:text-slate-400">{user.email}</p>
+                    <p className="text-slate-600 dark:text-slate-400">
+                      {user.email}
+                    </p>
                   </div>
                 </div>
 
@@ -205,18 +233,22 @@ export default function ProfilePage() {
                   animate={{ opacity: 1, height: "auto" }}
                   className="mb-6 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-2xl"
                 >
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Selecciona tu avatar:</p>
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+                    Selecciona tu avatar:
+                  </p>
                   <div className="flex gap-2 flex-wrap">
                     {avatarOptions.map((avatar) => (
                       <motion.button
                         key={avatar}
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
-                        onClick={() => setFormData(prev => ({ ...prev, avatar }))}
+                        onClick={() =>
+                          setFormData((prev) => ({ ...prev, avatar }))
+                        }
                         className={`w-12 h-12 rounded-full flex items-center justify-center text-xl transition-all ${
                           formData.avatar === avatar
-                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                            : 'bg-white dark:bg-slate-600 hover:bg-slate-100 dark:hover:bg-slate-500'
+                            ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                            : "bg-white dark:bg-slate-600 hover:bg-slate-100 dark:hover:bg-slate-500"
                         }`}
                       >
                         {avatar}
@@ -240,9 +272,11 @@ export default function ProfilePage() {
                 <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
                   <User className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Información Personal</h3>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
+                  Información Personal
+                </h3>
               </div>
-              
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -252,13 +286,20 @@ export default function ProfilePage() {
                     <input
                       type="text"
                       value={formData.name}
-                      onChange={(e) => setFormData(prev => ({...prev, name: e.target.value}))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          name: e.target.value,
+                        }))
+                      }
                       className="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/50 dark:bg-slate-700/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
                     />
                   ) : (
                     <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                       <User className="w-5 h-5 text-slate-500" />
-                      <span className="text-slate-900 dark:text-white">{user.name}</span>
+                      <span className="text-slate-900 dark:text-white">
+                        {user.name}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -271,13 +312,20 @@ export default function ProfilePage() {
                     <input
                       type="email"
                       value={formData.email}
-                      onChange={(e) => setFormData(prev => ({...prev, email: e.target.value}))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          email: e.target.value,
+                        }))
+                      }
                       className="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/50 dark:bg-slate-700/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
                     />
                   ) : (
                     <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                       <Mail className="w-5 h-5 text-slate-500" />
-                      <span className="text-slate-900 dark:text-white">{user.email}</span>
+                      <span className="text-slate-900 dark:text-white">
+                        {user.email}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -290,14 +338,21 @@ export default function ProfilePage() {
                     <input
                       type="tel"
                       value={formData.phone}
-                      onChange={(e) => setFormData(prev => ({...prev, phone: e.target.value}))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          phone: e.target.value,
+                        }))
+                      }
                       placeholder="Introduce tu número de teléfono"
                       className="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/50 dark:bg-slate-700/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
                     />
                   ) : (
                     <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                       <Phone className="w-5 h-5 text-slate-500" />
-                      <span className="text-slate-900 dark:text-white">{user.phone || "No especificado"}</span>
+                      <span className="text-slate-900 dark:text-white">
+                        {user.phone || "No especificado"}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -315,9 +370,11 @@ export default function ProfilePage() {
                 <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
                   <Building2 className="w-5 h-5 text-white" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Empresa & Ubicación</h3>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
+                  Empresa & Ubicación
+                </h3>
               </div>
-              
+
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -327,14 +384,21 @@ export default function ProfilePage() {
                     <input
                       type="text"
                       value={formData.company}
-                      onChange={(e) => setFormData(prev => ({...prev, company: e.target.value}))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          company: e.target.value,
+                        }))
+                      }
                       placeholder="Nombre de tu empresa"
                       className="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/50 dark:bg-slate-700/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
                     />
                   ) : (
                     <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                       <Building2 className="w-5 h-5 text-slate-500" />
-                      <span className="text-slate-900 dark:text-white">{user.company || "No especificado"}</span>
+                      <span className="text-slate-900 dark:text-white">
+                        {user.company || "No especificado"}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -346,7 +410,12 @@ export default function ProfilePage() {
                   {isEditing ? (
                     <textarea
                       value={formData.address}
-                      onChange={(e) => setFormData(prev => ({...prev, address: e.target.value}))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          address: e.target.value,
+                        }))
+                      }
                       placeholder="Tu dirección completa"
                       rows={3}
                       className="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/50 dark:bg-slate-700/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all resize-none"
@@ -354,7 +423,9 @@ export default function ProfilePage() {
                   ) : (
                     <div className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                       <MapPin className="w-5 h-5 text-slate-500 mt-0.5" />
-                      <span className="text-slate-900 dark:text-white">{user.address || "No especificado"}</span>
+                      <span className="text-slate-900 dark:text-white">
+                        {user.address || "No especificado"}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -369,7 +440,9 @@ export default function ProfilePage() {
             transition={{ delay: 0.6 }}
             className="mt-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-3xl shadow-xl border border-white/20 p-8"
           >
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Acciones Rápidas</h3>
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">
+              Acciones Rápidas
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Link
                 href="/mis-pedidos"
@@ -379,8 +452,12 @@ export default function ProfilePage() {
                   <Award className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-slate-900 dark:text-white">Mis Pedidos</h4>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Ver historial</p>
+                  <h4 className="font-semibold text-slate-900 dark:text-white">
+                    Mis Pedidos
+                  </h4>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                    Ver historial
+                  </p>
                 </div>
               </Link>
 
@@ -392,8 +469,12 @@ export default function ProfilePage() {
                   <Award className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-slate-900 dark:text-white">Favoritos</h4>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Productos guardados</p>
+                  <h4 className="font-semibold text-slate-900 dark:text-white">
+                    Favoritos
+                  </h4>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                    Productos guardados
+                  </p>
                 </div>
               </Link>
 
@@ -402,8 +483,12 @@ export default function ProfilePage() {
                   <Lock className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-slate-900 dark:text-white">Seguridad</h4>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Cambiar contraseña</p>
+                  <h4 className="font-semibold text-slate-900 dark:text-white">
+                    Seguridad
+                  </h4>
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                    Cambiar contraseña
+                  </p>
                 </div>
               </button>
             </div>
@@ -411,5 +496,5 @@ export default function ProfilePage() {
         </motion.div>
       </div>
     </div>
-  )
+  );
 }

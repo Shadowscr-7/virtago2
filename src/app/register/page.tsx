@@ -1,10 +1,11 @@
-import { MultiStepRegistration } from "@/components/auth"
+import { MultiStepRegistration } from "@/components/auth";
 
 export default function RegisterPage() {
-  return <MultiStepRegistration />
+  return <MultiStepRegistration />;
 }
 
 export const metadata = {
-  title: 'Registro - Virtago',
-  description: 'Regístrate en Virtago para acceder a precios exclusivos y beneficios empresariales',
-}
+  title: "Registro - Virtago",
+  description:
+    "Regístrate en Virtago para acceder a precios exclusivos y beneficios empresariales",
+};

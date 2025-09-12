@@ -1,29 +1,44 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Shield, Smartphone, ArrowLeft, QrCode, Key, Copy, Check, AlertCircle } from "lucide-react"
-import { useAuthStore } from "@/lib/auth-store"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Shield,
+  Smartphone,
+  ArrowLeft,
+  QrCode,
+  Key,
+  Copy,
+  Check,
+  AlertCircle,
+} from "lucide-react";
+import { useAuthStore } from "@/lib/auth-store";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Autenticacion2FAPage() {
-  const { user } = useAuthStore()
-  const router = useRouter()
-  const [twoFAEnabled, setTwoFAEnabled] = useState(false)
-  const [step, setStep] = useState(1)
-  const [verificationCode, setVerificationCode] = useState("")
+  const { user } = useAuthStore();
+  const router = useRouter();
+  const [twoFAEnabled, setTwoFAEnabled] = useState(false);
+  const [step, setStep] = useState(1);
+  const [verificationCode, setVerificationCode] = useState("");
   const [backupCodes] = useState([
-    "1234-5678", "9876-5432", "2468-1357", "8642-9753",
-    "1357-2468", "9753-8642", "5432-9876", "1111-2222"
-  ])
-  const [copied, setCopied] = useState(false)
+    "1234-5678",
+    "9876-5432",
+    "2468-1357",
+    "8642-9753",
+    "1357-2468",
+    "9753-8642",
+    "5432-9876",
+    "1111-2222",
+  ]);
+  const [copied, setCopied] = useState(false);
 
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
         <div className="flex items-center justify-center min-h-[80vh]">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="text-center p-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20"
@@ -34,8 +49,10 @@ export default function Autenticacion2FAPage() {
             <h1 className="text-2xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               Acceso Denegado
             </h1>
-            <p className="text-muted-foreground mb-6">Debes iniciar sesión para configurar 2FA</p>
-            <Link 
+            <p className="text-muted-foreground mb-6">
+              Debes iniciar sesión para configurar 2FA
+            </p>
+            <Link
               href="/login"
               className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
             >
@@ -44,15 +61,15 @@ export default function Autenticacion2FAPage() {
           </motion.div>
         </div>
       </div>
-    )
+    );
   }
 
   const copyBackupCodes = () => {
-    const codesText = backupCodes.join('\n')
-    navigator.clipboard.writeText(codesText)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    const codesText = backupCodes.join("\n");
+    navigator.clipboard.writeText(codesText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const renderStep = () => {
     switch (step) {
@@ -67,25 +84,33 @@ export default function Autenticacion2FAPage() {
               <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
                 <Shield className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Configurar Autenticación 2FA</h3>
+              <h3 className="text-xl font-semibold text-white mb-2">
+                Configurar Autenticación 2FA
+              </h3>
               <p className="text-gray-300">
-                Agrega una capa extra de seguridad a tu cuenta con la verificación en dos pasos
+                Agrega una capa extra de seguridad a tu cuenta con la
+                verificación en dos pasos
               </p>
             </div>
 
             <div className="space-y-4">
               <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-                <h4 className="text-white font-medium mb-2">¿Qué es la autenticación 2FA?</h4>
+                <h4 className="text-white font-medium mb-2">
+                  ¿Qué es la autenticación 2FA?
+                </h4>
                 <p className="text-gray-300 text-sm">
-                  La autenticación en dos factores requiere un código adicional de tu teléfono 
-                  cada vez que inicies sesión, haciendo tu cuenta mucho más segura.
+                  La autenticación en dos factores requiere un código adicional
+                  de tu teléfono cada vez que inicies sesión, haciendo tu cuenta
+                  mucho más segura.
                 </p>
               </div>
 
               <div className="p-4 bg-white/5 rounded-lg border border-white/10">
                 <h4 className="text-white font-medium mb-2">Necesitarás:</h4>
                 <ul className="text-gray-300 text-sm space-y-1">
-                  <li>• Una app autenticadora (Google Authenticator, Authy, etc.)</li>
+                  <li>
+                    • Una app autenticadora (Google Authenticator, Authy, etc.)
+                  </li>
                   <li>• Tu teléfono móvil</li>
                   <li>• Unos minutos para la configuración</li>
                 </ul>
@@ -102,7 +127,7 @@ export default function Autenticacion2FAPage() {
               Comenzar Configuración
             </motion.button>
           </motion.div>
-        )
+        );
 
       case 2:
         return (
@@ -112,7 +137,9 @@ export default function Autenticacion2FAPage() {
             className="space-y-6"
           >
             <div className="text-center">
-              <h3 className="text-xl font-semibold text-white mb-4">Escanea el código QR</h3>
+              <h3 className="text-xl font-semibold text-white mb-4">
+                Escanea el código QR
+              </h3>
             </div>
 
             <div className="space-y-4">
@@ -135,7 +162,8 @@ export default function Autenticacion2FAPage() {
 
               <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                 <p className="text-blue-200 text-sm">
-                  <strong>Código manual:</strong> Si no puedes escanear, ingresa manualmente: 
+                  <strong>Código manual:</strong> Si no puedes escanear, ingresa
+                  manualmente:
                   <code className="block mt-1 font-mono text-xs bg-white/10 p-2 rounded">
                     JBSWY3DPEHPK3PXP
                   </code>
@@ -163,7 +191,7 @@ export default function Autenticacion2FAPage() {
               </motion.button>
             </div>
           </motion.div>
-        )
+        );
 
       case 3:
         return (
@@ -173,7 +201,9 @@ export default function Autenticacion2FAPage() {
             className="space-y-6"
           >
             <div className="text-center">
-              <h3 className="text-xl font-semibold text-white mb-4">Verificar configuración</h3>
+              <h3 className="text-xl font-semibold text-white mb-4">
+                Verificar configuración
+              </h3>
               <p className="text-gray-300">
                 Ingresa el código de 6 dígitos de tu app autenticadora
               </p>
@@ -214,7 +244,7 @@ export default function Autenticacion2FAPage() {
               </motion.button>
             </div>
           </motion.div>
-        )
+        );
 
       case 4:
         return (
@@ -227,7 +257,9 @@ export default function Autenticacion2FAPage() {
               <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
                 <Check className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">¡2FA Activado!</h3>
+              <h3 className="text-xl font-semibold text-white mb-2">
+                ¡2FA Activado!
+              </h3>
               <p className="text-gray-300">
                 Tu cuenta ahora está protegida con autenticación en dos factores
               </p>
@@ -239,14 +271,17 @@ export default function Autenticacion2FAPage() {
                 Códigos de respaldo
               </h4>
               <p className="text-orange-200 text-sm mb-3">
-                Guarda estos códigos en un lugar seguro. Puedes usarlos para acceder a tu cuenta 
-                si pierdes tu teléfono.
+                Guarda estos códigos en un lugar seguro. Puedes usarlos para
+                acceder a tu cuenta si pierdes tu teléfono.
               </p>
-              
+
               <div className="bg-white/10 rounded-lg p-4 mb-3">
                 <div className="grid grid-cols-2 gap-2 font-mono text-sm text-white">
                   {backupCodes.map((code, index) => (
-                    <div key={index} className="bg-white/10 p-2 rounded text-center">
+                    <div
+                      key={index}
+                      className="bg-white/10 p-2 rounded text-center"
+                    >
                       {code}
                     </div>
                   ))}
@@ -259,7 +294,11 @@ export default function Autenticacion2FAPage() {
                 onClick={copyBackupCodes}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-orange-500/20 text-orange-200 rounded-lg hover:bg-orange-500/30 transition-all"
               >
-                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {copied ? (
+                  <Check className="w-4 h-4" />
+                ) : (
+                  <Copy className="w-4 h-4" />
+                )}
                 {copied ? "Copiados!" : "Copiar códigos"}
               </motion.button>
             </div>
@@ -268,8 +307,8 @@ export default function Autenticacion2FAPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => {
-                setTwoFAEnabled(true)
-                router.push('/configuracion')
+                setTwoFAEnabled(true);
+                router.push("/configuracion");
               }}
               className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
             >
@@ -277,12 +316,12 @@ export default function Autenticacion2FAPage() {
               Finalizar configuración
             </motion.button>
           </motion.div>
-        )
+        );
 
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-6">
@@ -294,15 +333,15 @@ export default function Autenticacion2FAPage() {
         >
           {/* Header */}
           <div className="mb-8">
-            <Link 
+            <Link
               href="/configuracion"
               className="inline-flex items-center gap-2 text-purple-300 hover:text-white mb-6 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Volver a Configuración
             </Link>
-            
-            <motion.h1 
+
+            <motion.h1
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
@@ -317,7 +356,7 @@ export default function Autenticacion2FAPage() {
                 <div
                   key={stepNumber}
                   className={`flex-1 h-2 rounded-full transition-all ${
-                    stepNumber <= step ? 'bg-green-500' : 'bg-white/20'
+                    stepNumber <= step ? "bg-green-500" : "bg-white/20"
                   }`}
                 />
               ))}
@@ -337,5 +376,5 @@ export default function Autenticacion2FAPage() {
         </motion.div>
       </div>
     </div>
-  )
+  );
 }

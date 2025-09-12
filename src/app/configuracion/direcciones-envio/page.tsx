@@ -1,40 +1,40 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { 
-  Truck, 
-  ArrowLeft, 
-  Plus, 
-  Trash2, 
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Truck,
+  ArrowLeft,
+  Plus,
+  Trash2,
   Edit3,
   MapPin,
   Home,
   Building,
-  Star
-} from "lucide-react"
-import { useAuthStore } from "@/lib/auth-store"
-import { StyledSelect } from "@/components/ui/styled-select"
-import { StyledSwitch } from "@/components/ui/styled-switch"
-import Link from "next/link"
+  Star,
+} from "lucide-react";
+import { useAuthStore } from "@/lib/auth-store";
+import { StyledSelect } from "@/components/ui/styled-select";
+import { StyledSwitch } from "@/components/ui/styled-switch";
+import Link from "next/link";
 
 interface Address {
-  id: number
-  type: "home" | "work" | "other"
-  title: string
-  fullName: string
-  street: string
-  city: string
-  state: string
-  zipCode: string
-  country: string
-  phone: string
-  isDefault: boolean
+  id: number;
+  type: "home" | "work" | "other";
+  title: string;
+  fullName: string;
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country: string;
+  phone: string;
+  isDefault: boolean;
 }
 
 export default function DireccionesEnvioPage() {
-  const { user } = useAuthStore()
-  const [showAddAddress, setShowAddAddress] = useState(false)
+  const { user } = useAuthStore();
+  const [showAddAddress, setShowAddAddress] = useState(false);
   const [addresses, setAddresses] = useState<Address[]>([
     {
       id: 1,
@@ -47,7 +47,7 @@ export default function DireccionesEnvioPage() {
       zipCode: "C1043",
       country: "Argentina",
       phone: "+54 11 1234-5678",
-      isDefault: true
+      isDefault: true,
     },
     {
       id: 2,
@@ -60,10 +60,10 @@ export default function DireccionesEnvioPage() {
       zipCode: "C1059",
       country: "Argentina",
       phone: "+54 11 9876-5432",
-      isDefault: false
-    }
-  ])
-  const [newAddress, setNewAddress] = useState<Omit<Address, 'id'>>({
+      isDefault: false,
+    },
+  ]);
+  const [newAddress, setNewAddress] = useState<Omit<Address, "id">>({
     type: "home",
     title: "",
     fullName: "",
@@ -73,14 +73,14 @@ export default function DireccionesEnvioPage() {
     zipCode: "",
     country: "Argentina",
     phone: "",
-    isDefault: false
-  })
+    isDefault: false,
+  });
 
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
         <div className="flex items-center justify-center min-h-[80vh]">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="text-center p-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20"
@@ -91,8 +91,10 @@ export default function DireccionesEnvioPage() {
             <h1 className="text-2xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
               Acceso Denegado
             </h1>
-            <p className="text-muted-foreground mb-6">Debes iniciar sesión para gestionar direcciones</p>
-            <Link 
+            <p className="text-muted-foreground mb-6">
+              Debes iniciar sesión para gestionar direcciones
+            </p>
+            <Link
               href="/login"
               className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
             >
@@ -101,39 +103,41 @@ export default function DireccionesEnvioPage() {
           </motion.div>
         </div>
       </div>
-    )
+    );
   }
 
   const getAddressIcon = (type: string) => {
     const icons = {
       home: Home,
       work: Building,
-      other: MapPin
-    }
-    const IconComponent = icons[type as keyof typeof icons] || MapPin
-    return <IconComponent className="w-5 h-5" />
-  }
+      other: MapPin,
+    };
+    const IconComponent = icons[type as keyof typeof icons] || MapPin;
+    return <IconComponent className="w-5 h-5" />;
+  };
 
   const getAddressColor = (type: string) => {
     const colors = {
       home: "from-green-500 to-emerald-500",
       work: "from-blue-500 to-cyan-500",
-      other: "from-purple-500 to-pink-500"
-    }
-    return colors[type as keyof typeof colors] || colors.other
-  }
+      other: "from-purple-500 to-pink-500",
+    };
+    return colors[type as keyof typeof colors] || colors.other;
+  };
 
   const addAddress = () => {
     const address: Address = {
       ...newAddress,
-      id: Date.now()
-    }
-    
+      id: Date.now(),
+    };
+
     if (newAddress.isDefault) {
-      setAddresses(prev => prev.map(addr => ({ ...addr, isDefault: false })))
+      setAddresses((prev) =>
+        prev.map((addr) => ({ ...addr, isDefault: false })),
+      );
     }
-    
-    setAddresses(prev => [...prev, address])
+
+    setAddresses((prev) => [...prev, address]);
     setNewAddress({
       type: "home",
       title: "",
@@ -144,21 +148,23 @@ export default function DireccionesEnvioPage() {
       zipCode: "",
       country: "Argentina",
       phone: "",
-      isDefault: false
-    })
-    setShowAddAddress(false)
-  }
+      isDefault: false,
+    });
+    setShowAddAddress(false);
+  };
 
   const removeAddress = (id: number) => {
-    setAddresses(prev => prev.filter(addr => addr.id !== id))
-  }
+    setAddresses((prev) => prev.filter((addr) => addr.id !== id));
+  };
 
   const setAsDefault = (id: number) => {
-    setAddresses(prev => prev.map(addr => ({
-      ...addr,
-      isDefault: addr.id === id
-    })))
-  }
+    setAddresses((prev) =>
+      prev.map((addr) => ({
+        ...addr,
+        isDefault: addr.id === id,
+      })),
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 pt-6">
@@ -170,15 +176,15 @@ export default function DireccionesEnvioPage() {
         >
           {/* Header */}
           <div className="mb-8">
-            <Link 
+            <Link
               href="/configuracion"
               className="inline-flex items-center gap-2 text-purple-300 hover:text-white mb-6 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Volver a Configuración
             </Link>
-            
-            <motion.h1 
+
+            <motion.h1
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
@@ -186,7 +192,7 @@ export default function DireccionesEnvioPage() {
             >
               Direcciones de Envío
             </motion.h1>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
@@ -205,7 +211,9 @@ export default function DireccionesEnvioPage() {
               className="lg:col-span-2 space-y-4"
             >
               <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-white">Tus Direcciones</h2>
+                <h2 className="text-xl font-semibold text-white">
+                  Tus Direcciones
+                </h2>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -225,9 +233,9 @@ export default function DireccionesEnvioPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 + index * 0.1 }}
                     className={`relative p-6 rounded-2xl border transition-all ${
-                      address.isDefault 
-                        ? 'bg-gradient-to-r from-orange-500/20 to-red-500/20 border-orange-500/30' 
-                        : 'bg-white/10 border-white/20 hover:bg-white/15'
+                      address.isDefault
+                        ? "bg-gradient-to-r from-orange-500/20 to-red-500/20 border-orange-500/30"
+                        : "bg-white/10 border-white/20 hover:bg-white/15"
                     }`}
                   >
                     {address.isDefault && (
@@ -240,11 +248,15 @@ export default function DireccionesEnvioPage() {
                     )}
 
                     <div className="flex items-start gap-4 mb-4">
-                      <div className={`p-3 rounded-xl bg-gradient-to-r ${getAddressColor(address.type)}`}>
+                      <div
+                        className={`p-3 rounded-xl bg-gradient-to-r ${getAddressColor(address.type)}`}
+                      >
                         {getAddressIcon(address.type)}
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-white font-semibold text-lg">{address.title}</h3>
+                        <h3 className="text-white font-semibold text-lg">
+                          {address.title}
+                        </h3>
                         <p className="text-gray-300">{address.fullName}</p>
                       </div>
                     </div>
@@ -302,8 +314,12 @@ export default function DireccionesEnvioPage() {
                     className="text-center py-12"
                   >
                     <MapPin className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                    <p className="text-gray-400">No tienes direcciones guardadas</p>
-                    <p className="text-gray-500 text-sm">Agrega una dirección para recibir tus pedidos</p>
+                    <p className="text-gray-400">
+                      No tienes direcciones guardadas
+                    </p>
+                    <p className="text-gray-500 text-sm">
+                      Agrega una dirección para recibir tus pedidos
+                    </p>
                   </motion.div>
                 )}
               </div>
@@ -318,16 +334,29 @@ export default function DireccionesEnvioPage() {
             >
               {showAddAddress ? (
                 <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 sticky top-6">
-                  <h3 className="text-xl font-semibold text-white mb-6">Nueva Dirección</h3>
-                  
-                  <form onSubmit={(e) => { e.preventDefault(); addAddress(); }} className="space-y-4">
+                  <h3 className="text-xl font-semibold text-white mb-6">
+                    Nueva Dirección
+                  </h3>
+
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      addAddress();
+                    }}
+                    className="space-y-4"
+                  >
                     <StyledSelect
                       value={newAddress.type}
-                      onChange={(value) => setNewAddress(prev => ({ ...prev, type: value as Address['type'] }))}
+                      onChange={(value) =>
+                        setNewAddress((prev) => ({
+                          ...prev,
+                          type: value as Address["type"],
+                        }))
+                      }
                       options={[
                         { value: "home", label: "Casa", icon: "🏠" },
                         { value: "work", label: "Trabajo", icon: "🏢" },
-                        { value: "other", label: "Otro", icon: "📍" }
+                        { value: "other", label: "Otro", icon: "📍" },
                       ]}
                       label="Tipo de dirección"
                       className="mb-4"
@@ -340,7 +369,12 @@ export default function DireccionesEnvioPage() {
                       <input
                         type="text"
                         value={newAddress.title}
-                        onChange={(e) => setNewAddress(prev => ({ ...prev, title: e.target.value }))}
+                        onChange={(e) =>
+                          setNewAddress((prev) => ({
+                            ...prev,
+                            title: e.target.value,
+                          }))
+                        }
                         className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                         placeholder="Ej: Casa, Oficina, etc."
                       />
@@ -353,7 +387,12 @@ export default function DireccionesEnvioPage() {
                       <input
                         type="text"
                         value={newAddress.fullName}
-                        onChange={(e) => setNewAddress(prev => ({ ...prev, fullName: e.target.value }))}
+                        onChange={(e) =>
+                          setNewAddress((prev) => ({
+                            ...prev,
+                            fullName: e.target.value,
+                          }))
+                        }
                         className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                         placeholder="Nombre de quien recibe"
                       />
@@ -365,7 +404,12 @@ export default function DireccionesEnvioPage() {
                       </label>
                       <textarea
                         value={newAddress.street}
-                        onChange={(e) => setNewAddress(prev => ({ ...prev, street: e.target.value }))}
+                        onChange={(e) =>
+                          setNewAddress((prev) => ({
+                            ...prev,
+                            street: e.target.value,
+                          }))
+                        }
                         className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent h-20 resize-none"
                         placeholder="Calle, número, piso, depto"
                       />
@@ -379,7 +423,12 @@ export default function DireccionesEnvioPage() {
                         <input
                           type="text"
                           value={newAddress.city}
-                          onChange={(e) => setNewAddress(prev => ({ ...prev, city: e.target.value }))}
+                          onChange={(e) =>
+                            setNewAddress((prev) => ({
+                              ...prev,
+                              city: e.target.value,
+                            }))
+                          }
                           className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                           placeholder="Ciudad"
                         />
@@ -391,7 +440,12 @@ export default function DireccionesEnvioPage() {
                         <input
                           type="text"
                           value={newAddress.state}
-                          onChange={(e) => setNewAddress(prev => ({ ...prev, state: e.target.value }))}
+                          onChange={(e) =>
+                            setNewAddress((prev) => ({
+                              ...prev,
+                              state: e.target.value,
+                            }))
+                          }
                           className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                           placeholder="Provincia"
                         />
@@ -405,7 +459,12 @@ export default function DireccionesEnvioPage() {
                       <input
                         type="text"
                         value={newAddress.zipCode}
-                        onChange={(e) => setNewAddress(prev => ({ ...prev, zipCode: e.target.value }))}
+                        onChange={(e) =>
+                          setNewAddress((prev) => ({
+                            ...prev,
+                            zipCode: e.target.value,
+                          }))
+                        }
                         className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                         placeholder="Código postal"
                       />
@@ -418,7 +477,12 @@ export default function DireccionesEnvioPage() {
                       <input
                         type="tel"
                         value={newAddress.phone}
-                        onChange={(e) => setNewAddress(prev => ({ ...prev, phone: e.target.value }))}
+                        onChange={(e) =>
+                          setNewAddress((prev) => ({
+                            ...prev,
+                            phone: e.target.value,
+                          }))
+                        }
                         className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                         placeholder="+54 11 1234-5678"
                       />
@@ -426,7 +490,12 @@ export default function DireccionesEnvioPage() {
 
                     <StyledSwitch
                       checked={newAddress.isDefault}
-                      onChange={(checked) => setNewAddress(prev => ({ ...prev, isDefault: checked }))}
+                      onChange={(checked) =>
+                        setNewAddress((prev) => ({
+                          ...prev,
+                          isDefault: checked,
+                        }))
+                      }
                       label="Establecer como dirección principal"
                       description="Esta dirección se usará por defecto en tus pedidos"
                       color="orange"
@@ -457,17 +526,24 @@ export default function DireccionesEnvioPage() {
                 </div>
               ) : (
                 <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 sticky top-6">
-                  <h3 className="text-lg font-semibold text-white mb-4">Información de Envío</h3>
+                  <h3 className="text-lg font-semibold text-white mb-4">
+                    Información de Envío
+                  </h3>
                   <div className="space-y-4">
                     <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
-                      <h4 className="text-green-300 font-medium mb-2">Envío Gratis</h4>
+                      <h4 className="text-green-300 font-medium mb-2">
+                        Envío Gratis
+                      </h4>
                       <p className="text-green-200 text-sm">
-                        En compras mayores a $500.000 el envío es gratuito a todo el país.
+                        En compras mayores a $500.000 el envío es gratuito a
+                        todo el país.
                       </p>
                     </div>
-                    
+
                     <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                      <h4 className="text-blue-300 font-medium mb-2">Tiempos de Entrega</h4>
+                      <h4 className="text-blue-300 font-medium mb-2">
+                        Tiempos de Entrega
+                      </h4>
                       <ul className="text-blue-200 text-sm space-y-1">
                         <li>• CABA: 24-48 horas</li>
                         <li>• GBA: 2-3 días hábiles</li>
@@ -476,9 +552,12 @@ export default function DireccionesEnvioPage() {
                     </div>
 
                     <div className="p-4 bg-purple-500/10 border border-purple-500/20 rounded-lg">
-                      <h4 className="text-purple-300 font-medium mb-2">Seguimiento</h4>
+                      <h4 className="text-purple-300 font-medium mb-2">
+                        Seguimiento
+                      </h4>
                       <p className="text-purple-200 text-sm">
-                        Recibirás un código de seguimiento para rastrear tu pedido en tiempo real.
+                        Recibirás un código de seguimiento para rastrear tu
+                        pedido en tiempo real.
                       </p>
                     </div>
                   </div>
@@ -489,5 +568,5 @@ export default function DireccionesEnvioPage() {
         </motion.div>
       </div>
     </div>
-  )
+  );
 }

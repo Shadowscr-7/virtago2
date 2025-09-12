@@ -1,82 +1,90 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { Eye, EyeOff, Mail, Lock, ArrowLeft, Building2, User } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { useAuthStore } from "@/lib/auth-store"
-import { useToast } from "@/components/ui/toast"
-import { setToastFunction } from "@/components/cart/cart-store"
-import { StyledSwitch } from "@/components/ui/styled-switch"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  ArrowLeft,
+  Building2,
+  User,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/lib/auth-store";
+import { useToast } from "@/components/ui/toast";
+import { setToastFunction } from "@/components/cart/cart-store";
+import { StyledSwitch } from "@/components/ui/styled-switch";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [rememberMe, setRememberMe] = useState(false)
-  
-  const { login } = useAuthStore()
-  const { showToast } = useToast()
-  const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+
+  const { login } = useAuthStore();
+  const { showToast } = useToast();
+  const router = useRouter();
 
   // Set up toast function
   useEffect(() => {
-    setToastFunction(showToast)
-  }, [showToast])
+    setToastFunction(showToast);
+  }, [showToast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     if (!email || !password) {
       showToast({
         title: "Campos requeridos",
         description: "Por favor completa email y contraseña",
-        type: "warning"
-      })
-      return
+        type: "warning",
+      });
+      return;
     }
 
-    setIsLoading(true)
-    
+    setIsLoading(true);
+
     try {
-      const success = await login(email, password)
-      
+      const success = await login(email, password);
+
       if (success) {
         showToast({
           title: "¡Bienvenido!",
           description: "Has iniciado sesión exitosamente",
-          type: "success"
-        })
-        router.push("/")
+          type: "success",
+        });
+        router.push("/");
       } else {
         showToast({
           title: "Error de autenticación",
           description: "Email o contraseña incorrectos",
-          type: "error"
-        })
+          type: "error",
+        });
       }
     } catch {
       showToast({
         title: "Error",
         description: "Ocurrió un error inesperado",
-        type: "error"
-      })
+        type: "error",
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  const fillTestUser = (userType: 'cliente' | 'distribuidor') => {
-    if (userType === 'cliente') {
-      setEmail('cliente@virtago.com')
+  const fillTestUser = (userType: "cliente" | "distribuidor") => {
+    if (userType === "cliente") {
+      setEmail("cliente@virtago.com");
     } else {
-      setEmail('distribuidor@virtago.com')
+      setEmail("distribuidor@virtago.com");
     }
-    setPassword('123456')
-  }
+    setPassword("123456");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
@@ -86,17 +94,17 @@ export default function LoginPage() {
           <motion.div
             key={i}
             initial={{ opacity: 0, scale: 0 }}
-            animate={{ 
-              opacity: [0, 1, 0], 
+            animate={{
+              opacity: [0, 1, 0],
               scale: [0, 1, 0],
               x: [0, Math.random() * 200 - 100],
-              y: [0, Math.random() * 200 - 100]
+              y: [0, Math.random() * 200 - 100],
             }}
             transition={{
               duration: 6,
               repeat: Infinity,
               delay: i * 0.2,
-              ease: "easeInOut"
+              ease: "easeInOut",
             }}
             className="absolute w-1 h-1 bg-purple-400 rounded-full"
             style={{
@@ -114,7 +122,7 @@ export default function LoginPage() {
           animate={{ opacity: 1, x: 0 }}
           className="mb-8"
         >
-          <Link 
+          <Link
             href="/"
             className="inline-flex items-center gap-2 text-white/70 hover:text-white transition-colors"
           >
@@ -145,7 +153,7 @@ export default function LoginPage() {
                 </div>
               </div>
             </motion.div>
-            
+
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -154,7 +162,7 @@ export default function LoginPage() {
             >
               Iniciar Sesión
             </motion.h1>
-            
+
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -171,11 +179,13 @@ export default function LoginPage() {
             animate={{ opacity: 1, height: "auto" }}
             className="bg-blue-500/20 border border-blue-400/30 rounded-xl p-4 mb-6"
           >
-            <p className="text-blue-200 text-sm mb-3">🔐 Datos de prueba disponibles:</p>
+            <p className="text-blue-200 text-sm mb-3">
+              🔐 Datos de prueba disponibles:
+            </p>
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => fillTestUser('cliente')}
+                onClick={() => fillTestUser("cliente")}
                 className="text-left p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
               >
                 <div className="text-white text-xs font-medium">👩‍💼 Cliente</div>
@@ -183,14 +193,18 @@ export default function LoginPage() {
               </button>
               <button
                 type="button"
-                onClick={() => fillTestUser('distribuidor')}
+                onClick={() => fillTestUser("distribuidor")}
                 className="text-left p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
               >
-                <div className="text-white text-xs font-medium">👨‍💼 Distribuidor</div>
+                <div className="text-white text-xs font-medium">
+                  👨‍💼 Distribuidor
+                </div>
                 <div className="text-white/70 text-xs">Carlos Rodríguez</div>
               </button>
             </div>
-            <p className="text-blue-200/70 text-xs mt-2">Contraseña para ambos: <code>123456</code></p>
+            <p className="text-blue-200/70 text-xs mt-2">
+              Contraseña para ambos: <code>123456</code>
+            </p>
           </motion.div>
 
           {/* Formulario */}
@@ -241,7 +255,11 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white/70 transition-colors"
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
                 </button>
               </div>
             </motion.div>
@@ -260,7 +278,10 @@ export default function LoginPage() {
                 size="sm"
                 color="purple"
               />
-              <a href="#" className="text-sm text-purple-400 hover:text-purple-300 transition-colors">
+              <a
+                href="#"
+                className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
+              >
                 ¿Olvidaste tu contraseña?
               </a>
             </motion.div>
@@ -280,7 +301,7 @@ export default function LoginPage() {
                 "hover:from-purple-600 hover:via-pink-600 hover:to-cyan-600",
                 "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-transparent",
                 "disabled:opacity-50 disabled:cursor-not-allowed",
-                isLoading && "animate-pulse"
+                isLoading && "animate-pulse",
               )}
             >
               {isLoading ? (
@@ -303,7 +324,10 @@ export default function LoginPage() {
           >
             <p className="text-white/70">
               ¿No tienes cuenta?{" "}
-              <Link href="/register" className="text-purple-400 hover:text-purple-300 font-medium transition-colors">
+              <Link
+                href="/register"
+                className="text-purple-400 hover:text-purple-300 font-medium transition-colors"
+              >
                 Regístrate aquí
               </Link>
             </p>
@@ -317,10 +341,12 @@ export default function LoginPage() {
             className="mt-6 flex items-center justify-center gap-2 p-3 bg-white/5 rounded-lg border border-white/10"
           >
             <Building2 className="h-4 w-4 text-purple-400" />
-            <span className="text-sm text-white/70">Plataforma exclusiva para empresas</span>
+            <span className="text-sm text-white/70">
+              Plataforma exclusiva para empresas
+            </span>
           </motion.div>
         </motion.div>
       </div>
     </div>
-  )
+  );
 }

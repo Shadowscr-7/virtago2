@@ -1,29 +1,29 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
-import { 
-  Search, 
-  Download, 
-  Upload, 
-  Plus, 
-  Eye, 
-  Edit, 
-  Package, 
-  Star, 
-  ChevronLeft, 
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import {
+  Search,
+  Download,
+  Upload,
+  Plus,
+  Eye,
+  Edit,
+  Package,
+  Star,
+  ChevronLeft,
   ChevronRight,
   AlertTriangle,
   Check,
   TrendingUp,
   TrendingDown,
-  Minus
-} from "lucide-react"
-import { AdminLayout } from "@/components/admin/admin-layout"
-import { useAuthStore } from "@/lib/auth-store"
-import { StyledSelect } from "@/components/ui/styled-select"
+  Minus,
+} from "lucide-react";
+import { AdminLayout } from "@/components/admin/admin-layout";
+import { useAuthStore } from "@/lib/auth-store";
+import { StyledSelect } from "@/components/ui/styled-select";
 
 // Datos de ejemplo - después esto vendrá del servidor
 const mockProducts = [
@@ -45,15 +45,15 @@ const mockProducts = [
     totalSales: 156,
     lastSale: "2024-09-10",
     createdAt: "2024-01-15",
-    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400"
+    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400",
   },
   {
     id: "PRO002",
-    name: "MacBook Pro 16\" M3",
+    name: 'MacBook Pro 16" M3',
     sku: "SKU-39108",
     description: "MacBook Pro 16 pulgadas con chip M3",
     category: "Informática",
-    brand: "Apple", 
+    brand: "Apple",
     supplier: "Apple Authorized",
     price: 45999,
     costPrice: 35000,
@@ -65,7 +65,7 @@ const mockProducts = [
     totalSales: 89,
     lastSale: "2024-09-11",
     createdAt: "2024-02-10",
-    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400"
+    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400",
   },
   {
     id: "PRO003",
@@ -85,7 +85,7 @@ const mockProducts = [
     totalSales: 234,
     lastSale: "2024-09-12",
     createdAt: "2024-01-20",
-    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400"
+    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400",
   },
   {
     id: "PRO004",
@@ -105,7 +105,7 @@ const mockProducts = [
     totalSales: 345,
     lastSale: "2024-09-09",
     createdAt: "2024-03-05",
-    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400"
+    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400",
   },
   {
     id: "PRO005",
@@ -125,7 +125,7 @@ const mockProducts = [
     totalSales: 78,
     lastSale: "2024-09-08",
     createdAt: "2024-02-28",
-    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400"
+    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400",
   },
   {
     id: "PRO006",
@@ -145,7 +145,7 @@ const mockProducts = [
     totalSales: 123,
     lastSale: "2024-09-11",
     createdAt: "2024-01-10",
-    image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400"
+    image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400",
   },
   {
     id: "PRO007",
@@ -165,7 +165,7 @@ const mockProducts = [
     totalSales: 45,
     lastSale: "2024-08-15",
     createdAt: "2024-04-12",
-    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400"
+    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400",
   },
   {
     id: "PRO008",
@@ -185,7 +185,7 @@ const mockProducts = [
     totalSales: 23,
     lastSale: "2024-09-07",
     createdAt: "2024-03-20",
-    image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400"
+    image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400",
   },
   {
     id: "PRO009",
@@ -205,11 +205,11 @@ const mockProducts = [
     totalSales: 267,
     lastSale: "2024-09-12",
     createdAt: "2024-02-15",
-    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400"
+    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400",
   },
   {
     id: "PRO010",
-    name: "iPad Pro 12.9\" M2",
+    name: 'iPad Pro 12.9" M2',
     sku: "SKU-45689",
     description: "iPad Pro 12.9 pulgadas con chip M2",
     category: "Informática",
@@ -225,144 +225,155 @@ const mockProducts = [
     totalSales: 134,
     lastSale: "2024-09-10",
     createdAt: "2024-01-25",
-    image: "https://images.unsplash.com/photo-1561154464-82e9adf32764?w=400"
-  }
-]
+    image: "https://images.unsplash.com/photo-1561154464-82e9adf32764?w=400",
+  },
+];
 
 export default function ProductsAdminPage() {
-  const { user } = useAuthStore()
-  const router = useRouter()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedProducts, setSelectedProducts] = useState<string[]>([])
-  const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage, setItemsPerPage] = useState(10)
-  const [categoryFilter, setCategoryFilter] = useState("all")
-  const [statusFilter, setStatusFilter] = useState("all")
+  const { user } = useAuthStore();
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [showConfirmDialog, setShowConfirmDialog] = useState<{
-    show: boolean
-    productId: string
-    action: 'delete' | 'activate' | 'deactivate'
-  }>({ show: false, productId: '', action: 'delete' })
+    show: boolean;
+    productId: string;
+    action: "delete" | "activate" | "deactivate";
+  }>({ show: false, productId: "", action: "delete" });
 
-  if (!user || user.role !== 'distribuidor') {
+  if (!user || user.role !== "distribuidor") {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center h-full">
           <div className="text-center p-8 bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20">
             <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-gray-800 mb-2">Acceso Denegado</h2>
-            <p className="text-gray-600">No tienes permisos para acceder a esta sección.</p>
+            <h2 className="text-xl font-bold text-gray-800 mb-2">
+              Acceso Denegado
+            </h2>
+            <p className="text-gray-600">
+              No tienes permisos para acceder a esta sección.
+            </p>
           </div>
         </div>
       </AdminLayout>
-    )
+    );
   }
 
   // Filtrar productos basado en la búsqueda y filtros
-  const filteredProducts = mockProducts.filter(product => {
-    const matchesSearch = 
+  const filteredProducts = mockProducts.filter((product) => {
+    const matchesSearch =
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    const matchesCategory = categoryFilter === "all" || product.category === categoryFilter
-    const matchesStatus = statusFilter === "all" || product.status === statusFilter
-    
-    return matchesSearch && matchesCategory && matchesStatus
-  })
+      product.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesCategory =
+      categoryFilter === "all" || product.category === categoryFilter;
+    const matchesStatus =
+      statusFilter === "all" || product.status === statusFilter;
+
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
 
   // Paginación
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const currentProducts = filteredProducts.slice(startIndex, endIndex)
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentProducts = filteredProducts.slice(startIndex, endIndex);
 
   const handleSelectProduct = (productId: string) => {
-    setSelectedProducts(prev =>
+    setSelectedProducts((prev) =>
       prev.includes(productId)
-        ? prev.filter(id => id !== productId)
-        : [...prev, productId]
-    )
-  }
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId],
+    );
+  };
 
   const handleSelectAll = () => {
     if (selectedProducts.length === currentProducts.length) {
-      setSelectedProducts([])
+      setSelectedProducts([]);
     } else {
-      setSelectedProducts(currentProducts.map(product => product.id))
+      setSelectedProducts(currentProducts.map((product) => product.id));
     }
-  }
+  };
 
   const handleDownloadTemplate = () => {
-    console.log("Descargando plantilla Excel de productos...")
-  }
+    console.log("Descargando plantilla Excel de productos...");
+  };
 
   const handleImportProducts = () => {
-    console.log("Abriendo selector de archivo para importar productos...")
-  }
+    console.log("Abriendo selector de archivo para importar productos...");
+  };
 
   const handleAddProduct = () => {
-    router.push("/admin/productos/nuevo")
-  }
+    router.push("/admin/productos/nuevo");
+  };
 
   const handleViewProduct = (productId: string) => {
-    router.push(`/admin/productos/${productId}`)
-  }
+    router.push(`/admin/productos/${productId}`);
+  };
 
   const handleEditProduct = (productId: string) => {
-    router.push(`/admin/productos/${productId}?mode=edit`)
-  }
+    router.push(`/admin/productos/${productId}?mode=edit`);
+  };
 
   const getStatusInfo = (status: string) => {
     switch (status) {
       case "ACTIVO":
         return {
           label: "Activo",
-          className: "bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-700 dark:text-green-300 border-green-500/30"
-        }
+          className:
+            "bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-700 dark:text-green-300 border-green-500/30",
+        };
       case "BAJO_STOCK":
         return {
           label: "Bajo Stock",
-          className: "bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-700 dark:text-yellow-300 border-yellow-500/30"
-        }
+          className:
+            "bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-700 dark:text-yellow-300 border-yellow-500/30",
+        };
       case "SIN_STOCK":
         return {
           label: "Sin Stock",
-          className: "bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-700 dark:text-red-300 border-red-500/30"
-        }
+          className:
+            "bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-700 dark:text-red-300 border-red-500/30",
+        };
       case "INACTIVO":
         return {
           label: "Inactivo",
-          className: "bg-gradient-to-r from-gray-500/20 to-slate-500/20 text-gray-700 dark:text-gray-300 border-gray-500/30"
-        }
+          className:
+            "bg-gradient-to-r from-gray-500/20 to-slate-500/20 text-gray-700 dark:text-gray-300 border-gray-500/30",
+        };
       default:
         return {
           label: "Desconocido",
-          className: "bg-gradient-to-r from-gray-500/20 to-slate-500/20 text-gray-700 dark:text-gray-300 border-gray-500/30"
-        }
+          className:
+            "bg-gradient-to-r from-gray-500/20 to-slate-500/20 text-gray-700 dark:text-gray-300 border-gray-500/30",
+        };
     }
-  }
+  };
 
   const getStockIcon = (stock: number, minStock: number) => {
-    if (stock === 0) return <Minus className="w-4 h-4" />
-    if (stock <= minStock) return <TrendingDown className="w-4 h-4" />
-    return <TrendingUp className="w-4 h-4" />
-  }
+    if (stock === 0) return <Minus className="w-4 h-4" />;
+    if (stock <= minStock) return <TrendingDown className="w-4 h-4" />;
+    return <TrendingUp className="w-4 h-4" />;
+  };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-UY', {
-      style: 'currency',
-      currency: 'UYU',
+    return new Intl.NumberFormat("es-UY", {
+      style: "currency",
+      currency: "UYU",
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount)
-  }
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
 
   const calculateMargin = (price: number, cost: number) => {
-    const margin = ((price - cost) / price) * 100
-    return margin.toFixed(1)
-  }
+    const margin = ((price - cost) / price) * 100;
+    return margin.toFixed(1);
+  };
 
   return (
     <AdminLayout>
@@ -414,7 +425,7 @@ export default function ProductsAdminPage() {
                   { value: "Electrónicos", label: "Electrónicos" },
                   { value: "Informática", label: "Informática" },
                   { value: "Oficina", label: "Oficina" },
-                  { value: "Fotografía", label: "Fotografía" }
+                  { value: "Fotografía", label: "Fotografía" },
                 ]}
               />
             </div>
@@ -429,7 +440,7 @@ export default function ProductsAdminPage() {
                   { value: "ACTIVO", label: "Activos" },
                   { value: "BAJO_STOCK", label: "Bajo Stock" },
                   { value: "SIN_STOCK", label: "Sin Stock" },
-                  { value: "INACTIVO", label: "Inactivos" }
+                  { value: "INACTIVO", label: "Inactivos" },
                 ]}
               />
             </div>
@@ -443,7 +454,7 @@ export default function ProductsAdminPage() {
                   { value: "5", label: "5 filas" },
                   { value: "10", label: "10 filas" },
                   { value: "25", label: "25 filas" },
-                  { value: "50", label: "50 filas" }
+                  { value: "50", label: "50 filas" },
                 ]}
               />
             </div>
@@ -499,7 +510,11 @@ export default function ProductsAdminPage() {
                       <label className="relative inline-flex items-center cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={selectedProducts.length === currentProducts.length && currentProducts.length > 0}
+                          checked={
+                            selectedProducts.length ===
+                              currentProducts.length &&
+                            currentProducts.length > 0
+                          }
                           onChange={handleSelectAll}
                           className="sr-only peer"
                         />
@@ -534,9 +549,12 @@ export default function ProductsAdminPage() {
               </thead>
               <tbody className="divide-y divide-gray-200/30 dark:divide-gray-700/30">
                 {currentProducts.map((product, index) => {
-                  const statusInfo = getStatusInfo(product.status)
-                  const margin = calculateMargin(product.price, product.costPrice)
-                  
+                  const statusInfo = getStatusInfo(product.status);
+                  const margin = calculateMargin(
+                    product.price,
+                    product.costPrice,
+                  );
+
                   return (
                     <motion.tr
                       key={product.id}
@@ -560,13 +578,13 @@ export default function ProductsAdminPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <motion.div 
+                          <motion.div
                             whileHover={{ scale: 1.1 }}
                             className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg overflow-hidden"
                           >
                             {product.image ? (
-                              <Image 
-                                src={product.image} 
+                              <Image
+                                src={product.image}
                                 alt={product.name}
                                 width={64}
                                 height={64}
@@ -595,7 +613,8 @@ export default function ProductsAdminPage() {
                             {product.sku}
                           </div>
                           <div className="text-xs text-gray-500 dark:text-gray-400">
-                            Desde {new Date(product.createdAt).toLocaleDateString()}
+                            Desde{" "}
+                            {new Date(product.createdAt).toLocaleDateString()}
                           </div>
                         </div>
                       </td>
@@ -615,11 +634,15 @@ export default function ProductsAdminPage() {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-2">
-                            <div className={`p-2 rounded-lg ${
-                              product.stock === 0 ? 'bg-red-100/50 dark:bg-red-900/20 text-red-600' :
-                              product.stock <= product.minStock ? 'bg-yellow-100/50 dark:bg-yellow-900/20 text-yellow-600' :
-                              'bg-green-100/50 dark:bg-green-900/20 text-green-600'
-                            }`}>
+                            <div
+                              className={`p-2 rounded-lg ${
+                                product.stock === 0
+                                  ? "bg-red-100/50 dark:bg-red-900/20 text-red-600"
+                                  : product.stock <= product.minStock
+                                    ? "bg-yellow-100/50 dark:bg-yellow-900/20 text-yellow-600"
+                                    : "bg-green-100/50 dark:bg-green-900/20 text-green-600"
+                              }`}
+                            >
                               {getStockIcon(product.stock, product.minStock)}
                             </div>
                             <div>
@@ -634,7 +657,9 @@ export default function ProductsAdminPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold transition-all backdrop-blur-sm border ${statusInfo.className}`}>
+                        <span
+                          className={`inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold transition-all backdrop-blur-sm border ${statusInfo.className}`}
+                        >
                           {statusInfo.label}
                         </span>
                       </td>
@@ -672,7 +697,7 @@ export default function ProductsAdminPage() {
                         </div>
                       </td>
                     </motion.tr>
-                  )
+                  );
                 })}
               </tbody>
             </table>
@@ -682,9 +707,21 @@ export default function ProductsAdminPage() {
           <div className="px-4 py-3 border-t border-gray-200/30 dark:border-gray-700/30 bg-gray-50/30 dark:bg-slate-700/30 backdrop-blur-sm">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-sm text-gray-600 dark:text-gray-300 bg-white/50 dark:bg-slate-600/50 px-3 py-2 rounded-lg backdrop-blur-sm">
-                Mostrando <span className="font-semibold text-purple-600">{startIndex + 1}</span> a <span className="font-semibold text-purple-600">{Math.min(endIndex, filteredProducts.length)}</span> de <span className="font-semibold text-purple-600">{filteredProducts.length}</span> productos
+                Mostrando{" "}
+                <span className="font-semibold text-purple-600">
+                  {startIndex + 1}
+                </span>{" "}
+                a{" "}
+                <span className="font-semibold text-purple-600">
+                  {Math.min(endIndex, filteredProducts.length)}
+                </span>{" "}
+                de{" "}
+                <span className="font-semibold text-purple-600">
+                  {filteredProducts.length}
+                </span>{" "}
+                productos
               </div>
-              
+
               <div className="flex items-center gap-3">
                 <motion.button
                   whileHover={{ scale: 1.05, x: -2 }}
@@ -695,10 +732,10 @@ export default function ProductsAdminPage() {
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </motion.button>
-                
+
                 <div className="flex items-center gap-2">
                   {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                    const pageNum = i + 1
+                    const pageNum = i + 1;
                     return (
                       <motion.button
                         key={pageNum}
@@ -707,20 +744,22 @@ export default function ProductsAdminPage() {
                         onClick={() => setCurrentPage(pageNum)}
                         className={`w-10 h-10 rounded-xl text-sm font-semibold transition-all backdrop-blur-sm ${
                           currentPage === pageNum
-                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg border border-purple-400'
-                            : 'bg-white/60 dark:bg-slate-700/60 border border-white/30 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 text-gray-700 dark:text-gray-300'
+                            ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg border border-purple-400"
+                            : "bg-white/60 dark:bg-slate-700/60 border border-white/30 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 text-gray-700 dark:text-gray-300"
                         }`}
                       >
                         {pageNum}
                       </motion.button>
-                    )
+                    );
                   })}
                 </div>
-                
+
                 <motion.button
                   whileHover={{ scale: 1.05, x: 2 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  onClick={() =>
+                    setCurrentPage(Math.min(totalPages, currentPage + 1))
+                  }
                   disabled={currentPage === totalPages}
                   className="p-3 rounded-xl bg-white/60 dark:bg-slate-700/60 border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/80 dark:hover:bg-slate-600/80 transition-all backdrop-blur-sm"
                 >
@@ -756,16 +795,22 @@ export default function ProductsAdminPage() {
                   </p>
                 </div>
               </div>
-              
+
               <p className="text-gray-600 dark:text-gray-300 mb-6">
                 ¿Estás seguro que deseas realizar esta acción?
               </p>
-              
+
               <div className="flex gap-3 justify-end">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setShowConfirmDialog({ show: false, productId: '', action: 'delete' })}
+                  onClick={() =>
+                    setShowConfirmDialog({
+                      show: false,
+                      productId: "",
+                      action: "delete",
+                    })
+                  }
                   className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-all"
                 >
                   Cancelar
@@ -773,7 +818,13 @@ export default function ProductsAdminPage() {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setShowConfirmDialog({ show: false, productId: '', action: 'delete' })}
+                  onClick={() =>
+                    setShowConfirmDialog({
+                      show: false,
+                      productId: "",
+                      action: "delete",
+                    })
+                  }
                   className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
                 >
                   Confirmar
@@ -784,5 +835,5 @@ export default function ProductsAdminPage() {
         )}
       </div>
     </AdminLayout>
-  )
+  );
 }

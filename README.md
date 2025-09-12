@@ -7,6 +7,7 @@ Virtago es una plataforma de e-commerce B2B moderna y profesional desarrollada c
 ## ✨ Características Principales
 
 ### 🎨 Diseño y UI/UX
+
 - **Temas Dual**: Modo claro y oscuro con gradientes profesionales
 - **Animaciones Fluidas**: Implementadas con Framer Motion
 - **Loader Único**: Animación de carga personalizada con partículas
@@ -14,6 +15,7 @@ Virtago es una plataforma de e-commerce B2B moderna y profesional desarrollada c
 - **Fuentes Modernas**: Inter, JetBrains Mono, Manrope
 
 ### 🛍️ Funcionalidades E-commerce
+
 - **Restricción de Precios**: Los precios solo son visibles para usuarios autenticados
 - **Multi-marca**: Soporte para múltiples marcas y proveedores
 - **Catálogo Avanzado**: Sistema de filtros y búsqueda
@@ -21,6 +23,7 @@ Virtago es una plataforma de e-commerce B2B moderna y profesional desarrollada c
 - **Banners Promocionales**: Secciones llamativas para ofertas
 
 ### 🔐 Sistema B2B
+
 - **Autenticación Empresarial**: Login especializado para empresas
 - **Precios Mayoristas**: Estructura de precios B2B
 - **Proveedores Verificados**: Sistema multi-proveedor
@@ -41,10 +44,12 @@ Virtago es una plataforma de e-commerce B2B moderna y profesional desarrollada c
 ## 🚀 Instalación y Uso
 
 ### Prerequisitos
+
 - Node.js 18+
 - npm o yarn
 
 ### Instalación
+
 ```bash
 # Clonar el repositorio
 git clone [repository-url]
@@ -60,6 +65,7 @@ npm run dev
 ```
 
 ### URLs Disponibles
+
 - **Homepage**: http://localhost:3001/
 - **Productos**: http://localhost:3001/productos
 - **Login**: http://localhost:3001/login
@@ -88,22 +94,27 @@ src/
 ## 🎯 Características Únicas
 
 ### 🔒 Restricción de Precios B2B
+
 ```tsx
 // Los precios solo se muestran si el usuario está autenticado
-{isAuthenticated ? (
-  <span>${price?.toLocaleString()}</span>
-) : (
-  <div>Inicie sesión para ver precios</div>
-)}
+{
+  isAuthenticated ? (
+    <span>${price?.toLocaleString()}</span>
+  ) : (
+    <div>Inicie sesión para ver precios</div>
+  );
+}
 ```
 
 ### 🎨 Loader Animado Personalizado
+
 - Partículas flotantes animadas
 - Logo rotatorio con gradientes
 - Barras de carga dinámicas
 - Texto de estado personalizado
 
 ### 🌈 Sistema de Temas Avanzado
+
 - Variables CSS para colores
 - Gradientes personalizados
 - Transiciones suaves
@@ -112,11 +123,13 @@ src/
 ## 🎨 Paleta de Colores
 
 ### Tema Claro
+
 - Primary: `#9333ea` (Purple)
 - Secondary: Gradientes de purple a pink a cyan
 - Background: Blanco con gradientes sutiles
 
 ### Tema Oscuro
+
 - Primary: `#9333ea` (Purple)
 - Background: Gradientes oscuros de slate
 - Acentos: Purple, pink, cyan

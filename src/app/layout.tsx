@@ -8,27 +8,28 @@ import { ToastProvider } from "@/components/ui/toast";
 import { ToastIntegration } from "@/components/cart/toast-integration";
 import { Toaster } from "sonner";
 
-const inter = Inter({ 
-  subsets: ["latin"], 
+const inter = Inter({
+  subsets: ["latin"],
   variable: "--font-inter",
-  display: 'swap',
+  display: "swap",
 });
 
-const jetbrainsMono = JetBrains_Mono({ 
-  subsets: ["latin"], 
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
   variable: "--font-mono",
-  display: 'swap',
+  display: "swap",
 });
 
-const manrope = Manrope({ 
-  subsets: ["latin"], 
+const manrope = Manrope({
+  subsets: ["latin"],
   variable: "--font-manrope",
-  display: 'swap',
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "Virtago - B2B E-commerce Platform",
-  description: "Professional B2B multi-brand e-commerce platform for wholesale business",
+  description:
+    "Professional B2B multi-brand e-commerce platform for wholesale business",
   keywords: ["B2B", "e-commerce", "wholesale", "multi-brand", "business"],
   authors: [{ name: "Virtago Team" }],
   creator: "Virtago",
@@ -60,9 +61,7 @@ export default function RootLayout({
             <ToastIntegration />
             <Toaster position="top-right" richColors />
             <LoadingProvider>
-              <ClientLayout>
-                {children}
-              </ClientLayout>
+              <ClientLayout>{children}</ClientLayout>
             </LoadingProvider>
           </ToastProvider>
         </ThemeProvider>

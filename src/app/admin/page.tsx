@@ -1,30 +1,30 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Users, 
-  Package, 
-  DollarSign, 
+import { motion } from "framer-motion";
+import {
+  BarChart3,
+  TrendingUp,
+  Users,
+  Package,
+  DollarSign,
   ShoppingCart,
   Eye,
   Plus,
   ArrowUpRight,
   Calendar,
-  Activity
-} from "lucide-react"
-import { AdminLayout } from "@/components/admin/admin-layout"
-import { useAuthStore } from "@/lib/auth-store"
-import Link from "next/link"
+  Activity,
+} from "lucide-react";
+import { AdminLayout } from "@/components/admin/admin-layout";
+import { useAuthStore } from "@/lib/auth-store";
+import Link from "next/link";
 
 export default function AdminDashboard() {
-  const { user } = useAuthStore()
+  const { user } = useAuthStore();
 
-  if (!user || user.role !== 'distribuidor') {
+  if (!user || user.role !== "distribuidor") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           className="text-center p-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20"
@@ -35,8 +35,10 @@ export default function AdminDashboard() {
           <h1 className="text-2xl font-bold mb-4 bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
             Acceso Denegado
           </h1>
-          <p className="text-muted-foreground mb-6">Solo los distribuidores pueden acceder al panel de administración</p>
-          <Link 
+          <p className="text-muted-foreground mb-6">
+            Solo los distribuidores pueden acceder al panel de administración
+          </p>
+          <Link
             href="/"
             className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
           >
@@ -44,7 +46,7 @@ export default function AdminDashboard() {
           </Link>
         </motion.div>
       </div>
-    )
+    );
   }
 
   const stats = [
@@ -54,7 +56,7 @@ export default function AdminDashboard() {
       change: "+12.5%",
       trend: "up",
       icon: DollarSign,
-      color: "from-green-500 to-emerald-500"
+      color: "from-green-500 to-emerald-500",
     },
     {
       title: "Órdenes",
@@ -62,7 +64,7 @@ export default function AdminDashboard() {
       change: "+8.2%",
       trend: "up",
       icon: ShoppingCart,
-      color: "from-blue-500 to-cyan-500"
+      color: "from-blue-500 to-cyan-500",
     },
     {
       title: "Productos",
@@ -70,7 +72,7 @@ export default function AdminDashboard() {
       change: "+15.3%",
       trend: "up",
       icon: Package,
-      color: "from-purple-500 to-pink-500"
+      color: "from-purple-500 to-pink-500",
     },
     {
       title: "Clientes",
@@ -78,9 +80,9 @@ export default function AdminDashboard() {
       change: "+23.1%",
       trend: "up",
       icon: Users,
-      color: "from-orange-500 to-red-500"
-    }
-  ]
+      color: "from-orange-500 to-red-500",
+    },
+  ];
 
   const quickActions = [
     {
@@ -88,30 +90,30 @@ export default function AdminDashboard() {
       description: "Añade un nuevo producto a tu catálogo",
       icon: Plus,
       href: "/admin/productos/nuevo",
-      color: "from-purple-500 to-pink-500"
+      color: "from-purple-500 to-pink-500",
     },
     {
       title: "Ver Órdenes",
       description: "Revisa las órdenes pendientes",
       icon: Eye,
       href: "/admin/ordenes",
-      color: "from-blue-500 to-cyan-500"
+      color: "from-blue-500 to-cyan-500",
     },
     {
       title: "Gestionar Precios",
       description: "Actualiza precios y descuentos",
       icon: DollarSign,
       href: "/admin/precios",
-      color: "from-green-500 to-emerald-500"
+      color: "from-green-500 to-emerald-500",
     },
     {
       title: "Configuración Rápida",
       description: "Configura tu tienda paso a paso",
       icon: Activity,
       href: "/admin/configuracion-rapida",
-      color: "from-orange-500 to-red-500"
-    }
-  ]
+      color: "from-orange-500 to-red-500",
+    },
+  ];
 
   return (
     <AdminLayout>
@@ -133,11 +135,11 @@ export default function AdminDashboard() {
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <Calendar className="w-4 h-4" />
-              {new Date().toLocaleDateString('es-ES', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
+              {new Date().toLocaleDateString("es-ES", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
               })}
             </div>
           </div>
@@ -151,7 +153,7 @@ export default function AdminDashboard() {
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
         >
           {stats.map((stat, index) => {
-            const IconComponent = stat.icon
+            const IconComponent = stat.icon;
             return (
               <motion.div
                 key={stat.title}
@@ -162,7 +164,9 @@ export default function AdminDashboard() {
                 className="p-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <div className={`p-3 rounded-xl bg-gradient-to-r ${stat.color}`}>
+                  <div
+                    className={`p-3 rounded-xl bg-gradient-to-r ${stat.color}`}
+                  >
                     <IconComponent className="w-6 h-6 text-white" />
                   </div>
                   <div className="flex items-center gap-1 text-green-500 text-sm font-medium">
@@ -179,7 +183,7 @@ export default function AdminDashboard() {
                   </p>
                 </div>
               </motion.div>
-            )
+            );
           })}
         </motion.div>
 
@@ -195,7 +199,7 @@ export default function AdminDashboard() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {quickActions.map((action, index) => {
-              const IconComponent = action.icon
+              const IconComponent = action.icon;
               return (
                 <Link key={action.title} href={action.href}>
                   <motion.div
@@ -205,7 +209,9 @@ export default function AdminDashboard() {
                     whileHover={{ scale: 1.02, y: -2 }}
                     className="p-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300 cursor-pointer group"
                   >
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${action.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                    <div
+                      className={`w-12 h-12 rounded-xl bg-gradient-to-r ${action.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}
+                    >
                       <IconComponent className="w-6 h-6 text-white" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
@@ -216,7 +222,7 @@ export default function AdminDashboard() {
                     </p>
                   </motion.div>
                 </Link>
-              )
+              );
             })}
           </div>
         </motion.div>
@@ -239,15 +245,17 @@ export default function AdminDashboard() {
               </h3>
             </div>
             <div className="h-48 flex items-end justify-between gap-2">
-              {[40, 65, 35, 80, 55, 90, 70, 85, 60, 95, 75, 88].map((height, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ height: 0 }}
-                  animate={{ height: `${height}%` }}
-                  transition={{ delay: 0.6 + index * 0.1 }}
-                  className="bg-gradient-to-t from-blue-500 to-cyan-500 rounded-t-lg flex-1 min-w-0"
-                />
-              ))}
+              {[40, 65, 35, 80, 55, 90, 70, 85, 60, 95, 75, 88].map(
+                (height, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ height: 0 }}
+                    animate={{ height: `${height}%` }}
+                    transition={{ delay: 0.6 + index * 0.1 }}
+                    className="bg-gradient-to-t from-blue-500 to-cyan-500 rounded-t-lg flex-1 min-w-0"
+                  />
+                ),
+              )}
             </div>
           </div>
 
@@ -263,10 +271,26 @@ export default function AdminDashboard() {
             </div>
             <div className="space-y-4">
               {[
-                { action: "Nueva orden recibida", time: "Hace 5 min", color: "text-green-500" },
-                { action: "Producto actualizado", time: "Hace 15 min", color: "text-blue-500" },
-                { action: "Cliente registrado", time: "Hace 1 hora", color: "text-purple-500" },
-                { action: "Precio modificado", time: "Hace 2 horas", color: "text-orange-500" }
+                {
+                  action: "Nueva orden recibida",
+                  time: "Hace 5 min",
+                  color: "text-green-500",
+                },
+                {
+                  action: "Producto actualizado",
+                  time: "Hace 15 min",
+                  color: "text-blue-500",
+                },
+                {
+                  action: "Cliente registrado",
+                  time: "Hace 1 hora",
+                  color: "text-purple-500",
+                },
+                {
+                  action: "Precio modificado",
+                  time: "Hace 2 horas",
+                  color: "text-orange-500",
+                },
               ].map((activity, index) => (
                 <motion.div
                   key={index}
@@ -288,5 +312,5 @@ export default function AdminDashboard() {
         </motion.div>
       </div>
     </AdminLayout>
-  )
+  );
 }

@@ -1,47 +1,41 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { 
-  Search, 
-  Grid3X3,
-  List,
-  Plus,
-  RefreshCw
-} from "lucide-react"
-import { AdminLayout } from "@/components/admin/admin-layout"
-import { StyledSelect } from "@/components/ui/styled-select"
-import { ImageUploadZone } from "@/components/images/admin/image-upload-zone"
-import { ImageGallery } from "@/components/images/admin/image-gallery"
-import { ImageStats } from "@/components/images/admin/image-stats"
-import { AutoAssignModal } from "@/components/images/admin/auto-assign-modal"
-import { BulkActionsBar } from "@/components/images/admin/bulk-actions-bar"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Search, Grid3X3, List, Plus, RefreshCw } from "lucide-react";
+import { AdminLayout } from "@/components/admin/admin-layout";
+import { StyledSelect } from "@/components/ui/styled-select";
+import { ImageUploadZone } from "@/components/images/admin/image-upload-zone";
+import { ImageGallery } from "@/components/images/admin/image-gallery";
+import { ImageStats } from "@/components/images/admin/image-stats";
+import { AutoAssignModal } from "@/components/images/admin/auto-assign-modal";
+import { BulkActionsBar } from "@/components/images/admin/bulk-actions-bar";
 
 // Tipos para imágenes
 interface ImageData {
-  id: string
-  filename: string
-  originalName: string
-  size: number
-  format: string
-  url: string
-  thumbnailUrl: string
-  uploadedAt: string
+  id: string;
+  filename: string;
+  originalName: string;
+  size: number;
+  format: string;
+  url: string;
+  thumbnailUrl: string;
+  uploadedAt: string;
   assignedTo?: {
-    productId: string
-    productName: string
-    productSku: string
-  }
-  status: 'UPLOADED' | 'ASSIGNED' | 'PROCESSING' | 'ERROR'
-  tags: string[]
+    productId: string;
+    productName: string;
+    productSku: string;
+  };
+  status: "UPLOADED" | "ASSIGNED" | "PROCESSING" | "ERROR";
+  tags: string[];
   aiSuggestions?: {
     productMatches: Array<{
-      productId: string
-      productName: string
-      productSku: string
-      confidence: number
-    }>
-  }
+      productId: string;
+      productName: string;
+      productSku: string;
+      confidence: number;
+    }>;
+  };
 }
 
 // Datos de ejemplo
@@ -53,20 +47,26 @@ const mockImages: ImageData[] = [
     size: 2456789,
     format: "JPEG",
     url: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800",
-    thumbnailUrl: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=200",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=200",
     uploadedAt: "2024-09-12T10:30:00Z",
     assignedTo: {
       productId: "PRO001",
       productName: "iPhone 15 Pro Max 256GB",
-      productSku: "SKU-31118"
+      productSku: "SKU-31118",
     },
     status: "ASSIGNED",
     tags: ["smartphone", "apple", "front-view"],
     aiSuggestions: {
       productMatches: [
-        { productId: "PRO001", productName: "iPhone 15 Pro Max 256GB", productSku: "SKU-31118", confidence: 95 }
-      ]
-    }
+        {
+          productId: "PRO001",
+          productName: "iPhone 15 Pro Max 256GB",
+          productSku: "SKU-31118",
+          confidence: 95,
+        },
+      ],
+    },
   },
   {
     id: "IMG002",
@@ -75,16 +75,27 @@ const mockImages: ImageData[] = [
     size: 3245678,
     format: "JPEG",
     url: "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=800",
-    thumbnailUrl: "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=200",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=200",
     uploadedAt: "2024-09-12T09:15:00Z",
     status: "UPLOADED",
     tags: ["laptop", "apple", "macbook"],
     aiSuggestions: {
       productMatches: [
-        { productId: "PRO002", productName: "MacBook Pro 16\" M3", productSku: "SKU-39188", confidence: 88 },
-        { productId: "PRO008", productName: "MacBook Air M2", productSku: "SKU-20451", confidence: 65 }
-      ]
-    }
+        {
+          productId: "PRO002",
+          productName: 'MacBook Pro 16" M3',
+          productSku: "SKU-39188",
+          confidence: 88,
+        },
+        {
+          productId: "PRO008",
+          productName: "MacBook Air M2",
+          productSku: "SKU-20451",
+          confidence: 65,
+        },
+      ],
+    },
   },
   {
     id: "IMG003",
@@ -93,70 +104,79 @@ const mockImages: ImageData[] = [
     size: 1876543,
     format: "JPEG",
     url: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=800",
-    thumbnailUrl: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=200",
+    thumbnailUrl:
+      "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=200",
     uploadedAt: "2024-09-12T08:45:00Z",
     status: "PROCESSING",
-    tags: ["smartphone", "samsung", "android"]
-  }
-]
+    tags: ["smartphone", "samsung", "android"],
+  },
+];
 
 export default function ImagenesAdminPage() {
-  const [images] = useState<ImageData[]>(mockImages)
-  const [selectedImages, setSelectedImages] = useState<string[]>([])
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [formatFilter, setFormatFilter] = useState("all")
-  const [sortBy, setSortBy] = useState("uploadedAt")
-  const [isAutoAssignModalOpen, setIsAutoAssignModalOpen] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
+  const [images] = useState<ImageData[]>(mockImages);
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [formatFilter, setFormatFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("uploadedAt");
+  const [isAutoAssignModalOpen, setIsAutoAssignModalOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Filtrar imágenes
-  const filteredImages = images.filter(image => {
-    const matchesSearch = image.originalName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         image.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
-                         (image.assignedTo?.productName.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
-    
-    const matchesStatus = statusFilter === "all" || image.status === statusFilter
-    const matchesFormat = formatFilter === "all" || image.format === formatFilter
-    
-    return matchesSearch && matchesStatus && matchesFormat
-  })
+  const filteredImages = images.filter((image) => {
+    const matchesSearch =
+      image.originalName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      image.tags.some((tag) =>
+        tag.toLowerCase().includes(searchQuery.toLowerCase()),
+      ) ||
+      (image.assignedTo?.productName
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase()) ??
+        false);
+
+    const matchesStatus =
+      statusFilter === "all" || image.status === statusFilter;
+    const matchesFormat =
+      formatFilter === "all" || image.format === formatFilter;
+
+    return matchesSearch && matchesStatus && matchesFormat;
+  });
 
   // Estadísticas
   const stats = {
     total: images.length,
-    assigned: images.filter(img => img.status === 'ASSIGNED').length,
-    unassigned: images.filter(img => img.status === 'UPLOADED').length,
-    processing: images.filter(img => img.status === 'PROCESSING').length,
-    errors: images.filter(img => img.status === 'ERROR').length,
-    totalSize: images.reduce((acc, img) => acc + img.size, 0)
-  }
+    assigned: images.filter((img) => img.status === "ASSIGNED").length,
+    unassigned: images.filter((img) => img.status === "UPLOADED").length,
+    processing: images.filter((img) => img.status === "PROCESSING").length,
+    errors: images.filter((img) => img.status === "ERROR").length,
+    totalSize: images.reduce((acc, img) => acc + img.size, 0),
+  };
 
   const handleImageSelect = (imageId: string) => {
-    setSelectedImages(prev => 
-      prev.includes(imageId) 
-        ? prev.filter(id => id !== imageId)
-        : [...prev, imageId]
-    )
-  }
+    setSelectedImages((prev) =>
+      prev.includes(imageId)
+        ? prev.filter((id) => id !== imageId)
+        : [...prev, imageId],
+    );
+  };
 
   const handleSelectAll = () => {
     setSelectedImages(
-      selectedImages.length === filteredImages.length 
-        ? [] 
-        : filteredImages.map(img => img.id)
-    )
-  }
+      selectedImages.length === filteredImages.length
+        ? []
+        : filteredImages.map((img) => img.id),
+    );
+  };
 
   const handleBulkUpload = async (_files: FileList) => {
-    setIsUploading(true)
+    setIsUploading(true);
     // Aquí iría la lógica de carga masiva
     setTimeout(() => {
-      setIsUploading(false)
+      setIsUploading(false);
       // Simular nuevas imágenes cargadas
-    }, 3000)
-  }
+    }, 3000);
+  };
 
   return (
     <AdminLayout>
@@ -173,10 +193,11 @@ export default function ImagenesAdminPage() {
                 Gestión de Imágenes
               </h1>
               <p className="text-gray-600 dark:text-gray-300 mt-1">
-                Administra y asigna imágenes a tus productos de forma inteligente
+                Administra y asigna imágenes a tus productos de forma
+                inteligente
               </p>
             </div>
-            
+
             <div className="flex flex-col sm:flex-row gap-3">
               <motion.button
                 whileHover={{ scale: 1.02 }}
@@ -187,7 +208,7 @@ export default function ImagenesAdminPage() {
                 <RefreshCw className="w-4 h-4" />
                 Auto-Asignar
               </motion.button>
-              
+
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -209,20 +230,36 @@ export default function ImagenesAdminPage() {
         >
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-300">Total Imágenes</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                {stats.total}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-300">
+                Total Imágenes
+              </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{stats.assigned}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-300">Asignadas</div>
+              <div className="text-2xl font-bold text-green-600">
+                {stats.assigned}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-300">
+                Asignadas
+              </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{stats.unassigned}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-300">Sin Asignar</div>
+              <div className="text-2xl font-bold text-blue-600">
+                {stats.unassigned}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-300">
+                Sin Asignar
+              </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">{Math.round(stats.totalSize / 1024 / 1024)} MB</div>
-              <div className="text-sm text-gray-600 dark:text-gray-300">Tamaño Total</div>
+              <div className="text-2xl font-bold text-purple-600">
+                {Math.round(stats.totalSize / 1024 / 1024)} MB
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-300">
+                Tamaño Total
+              </div>
             </div>
           </div>
         </motion.div>
@@ -241,23 +278,45 @@ export default function ImagenesAdminPage() {
                 whileTap={{ scale: 0.95 }}
                 className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg"
               >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                <svg
+                  className="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
                 </svg>
                 Subir Imágenes
               </motion.button>
-              
+
               <div className="relative">
                 <select
                   value={viewMode}
-                  onChange={(e) => setViewMode(e.target.value as 'grid' | 'list')}
+                  onChange={(e) =>
+                    setViewMode(e.target.value as "grid" | "list")
+                  }
                   className="appearance-none bg-white/70 dark:bg-slate-700/70 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
                 >
                   <option value="grid">Vista Cuadrícula</option>
                   <option value="list">Vista Lista</option>
                 </select>
-                <svg className="w-4 h-4 absolute right-2 top-3 pointer-events-none text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <svg
+                  className="w-4 h-4 absolute right-2 top-3 pointer-events-none text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </div>
             </div>
@@ -271,8 +330,18 @@ export default function ImagenesAdminPage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/70 dark:bg-slate-700/70 backdrop-blur-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
-                <svg className="w-4 h-4 absolute left-3 top-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg
+                  className="w-4 h-4 absolute left-3 top-3 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
               </div>
 
@@ -286,8 +355,18 @@ export default function ImagenesAdminPage() {
                   <option value="assigned">Asignadas</option>
                   <option value="unassigned">Sin Asignar</option>
                 </select>
-                <svg className="w-4 h-4 absolute right-2 top-3 pointer-events-none text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <svg
+                  className="w-4 h-4 absolute right-2 top-3 pointer-events-none text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </div>
             </div>
@@ -325,7 +404,7 @@ export default function ImagenesAdminPage() {
                     { value: "UPLOADED", label: "Sin asignar" },
                     { value: "ASSIGNED", label: "Asignadas" },
                     { value: "PROCESSING", label: "Procesando" },
-                    { value: "ERROR", label: "Con errores" }
+                    { value: "ERROR", label: "Con errores" },
                   ]}
                 />
               </div>
@@ -339,7 +418,7 @@ export default function ImagenesAdminPage() {
                     { value: "JPEG", label: "JPEG" },
                     { value: "PNG", label: "PNG" },
                     { value: "WEBP", label: "WEBP" },
-                    { value: "SVG", label: "SVG" }
+                    { value: "SVG", label: "SVG" },
                   ]}
                 />
               </div>
@@ -352,7 +431,7 @@ export default function ImagenesAdminPage() {
                     { value: "uploadedAt", label: "Fecha de carga" },
                     { value: "filename", label: "Nombre" },
                     { value: "size", label: "Tamaño" },
-                    { value: "status", label: "Estado" }
+                    { value: "status", label: "Estado" },
                   ]}
                 />
               </div>
@@ -360,21 +439,21 @@ export default function ImagenesAdminPage() {
               {/* Toggle de vista */}
               <div className="flex bg-white/50 dark:bg-slate-700/50 rounded-lg p-1 border border-white/30">
                 <button
-                  onClick={() => setViewMode('grid')}
+                  onClick={() => setViewMode("grid")}
                   className={`p-2 rounded-md transition-all ${
-                    viewMode === 'grid'
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-purple-600'
+                    viewMode === "grid"
+                      ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                      : "text-gray-600 dark:text-gray-300 hover:text-purple-600"
                   }`}
                 >
                   <Grid3X3 className="w-4 h-4" />
                 </button>
                 <button
-                  onClick={() => setViewMode('list')}
+                  onClick={() => setViewMode("list")}
                   className={`p-2 rounded-md transition-all ${
-                    viewMode === 'list'
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-purple-600'
+                    viewMode === "list"
+                      ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                      : "text-gray-600 dark:text-gray-300 hover:text-purple-600"
                   }`}
                 >
                   <List className="w-4 h-4" />
@@ -385,7 +464,7 @@ export default function ImagenesAdminPage() {
         </motion.div>
 
         {/* Zona de carga */}
-        <ImageUploadZone 
+        <ImageUploadZone
           onUpload={handleBulkUpload}
           isUploading={isUploading}
         />
@@ -414,9 +493,12 @@ export default function ImagenesAdminPage() {
         <AutoAssignModal
           isOpen={isAutoAssignModalOpen}
           onClose={() => setIsAutoAssignModalOpen(false)}
-          images={images.filter(img => selectedImages.includes(img.id) || selectedImages.length === 0)}
+          images={images.filter(
+            (img) =>
+              selectedImages.includes(img.id) || selectedImages.length === 0,
+          )}
         />
       </div>
     </AdminLayout>
-  )
+  );
 }
