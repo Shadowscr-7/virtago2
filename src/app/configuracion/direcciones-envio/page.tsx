@@ -7,14 +7,15 @@ import {
   ArrowLeft, 
   Plus, 
   Trash2, 
-  Edit3, 
-  Check,
+  Edit3,
   MapPin,
   Home,
   Building,
   Star
 } from "lucide-react"
 import { useAuthStore } from "@/lib/auth-store"
+import { StyledSelect } from "@/components/ui/styled-select"
+import { StyledSwitch } from "@/components/ui/styled-switch"
 import Link from "next/link"
 
 interface Address {
@@ -320,20 +321,17 @@ export default function DireccionesEnvioPage() {
                   <h3 className="text-xl font-semibold text-white mb-6">Nueva Dirección</h3>
                   
                   <form onSubmit={(e) => { e.preventDefault(); addAddress(); }} className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-200 mb-2">
-                        Tipo de dirección
-                      </label>
-                      <select
-                        value={newAddress.type}
-                        onChange={(e) => setNewAddress(prev => ({ ...prev, type: e.target.value as Address['type'] }))}
-                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      >
-                        <option value="home" className="bg-slate-800">🏠 Casa</option>
-                        <option value="work" className="bg-slate-800">🏢 Trabajo</option>
-                        <option value="other" className="bg-slate-800">📍 Otro</option>
-                      </select>
-                    </div>
+                    <StyledSelect
+                      value={newAddress.type}
+                      onChange={(value) => setNewAddress(prev => ({ ...prev, type: value as Address['type'] }))}
+                      options={[
+                        { value: "home", label: "Casa", icon: "🏠" },
+                        { value: "work", label: "Trabajo", icon: "🏢" },
+                        { value: "other", label: "Otro", icon: "📍" }
+                      ]}
+                      label="Tipo de dirección"
+                      className="mb-4"
+                    />
 
                     <div>
                       <label className="block text-sm font-medium text-gray-200 mb-2">
@@ -426,18 +424,14 @@ export default function DireccionesEnvioPage() {
                       />
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="isDefault"
-                        checked={newAddress.isDefault}
-                        onChange={(e) => setNewAddress(prev => ({ ...prev, isDefault: e.target.checked }))}
-                        className="w-4 h-4 text-orange-500 bg-white/10 border-white/20 rounded focus:ring-orange-500"
-                      />
-                      <label htmlFor="isDefault" className="text-sm text-gray-200">
-                        Establecer como dirección principal
-                      </label>
-                    </div>
+                    <StyledSwitch
+                      checked={newAddress.isDefault}
+                      onChange={(checked) => setNewAddress(prev => ({ ...prev, isDefault: checked }))}
+                      label="Establecer como dirección principal"
+                      description="Esta dirección se usará por defecto en tus pedidos"
+                      color="orange"
+                      className="p-4 bg-white/5 rounded-xl border border-white/10"
+                    />
 
                     <div className="flex gap-3 pt-4">
                       <motion.button

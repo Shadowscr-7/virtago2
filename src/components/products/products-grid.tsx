@@ -15,6 +15,7 @@ import {
 } from "lucide-react"
 import { ProductFilters } from "./products-section"
 import { QuantityModal } from "./quantity-modal"
+import { StyledSelect } from "@/components/ui/styled-select"
 import Image from "next/image"
 import Link from "next/link"
 import { useCartStore } from "@/components/cart/cart-store"
@@ -469,17 +470,15 @@ export function ProductsGrid({
         {/* Sort Dropdown */}
         <div className="flex items-center gap-3">
           <ArrowUpDown className="w-4 h-4 text-slate-500" />
-          <select
+          <StyledSelect
             value={filters.sortBy}
-            onChange={(e) => onFiltersChange({ ...filters, sortBy: e.target.value })}
-            className="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            {sortOptions.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            onChange={(value) => onFiltersChange({ ...filters, sortBy: value })}
+            options={sortOptions.map(option => ({
+              value: option.value,
+              label: option.label
+            }))}
+            className="min-w-[200px]"
+          />
         </div>
       </div>
 

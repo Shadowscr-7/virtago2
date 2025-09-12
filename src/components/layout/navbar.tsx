@@ -4,6 +4,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { Search, User, Menu, Settings, LogOut, ShoppingBag, Heart, Shield } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { CartButton } from "@/components/cart/cart-button"
 import { useAuthStore } from "@/lib/auth-store"
@@ -16,13 +17,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-export function Navbar() {
+interface NavbarProps {
+  isAdminMode?: boolean
+}
+
+export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
   const [isSearchFocused, setIsSearchFocused] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const { user, isAuthenticated, logout } = useAuthStore()
+  const router = useRouter()
 
   const handleLogout = () => {
     logout()
+    router.push("/")
   }
 
   return (
@@ -57,50 +64,52 @@ export function Navbar() {
           </motion.div>
 
           {/* Barra de búsqueda */}
-          <div className="flex-1 max-w-xl mx-8">
-            <motion.div
-              animate={{
-                scale: isSearchFocused ? 1.02 : 1,
-              }}
-              className={cn(
-                "relative transition-all duration-300",
-                isSearchFocused && "drop-shadow-lg"
-              )}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-cyan-500/20 rounded-full blur-sm" />
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <input
-                  type="text"
-                  placeholder="Buscar productos, marcas o proveedores..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setIsSearchFocused(true)}
-                  onBlur={() => setIsSearchFocused(false)}
-                  className={cn(
-                    "w-full pl-10 pr-4 py-2 rounded-full border bg-background/50 backdrop-blur",
-                    "transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/50",
-                    isSearchFocused && "bg-background/80 shadow-lg"
-                  )}
-                />
-                {searchQuery && (
-                  <motion.button
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  >
-                    ×
-                  </motion.button>
+          {!isAdminMode && (
+            <div className="flex-1 max-w-xl mx-8">
+              <motion.div
+                animate={{
+                  scale: isSearchFocused ? 1.02 : 1,
+                }}
+                className={cn(
+                  "relative transition-all duration-300",
+                  isSearchFocused && "drop-shadow-lg"
                 )}
-              </div>
-            </motion.div>
-          </div>
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-cyan-500/20 rounded-full blur-sm" />
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <input
+                    type="text"
+                    placeholder="Buscar productos, marcas o proveedores..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setIsSearchFocused(true)}
+                    onBlur={() => setIsSearchFocused(false)}
+                    className={cn(
+                      "w-full pl-10 pr-4 py-2 rounded-full border bg-background/50 backdrop-blur",
+                      "transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/50",
+                      isSearchFocused && "bg-background/80 shadow-lg"
+                    )}
+                  />
+                  {searchQuery && (
+                    <motion.button
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    >
+                      ×
+                    </motion.button>
+                  )}
+                </div>
+              </motion.div>
+            </div>
+          )}
 
           {/* Acciones de la derecha */}
           <div className="flex items-center space-x-4">
             {/* Carrito */}
-            <CartButton />
+            {!isAdminMode && <CartButton />}
 
             {/* Usuario/Auth */}
             {isAuthenticated && user ? (

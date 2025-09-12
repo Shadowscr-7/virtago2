@@ -8,9 +8,6 @@ import {
   Bell, 
   Shield, 
   Eye, 
-  Moon, 
-  Sun, 
-  Globe, 
   Mail, 
   Phone, 
   Lock,
@@ -20,6 +17,8 @@ import {
   RefreshCw
 } from "lucide-react"
 import { useAuthStore } from "@/lib/auth-store"
+import { StyledSelect } from "@/components/ui/styled-select"
+import { StyledSwitch } from "@/components/ui/styled-switch"
 import Link from "next/link"
 
 export default function ConfiguracionPage() {
@@ -127,15 +126,17 @@ export default function ConfiguracionPage() {
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent h-24 resize-none"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-200 mb-2">Zona horaria</label>
-                  <select className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                    <option value="UTC-3">Argentina (UTC-3)</option>
-                    <option value="UTC-5">Colombia (UTC-5)</option>
-                    <option value="UTC-6">México (UTC-6)</option>
-                    <option value="UTC+1">España (UTC+1)</option>
-                  </select>
-                </div>
+                <StyledSelect
+                  value="UTC-3"
+                  onChange={() => {}}
+                  options={[
+                    { value: "UTC-3", label: "Argentina (UTC-3)", icon: "🇦🇷" },
+                    { value: "UTC-5", label: "Colombia (UTC-5)", icon: "🇨🇴" },
+                    { value: "UTC-6", label: "México (UTC-6)", icon: "🇲🇽" },
+                    { value: "UTC+1", label: "España (UTC+1)", icon: "🇪🇸" }
+                  ]}
+                  label="Zona horaria"
+                />
               </div>
             </div>
           </motion.div>
@@ -155,18 +156,18 @@ export default function ConfiguracionPage() {
                   Notificaciones por Email
                 </h3>
                 {[
-                  { key: "email" as keyof typeof notifications, label: "Confirmaciones de pedido", checked: notifications.email },
-                  { key: "marketing" as keyof typeof notifications, label: "Promociones y ofertas", checked: notifications.marketing }
+                  { key: "email" as keyof typeof notifications, label: "Confirmaciones de pedido", description: "Recibe confirmaciones cuando realices un pedido", checked: notifications.email },
+                  { key: "marketing" as keyof typeof notifications, label: "Promociones y ofertas", description: "Entérate de nuestras mejores ofertas y descuentos", checked: notifications.marketing }
                 ].map(item => (
-                  <div key={item.key} className="flex items-center justify-between p-4 bg-white/10 rounded-lg">
-                    <span className="text-gray-200">{item.label}</span>
-                    <button 
-                      onClick={() => setNotifications(prev => ({ ...prev, [item.key]: !prev[item.key] }))}
-                      className={`relative w-12 h-6 rounded-full transition-colors ${item.checked ? 'bg-purple-500' : 'bg-gray-600'}`}
-                    >
-                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${item.checked ? 'translate-x-7' : 'translate-x-1'}`} />
-                    </button>
-                  </div>
+                  <StyledSwitch
+                    key={item.key}
+                    checked={item.checked}
+                    onChange={(checked) => setNotifications(prev => ({ ...prev, [item.key]: checked }))}
+                    label={item.label}
+                    description={item.description}
+                    color="purple"
+                    className="p-4 bg-white/5 rounded-xl border border-white/10"
+                  />
                 ))}
               </div>
               <div className="space-y-4">
@@ -175,18 +176,18 @@ export default function ConfiguracionPage() {
                   Notificaciones Móviles
                 </h3>
                 {[
-                  { key: "push" as keyof typeof notifications, label: "Notificaciones push", checked: notifications.push },
-                  { key: "sms" as keyof typeof notifications, label: "SMS importantes", checked: notifications.sms }
+                  { key: "push" as keyof typeof notifications, label: "Notificaciones push", description: "Recibe notificaciones en tu dispositivo móvil", checked: notifications.push },
+                  { key: "sms" as keyof typeof notifications, label: "SMS importantes", description: "Solo para notificaciones críticas de seguridad", checked: notifications.sms }
                 ].map(item => (
-                  <div key={item.key} className="flex items-center justify-between p-4 bg-white/10 rounded-lg">
-                    <span className="text-gray-200">{item.label}</span>
-                    <button 
-                      onClick={() => setNotifications(prev => ({ ...prev, [item.key]: !prev[item.key] }))}
-                      className={`relative w-12 h-6 rounded-full transition-colors ${item.checked ? 'bg-purple-500' : 'bg-gray-600'}`}
-                    >
-                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${item.checked ? 'translate-x-7' : 'translate-x-1'}`} />
-                    </button>
-                  </div>
+                  <StyledSwitch
+                    key={item.key}
+                    checked={item.checked}
+                    onChange={(checked) => setNotifications(prev => ({ ...prev, [item.key]: checked }))}
+                    label={item.label}
+                    description={item.description}
+                    color="blue"
+                    className="p-4 bg-white/5 rounded-xl border border-white/10"
+                  />
                 ))}
               </div>
             </div>
@@ -203,26 +204,20 @@ export default function ConfiguracionPage() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-white">Configuración de Privacidad</h3>
               {[
-                { key: "profileVisible" as keyof typeof privacy, label: "Perfil visible para otros usuarios", checked: privacy.profileVisible },
-                { key: "showEmail" as keyof typeof privacy, label: "Mostrar email en el perfil", checked: privacy.showEmail },
-                { key: "showPhone" as keyof typeof privacy, label: "Mostrar teléfono en el perfil", checked: privacy.showPhone },
-                { key: "analytics" as keyof typeof privacy, label: "Permitir análisis de uso", checked: privacy.analytics }
+                { key: "profileVisible" as keyof typeof privacy, label: "Perfil visible para otros usuarios", description: "Otros usuarios podrán ver tu información básica", checked: privacy.profileVisible },
+                { key: "showEmail" as keyof typeof privacy, label: "Mostrar email en el perfil", description: "Tu email será visible en tu perfil público", checked: privacy.showEmail },
+                { key: "showPhone" as keyof typeof privacy, label: "Mostrar teléfono en el perfil", description: "Tu teléfono será visible en tu perfil público", checked: privacy.showPhone },
+                { key: "analytics" as keyof typeof privacy, label: "Permitir análisis de uso", description: "Ayúdanos a mejorar la plataforma", checked: privacy.analytics }
               ].map(item => (
-                <div key={item.key} className="flex items-center justify-between p-4 bg-white/10 rounded-lg">
-                  <div>
-                    <span className="text-gray-200 block">{item.label}</span>
-                    <span className="text-sm text-gray-400">
-                      {item.key === "analytics" && "Ayúdanos a mejorar la plataforma"}
-                      {item.key === "profileVisible" && "Otros usuarios podrán ver tu información básica"}
-                    </span>
-                  </div>
-                  <button 
-                    onClick={() => setPrivacy(prev => ({ ...prev, [item.key]: !prev[item.key] }))}
-                    className={`relative w-12 h-6 rounded-full transition-colors ${item.checked ? 'bg-purple-500' : 'bg-gray-600'}`}
-                  >
-                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${item.checked ? 'translate-x-7' : 'translate-x-1'}`} />
-                  </button>
-                </div>
+                <StyledSwitch
+                  key={item.key}
+                  checked={item.checked}
+                  onChange={(checked) => setPrivacy(prev => ({ ...prev, [item.key]: checked }))}
+                  label={item.label}
+                  description={item.description}
+                  color="green"
+                  className="p-4 bg-white/5 rounded-xl border border-white/10"
+                />
               ))}
             </div>
           </motion.div>
@@ -238,32 +233,26 @@ export default function ConfiguracionPage() {
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-white">Personalización de Apariencia</h3>
               
-              <div className="p-4 bg-white/10 rounded-lg">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    {darkMode ? <Moon className="w-5 h-5 text-purple-400" /> : <Sun className="w-5 h-5 text-yellow-400" />}
-                    <span className="text-gray-200">Modo oscuro</span>
-                  </div>
-                  <button 
-                    onClick={() => setDarkMode(!darkMode)}
-                    className={`relative w-12 h-6 rounded-full transition-colors ${darkMode ? 'bg-purple-500' : 'bg-gray-600'}`}
-                  >
-                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${darkMode ? 'translate-x-7' : 'translate-x-1'}`} />
-                  </button>
-                </div>
-              </div>
+              <StyledSwitch
+                checked={darkMode}
+                onChange={setDarkMode}
+                label="Modo oscuro"
+                description="Cambia entre tema claro y oscuro"
+                color="purple"
+                className="p-4 bg-white/5 rounded-xl border border-white/10"
+              />
 
-              <div className="p-4 bg-white/10 rounded-lg">
-                <div className="flex items-center gap-3 mb-4">
-                  <Globe className="w-5 h-5 text-purple-400" />
-                  <span className="text-gray-200">Idioma</span>
-                </div>
-                <select className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500">
-                  <option value="es">Español</option>
-                  <option value="en">English</option>
-                  <option value="pt">Português</option>
-                </select>
-              </div>
+              <StyledSelect
+                value="es"
+                onChange={() => {}}
+                options={[
+                  { value: "es", label: "Español", icon: "🇪🇸" },
+                  { value: "en", label: "English", icon: "🇺🇸" },
+                  { value: "pt", label: "Português", icon: "🇧🇷" }
+                ]}
+                label="Idioma"
+                className="p-4 bg-white/5 rounded-xl border border-white/10"
+              />
             </div>
           </motion.div>
         )

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/lib/auth-store"
 import { useToast } from "@/components/ui/toast"
 import { setToastFunction } from "@/components/cart/cart-store"
+import { StyledSwitch } from "@/components/ui/styled-switch"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
@@ -15,6 +16,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [rememberMe, setRememberMe] = useState(false)
   
   const { login } = useAuthStore()
   const { showToast } = useToast()
@@ -251,13 +253,13 @@ export default function LoginPage() {
               transition={{ delay: 0.7, duration: 0.6 }}
               className="flex items-center justify-between"
             >
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="w-4 h-4 text-purple-500 bg-white/10 border-white/20 rounded focus:ring-purple-500 focus:ring-2"
-                />
-                <span className="ml-2 text-sm text-white/70">Recordarme</span>
-              </label>
+              <StyledSwitch
+                checked={rememberMe}
+                onChange={setRememberMe}
+                label="Recordarme"
+                size="sm"
+                color="purple"
+              />
               <a href="#" className="text-sm text-purple-400 hover:text-purple-300 transition-colors">
                 ¿Olvidaste tu contraseña?
               </a>
