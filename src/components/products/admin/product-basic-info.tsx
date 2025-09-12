@@ -1,66 +1,69 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { Package, FileText, Tag, Building } from "lucide-react"
-import { StyledSelect } from "@/components/ui/styled-select"
-import type { ProductData } from "@/app/admin/productos/[id]/page"
+import { motion } from "framer-motion";
+import { Package, FileText, Tag, Building } from "lucide-react";
+import { StyledSelect } from "@/components/ui/styled-select";
+import type { ProductData } from "@/app/admin/productos/[id]/page";
 
 interface ProductBasicInfoProps {
-  productData: ProductData
-  isEditing: boolean
-  onChange: (updates: Partial<ProductData>) => void
+  productData: ProductData;
+  isEditing: boolean;
+  onChange: (updates: Partial<ProductData>) => void;
 }
 
 export function ProductBasicInfo({
   productData,
   isEditing,
-  onChange
+  onChange,
 }: ProductBasicInfoProps) {
-  
   const categoryOptions = [
     { value: "Electrónicos", label: "Electrónicos" },
     { value: "Informática", label: "Informática" },
     { value: "Oficina", label: "Oficina" },
     { value: "Fotografía", label: "Fotografía" },
     { value: "Hogar", label: "Hogar" },
-    { value: "Deportes", label: "Deportes" }
-  ]
+    { value: "Deportes", label: "Deportes" },
+  ];
 
   const subcategoryOptions = {
-    "Electrónicos": [
+    Electrónicos: [
       { value: "Smartphones", label: "Smartphones" },
       { value: "Audio", label: "Audio" },
       { value: "Accesorios", label: "Accesorios" },
-      { value: "Wearables", label: "Wearables" }
+      { value: "Wearables", label: "Wearables" },
     ],
-    "Informática": [
+    Informática: [
       { value: "Laptops", label: "Laptops" },
       { value: "Monitores", label: "Monitores" },
       { value: "Tablets", label: "Tablets" },
-      { value: "Periféricos", label: "Periféricos" }
+      { value: "Periféricos", label: "Periféricos" },
     ],
-    "Oficina": [
+    Oficina: [
       { value: "Mobiliario", label: "Mobiliario" },
       { value: "Impresoras", label: "Impresoras" },
-      { value: "Suministros", label: "Suministros" }
+      { value: "Suministros", label: "Suministros" },
     ],
-    "Fotografía": [
+    Fotografía: [
       { value: "Cámaras", label: "Cámaras" },
       { value: "Lentes", label: "Lentes" },
-      { value: "Accesorios", label: "Accesorios" }
-    ]
-  }
+      { value: "Accesorios", label: "Accesorios" },
+    ],
+  };
 
   const statusOptions = [
     { value: "ACTIVO", label: "Activo" },
     { value: "INACTIVO", label: "Inactivo" },
     { value: "BORRADOR", label: "Borrador" },
-    { value: "DESCONTINUADO", label: "Descontinuado" }
-  ]
+    { value: "DESCONTINUADO", label: "Descontinuado" },
+  ];
 
   const getCurrentSubcategories = () => {
-    return subcategoryOptions[productData.category as keyof typeof subcategoryOptions] || []
-  }
+    return (
+      subcategoryOptions[
+        productData.category as keyof typeof subcategoryOptions
+      ] || []
+    );
+  };
 
   return (
     <motion.div
@@ -99,7 +102,9 @@ export function ProductBasicInfo({
             />
           ) : (
             <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
-              <span className="text-gray-900 dark:text-white font-medium">{productData.name}</span>
+              <span className="text-gray-900 dark:text-white font-medium">
+                {productData.name}
+              </span>
             </div>
           )}
         </div>
@@ -120,7 +125,9 @@ export function ProductBasicInfo({
             />
           ) : (
             <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
-              <span className="text-gray-900 dark:text-white font-mono">{productData.sku}</span>
+              <span className="text-gray-900 dark:text-white font-mono">
+                {productData.sku}
+              </span>
             </div>
           )}
         </div>
@@ -141,7 +148,9 @@ export function ProductBasicInfo({
             />
           ) : (
             <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
-              <span className="text-gray-900 dark:text-white font-medium">{productData.brand}</span>
+              <span className="text-gray-900 dark:text-white font-medium">
+                {productData.brand}
+              </span>
             </div>
           )}
         </div>
@@ -161,7 +170,9 @@ export function ProductBasicInfo({
             />
           ) : (
             <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
-              <span className="text-gray-900 dark:text-white">{productData.model}</span>
+              <span className="text-gray-900 dark:text-white">
+                {productData.model}
+              </span>
             </div>
           )}
         </div>
@@ -174,12 +185,16 @@ export function ProductBasicInfo({
           {isEditing ? (
             <StyledSelect
               value={productData.category}
-              onChange={(value) => onChange({ category: value, subcategory: "" })}
+              onChange={(value) =>
+                onChange({ category: value, subcategory: "" })
+              }
               options={categoryOptions}
             />
           ) : (
             <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
-              <span className="text-gray-900 dark:text-white">{productData.category}</span>
+              <span className="text-gray-900 dark:text-white">
+                {productData.category}
+              </span>
             </div>
           )}
         </div>
@@ -198,7 +213,9 @@ export function ProductBasicInfo({
             />
           ) : (
             <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
-              <span className="text-gray-900 dark:text-white">{productData.subcategory || "No especificada"}</span>
+              <span className="text-gray-900 dark:text-white">
+                {productData.subcategory || "No especificada"}
+              </span>
             </div>
           )}
         </div>
@@ -216,12 +233,17 @@ export function ProductBasicInfo({
             />
           ) : (
             <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
-              <span className={`px-3 py-1 rounded-lg text-sm font-medium ${
-                productData.status === "ACTIVO" ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300" :
-                productData.status === "INACTIVO" ? "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300" :
-                productData.status === "BORRADOR" ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300" :
-                "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300"
-              }`}>
+              <span
+                className={`px-3 py-1 rounded-lg text-sm font-medium ${
+                  productData.status === "ACTIVO"
+                    ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
+                    : productData.status === "INACTIVO"
+                      ? "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300"
+                      : productData.status === "BORRADOR"
+                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
+                        : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300"
+                }`}
+              >
                 {productData.status}
               </span>
             </div>
@@ -244,7 +266,9 @@ export function ProductBasicInfo({
             />
           ) : (
             <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
-              <span className="text-gray-900 dark:text-white">{productData.shortDescription}</span>
+              <span className="text-gray-900 dark:text-white">
+                {productData.shortDescription}
+              </span>
             </div>
           )}
         </div>
@@ -264,7 +288,9 @@ export function ProductBasicInfo({
             />
           ) : (
             <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20 min-h-[120px]">
-              <p className="text-gray-900 dark:text-white leading-relaxed">{productData.description}</p>
+              <p className="text-gray-900 dark:text-white leading-relaxed">
+                {productData.description}
+              </p>
             </div>
           )}
         </div>
@@ -278,7 +304,11 @@ export function ProductBasicInfo({
             <input
               type="text"
               value={productData.tags.join(", ")}
-              onChange={(e) => onChange({ tags: e.target.value.split(", ").filter(tag => tag.trim()) })}
+              onChange={(e) =>
+                onChange({
+                  tags: e.target.value.split(", ").filter((tag) => tag.trim()),
+                })
+              }
               className="w-full px-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
               placeholder="iPhone, Apple, 5G, Pro (separadas por comas)"
             />
@@ -299,5 +329,5 @@ export function ProductBasicInfo({
         </div>
       </div>
     </motion.div>
-  )
+  );
 }

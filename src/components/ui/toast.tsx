@@ -1,85 +1,85 @@
-"use client"
+"use client";
 
-import { createContext, useContext, useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { CheckCircle, ShoppingCart, Trash2, Plus, X } from "lucide-react"
+import { createContext, useContext, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { CheckCircle, ShoppingCart, Trash2, Plus, X } from "lucide-react";
 
 interface Toast {
-  id: string
-  type: "success" | "error" | "info" | "warning"
-  title: string
-  description?: string
-  duration?: number
+  id: string;
+  type: "success" | "error" | "info" | "warning";
+  title: string;
+  description?: string;
+  duration?: number;
 }
 
 interface ToastContextType {
-  showToast: (toast: Omit<Toast, "id">) => void
-  removeToast: (id: string) => void
+  showToast: (toast: Omit<Toast, "id">) => void;
+  removeToast: (id: string) => void;
 }
 
-const ToastContext = createContext<ToastContextType | undefined>(undefined)
+const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 export function useToast() {
-  const context = useContext(ToastContext)
+  const context = useContext(ToastContext);
   if (!context) {
-    throw new Error("useToast must be used within a ToastProvider")
+    throw new Error("useToast must be used within a ToastProvider");
   }
-  return context
+  return context;
 }
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
-  const [toasts, setToasts] = useState<Toast[]>([])
+  const [toasts, setToasts] = useState<Toast[]>([]);
 
   const showToast = (toast: Omit<Toast, "id">) => {
-    const id = Math.random().toString(36).substr(2, 9)
-    const newToast = { ...toast, id }
-    
-    setToasts(prev => [...prev, newToast])
+    const id = Math.random().toString(36).substr(2, 9);
+    const newToast = { ...toast, id };
+
+    setToasts((prev) => [...prev, newToast]);
 
     // Auto remove toast after duration
     setTimeout(() => {
-      removeToast(id)
-    }, toast.duration || 3000)
-  }
+      removeToast(id);
+    }, toast.duration || 3000);
+  };
 
   const removeToast = (id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id))
-  }
+    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+  };
 
   const getIcon = (type: string) => {
     switch (type) {
       case "success":
-        return <CheckCircle className="w-5 h-5" />
+        return <CheckCircle className="w-5 h-5" />;
       case "info":
-        return <ShoppingCart className="w-5 h-5" />
+        return <ShoppingCart className="w-5 h-5" />;
       case "warning":
-        return <Plus className="w-5 h-5" />
+        return <Plus className="w-5 h-5" />;
       case "error":
-        return <Trash2 className="w-5 h-5" />
+        return <Trash2 className="w-5 h-5" />;
       default:
-        return <CheckCircle className="w-5 h-5" />
+        return <CheckCircle className="w-5 h-5" />;
     }
-  }
+  };
 
   const getColors = (type: string) => {
     switch (type) {
       case "success":
-        return "bg-green-500 text-white"
+        return "bg-green-500 text-white";
       case "info":
-        return "bg-blue-500 text-white"
+        return "bg-blue-500 text-white";
       case "warning":
-        return "bg-orange-500 text-white"
+        return "bg-orange-500 text-white";
       case "error":
-        return "bg-red-500 text-white"
+        return "bg-red-500 text-white";
       default:
-        return "bg-slate-900 text-white"
+        return "bg-slate-900 text-white";
     }
-  }
+  };
 
   return (
     <ToastContext.Provider value={{ showToast, removeToast }}>
       {children}
-      
+
       {/* Toast Container */}
       <div className="fixed top-4 right-4 z-[9999] space-y-2">
         <AnimatePresence>
@@ -100,7 +100,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm">{toast.title}</p>
                     {toast.description && (
-                      <p className="text-xs opacity-90 mt-1">{toast.description}</p>
+                      <p className="text-xs opacity-90 mt-1">
+                        {toast.description}
+                      </p>
                     )}
                   </div>
                   <button
@@ -116,5 +118,5 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         </AnimatePresence>
       </div>
     </ToastContext.Provider>
-  )
+  );
 }

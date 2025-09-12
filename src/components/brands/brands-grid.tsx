@@ -1,40 +1,47 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { 
-  Star, Award, Building, Globe, ExternalLink, 
-  ShoppingBag, TrendingUp, Users, Calendar
-} from "lucide-react"
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Star,
+  Award,
+  Building,
+  Globe,
+  ExternalLink,
+  ShoppingBag,
+  TrendingUp,
+  Users,
+  Calendar,
+} from "lucide-react";
 
 interface Brand {
-  id: string
-  name: string
-  logo: string
-  description: string
-  category: string
-  origin: string
-  founded: number
-  rating: number
-  reviewsCount: number
-  productsCount: number
-  partnershipLevel: "básico" | "silver" | "gold" | "platinum" | "estratégico"
-  certifications: string[]
-  website: string
-  specialties: string[]
-  marketShare: string
-  globalPresence: string[]
+  id: string;
+  name: string;
+  logo: string;
+  description: string;
+  category: string;
+  origin: string;
+  founded: number;
+  rating: number;
+  reviewsCount: number;
+  productsCount: number;
+  partnershipLevel: "básico" | "silver" | "gold" | "platinum" | "estratégico";
+  certifications: string[];
+  website: string;
+  specialties: string[];
+  marketShare: string;
+  globalPresence: string[];
 }
 
 interface BrandsGridProps {
-  brands: Brand[]
-  loading?: boolean
+  brands: Brand[];
+  loading?: boolean;
 }
 
 interface BrandModalProps {
-  brand: Brand
-  isOpen: boolean
-  onClose: () => void
+  brand: Brand;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 function BrandModal({ brand, isOpen, onClose }: BrandModalProps) {
@@ -43,8 +50,8 @@ function BrandModal({ brand, isOpen, onClose }: BrandModalProps) {
     silver: "from-slate-400 to-slate-500",
     gold: "from-yellow-400 to-yellow-500",
     platinum: "from-purple-400 to-purple-500",
-    estratégico: "from-emerald-400 to-emerald-500"
-  }
+    estratégico: "from-emerald-400 to-emerald-500",
+  };
 
   return (
     <AnimatePresence>
@@ -57,7 +64,7 @@ function BrandModal({ brand, isOpen, onClose }: BrandModalProps) {
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={onClose}
           />
-          
+
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -70,7 +77,7 @@ function BrandModal({ brand, isOpen, onClose }: BrandModalProps) {
                 <div className="w-20 h-20 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shrink-0">
                   {brand.name.charAt(0)}
                 </div>
-                
+
                 <div className="flex-1">
                   <div className="flex items-start justify-between">
                     <div>
@@ -87,21 +94,24 @@ function BrandModal({ brand, isOpen, onClose }: BrandModalProps) {
                             ({brand.reviewsCount} reseñas)
                           </span>
                         </div>
-                        <div className={`px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${partnershipColors[brand.partnershipLevel]}`}>
-                          Partner {brand.partnershipLevel.charAt(0).toUpperCase() + brand.partnershipLevel.slice(1)}
+                        <div
+                          className={`px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${partnershipColors[brand.partnershipLevel]}`}
+                        >
+                          Partner{" "}
+                          {brand.partnershipLevel.charAt(0).toUpperCase() +
+                            brand.partnershipLevel.slice(1)}
                         </div>
                       </div>
                     </div>
-                    
+
                     <button
                       onClick={onClose}
                       className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                     >
-                      <span className="sr-only">Cerrar</span>
-                      ✕
+                      <span className="sr-only">Cerrar</span>✕
                     </button>
                   </div>
-                  
+
                   <div className="flex items-center gap-6 text-sm text-slate-600 dark:text-slate-400">
                     <div className="flex items-center gap-2">
                       <Globe className="w-4 h-4" />
@@ -136,23 +146,39 @@ function BrandModal({ brand, isOpen, onClose }: BrandModalProps) {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center p-4 bg-slate-50 dark:bg-slate-700 rounded-xl">
                   <ShoppingBag className="w-6 h-6 text-emerald-500 mx-auto mb-2" />
-                  <div className="font-semibold text-slate-900 dark:text-white">{brand.productsCount.toLocaleString()}</div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400">Productos</div>
+                  <div className="font-semibold text-slate-900 dark:text-white">
+                    {brand.productsCount.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-slate-600 dark:text-slate-400">
+                    Productos
+                  </div>
                 </div>
                 <div className="text-center p-4 bg-slate-50 dark:bg-slate-700 rounded-xl">
                   <TrendingUp className="w-6 h-6 text-blue-500 mx-auto mb-2" />
-                  <div className="font-semibold text-slate-900 dark:text-white">{brand.marketShare}</div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400">Market Share</div>
+                  <div className="font-semibold text-slate-900 dark:text-white">
+                    {brand.marketShare}
+                  </div>
+                  <div className="text-xs text-slate-600 dark:text-slate-400">
+                    Market Share
+                  </div>
                 </div>
                 <div className="text-center p-4 bg-slate-50 dark:bg-slate-700 rounded-xl">
                   <Users className="w-6 h-6 text-purple-500 mx-auto mb-2" />
-                  <div className="font-semibold text-slate-900 dark:text-white">{brand.reviewsCount}</div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400">Reseñas</div>
+                  <div className="font-semibold text-slate-900 dark:text-white">
+                    {brand.reviewsCount}
+                  </div>
+                  <div className="text-xs text-slate-600 dark:text-slate-400">
+                    Reseñas
+                  </div>
                 </div>
                 <div className="text-center p-4 bg-slate-50 dark:bg-slate-700 rounded-xl">
                   <Globe className="w-6 h-6 text-orange-500 mx-auto mb-2" />
-                  <div className="font-semibold text-slate-900 dark:text-white">{brand.globalPresence.length}</div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400">Países</div>
+                  <div className="font-semibold text-slate-900 dark:text-white">
+                    {brand.globalPresence.length}
+                  </div>
+                  <div className="text-xs text-slate-600 dark:text-slate-400">
+                    Países
+                  </div>
                 </div>
               </div>
 
@@ -229,25 +255,28 @@ function BrandModal({ brand, isOpen, onClose }: BrandModalProps) {
         </div>
       )}
     </AnimatePresence>
-  )
+  );
 }
 
 export function BrandsGrid({ brands, loading = false }: BrandsGridProps) {
-  const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null)
+  const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
 
   const partnershipColors = {
     básico: "from-slate-500 to-slate-600",
     silver: "from-slate-400 to-slate-500",
     gold: "from-yellow-400 to-yellow-500",
     platinum: "from-purple-400 to-purple-500",
-    estratégico: "from-emerald-400 to-emerald-500"
-  }
+    estratégico: "from-emerald-400 to-emerald-500",
+  };
 
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {Array.from({ length: 8 }).map((_, index) => (
-          <div key={index} className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg animate-pulse">
+          <div
+            key={index}
+            className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg animate-pulse"
+          >
             <div className="flex items-center gap-4 mb-4">
               <div className="w-16 h-16 bg-slate-200 dark:bg-slate-700 rounded-xl" />
               <div className="flex-1">
@@ -262,7 +291,7 @@ export function BrandsGrid({ brands, loading = false }: BrandsGridProps) {
           </div>
         ))}
       </div>
-    )
+    );
   }
 
   return (
@@ -305,7 +334,7 @@ export function BrandsGrid({ brands, loading = false }: BrandsGridProps) {
               <p className="text-slate-600 dark:text-slate-400 text-sm line-clamp-2">
                 {brand.description}
               </p>
-              
+
               <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                 <Globe className="w-4 h-4" />
                 <span>{brand.origin}</span>
@@ -319,8 +348,12 @@ export function BrandsGrid({ brands, loading = false }: BrandsGridProps) {
 
             {/* Partnership Level */}
             <div className="mb-4">
-              <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${partnershipColors[brand.partnershipLevel]}`}>
-                Partner {brand.partnershipLevel.charAt(0).toUpperCase() + brand.partnershipLevel.slice(1)}
+              <div
+                className={`inline-block px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${partnershipColors[brand.partnershipLevel]}`}
+              >
+                Partner{" "}
+                {brand.partnershipLevel.charAt(0).toUpperCase() +
+                  brand.partnershipLevel.slice(1)}
               </div>
             </div>
 
@@ -346,12 +379,20 @@ export function BrandsGrid({ brands, loading = false }: BrandsGridProps) {
             {/* Quick Stats */}
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div className="text-center p-2 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                <div className="text-xs text-slate-600 dark:text-slate-400 mb-1">Productos</div>
-                <div className="font-semibold text-sm text-slate-900 dark:text-white">{brand.productsCount.toLocaleString()}</div>
+                <div className="text-xs text-slate-600 dark:text-slate-400 mb-1">
+                  Productos
+                </div>
+                <div className="font-semibold text-sm text-slate-900 dark:text-white">
+                  {brand.productsCount.toLocaleString()}
+                </div>
               </div>
               <div className="text-center p-2 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                <div className="text-xs text-slate-600 dark:text-slate-400 mb-1">Fundada</div>
-                <div className="font-semibold text-sm text-slate-900 dark:text-white">{brand.founded}</div>
+                <div className="text-xs text-slate-600 dark:text-slate-400 mb-1">
+                  Fundada
+                </div>
+                <div className="font-semibold text-sm text-slate-900 dark:text-white">
+                  {brand.founded}
+                </div>
               </div>
             </div>
 
@@ -359,8 +400,8 @@ export function BrandsGrid({ brands, loading = false }: BrandsGridProps) {
             <div className="flex gap-2">
               <button
                 onClick={(e) => {
-                  e.stopPropagation()
-                  setSelectedBrand(brand)
+                  e.stopPropagation();
+                  setSelectedBrand(brand);
                 }}
                 className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-300"
               >
@@ -386,5 +427,5 @@ export function BrandsGrid({ brands, loading = false }: BrandsGridProps) {
         />
       )}
     </>
-  )
+  );
 }

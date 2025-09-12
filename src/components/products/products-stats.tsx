@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { TrendingUp, Package, Users, Award } from "lucide-react"
+import { motion } from "framer-motion";
+import { TrendingUp, Package, Users, Award } from "lucide-react";
 
 interface ProductsStatsProps {
-  totalProducts: number
+  totalProducts: number;
 }
 
 export function ProductsStats({ totalProducts }: ProductsStatsProps) {
@@ -14,30 +14,30 @@ export function ProductsStats({ totalProducts }: ProductsStatsProps) {
       label: "Productos Disponibles",
       value: totalProducts.toLocaleString(),
       trend: "+12%",
-      description: "vs. mes anterior"
+      description: "vs. mes anterior",
     },
     {
       icon: Users,
       label: "Clientes Activos",
       value: "2,500+",
       trend: "+8%",
-      description: "crecimiento mensual"
+      description: "crecimiento mensual",
     },
     {
       icon: Award,
       label: "Marcas Premium",
       value: "50+",
       trend: "+5",
-      description: "nuevas este mes"
+      description: "nuevas este mes",
     },
     {
       icon: TrendingUp,
       label: "Satisfacción",
       value: "99.2%",
       trend: "+0.3%",
-      description: "índice de calidad"
-    }
-  ]
+      description: "índice de calidad",
+    },
+  ];
 
   return (
     <section className="py-16 bg-white dark:bg-slate-900">
@@ -53,7 +53,8 @@ export function ProductsStats({ totalProducts }: ProductsStatsProps) {
             Números que Hablan por Sí Solos
           </h2>
           <p className="text-slate-600 dark:text-slate-300 text-lg max-w-2xl mx-auto">
-            Nuestra plataforma conecta empresas con los mejores productos del mercado
+            Nuestra plataforma conecta empresas con los mejores productos del
+            mercado
           </p>
         </motion.div>
 
@@ -120,11 +121,12 @@ export function ProductsStats({ totalProducts }: ProductsStatsProps) {
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200/50 dark:border-blue-600/30 rounded-full px-6 py-3">
             <Award className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             <span className="text-slate-700 dark:text-slate-300 font-medium">
-              Certificados como Distribuidor Premium por más de 30 marcas líderes
+              Certificados como Distribuidor Premium por más de 30 marcas
+              líderes
             </span>
           </div>
         </motion.div>
       </div>
     </section>
-  )
+  );
 }

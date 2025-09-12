@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { ArrowRight, Sparkles, Zap } from "lucide-react"
-import Image from "next/image"
-import { cn } from "@/lib/utils"
+import { motion } from "framer-motion";
+import { ArrowRight, Sparkles, Zap } from "lucide-react";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 interface OfferBannerProps {
-  title: string
-  subtitle?: string
-  description?: string
-  image?: string
-  ctaText?: string
-  ctaLink?: string
-  discount?: string
-  variant?: "primary" | "secondary"
-  className?: string
+  title: string;
+  subtitle?: string;
+  description?: string;
+  image?: string;
+  ctaText?: string;
+  ctaLink?: string;
+  discount?: string;
+  variant?: "primary" | "secondary";
+  className?: string;
 }
 
 export function OfferBanner({
@@ -26,9 +26,9 @@ export function OfferBanner({
   ctaLink = "#",
   discount,
   variant = "primary",
-  className
+  className,
 }: OfferBannerProps) {
-  const isPrimary = variant === "primary"
+  const isPrimary = variant === "primary";
 
   return (
     <motion.div
@@ -39,16 +39,18 @@ export function OfferBanner({
       className={cn(
         "relative overflow-hidden rounded-2xl group cursor-pointer",
         isPrimary ? "h-64 md:h-80" : "h-48 md:h-56",
-        className
+        className,
       )}
     >
       {/* Fondo con gradiente */}
-      <div className={cn(
-        "absolute inset-0",
-        isPrimary 
-          ? "bg-gradient-to-br from-purple-600 via-pink-600 to-cyan-600"
-          : "bg-gradient-to-br from-slate-800 via-purple-800 to-slate-900"
-      )} />
+      <div
+        className={cn(
+          "absolute inset-0",
+          isPrimary
+            ? "bg-gradient-to-br from-purple-600 via-pink-600 to-cyan-600"
+            : "bg-gradient-to-br from-slate-800 via-purple-800 to-slate-900",
+        )}
+      />
 
       {/* Patrón de fondo animado */}
       <div className="absolute inset-0 opacity-10">
@@ -63,17 +65,17 @@ export function OfferBanner({
           <motion.div
             key={i}
             initial={{ opacity: 0, scale: 0 }}
-            animate={{ 
-              opacity: [0, 1, 0], 
+            animate={{
+              opacity: [0, 1, 0],
               scale: [0, 1, 0],
               x: [0, Math.random() * 100 - 50],
-              y: [0, Math.random() * 100 - 50]
+              y: [0, Math.random() * 100 - 50],
             }}
             transition={{
               duration: 4,
               repeat: Infinity,
               delay: i * 0.5,
-              ease: "easeInOut"
+              ease: "easeInOut",
             }}
             className="absolute w-2 h-2 bg-white rounded-full"
             style={{
@@ -130,7 +132,7 @@ export function OfferBanner({
           transition={{ delay: 0.3 }}
           className={cn(
             "font-bold text-white mb-4 leading-tight",
-            isPrimary ? "text-2xl md:text-4xl" : "text-xl md:text-2xl"
+            isPrimary ? "text-2xl md:text-4xl" : "text-xl md:text-2xl",
           )}
         >
           {title}
@@ -175,5 +177,5 @@ export function OfferBanner({
         className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12"
       />
     </motion.div>
-  )
+  );
 }

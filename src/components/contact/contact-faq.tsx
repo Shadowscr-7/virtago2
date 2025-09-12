@@ -1,19 +1,23 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { ChevronDown, HelpCircle, MessageCircle, Clock, Users } from "lucide-react"
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ChevronDown,
+  HelpCircle,
+  MessageCircle,
+  Clock,
+  Users,
+} from "lucide-react";
 
 export function ContactFAQ() {
-  const [openItems, setOpenItems] = useState<number[]>([0])
+  const [openItems, setOpenItems] = useState<number[]>([0]);
 
   const toggleItem = (index: number) => {
-    setOpenItems(prev => 
-      prev.includes(index) 
-        ? prev.filter(i => i !== index)
-        : [...prev, index]
-    )
-  }
+    setOpenItems((prev) =>
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index],
+    );
+  };
 
   const faqs = [
     {
@@ -23,17 +27,20 @@ export function ContactFAQ() {
       questions: [
         {
           question: "¿Qué es Virtago y cómo funciona?",
-          answer: "Virtago es una plataforma B2B especializada en la distribución de productos para empresas. Conectamos distribuidores con clientes empresariales, ofreciendo precios mayoristas, gestión de inventario y logística especializada."
+          answer:
+            "Virtago es una plataforma B2B especializada en la distribución de productos para empresas. Conectamos distribuidores con clientes empresariales, ofreciendo precios mayoristas, gestión de inventario y logística especializada.",
         },
         {
           question: "¿Cómo puedo convertirme en distribuidor?",
-          answer: "Para ser distribuidor de Virtago, necesitas completar nuestro proceso de registro, presentar documentación empresarial, cumplir con requisitos mínimos de volumen y pasar por un proceso de verificación. Contacta a nuestro equipo comercial para más información."
+          answer:
+            "Para ser distribuidor de Virtago, necesitas completar nuestro proceso de registro, presentar documentación empresarial, cumplir con requisitos mínimos de volumen y pasar por un proceso de verificación. Contacta a nuestro equipo comercial para más información.",
         },
         {
           question: "¿Cuáles son los métodos de pago disponibles?",
-          answer: "Aceptamos transferencias bancarias, tarjetas de crédito empresariales, cheques certificados y ofrecemos términos de crédito para distribuidores calificados. Los términos específicos dependen del tipo de cuenta y historial crediticio."
-        }
-      ]
+          answer:
+            "Aceptamos transferencias bancarias, tarjetas de crédito empresariales, cheques certificados y ofrecemos términos de crédito para distribuidores calificados. Los términos específicos dependen del tipo de cuenta y historial crediticio.",
+        },
+      ],
     },
     {
       category: "Productos y Precios",
@@ -42,17 +49,20 @@ export function ContactFAQ() {
       questions: [
         {
           question: "¿Por qué no veo precios sin registrarme?",
-          answer: "Virtago es una plataforma B2B exclusiva. Los precios mayoristas y términos comerciales solo están disponibles para usuarios registrados y verificados para proteger nuestras políticas de precios y mantener la exclusividad del canal."
+          answer:
+            "Virtago es una plataforma B2B exclusiva. Los precios mayoristas y términos comerciales solo están disponibles para usuarios registrados y verificados para proteger nuestras políticas de precios y mantener la exclusividad del canal.",
         },
         {
           question: "¿Qué marcas y productos manejan?",
-          answer: "Trabajamos con más de 200 marcas reconocidas en categorías como electrónicos, hogar, herramientas, oficina y más. Nuestro catálogo se actualiza constantemente con nuevos productos y marcas."
+          answer:
+            "Trabajamos con más de 200 marcas reconocidas en categorías como electrónicos, hogar, herramientas, oficina y más. Nuestro catálogo se actualiza constantemente con nuevos productos y marcas.",
         },
         {
           question: "¿Ofrecen productos personalizados o bajo marca propia?",
-          answer: "Sí, para distribuidores de alto volumen ofrecemos servicios de marca blanca, personalización de productos y desarrollo de líneas exclusivas. Contacta a nuestro equipo comercial para conocer los requisitos."
-        }
-      ]
+          answer:
+            "Sí, para distribuidores de alto volumen ofrecemos servicios de marca blanca, personalización de productos y desarrollo de líneas exclusivas. Contacta a nuestro equipo comercial para conocer los requisitos.",
+        },
+      ],
     },
     {
       category: "Envíos y Logística",
@@ -61,17 +71,20 @@ export function ContactFAQ() {
       questions: [
         {
           question: "¿Cuáles son los tiempos de entrega?",
-          answer: "Los tiempos varían según la ubicación y tipo de producto: CDMX y área metropolitana 24-48 horas, interior de la república 3-5 días hábiles. Para productos especiales o bajo pedido, puede tomar 7-15 días hábiles."
+          answer:
+            "Los tiempos varían según la ubicación y tipo de producto: CDMX y área metropolitana 24-48 horas, interior de la república 3-5 días hábiles. Para productos especiales o bajo pedido, puede tomar 7-15 días hábiles.",
         },
         {
           question: "¿Tienen cobertura nacional?",
-          answer: "Sí, tenemos cobertura en todo México a través de nuestra red de centros de distribución y alianzas logísticas. Ofrecemos envío a domicilio, puntos de entrega y servicios especializados para carga pesada."
+          answer:
+            "Sí, tenemos cobertura en todo México a través de nuestra red de centros de distribución y alianzas logísticas. Ofrecemos envío a domicilio, puntos de entrega y servicios especializados para carga pesada.",
         },
         {
           question: "¿Qué pasa si mi pedido llega dañado?",
-          answer: "Tenemos una política de garantía completa. Si tu pedido llega dañado, reporta el incidente dentro de 24 horas con fotos del producto y empaque. Reemplazaremos el producto sin costo adicional."
-        }
-      ]
+          answer:
+            "Tenemos una política de garantía completa. Si tu pedido llega dañado, reporta el incidente dentro de 24 horas con fotos del producto y empaque. Reemplazaremos el producto sin costo adicional.",
+        },
+      ],
     },
     {
       category: "Soporte y Cuenta",
@@ -80,19 +93,22 @@ export function ContactFAQ() {
       questions: [
         {
           question: "¿Cómo puedo actualizar mi información de facturación?",
-          answer: "Puedes actualizar tu información desde tu panel de usuario en la sección 'Mi Cuenta' > 'Datos Fiscales'. Para cambios en razón social o RFC, necesitarás verificación adicional contactando a soporte."
+          answer:
+            "Puedes actualizar tu información desde tu panel de usuario en la sección 'Mi Cuenta' > 'Datos Fiscales'. Para cambios en razón social o RFC, necesitarás verificación adicional contactando a soporte.",
         },
         {
           question: "¿Ofrecen capacitación para usar la plataforma?",
-          answer: "Sí, ofrecemos capacitación gratuita para todos los distribuidores. Incluye sesiones en línea, materiales de apoyo y un gestor de cuenta dedicado para resolver dudas operativas."
+          answer:
+            "Sí, ofrecemos capacitación gratuita para todos los distribuidores. Incluye sesiones en línea, materiales de apoyo y un gestor de cuenta dedicado para resolver dudas operativas.",
         },
         {
           question: "¿Cómo funciona el sistema de crédito?",
-          answer: "El crédito se asigna basado en historial crediticio, volumen de compras y referencias comerciales. Los términos van desde 15 hasta 90 días según la calificación. Evaluamos las solicitudes de crédito mensualmente."
-        }
-      ]
-    }
-  ]
+          answer:
+            "El crédito se asigna basado en historial crediticio, volumen de compras y referencias comerciales. Los términos van desde 15 hasta 90 días según la calificación. Evaluamos las solicitudes de crédito mensualmente.",
+        },
+      ],
+    },
+  ];
 
   return (
     <section className="py-20 bg-gray-50 dark:bg-slate-900">
@@ -114,13 +130,14 @@ export function ContactFAQ() {
             </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Encuentra respuestas rápidas a las consultas más comunes sobre nuestros servicios y plataforma.
+            Encuentra respuestas rápidas a las consultas más comunes sobre
+            nuestros servicios y plataforma.
           </p>
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {faqs.map((category, categoryIndex) => {
-            const Icon = category.icon
+            const Icon = category.icon;
             return (
               <motion.div
                 key={category.category}
@@ -132,25 +149,34 @@ export function ContactFAQ() {
               >
                 {/* Category Header */}
                 <div className="flex items-center gap-3 mb-6">
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${category.color} flex items-center justify-center`}>
+                  <div
+                    className={`w-12 h-12 rounded-xl bg-gradient-to-r ${category.color} flex items-center justify-center`}
+                  >
                     <Icon className="h-6 w-6 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-foreground">{category.category}</h3>
+                  <h3 className="text-xl font-bold text-foreground">
+                    {category.category}
+                  </h3>
                 </div>
 
                 {/* Questions */}
                 <div className="space-y-3">
                   {category.questions.map((faq, questionIndex) => {
-                    const globalIndex = categoryIndex * 10 + questionIndex
-                    const isOpen = openItems.includes(globalIndex)
-                    
+                    const globalIndex = categoryIndex * 10 + questionIndex;
+                    const isOpen = openItems.includes(globalIndex);
+
                     return (
-                      <div key={questionIndex} className="border border-gray-100 dark:border-slate-700 rounded-xl overflow-hidden">
+                      <div
+                        key={questionIndex}
+                        className="border border-gray-100 dark:border-slate-700 rounded-xl overflow-hidden"
+                      >
                         <button
                           onClick={() => toggleItem(globalIndex)}
                           className="w-full px-4 py-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
                         >
-                          <span className="font-medium text-foreground pr-4">{faq.question}</span>
+                          <span className="font-medium text-foreground pr-4">
+                            {faq.question}
+                          </span>
                           <motion.div
                             animate={{ rotate: isOpen ? 180 : 0 }}
                             transition={{ duration: 0.2 }}
@@ -158,7 +184,7 @@ export function ContactFAQ() {
                             <ChevronDown className="h-5 w-5 text-muted-foreground" />
                           </motion.div>
                         </button>
-                        
+
                         <AnimatePresence>
                           {isOpen && (
                             <motion.div
@@ -175,11 +201,11 @@ export function ContactFAQ() {
                           )}
                         </AnimatePresence>
                       </div>
-                    )
+                    );
                   })}
                 </div>
               </motion.div>
-            )
+            );
           })}
         </div>
 
@@ -196,7 +222,9 @@ export function ContactFAQ() {
               ¿No encuentras lo que buscas?
             </h3>
             <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-              Nuestro equipo de soporte está disponible para ayudarte con cualquier consulta específica sobre nuestros productos y servicios.
+              Nuestro equipo de soporte está disponible para ayudarte con
+              cualquier consulta específica sobre nuestros productos y
+              servicios.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all inline-flex items-center justify-center gap-2">
@@ -211,5 +239,5 @@ export function ContactFAQ() {
         </motion.div>
       </div>
     </section>
-  )
+  );
 }

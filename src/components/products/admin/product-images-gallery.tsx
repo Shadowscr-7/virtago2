@@ -1,84 +1,96 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import Image from "next/image"
-import { Image as ImageIcon, Upload, X, Star, ArrowUp, ArrowDown } from "lucide-react"
-import type { ProductData } from "@/app/admin/productos/[id]/page"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import Image from "next/image";
+import {
+  Image as ImageIcon,
+  Upload,
+  X,
+  Star,
+  ArrowUp,
+  ArrowDown,
+} from "lucide-react";
+import type { ProductData } from "@/app/admin/productos/[id]/page";
 
 interface ProductImagesGalleryProps {
-  productData: ProductData
-  isEditing: boolean
-  onChange: (updates: Partial<ProductData>) => void
+  productData: ProductData;
+  isEditing: boolean;
+  onChange: (updates: Partial<ProductData>) => void;
 }
 
 export function ProductImagesGallery({
   productData,
   isEditing,
-  onChange
+  onChange,
 }: ProductImagesGalleryProps) {
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files
-    if (!files) return
+    const files = event.target.files;
+    if (!files) return;
 
     // Aquí iría la lógica para subir las imágenes
-    console.log("Subiendo imágenes:", files)
-    
+    console.log("Subiendo imágenes:", files);
+
     // Simular agregado de nuevas imágenes
     const newImages = Array.from(files).map((file, index) => ({
       id: `new-${Date.now()}-${index}`,
       url: URL.createObjectURL(file),
       alt: file.name,
       isPrimary: false,
-      order: productData.images.length + index + 1
-    }))
+      order: productData.images.length + index + 1,
+    }));
 
     onChange({
-      images: [...productData.images, ...newImages]
-    })
-  }
+      images: [...productData.images, ...newImages],
+    });
+  };
 
   const removeImage = (imageId: string) => {
-    const updatedImages = productData.images.filter(img => img.id !== imageId)
-    onChange({ images: updatedImages })
-    
+    const updatedImages = productData.images.filter(
+      (img) => img.id !== imageId,
+    );
+    onChange({ images: updatedImages });
+
     // Ajustar el índice seleccionado si es necesario
     if (selectedImageIndex >= updatedImages.length) {
-      setSelectedImageIndex(Math.max(0, updatedImages.length - 1))
+      setSelectedImageIndex(Math.max(0, updatedImages.length - 1));
     }
-  }
+  };
 
   const setPrimaryImage = (imageId: string) => {
-    const updatedImages = productData.images.map(img => ({
+    const updatedImages = productData.images.map((img) => ({
       ...img,
-      isPrimary: img.id === imageId
-    }))
-    onChange({ images: updatedImages })
-  }
+      isPrimary: img.id === imageId,
+    }));
+    onChange({ images: updatedImages });
+  };
 
-  const moveImage = (imageId: string, direction: 'up' | 'down') => {
-    const currentIndex = productData.images.findIndex(img => img.id === imageId)
-    if (currentIndex === -1) return
+  const moveImage = (imageId: string, direction: "up" | "down") => {
+    const currentIndex = productData.images.findIndex(
+      (img) => img.id === imageId,
+    );
+    if (currentIndex === -1) return;
 
-    const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
-    if (newIndex < 0 || newIndex >= productData.images.length) return
+    const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    if (newIndex < 0 || newIndex >= productData.images.length) return;
 
-    const updatedImages = [...productData.images]
-    const [movedImage] = updatedImages.splice(currentIndex, 1)
-    updatedImages.splice(newIndex, 0, movedImage)
+    const updatedImages = [...productData.images];
+    const [movedImage] = updatedImages.splice(currentIndex, 1);
+    updatedImages.splice(newIndex, 0, movedImage);
 
     // Actualizar órdenes
     const imagesWithOrder = updatedImages.map((img, index) => ({
       ...img,
-      order: index + 1
-    }))
+      order: index + 1,
+    }));
 
-    onChange({ images: imagesWithOrder })
-  }
+    onChange({ images: imagesWithOrder });
+  };
 
-  const primaryImage = productData.images.find(img => img.isPrimary) || productData.images[0]
+  const primaryImage =
+    productData.images.find((img) => img.isPrimary) || productData.images[0];
 
   return (
     <motion.div
@@ -116,11 +128,13 @@ export function ProductImagesGallery({
             <div className="w-full h-full flex items-center justify-center">
               <div className="text-center">
                 <ImageIcon className="w-16 h-16 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-500 dark:text-gray-400">No hay imagen principal</p>
+                <p className="text-gray-500 dark:text-gray-400">
+                  No hay imagen principal
+                </p>
               </div>
             </div>
           )}
-          
+
           {primaryImage && (
             <div className="absolute top-3 left-3">
               <span className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
@@ -137,7 +151,7 @@ export function ProductImagesGallery({
         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
           Todas las imágenes ({productData.images.length})
         </h3>
-        
+
         <div className="grid grid-cols-3 gap-3">
           {productData.images.map((image, index) => (
             <motion.div
@@ -145,8 +159,8 @@ export function ProductImagesGallery({
               whileHover={{ scale: 1.05 }}
               className={`relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${
                 selectedImageIndex === index
-                  ? 'border-purple-500 ring-2 ring-purple-500/30'
-                  : 'border-white/20 hover:border-purple-300'
+                  ? "border-purple-500 ring-2 ring-purple-500/30"
+                  : "border-white/20 hover:border-purple-300"
               }`}
               onClick={() => setSelectedImageIndex(index)}
             >
@@ -157,34 +171,34 @@ export function ProductImagesGallery({
                 className="object-cover"
                 sizes="(max-width: 768px) 33vw, (max-width: 1200px) 16vw, 11vw"
               />
-              
+
               {image.isPrimary && (
                 <div className="absolute top-1 left-1">
                   <Star className="w-3 h-3 text-yellow-500 fill-current" />
                 </div>
               )}
-              
+
               {isEditing && (
                 <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={(e) => {
-                      e.stopPropagation()
-                      setPrimaryImage(image.id)
+                      e.stopPropagation();
+                      setPrimaryImage(image.id);
                     }}
                     className="p-1 bg-yellow-500 hover:bg-yellow-600 text-white rounded"
                     title="Establecer como principal"
                   >
                     <Star className="w-3 h-3" />
                   </motion.button>
-                  
+
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={(e) => {
-                      e.stopPropagation()
-                      moveImage(image.id, 'up')
+                      e.stopPropagation();
+                      moveImage(image.id, "up");
                     }}
                     className="p-1 bg-blue-500 hover:bg-blue-600 text-white rounded"
                     title="Mover arriba"
@@ -192,13 +206,13 @@ export function ProductImagesGallery({
                   >
                     <ArrowUp className="w-3 h-3" />
                   </motion.button>
-                  
+
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={(e) => {
-                      e.stopPropagation()
-                      moveImage(image.id, 'down')
+                      e.stopPropagation();
+                      moveImage(image.id, "down");
                     }}
                     className="p-1 bg-blue-500 hover:bg-blue-600 text-white rounded"
                     title="Mover abajo"
@@ -206,13 +220,13 @@ export function ProductImagesGallery({
                   >
                     <ArrowDown className="w-3 h-3" />
                   </motion.button>
-                  
+
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
                     onClick={(e) => {
-                      e.stopPropagation()
-                      removeImage(image.id)
+                      e.stopPropagation();
+                      removeImage(image.id);
                     }}
                     className="p-1 bg-red-500 hover:bg-red-600 text-white rounded"
                     title="Eliminar imagen"
@@ -223,7 +237,7 @@ export function ProductImagesGallery({
               )}
             </motion.div>
           ))}
-          
+
           {/* Botón para agregar imágenes */}
           {isEditing && (
             <motion.label
@@ -232,7 +246,9 @@ export function ProductImagesGallery({
             >
               <div className="text-center">
                 <Upload className="w-6 h-6 text-gray-400 mx-auto mb-1" />
-                <span className="text-xs text-gray-500 dark:text-gray-400">Agregar</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  Agregar
+                </span>
               </div>
               <input
                 type="file"
@@ -267,12 +283,16 @@ export function ProductImagesGallery({
             </div>
             <div>
               <span className="text-gray-500 dark:text-gray-400">Estado:</span>
-              <span className={`ml-2 px-2 py-1 rounded text-xs font-medium ${
-                productData.images[selectedImageIndex].isPrimary
-                  ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300'
-                  : 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300'
-              }`}>
-                {productData.images[selectedImageIndex].isPrimary ? 'Principal' : 'Secundaria'}
+              <span
+                className={`ml-2 px-2 py-1 rounded text-xs font-medium ${
+                  productData.images[selectedImageIndex].isPrimary
+                    ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
+                    : "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300"
+                }`}
+              >
+                {productData.images[selectedImageIndex].isPrimary
+                  ? "Principal"
+                  : "Secundaria"}
               </span>
             </div>
           </div>
@@ -287,10 +307,9 @@ export function ProductImagesGallery({
             No hay imágenes
           </h3>
           <p className="text-gray-500 dark:text-gray-400 mb-4">
-            {isEditing 
+            {isEditing
               ? "Agrega imágenes del producto para mostrar a los clientes"
-              : "Este producto no tiene imágenes configuradas"
-            }
+              : "Este producto no tiene imágenes configuradas"}
           </p>
           {isEditing && (
             <label className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all cursor-pointer">
@@ -308,5 +327,5 @@ export function ProductImagesGallery({
         </div>
       )}
     </motion.div>
-  )
+  );
 }

@@ -1,68 +1,69 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { 
-  Grid3X3, 
-  List, 
-  ArrowUpDown, 
-  Star, 
-  Heart, 
-  ShoppingCart, 
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Grid3X3,
+  List,
+  ArrowUpDown,
+  Star,
+  Heart,
+  ShoppingCart,
   Eye,
   Package,
-  AlertCircle
-} from "lucide-react"
-import { ProductFilters } from "./products-section"
-import { QuantityModal } from "./quantity-modal"
-import { StyledSelect } from "@/components/ui/styled-select"
-import Image from "next/image"
-import Link from "next/link"
-import { useCartStore } from "@/components/cart/cart-store"
+  AlertCircle,
+} from "lucide-react";
+import { ProductFilters } from "./products-section";
+import { QuantityModal } from "./quantity-modal";
+import { StyledSelect } from "@/components/ui/styled-select";
+import Image from "next/image";
+import Link from "next/link";
+import { useCartStore } from "@/components/cart/cart-store";
 
 interface Product {
-  id: string
-  name: string
-  brand: string
-  supplier: string
-  image: string
-  price: number
-  originalPrice?: number
-  description: string
-  category: string
-  subcategory: string
-  inStock: boolean
-  stockQuantity: number
-  rating?: number
-  reviews?: number
-  tags: string[]
-  specifications: Record<string, string>
+  id: string;
+  name: string;
+  brand: string;
+  supplier: string;
+  image: string;
+  price: number;
+  originalPrice?: number;
+  description: string;
+  category: string;
+  subcategory: string;
+  inStock: boolean;
+  stockQuantity: number;
+  rating?: number;
+  reviews?: number;
+  tags: string[];
+  specifications: Record<string, string>;
 }
 
 interface ProductsGridProps {
-  products: Product[]
-  viewMode: "grid" | "list"
-  onViewModeChange: (mode: "grid" | "list") => void
-  isLoading: boolean
-  filters: ProductFilters
-  onFiltersChange: (filters: ProductFilters) => void
+  products: Product[];
+  viewMode: "grid" | "list";
+  onViewModeChange: (mode: "grid" | "list") => void;
+  isLoading: boolean;
+  filters: ProductFilters;
+  onFiltersChange: (filters: ProductFilters) => void;
 }
 
-export function ProductsGrid({ 
-  products, 
-  viewMode, 
-  onViewModeChange, 
+export function ProductsGrid({
+  products,
+  viewMode,
+  onViewModeChange,
   isLoading,
   filters,
-  onFiltersChange
+  onFiltersChange,
 }: ProductsGridProps) {
-  const [favorites, setFavorites] = useState<Set<string>>(new Set())
-  const [currentPage, setCurrentPage] = useState(1)
-  const [quantityModalProduct, setQuantityModalProduct] = useState<Product | null>(null)
-  const [isQuantityModalOpen, setIsQuantityModalOpen] = useState(false)
-  const itemsPerPage = 12
-  
-  const { addItem } = useCartStore()
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [currentPage, setCurrentPage] = useState(1);
+  const [quantityModalProduct, setQuantityModalProduct] =
+    useState<Product | null>(null);
+  const [isQuantityModalOpen, setIsQuantityModalOpen] = useState(false);
+  const itemsPerPage = 12;
+
+  const { addItem } = useCartStore();
 
   const sortOptions = [
     { value: "relevance", label: "Relevancia" },
@@ -71,37 +72,37 @@ export function ProductsGrid({
     { value: "name-asc", label: "Nombre: A-Z" },
     { value: "name-desc", label: "Nombre: Z-A" },
     { value: "rating", label: "Mejor Valorados" },
-    { value: "newest", label: "Más Recientes" }
-  ]
+    { value: "newest", label: "Más Recientes" },
+  ];
 
   const toggleFavorite = (productId: string) => {
-    setFavorites(prev => {
-      const newSet = new Set(prev)
+    setFavorites((prev) => {
+      const newSet = new Set(prev);
       if (newSet.has(productId)) {
-        newSet.delete(productId)
+        newSet.delete(productId);
       } else {
-        newSet.add(productId)
+        newSet.add(productId);
       }
-      return newSet
-    })
-  }
+      return newSet;
+    });
+  };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 0
-    }).format(price)
-  }
+    return new Intl.NumberFormat("es-AR", {
+      style: "currency",
+      currency: "ARS",
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
 
   const calculateDiscount = (original: number, current: number) => {
-    return Math.round(((original - current) / original) * 100)
-  }
+    return Math.round(((original - current) / original) * 100);
+  };
 
   const handleAddToCart = (product: Product) => {
-    setQuantityModalProduct(product)
-    setIsQuantityModalOpen(true)
-  }
+    setQuantityModalProduct(product);
+    setIsQuantityModalOpen(true);
+  };
 
   const handleCartConfirm = (product: Product, quantity: number) => {
     addItem({
@@ -109,7 +110,7 @@ export function ProductsGrid({
       name: product.name,
       brand: product.brand,
       supplier: product.supplier,
-      supplierId: product.supplier.toLowerCase().replace(/\s+/g, '-'),
+      supplierId: product.supplier.toLowerCase().replace(/\s+/g, "-"),
       image: product.image,
       price: product.price,
       originalPrice: product.originalPrice,
@@ -117,20 +118,23 @@ export function ProductsGrid({
       inStock: product.inStock,
       stockQuantity: product.stockQuantity,
       category: product.category,
-      specifications: product.specifications
-    })
-    setIsQuantityModalOpen(false)
-  }
+      specifications: product.specifications,
+    });
+    setIsQuantityModalOpen(false);
+  };
 
   // Pagination
-  const totalPages = Math.ceil(products.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const currentProducts = products.slice(startIndex, endIndex)
+  const totalPages = Math.ceil(products.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentProducts = products.slice(startIndex, endIndex);
 
   const ProductCard = ({ product }: { product: Product }) => {
-    const isOnSale = product.originalPrice && product.originalPrice > product.price
-    const discount = isOnSale ? calculateDiscount(product.originalPrice!, product.price) : 0
+    const isOnSale =
+      product.originalPrice && product.originalPrice > product.price;
+    const discount = isOnSale
+      ? calculateDiscount(product.originalPrice!, product.price)
+      : 0;
 
     return (
       <motion.div
@@ -149,7 +153,7 @@ export function ProductsGrid({
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
           />
-          
+
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-2">
             {isOnSale && (
@@ -175,13 +179,13 @@ export function ProductsGrid({
               onClick={() => toggleFavorite(product.id)}
               className={`p-2 rounded-full backdrop-blur-sm transition-colors ${
                 favorites.has(product.id)
-                  ? 'bg-red-500 text-white'
-                  : 'bg-white/90 text-slate-600 hover:bg-red-500 hover:text-white'
+                  ? "bg-red-500 text-white"
+                  : "bg-white/90 text-slate-600 hover:bg-red-500 hover:text-white"
               }`}
             >
               <Heart className="w-4 h-4" />
             </button>
-            <Link 
+            <Link
               href={`/producto/${product.id}`}
               className="p-2 bg-white/90 text-slate-600 rounded-full backdrop-blur-sm hover:bg-blue-500 hover:text-white transition-colors"
             >
@@ -191,13 +195,13 @@ export function ProductsGrid({
 
           {/* Quick Add */}
           <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <button 
+            <button
               onClick={() => handleAddToCart(product)}
               disabled={!product.inStock}
               className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
             >
               <ShoppingCart className="w-4 h-4" />
-              {product.inStock ? 'Agregar al Carrito' : 'Sin Stock'}
+              {product.inStock ? "Agregar al Carrito" : "Sin Stock"}
             </button>
           </div>
         </div>
@@ -223,8 +227,8 @@ export function ProductsGrid({
                     key={i}
                     className={`w-4 h-4 ${
                       i < Math.floor(product.rating!)
-                        ? 'fill-yellow-400 text-yellow-400'
-                        : 'text-slate-300'
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-slate-300"
                     }`}
                   />
                 ))}
@@ -249,7 +253,7 @@ export function ProductsGrid({
 
           {/* Tags */}
           <div className="flex flex-wrap gap-1 mb-3">
-            {product.tags.slice(0, 3).map(tag => (
+            {product.tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
                 className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-1 rounded-full"
@@ -275,12 +279,15 @@ export function ProductsGrid({
           </div>
         </div>
       </motion.div>
-    )
-  }
+    );
+  };
 
   const ProductListItem = ({ product }: { product: Product }) => {
-    const isOnSale = product.originalPrice && product.originalPrice > product.price
-    const discount = isOnSale ? calculateDiscount(product.originalPrice!, product.price) : 0
+    const isOnSale =
+      product.originalPrice && product.originalPrice > product.price;
+    const discount = isOnSale
+      ? calculateDiscount(product.originalPrice!, product.price)
+      : 0;
 
     return (
       <motion.div
@@ -300,7 +307,7 @@ export function ProductsGrid({
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-300"
             />
-            
+
             {/* Badges */}
             <div className="absolute top-2 left-2 flex flex-col gap-1">
               {isOnSale && (
@@ -344,8 +351,8 @@ export function ProductsGrid({
                           key={i}
                           className={`w-4 h-4 ${
                             i < Math.floor(product.rating!)
-                              ? 'fill-yellow-400 text-yellow-400'
-                              : 'text-slate-300'
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-slate-300"
                           }`}
                         />
                       ))}
@@ -358,7 +365,7 @@ export function ProductsGrid({
 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-1">
-                  {product.tags.slice(0, 4).map(tag => (
+                  {product.tags.slice(0, 4).map((tag) => (
                     <span
                       key={tag}
                       className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-1 rounded-full"
@@ -404,25 +411,25 @@ export function ProductsGrid({
                     onClick={() => toggleFavorite(product.id)}
                     className={`p-2 rounded-lg transition-colors ${
                       favorites.has(product.id)
-                        ? 'bg-red-500 text-white'
-                        : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-red-500 hover:text-white'
+                        ? "bg-red-500 text-white"
+                        : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-red-500 hover:text-white"
                     }`}
                   >
                     <Heart className="w-4 h-4" />
                   </button>
-                  <Link 
+                  <Link
                     href={`/producto/${product.id}`}
                     className="p-2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-blue-500 hover:text-white transition-colors"
                   >
                     <Eye className="w-4 h-4" />
                   </Link>
-                  <button 
+                  <button
                     onClick={() => handleAddToCart(product)}
                     disabled={!product.inStock}
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                   >
                     <ShoppingCart className="w-4 h-4" />
-                    {product.inStock ? 'Agregar' : 'Sin Stock'}
+                    {product.inStock ? "Agregar" : "Sin Stock"}
                   </button>
                 </div>
               </div>
@@ -430,8 +437,8 @@ export function ProductsGrid({
           </div>
         </div>
       </motion.div>
-    )
-  }
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -439,17 +446,18 @@ export function ProductsGrid({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200/50 dark:border-slate-600/50">
         <div className="flex items-center gap-4">
           <div className="text-slate-700 dark:text-slate-300">
-            <span className="font-semibold">{products.length}</span> productos encontrados
+            <span className="font-semibold">{products.length}</span> productos
+            encontrados
           </div>
-          
+
           {/* View Mode Toggle */}
           <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
             <button
               onClick={() => onViewModeChange("grid")}
               className={`p-2 rounded-md transition-colors ${
                 viewMode === "grid"
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-600'
+                  ? "bg-blue-600 text-white"
+                  : "text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-600"
               }`}
             >
               <Grid3X3 className="w-4 h-4" />
@@ -458,8 +466,8 @@ export function ProductsGrid({
               onClick={() => onViewModeChange("list")}
               className={`p-2 rounded-md transition-colors ${
                 viewMode === "list"
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-600'
+                  ? "bg-blue-600 text-white"
+                  : "text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-600"
               }`}
             >
               <List className="w-4 h-4" />
@@ -473,9 +481,9 @@ export function ProductsGrid({
           <StyledSelect
             value={filters.sortBy}
             onChange={(value) => onFiltersChange({ ...filters, sortBy: value })}
-            options={sortOptions.map(option => ({
+            options={sortOptions.map((option) => ({
               value: option.value,
-              label: option.label
+              label: option.label,
             }))}
             className="min-w-[200px]"
           />
@@ -508,12 +516,12 @@ export function ProductsGrid({
                   : "space-y-4"
               }
             >
-              {currentProducts.map(product =>
+              {currentProducts.map((product) =>
                 viewMode === "grid" ? (
                   <ProductCard key={product.id} product={product} />
                 ) : (
                   <ProductListItem key={product.id} product={product} />
-                )
+                ),
               )}
             </motion.div>
           </AnimatePresence>
@@ -533,17 +541,19 @@ export function ProductsGrid({
                 Intenta ajustar los filtros o realizar una nueva búsqueda
               </p>
               <button
-                onClick={() => onFiltersChange({
-                  search: "",
-                  category: "all",
-                  subcategory: "all",
-                  brand: "all",
-                  supplier: "all",
-                  priceRange: "all",
-                  sortBy: "relevance",
-                  inStockOnly: false,
-                  onSaleOnly: false
-                })}
+                onClick={() =>
+                  onFiltersChange({
+                    search: "",
+                    category: "all",
+                    subcategory: "all",
+                    brand: "all",
+                    supplier: "all",
+                    priceRange: "all",
+                    sortBy: "relevance",
+                    inStockOnly: false,
+                    onSaleOnly: false,
+                  })
+                }
                 className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
               >
                 Limpiar filtros
@@ -555,29 +565,31 @@ export function ProductsGrid({
           {products.length > itemsPerPage && (
             <div className="flex justify-center items-center gap-2 mt-8">
               <button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
                 className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Anterior
               </button>
-              
+
               {[...Array(totalPages)].map((_, i) => (
                 <button
                   key={i + 1}
                   onClick={() => setCurrentPage(i + 1)}
                   className={`px-4 py-2 rounded-lg transition-colors ${
                     currentPage === i + 1
-                      ? 'bg-blue-600 text-white'
-                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+                      ? "bg-blue-600 text-white"
+                      : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
                   }`}
                 >
                   {i + 1}
                 </button>
               ))}
-              
+
               <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
                 disabled={currentPage === totalPages}
                 className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -596,5 +608,5 @@ export function ProductsGrid({
         onAddToCart={handleCartConfirm}
       />
     </div>
-  )
+  );
 }

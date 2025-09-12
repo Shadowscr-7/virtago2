@@ -1,42 +1,41 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { DollarSign, TrendingUp, Percent } from "lucide-react"
-import type { ProductData } from "@/app/admin/productos/[id]/page"
+import { motion } from "framer-motion";
+import { DollarSign, TrendingUp, Percent } from "lucide-react";
+import type { ProductData } from "@/app/admin/productos/[id]/page";
 
 interface ProductPricingInfoProps {
-  productData: ProductData
-  isEditing: boolean
-  onChange: (updates: Partial<ProductData>) => void
+  productData: ProductData;
+  isEditing: boolean;
+  onChange: (updates: Partial<ProductData>) => void;
 }
 
 export function ProductPricingInfo({
   productData,
   isEditing,
-  onChange
+  onChange,
 }: ProductPricingInfoProps) {
-
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('es-UY', {
-      style: 'currency',
-      currency: 'UYU',
+    return new Intl.NumberFormat("es-UY", {
+      style: "currency",
+      currency: "UYU",
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(amount)
-  }
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
 
   const calculateMargin = (price: number, cost: number) => {
-    if (cost === 0) return 0
-    return ((price - cost) / price) * 100
-  }
+    if (cost === 0) return 0;
+    return ((price - cost) / price) * 100;
+  };
 
   const calculateMarkup = (price: number, cost: number) => {
-    if (cost === 0) return 0
-    return ((price - cost) / cost) * 100
-  }
+    if (cost === 0) return 0;
+    return ((price - cost) / cost) * 100;
+  };
 
-  const margin = calculateMargin(productData.price, productData.costPrice)
-  const markup = calculateMarkup(productData.price, productData.costPrice)
+  const margin = calculateMargin(productData.price, productData.costPrice);
+  const markup = calculateMarkup(productData.price, productData.costPrice);
 
   return (
     <motion.div
@@ -68,7 +67,9 @@ export function ProductPricingInfo({
           </label>
           {isEditing ? (
             <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">
+                $
+              </span>
               <input
                 type="number"
                 value={productData.price}
@@ -95,11 +96,15 @@ export function ProductPricingInfo({
           </label>
           {isEditing ? (
             <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">
+                $
+              </span>
               <input
                 type="number"
                 value={productData.costPrice}
-                onChange={(e) => onChange({ costPrice: Number(e.target.value) })}
+                onChange={(e) =>
+                  onChange({ costPrice: Number(e.target.value) })
+                }
                 className="w-full pl-8 pr-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
                 placeholder="0"
                 min="0"
@@ -122,11 +127,19 @@ export function ProductPricingInfo({
           </label>
           {isEditing ? (
             <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">
+                $
+              </span>
               <input
                 type="number"
-                value={productData.originalPrice || ''}
-                onChange={(e) => onChange({ originalPrice: e.target.value ? Number(e.target.value) : undefined })}
+                value={productData.originalPrice || ""}
+                onChange={(e) =>
+                  onChange({
+                    originalPrice: e.target.value
+                      ? Number(e.target.value)
+                      : undefined,
+                  })
+                }
                 className="w-full pl-8 pr-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
                 placeholder="0"
                 min="0"
@@ -141,11 +154,19 @@ export function ProductPricingInfo({
                     {formatCurrency(productData.originalPrice)}
                   </span>
                   <div className="text-sm bg-red-100/50 dark:bg-red-900/20 text-red-700 dark:text-red-300 px-2 py-1 rounded-md inline-block">
-                    -{Math.round(((productData.originalPrice - productData.price) / productData.originalPrice) * 100)}% OFF
+                    -
+                    {Math.round(
+                      ((productData.originalPrice - productData.price) /
+                        productData.originalPrice) *
+                        100,
+                    )}
+                    % OFF
                   </div>
                 </div>
               ) : (
-                <span className="text-gray-500 dark:text-gray-400">Sin descuento</span>
+                <span className="text-gray-500 dark:text-gray-400">
+                  Sin descuento
+                </span>
               )}
             </div>
           )}
@@ -158,11 +179,19 @@ export function ProductPricingInfo({
           </label>
           {isEditing ? (
             <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">
+                $
+              </span>
               <input
                 type="number"
-                value={productData.wholesalePrice || ''}
-                onChange={(e) => onChange({ wholesalePrice: e.target.value ? Number(e.target.value) : undefined })}
+                value={productData.wholesalePrice || ""}
+                onChange={(e) =>
+                  onChange({
+                    wholesalePrice: e.target.value
+                      ? Number(e.target.value)
+                      : undefined,
+                  })
+                }
                 className="w-full pl-8 pr-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
                 placeholder="0"
                 min="0"
@@ -172,7 +201,9 @@ export function ProductPricingInfo({
           ) : (
             <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
               <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                {productData.wholesalePrice ? formatCurrency(productData.wholesalePrice) : 'No definido'}
+                {productData.wholesalePrice
+                  ? formatCurrency(productData.wholesalePrice)
+                  : "No definido"}
               </span>
             </div>
           )}
@@ -185,11 +216,19 @@ export function ProductPricingInfo({
           </label>
           {isEditing ? (
             <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400">
+                $
+              </span>
               <input
                 type="number"
-                value={productData.minPrice || ''}
-                onChange={(e) => onChange({ minPrice: e.target.value ? Number(e.target.value) : undefined })}
+                value={productData.minPrice || ""}
+                onChange={(e) =>
+                  onChange({
+                    minPrice: e.target.value
+                      ? Number(e.target.value)
+                      : undefined,
+                  })
+                }
                 className="w-full pl-8 pr-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
                 placeholder="0"
                 min="0"
@@ -199,7 +238,9 @@ export function ProductPricingInfo({
           ) : (
             <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
               <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                {productData.minPrice ? formatCurrency(productData.minPrice) : 'No definido'}
+                {productData.minPrice
+                  ? formatCurrency(productData.minPrice)
+                  : "No definido"}
               </span>
             </div>
           )}
@@ -213,7 +254,7 @@ export function ProductPricingInfo({
           {isEditing ? (
             <input
               type="text"
-              value={productData.supplierCode || ''}
+              value={productData.supplierCode || ""}
               onChange={(e) => onChange({ supplierCode: e.target.value })}
               className="w-full px-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
               placeholder="Código del proveedor"
@@ -221,7 +262,7 @@ export function ProductPricingInfo({
           ) : (
             <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
               <span className="text-gray-900 dark:text-white font-mono">
-                {productData.supplierCode || 'No especificado'}
+                {productData.supplierCode || "No especificado"}
               </span>
             </div>
           )}
@@ -234,13 +275,15 @@ export function ProductPricingInfo({
           <TrendingUp className="w-5 h-5" />
           Métricas de Rentabilidad
         </h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Margen */}
           <div className="bg-gradient-to-r from-green-50/50 to-emerald-50/50 dark:from-green-900/10 dark:to-emerald-900/10 rounded-xl p-4 border border-green-200/30">
             <div className="flex items-center gap-2 mb-2">
               <Percent className="w-4 h-4 text-green-600" />
-              <span className="text-sm font-medium text-green-700 dark:text-green-300">Margen</span>
+              <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                Margen
+              </span>
             </div>
             <div className="text-2xl font-bold text-green-600 dark:text-green-400">
               {margin.toFixed(1)}%
@@ -254,7 +297,9 @@ export function ProductPricingInfo({
           <div className="bg-gradient-to-r from-blue-50/50 to-cyan-50/50 dark:from-blue-900/10 dark:to-cyan-900/10 rounded-xl p-4 border border-blue-200/30">
             <div className="flex items-center gap-2 mb-2">
               <TrendingUp className="w-4 h-4 text-blue-600" />
-              <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Markup</span>
+              <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                Markup
+              </span>
             </div>
             <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
               {markup.toFixed(1)}%
@@ -268,7 +313,9 @@ export function ProductPricingInfo({
           <div className="bg-gradient-to-r from-purple-50/50 to-pink-50/50 dark:from-purple-900/10 dark:to-pink-900/10 rounded-xl p-4 border border-purple-200/30">
             <div className="flex items-center gap-2 mb-2">
               <DollarSign className="w-4 h-4 text-purple-600" />
-              <span className="text-sm font-medium text-purple-700 dark:text-purple-300">Ganancia</span>
+              <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                Ganancia
+              </span>
             </div>
             <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
               {formatCurrency(productData.price - productData.costPrice)}
@@ -280,5 +327,5 @@ export function ProductPricingInfo({
         </div>
       </div>
     </motion.div>
-  )
+  );
 }

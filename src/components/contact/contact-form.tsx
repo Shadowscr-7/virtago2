@@ -1,21 +1,21 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { 
-  Send, 
-  User, 
-  Mail, 
-  Phone, 
-  Building2, 
-  MessageSquare, 
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  Send,
+  User,
+  Mail,
+  Phone,
+  Building2,
+  MessageSquare,
   CheckCircle,
-  Loader2
-} from "lucide-react"
-import { cn } from "@/lib/utils"
+  Loader2,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const contactSchema = z.object({
   firstName: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
@@ -26,52 +26,52 @@ const contactSchema = z.object({
   subject: z.string().min(5, "El asunto debe tener al menos 5 caracteres"),
   message: z.string().min(20, "El mensaje debe tener al menos 20 caracteres"),
   department: z.string().min(1, "Selecciona un departamento"),
-  urgency: z.string().min(1, "Selecciona el nivel de urgencia")
-})
+  urgency: z.string().min(1, "Selecciona el nivel de urgencia"),
+});
 
-type ContactFormData = z.infer<typeof contactSchema>
+type ContactFormData = z.infer<typeof contactSchema>;
 
 export function ContactForm() {
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset
+    reset,
   } = useForm<ContactFormData>({
-    resolver: zodResolver(contactSchema)
-  })
+    resolver: zodResolver(contactSchema),
+  });
 
   const departments = [
     { value: "ventas", label: "Ventas B2B" },
     { value: "soporte", label: "Soporte Técnico" },
     { value: "distribuidores", label: "Distribuidores" },
-    { value: "general", label: "Consulta General" }
-  ]
+    { value: "general", label: "Consulta General" },
+  ];
 
   const urgencyLevels = [
     { value: "baja", label: "Baja - Consulta general" },
     { value: "media", label: "Media - Necesito respuesta pronto" },
     { value: "alta", label: "Alta - Es urgente" },
-    { value: "critica", label: "Crítica - Problema grave" }
-  ]
+    { value: "critica", label: "Crítica - Problema grave" },
+  ];
 
   const onSubmit = async (data: ContactFormData) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
       // Simular envío del formulario
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      console.log('Form data:', data)
-      setIsSubmitted(true)
-      reset()
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      console.log("Form data:", data);
+      setIsSubmitted(true);
+      reset();
     } catch (error) {
-      console.error('Error sending message:', error)
+      console.error("Error sending message:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   if (isSubmitted) {
     return (
@@ -91,12 +91,15 @@ export function ContactForm() {
               <CheckCircle className="h-8 w-8 text-white" />
             </div>
           </motion.div>
-          
-          <h3 className="text-2xl font-bold text-foreground mb-4">¡Mensaje Enviado!</h3>
+
+          <h3 className="text-2xl font-bold text-foreground mb-4">
+            ¡Mensaje Enviado!
+          </h3>
           <p className="text-muted-foreground mb-6">
-            Gracias por contactarnos. Nuestro equipo te responderá en las próximas 24 horas.
+            Gracias por contactarnos. Nuestro equipo te responderá en las
+            próximas 24 horas.
           </p>
-          
+
           <button
             onClick={() => setIsSubmitted(false)}
             className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all"
@@ -105,7 +108,7 @@ export function ContactForm() {
           </button>
         </div>
       </motion.div>
-    )
+    );
   }
 
   return (
@@ -117,9 +120,12 @@ export function ContactForm() {
       className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-xl border border-gray-100 dark:border-slate-700"
     >
       <div className="mb-8">
-        <h3 className="text-2xl font-bold text-foreground mb-2">Envíanos un Mensaje</h3>
+        <h3 className="text-2xl font-bold text-foreground mb-2">
+          Envíanos un Mensaje
+        </h3>
         <p className="text-muted-foreground">
-          Completa el formulario y nos pondremos en contacto contigo lo antes posible.
+          Completa el formulario y nos pondremos en contacto contigo lo antes
+          posible.
         </p>
       </div>
 
@@ -137,13 +143,15 @@ export function ContactForm() {
                 className={cn(
                   "w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-foreground placeholder-muted-foreground",
                   "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                  errors.firstName && "border-red-500 focus:ring-red-500"
+                  errors.firstName && "border-red-500 focus:ring-red-500",
                 )}
                 placeholder="Juan"
               />
             </div>
             {errors.firstName && (
-              <p className="text-red-500 text-sm mt-1">{errors.firstName.message}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.firstName.message}
+              </p>
             )}
           </div>
 
@@ -158,13 +166,15 @@ export function ContactForm() {
                 className={cn(
                   "w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-foreground placeholder-muted-foreground",
                   "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                  errors.lastName && "border-red-500 focus:ring-red-500"
+                  errors.lastName && "border-red-500 focus:ring-red-500",
                 )}
                 placeholder="Pérez"
               />
             </div>
             {errors.lastName && (
-              <p className="text-red-500 text-sm mt-1">{errors.lastName.message}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.lastName.message}
+              </p>
             )}
           </div>
         </div>
@@ -183,13 +193,15 @@ export function ContactForm() {
                 className={cn(
                   "w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-foreground placeholder-muted-foreground",
                   "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                  errors.email && "border-red-500 focus:ring-red-500"
+                  errors.email && "border-red-500 focus:ring-red-500",
                 )}
                 placeholder="juan@empresa.com"
               />
             </div>
             {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.email.message}
+              </p>
             )}
           </div>
 
@@ -205,13 +217,15 @@ export function ContactForm() {
                 className={cn(
                   "w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-foreground placeholder-muted-foreground",
                   "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                  errors.phone && "border-red-500 focus:ring-red-500"
+                  errors.phone && "border-red-500 focus:ring-red-500",
                 )}
                 placeholder="+52 55 1234 5678"
               />
             </div>
             {errors.phone && (
-              <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.phone.message}
+              </p>
             )}
           </div>
         </div>
@@ -228,13 +242,15 @@ export function ContactForm() {
               className={cn(
                 "w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-foreground placeholder-muted-foreground",
                 "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                errors.company && "border-red-500 focus:ring-red-500"
+                errors.company && "border-red-500 focus:ring-red-500",
               )}
               placeholder="Distribuidora ABC S.A. de C.V."
             />
           </div>
           {errors.company && (
-            <p className="text-red-500 text-sm mt-1">{errors.company.message}</p>
+            <p className="text-red-500 text-sm mt-1">
+              {errors.company.message}
+            </p>
           )}
         </div>
 
@@ -249,7 +265,7 @@ export function ContactForm() {
               className={cn(
                 "w-full px-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-foreground",
                 "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                errors.department && "border-red-500 focus:ring-red-500"
+                errors.department && "border-red-500 focus:ring-red-500",
               )}
             >
               <option value="">Selecciona un departamento</option>
@@ -260,7 +276,9 @@ export function ContactForm() {
               ))}
             </select>
             {errors.department && (
-              <p className="text-red-500 text-sm mt-1">{errors.department.message}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.department.message}
+              </p>
             )}
           </div>
 
@@ -273,7 +291,7 @@ export function ContactForm() {
               className={cn(
                 "w-full px-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-foreground",
                 "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                errors.urgency && "border-red-500 focus:ring-red-500"
+                errors.urgency && "border-red-500 focus:ring-red-500",
               )}
             >
               <option value="">Selecciona la urgencia</option>
@@ -284,7 +302,9 @@ export function ContactForm() {
               ))}
             </select>
             {errors.urgency && (
-              <p className="text-red-500 text-sm mt-1">{errors.urgency.message}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.urgency.message}
+              </p>
             )}
           </div>
         </div>
@@ -299,12 +319,14 @@ export function ContactForm() {
             className={cn(
               "w-full px-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-foreground placeholder-muted-foreground",
               "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-              errors.subject && "border-red-500 focus:ring-red-500"
+              errors.subject && "border-red-500 focus:ring-red-500",
             )}
             placeholder="Consulta sobre precios mayoristas"
           />
           {errors.subject && (
-            <p className="text-red-500 text-sm mt-1">{errors.subject.message}</p>
+            <p className="text-red-500 text-sm mt-1">
+              {errors.subject.message}
+            </p>
           )}
         </div>
 
@@ -321,13 +343,15 @@ export function ContactForm() {
               className={cn(
                 "w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-foreground placeholder-muted-foreground resize-none",
                 "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                errors.message && "border-red-500 focus:ring-red-500"
+                errors.message && "border-red-500 focus:ring-red-500",
               )}
               placeholder="Describe tu consulta o solicitud detalladamente..."
             />
           </div>
           {errors.message && (
-            <p className="text-red-500 text-sm mt-1">{errors.message.message}</p>
+            <p className="text-red-500 text-sm mt-1">
+              {errors.message.message}
+            </p>
           )}
         </div>
 
@@ -343,7 +367,7 @@ export function ContactForm() {
             "hover:from-purple-600 hover:via-pink-600 hover:to-cyan-600",
             "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2",
             "disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2",
-            isLoading && "animate-pulse"
+            isLoading && "animate-pulse",
           )}
         >
           {isLoading ? (
@@ -360,5 +384,5 @@ export function ContactForm() {
         </motion.button>
       </form>
     </motion.div>
-  )
+  );
 }

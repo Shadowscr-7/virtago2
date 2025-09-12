@@ -1,37 +1,40 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react"
-import Image from "next/image"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
+import Image from "next/image";
 
 interface ProductImageGalleryProps {
-  images: string[]
-  productName: string
+  images: string[];
+  productName: string;
 }
 
-export function ProductImageGallery({ images, productName }: ProductImageGalleryProps) {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [isZoomed, setIsZoomed] = useState(false)
-  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 })
+export function ProductImageGallery({
+  images,
+  productName,
+}: ProductImageGalleryProps) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
 
   const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % images.length)
-  }
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
 
   const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
-  }
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isZoomed) return
-    
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = ((e.clientX - rect.left) / rect.width) * 100
-    const y = ((e.clientY - rect.top) / rect.height) * 100
-    
-    setZoomPosition({ x, y })
-  }
+    if (!isZoomed) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    setZoomPosition({ x, y });
+  };
 
   return (
     <div className="space-y-4">
@@ -48,7 +51,7 @@ export function ProductImageGallery({ images, productName }: ProductImageGallery
             alt={`${productName} - Imagen ${currentImageIndex + 1}`}
             fill
             className={`object-cover transition-transform duration-300 ${
-              isZoomed ? 'scale-150' : 'scale-100'
+              isZoomed ? "scale-150" : "scale-100"
             }`}
             style={
               isZoomed
@@ -104,8 +107,8 @@ export function ProductImageGallery({ images, productName }: ProductImageGallery
               onClick={() => setCurrentImageIndex(index)}
               className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all duration-300 ${
                 index === currentImageIndex
-                  ? 'border-blue-500 ring-2 ring-blue-500/30'
-                  : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                  ? "border-blue-500 ring-2 ring-blue-500/30"
+                  : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
               }`}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -123,8 +126,11 @@ export function ProductImageGallery({ images, productName }: ProductImageGallery
 
       {/* Image Tips */}
       <div className="text-center text-sm text-slate-500 dark:text-slate-400">
-        <p>Pasa el cursor sobre la imagen para hacer zoom • Click en las miniaturas para cambiar</p>
+        <p>
+          Pasa el cursor sobre la imagen para hacer zoom • Click en las
+          miniaturas para cambiar
+        </p>
       </div>
     </div>
-  )
+  );
 }

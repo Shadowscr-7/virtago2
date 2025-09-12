@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { AlertTriangle } from "lucide-react"
+import { motion } from "framer-motion";
+import { AlertTriangle } from "lucide-react";
 
 interface UnsavedChangesNotificationProps {
-  hasChanges: boolean
-  onSave: () => void
-  onDiscard: () => void
+  hasChanges: boolean;
+  onSave: () => void;
+  onDiscard: () => void;
 }
 
-export function UnsavedChangesNotification({ 
-  hasChanges, 
-  onSave, 
-  onDiscard 
+export function UnsavedChangesNotification({
+  hasChanges,
+  onSave,
+  onDiscard,
 }: UnsavedChangesNotificationProps) {
-  if (!hasChanges) return null
+  if (!hasChanges) return null;
 
   return (
     <motion.div
@@ -28,7 +28,9 @@ export function UnsavedChangesNotification({
       </div>
       <div>
         <span className="font-medium block">Cambios no guardados</span>
-        <span className="text-sm opacity-90">Tienes modificaciones pendientes</span>
+        <span className="text-sm opacity-90">
+          Tienes modificaciones pendientes
+        </span>
       </div>
       <div className="flex gap-2 ml-4">
         <motion.button
@@ -49,5 +51,5 @@ export function UnsavedChangesNotification({
         </motion.button>
       </div>
     </motion.div>
-  )
+  );
 }

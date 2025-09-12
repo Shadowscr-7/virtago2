@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import Image from "next/image"
-import { 
-  Check, 
-  Eye, 
-  Edit, 
-  Trash2, 
+import { motion } from "framer-motion";
+import Image from "next/image";
+import {
+  Check,
+  Eye,
+  Edit,
+  Trash2,
   ExternalLink,
   Tag,
   Calendar,
@@ -14,93 +14,93 @@ import {
   Sparkles,
   AlertCircle,
   Clock,
-  CheckCircle
-} from "lucide-react"
+  CheckCircle,
+} from "lucide-react";
 
 interface ImageData {
-  id: string
-  filename: string
-  originalName: string
-  size: number
-  format: string
-  url: string
-  thumbnailUrl: string
-  uploadedAt: string
+  id: string;
+  filename: string;
+  originalName: string;
+  size: number;
+  format: string;
+  url: string;
+  thumbnailUrl: string;
+  uploadedAt: string;
   assignedTo?: {
-    productId: string
-    productName: string
-    productSku: string
-  }
-  status: 'UPLOADED' | 'ASSIGNED' | 'PROCESSING' | 'ERROR'
-  tags: string[]
+    productId: string;
+    productName: string;
+    productSku: string;
+  };
+  status: "UPLOADED" | "ASSIGNED" | "PROCESSING" | "ERROR";
+  tags: string[];
   aiSuggestions?: {
     productMatches: Array<{
-      productId: string
-      productName: string
-      productSku: string
-      confidence: number
-    }>
-  }
+      productId: string;
+      productName: string;
+      productSku: string;
+      confidence: number;
+    }>;
+  };
 }
 
 interface ImageGalleryProps {
-  images: ImageData[]
-  selectedImages: string[]
-  viewMode: 'grid' | 'list'
-  onImageSelect: (imageId: string) => void
-  onSelectAll: () => void
+  images: ImageData[];
+  selectedImages: string[];
+  viewMode: "grid" | "list";
+  onImageSelect: (imageId: string) => void;
+  onSelectAll: () => void;
 }
 
-export function ImageGallery({ 
-  images, 
-  selectedImages, 
-  viewMode, 
-  onImageSelect, 
-  onSelectAll 
+export function ImageGallery({
+  images,
+  selectedImages,
+  viewMode,
+  onImageSelect,
+  onSelectAll,
 }: ImageGalleryProps) {
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 B'
-    const k = 1024
-    const sizes = ['B', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
-  }
+    if (bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+  };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
+    return new Date(dateString).toLocaleDateString("es-ES", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'ASSIGNED':
-        return <CheckCircle className="w-4 h-4 text-green-500" />
-      case 'PROCESSING':
-        return <Clock className="w-4 h-4 text-blue-500 animate-pulse" />
-      case 'ERROR':
-        return <AlertCircle className="w-4 h-4 text-red-500" />
+      case "ASSIGNED":
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case "PROCESSING":
+        return <Clock className="w-4 h-4 text-blue-500 animate-pulse" />;
+      case "ERROR":
+        return <AlertCircle className="w-4 h-4 text-red-500" />;
       default:
-        return <FileText className="w-4 h-4 text-gray-400" />
+        return <FileText className="w-4 h-4 text-gray-400" />;
     }
-  }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'ASSIGNED':
-        return 'from-green-500/20 to-emerald-500/20 border-green-200 dark:border-green-700'
-      case 'PROCESSING':
-        return 'from-blue-500/20 to-cyan-500/20 border-blue-200 dark:border-blue-700'
-      case 'ERROR':
-        return 'from-red-500/20 to-pink-500/20 border-red-200 dark:border-red-700'
+      case "ASSIGNED":
+        return "from-green-500/20 to-emerald-500/20 border-green-200 dark:border-green-700";
+      case "PROCESSING":
+        return "from-blue-500/20 to-cyan-500/20 border-blue-200 dark:border-blue-700";
+      case "ERROR":
+        return "from-red-500/20 to-pink-500/20 border-red-200 dark:border-red-700";
       default:
-        return 'from-gray-500/20 to-slate-500/20 border-gray-200 dark:border-gray-700'
+        return "from-gray-500/20 to-slate-500/20 border-gray-200 dark:border-gray-700";
     }
-  }
+  };
 
   if (images.length === 0) {
     return (
@@ -116,10 +116,11 @@ export function ImageGallery({
           No hay imágenes
         </h3>
         <p className="text-gray-600 dark:text-gray-300">
-          Comienza cargando algunas imágenes para administrar tu catálogo de productos
+          Comienza cargando algunas imágenes para administrar tu catálogo de
+          productos
         </p>
       </motion.div>
-    )
+    );
   }
 
   return (
@@ -136,7 +137,9 @@ export function ImageGallery({
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                checked={selectedImages.length === images.length && images.length > 0}
+                checked={
+                  selectedImages.length === images.length && images.length > 0
+                }
                 onChange={onSelectAll}
                 className="sr-only peer"
               />
@@ -145,10 +148,9 @@ export function ImageGallery({
               </div>
             </label>
             <span className="text-sm text-gray-600 dark:text-gray-300">
-              {selectedImages.length > 0 
+              {selectedImages.length > 0
                 ? `${selectedImages.length} de ${images.length} seleccionadas`
-                : `${images.length} imagen${images.length !== 1 ? 'es' : ''}`
-              }
+                : `${images.length} imagen${images.length !== 1 ? "es" : ""}`}
             </span>
           </div>
         </div>
@@ -156,7 +158,7 @@ export function ImageGallery({
 
       {/* Contenido */}
       <div className="p-6">
-        {viewMode === 'grid' ? (
+        {viewMode === "grid" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {images.map((image, index) => (
               <motion.div
@@ -167,19 +169,22 @@ export function ImageGallery({
                 className={`
                   group relative bg-gradient-to-br ${getStatusColor(image.status)} 
                   backdrop-blur-sm border rounded-2xl p-4 hover:shadow-xl transition-all duration-300 cursor-pointer
-                  ${selectedImages.includes(image.id) ? 'ring-2 ring-purple-500 shadow-lg' : ''}
+                  ${selectedImages.includes(image.id) ? "ring-2 ring-purple-500 shadow-lg" : ""}
                 `}
                 onClick={() => onImageSelect(image.id)}
               >
                 {/* Checkbox */}
                 <div className="absolute top-2 left-2 z-10">
-                  <div className={`
+                  <div
+                    className={`
                     w-5 h-5 rounded-md border-2 transition-all duration-200 flex items-center justify-center
-                    ${selectedImages.includes(image.id) 
-                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 border-purple-500' 
-                      : 'bg-white/80 border-gray-300 group-hover:border-purple-400'
+                    ${
+                      selectedImages.includes(image.id)
+                        ? "bg-gradient-to-r from-purple-500 to-pink-500 border-purple-500"
+                        : "bg-white/80 border-gray-300 group-hover:border-purple-400"
                     }
-                  `}>
+                  `}
+                  >
                     {selectedImages.includes(image.id) && (
                       <Check className="w-3 h-3 text-white" />
                     )}
@@ -199,7 +204,7 @@ export function ImageGallery({
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  
+
                   {/* Overlay de acciones */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
                     <div className="flex gap-2">
@@ -221,7 +226,7 @@ export function ImageGallery({
                   <h4 className="font-medium text-gray-900 dark:text-white text-sm truncate">
                     {image.originalName}
                   </h4>
-                  
+
                   <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                     <span>{image.format}</span>
                     <span>{formatFileSize(image.size)}</span>
@@ -240,22 +245,25 @@ export function ImageGallery({
                   )}
 
                   {/* Sugerencias de IA */}
-                  {image.aiSuggestions && image.aiSuggestions.productMatches.length > 0 && !image.assignedTo && (
-                    <div className="bg-purple-100 dark:bg-purple-900/20 rounded-lg p-2">
-                      <div className="flex items-center gap-1 mb-1">
-                        <Sparkles className="w-3 h-3 text-purple-500" />
-                        <span className="text-xs font-medium text-purple-700 dark:text-purple-300">
-                          IA sugiere:
-                        </span>
+                  {image.aiSuggestions &&
+                    image.aiSuggestions.productMatches.length > 0 &&
+                    !image.assignedTo && (
+                      <div className="bg-purple-100 dark:bg-purple-900/20 rounded-lg p-2">
+                        <div className="flex items-center gap-1 mb-1">
+                          <Sparkles className="w-3 h-3 text-purple-500" />
+                          <span className="text-xs font-medium text-purple-700 dark:text-purple-300">
+                            IA sugiere:
+                          </span>
+                        </div>
+                        <p className="text-xs text-purple-600 dark:text-purple-400 truncate">
+                          {image.aiSuggestions.productMatches[0].productName}
+                        </p>
+                        <p className="text-xs text-purple-500 dark:text-purple-400">
+                          {image.aiSuggestions.productMatches[0].confidence}%
+                          confianza
+                        </p>
                       </div>
-                      <p className="text-xs text-purple-600 dark:text-purple-400 truncate">
-                        {image.aiSuggestions.productMatches[0].productName}
-                      </p>
-                      <p className="text-xs text-purple-500 dark:text-purple-400">
-                        {image.aiSuggestions.productMatches[0].confidence}% confianza
-                      </p>
-                    </div>
-                  )}
+                    )}
 
                   {/* Tags */}
                   {image.tags.length > 0 && (
@@ -291,18 +299,21 @@ export function ImageGallery({
                 className={`
                   group flex items-center gap-4 p-4 bg-gradient-to-r from-white/60 to-gray-50/60 dark:from-slate-700/60 dark:to-slate-600/60 
                   backdrop-blur-sm border border-white/30 dark:border-gray-600/30 rounded-xl hover:shadow-lg transition-all duration-200 cursor-pointer
-                  ${selectedImages.includes(image.id) ? 'ring-2 ring-purple-500 bg-gradient-to-r from-purple-50/80 to-pink-50/80 dark:from-purple-900/20 dark:to-pink-900/20' : ''}
+                  ${selectedImages.includes(image.id) ? "ring-2 ring-purple-500 bg-gradient-to-r from-purple-50/80 to-pink-50/80 dark:from-purple-900/20 dark:to-pink-900/20" : ""}
                 `}
                 onClick={() => onImageSelect(image.id)}
               >
                 {/* Checkbox */}
-                <div className={`
+                <div
+                  className={`
                   w-5 h-5 rounded-md border-2 transition-all duration-200 flex items-center justify-center flex-shrink-0
-                  ${selectedImages.includes(image.id) 
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 border-purple-500' 
-                    : 'bg-white/80 border-gray-300 group-hover:border-purple-400'
+                  ${
+                    selectedImages.includes(image.id)
+                      ? "bg-gradient-to-r from-purple-500 to-pink-500 border-purple-500"
+                      : "bg-white/80 border-gray-300 group-hover:border-purple-400"
                   }
-                `}>
+                `}
+                >
                   {selectedImages.includes(image.id) && (
                     <Check className="w-3 h-3 text-white" />
                   )}
@@ -326,9 +337,11 @@ export function ImageGallery({
                     </h4>
                     {getStatusIcon(image.status)}
                   </div>
-                  
+
                   <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-                    <span>{image.format} • {formatFileSize(image.size)}</span>
+                    <span>
+                      {image.format} • {formatFileSize(image.size)}
+                    </span>
                     <div className="flex items-center gap-1">
                       <Calendar className="w-3 h-3" />
                       <span>{formatDate(image.uploadedAt)}</span>
@@ -348,16 +361,20 @@ export function ImageGallery({
                         ({image.assignedTo.productSku})
                       </span>
                     </div>
-                  ) : image.aiSuggestions && image.aiSuggestions.productMatches.length > 0 && (
-                    <div className="mt-2 flex items-center gap-2">
-                      <Sparkles className="w-3 h-3 text-purple-500" />
-                      <span className="text-xs text-purple-700 dark:text-purple-300">
-                        IA sugiere: {image.aiSuggestions.productMatches[0].productName}
-                      </span>
-                      <span className="text-xs text-purple-500 dark:text-purple-400">
-                        ({image.aiSuggestions.productMatches[0].confidence}%)
-                      </span>
-                    </div>
+                  ) : (
+                    image.aiSuggestions &&
+                    image.aiSuggestions.productMatches.length > 0 && (
+                      <div className="mt-2 flex items-center gap-2">
+                        <Sparkles className="w-3 h-3 text-purple-500" />
+                        <span className="text-xs text-purple-700 dark:text-purple-300">
+                          IA sugiere:{" "}
+                          {image.aiSuggestions.productMatches[0].productName}
+                        </span>
+                        <span className="text-xs text-purple-500 dark:text-purple-400">
+                          ({image.aiSuggestions.productMatches[0].confidence}%)
+                        </span>
+                      </div>
+                    )
                   )}
                 </div>
 
@@ -379,5 +396,5 @@ export function ImageGallery({
         )}
       </div>
     </motion.div>
-  )
+  );
 }

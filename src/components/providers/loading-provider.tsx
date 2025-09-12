@@ -1,49 +1,51 @@
-"use client"
+"use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface LoadingContextType {
-  isLoading: boolean
-  setIsLoading: (loading: boolean) => void
-  startLoading: () => void
-  stopLoading: () => void
+  isLoading: boolean;
+  setIsLoading: (loading: boolean) => void;
+  startLoading: () => void;
+  stopLoading: () => void;
 }
 
-const LoadingContext = createContext<LoadingContextType | undefined>(undefined)
+const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 
 export function useLoading() {
-  const context = useContext(LoadingContext)
+  const context = useContext(LoadingContext);
   if (!context) {
-    throw new Error('useLoading must be used within a LoadingProvider')
+    throw new Error("useLoading must be used within a LoadingProvider");
   }
-  return context
+  return context;
 }
 
 interface LoadingProviderProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export function LoadingProvider({ children }: LoadingProviderProps) {
-  const [isLoading, setIsLoading] = useState(false) // Cambiar a false para evitar hidratación
-  const [mounted, setMounted] = useState(false)
+  const [isLoading, setIsLoading] = useState(false); // Cambiar a false para evitar hidratación
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true)
+    setMounted(true);
     // Simular carga inicial solo en el cliente
-    setIsLoading(true)
+    setIsLoading(true);
     const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 2000)
+      setIsLoading(false);
+    }, 2000);
 
-    return () => clearTimeout(timer)
-  }, [])
+    return () => clearTimeout(timer);
+  }, []);
 
-  const startLoading = () => setIsLoading(true)
-  const stopLoading = () => setIsLoading(false)
+  const startLoading = () => setIsLoading(true);
+  const stopLoading = () => setIsLoading(false);
 
   return (
-    <LoadingContext.Provider value={{ isLoading, setIsLoading, startLoading, stopLoading }}>
+    <LoadingContext.Provider
+      value={{ isLoading, setIsLoading, startLoading, stopLoading }}
+    >
       {mounted && (
         <AnimatePresence mode="wait">
           {isLoading && <VirtagoLoader />}
@@ -51,7 +53,7 @@ export function LoadingProvider({ children }: LoadingProviderProps) {
       )}
       {(!isLoading || !mounted) && children}
     </LoadingContext.Provider>
-  )
+  );
 }
 
 function VirtagoLoader() {
@@ -115,7 +117,7 @@ function VirtagoLoader() {
                 duration: 1.2,
                 repeat: Infinity,
                 delay: index * 0.1,
-                ease: "easeInOut"
+                ease: "easeInOut",
               }}
               className="w-1 bg-gradient-to-t from-purple-500 to-cyan-500 rounded-full"
             />
@@ -139,17 +141,17 @@ function VirtagoLoader() {
           <motion.div
             key={i}
             initial={{ opacity: 0, scale: 0 }}
-            animate={{ 
-              opacity: [0, 1, 0], 
+            animate={{
+              opacity: [0, 1, 0],
               scale: [0, 1, 0],
               x: [0, Math.random() * 200 - 100],
-              y: [0, Math.random() * 200 - 100]
+              y: [0, Math.random() * 200 - 100],
             }}
             transition={{
               duration: 3,
               repeat: Infinity,
               delay: i * 0.2,
-              ease: "easeInOut"
+              ease: "easeInOut",
             }}
             className="absolute w-2 h-2 bg-purple-400 rounded-full"
             style={{
@@ -160,5 +162,5 @@ function VirtagoLoader() {
         ))}
       </div>
     </motion.div>
-  )
+  );
 }

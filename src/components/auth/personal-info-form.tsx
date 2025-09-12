@@ -1,12 +1,19 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { ArrowLeft, User, Phone, Calendar, MapPin, ArrowRight } from "lucide-react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { cn } from "@/lib/utils"
-import { useAuthStore } from "@/store/auth"
+import { motion } from "framer-motion";
+import {
+  ArrowLeft,
+  User,
+  Phone,
+  Calendar,
+  MapPin,
+  ArrowRight,
+} from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/auth";
 
 const personalInfoSchema = z.object({
   firstName: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
@@ -15,19 +22,19 @@ const personalInfoSchema = z.object({
   birthDate: z.string().min(1, "La fecha de nacimiento es requerida"),
   address: z.string().min(5, "La dirección debe tener al menos 5 caracteres"),
   city: z.string().min(2, "La ciudad es requerida"),
-  country: z.string().min(2, "El país es requerido")
-})
+  country: z.string().min(2, "El país es requerido"),
+});
 
-type PersonalInfoFormData = z.infer<typeof personalInfoSchema>
+type PersonalInfoFormData = z.infer<typeof personalInfoSchema>;
 
 interface PersonalInfoFormProps {
-  onBack: () => void
-  onSuccess: () => void
+  onBack: () => void;
+  onSuccess: () => void;
 }
 
 export function PersonalInfoForm({ onBack, onSuccess }: PersonalInfoFormProps) {
-  const { updatePersonalInfo, isLoading, user } = useAuthStore()
-  
+  const { updatePersonalInfo, isLoading, user } = useAuthStore();
+
   const {
     register,
     handleSubmit,
@@ -35,24 +42,24 @@ export function PersonalInfoForm({ onBack, onSuccess }: PersonalInfoFormProps) {
   } = useForm<PersonalInfoFormData>({
     resolver: zodResolver(personalInfoSchema),
     defaultValues: {
-      firstName: user?.firstName || '',
-      lastName: user?.lastName || '',
-      phone: '',
-      birthDate: '',
-      address: '',
-      city: '',
-      country: 'México'
-    }
-  })
+      firstName: user?.firstName || "",
+      lastName: user?.lastName || "",
+      phone: "",
+      birthDate: "",
+      address: "",
+      city: "",
+      country: "México",
+    },
+  });
 
   const onSubmit = async (data: PersonalInfoFormData) => {
     try {
-      await updatePersonalInfo(data)
-      onSuccess()
+      await updatePersonalInfo(data);
+      onSuccess();
     } catch (error) {
-      console.error('Error updating personal info:', error)
+      console.error("Error updating personal info:", error);
     }
-  }
+  };
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -87,7 +94,7 @@ export function PersonalInfoForm({ onBack, onSuccess }: PersonalInfoFormProps) {
               </div>
             </div>
           </motion.div>
-          
+
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -96,7 +103,7 @@ export function PersonalInfoForm({ onBack, onSuccess }: PersonalInfoFormProps) {
           >
             Información Personal
           </motion.h1>
-          
+
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -126,13 +133,15 @@ export function PersonalInfoForm({ onBack, onSuccess }: PersonalInfoFormProps) {
                   className={cn(
                     "w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50",
                     "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                    errors.firstName && "border-red-500 focus:ring-red-500"
+                    errors.firstName && "border-red-500 focus:ring-red-500",
                   )}
                   placeholder="Juan"
                 />
               </div>
               {errors.firstName && (
-                <p className="text-red-400 text-sm mt-1">{errors.firstName.message}</p>
+                <p className="text-red-400 text-sm mt-1">
+                  {errors.firstName.message}
+                </p>
               )}
             </motion.div>
 
@@ -151,13 +160,15 @@ export function PersonalInfoForm({ onBack, onSuccess }: PersonalInfoFormProps) {
                   className={cn(
                     "w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50",
                     "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                    errors.lastName && "border-red-500 focus:ring-red-500"
+                    errors.lastName && "border-red-500 focus:ring-red-500",
                   )}
                   placeholder="Pérez"
                 />
               </div>
               {errors.lastName && (
-                <p className="text-red-400 text-sm mt-1">{errors.lastName.message}</p>
+                <p className="text-red-400 text-sm mt-1">
+                  {errors.lastName.message}
+                </p>
               )}
             </motion.div>
           </div>
@@ -180,13 +191,15 @@ export function PersonalInfoForm({ onBack, onSuccess }: PersonalInfoFormProps) {
                   className={cn(
                     "w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50",
                     "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                    errors.phone && "border-red-500 focus:ring-red-500"
+                    errors.phone && "border-red-500 focus:ring-red-500",
                   )}
                   placeholder="+52 55 1234 5678"
                 />
               </div>
               {errors.phone && (
-                <p className="text-red-400 text-sm mt-1">{errors.phone.message}</p>
+                <p className="text-red-400 text-sm mt-1">
+                  {errors.phone.message}
+                </p>
               )}
             </motion.div>
 
@@ -206,12 +219,14 @@ export function PersonalInfoForm({ onBack, onSuccess }: PersonalInfoFormProps) {
                   className={cn(
                     "w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50",
                     "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                    errors.birthDate && "border-red-500 focus:ring-red-500"
+                    errors.birthDate && "border-red-500 focus:ring-red-500",
                   )}
                 />
               </div>
               {errors.birthDate && (
-                <p className="text-red-400 text-sm mt-1">{errors.birthDate.message}</p>
+                <p className="text-red-400 text-sm mt-1">
+                  {errors.birthDate.message}
+                </p>
               )}
             </motion.div>
           </div>
@@ -232,13 +247,15 @@ export function PersonalInfoForm({ onBack, onSuccess }: PersonalInfoFormProps) {
                 className={cn(
                   "w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50",
                   "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                  errors.address && "border-red-500 focus:ring-red-500"
+                  errors.address && "border-red-500 focus:ring-red-500",
                 )}
                 placeholder="Calle 123, Colonia Centro"
               />
             </div>
             {errors.address && (
-              <p className="text-red-400 text-sm mt-1">{errors.address.message}</p>
+              <p className="text-red-400 text-sm mt-1">
+                {errors.address.message}
+              </p>
             )}
           </motion.div>
 
@@ -259,13 +276,15 @@ export function PersonalInfoForm({ onBack, onSuccess }: PersonalInfoFormProps) {
                   className={cn(
                     "w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50",
                     "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                    errors.city && "border-red-500 focus:ring-red-500"
+                    errors.city && "border-red-500 focus:ring-red-500",
                   )}
                   placeholder="Ciudad de México"
                 />
               </div>
               {errors.city && (
-                <p className="text-red-400 text-sm mt-1">{errors.city.message}</p>
+                <p className="text-red-400 text-sm mt-1">
+                  {errors.city.message}
+                </p>
               )}
             </motion.div>
 
@@ -284,21 +303,39 @@ export function PersonalInfoForm({ onBack, onSuccess }: PersonalInfoFormProps) {
                   className={cn(
                     "w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white",
                     "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                    errors.country && "border-red-500 focus:ring-red-500"
+                    errors.country && "border-red-500 focus:ring-red-500",
                   )}
                 >
-                  <option value="México" className="bg-slate-800">México</option>
-                  <option value="Estados Unidos" className="bg-slate-800">Estados Unidos</option>
-                  <option value="Canadá" className="bg-slate-800">Canadá</option>
-                  <option value="España" className="bg-slate-800">España</option>
-                  <option value="Colombia" className="bg-slate-800">Colombia</option>
-                  <option value="Argentina" className="bg-slate-800">Argentina</option>
-                  <option value="Chile" className="bg-slate-800">Chile</option>
-                  <option value="Perú" className="bg-slate-800">Perú</option>
+                  <option value="México" className="bg-slate-800">
+                    México
+                  </option>
+                  <option value="Estados Unidos" className="bg-slate-800">
+                    Estados Unidos
+                  </option>
+                  <option value="Canadá" className="bg-slate-800">
+                    Canadá
+                  </option>
+                  <option value="España" className="bg-slate-800">
+                    España
+                  </option>
+                  <option value="Colombia" className="bg-slate-800">
+                    Colombia
+                  </option>
+                  <option value="Argentina" className="bg-slate-800">
+                    Argentina
+                  </option>
+                  <option value="Chile" className="bg-slate-800">
+                    Chile
+                  </option>
+                  <option value="Perú" className="bg-slate-800">
+                    Perú
+                  </option>
                 </select>
               </div>
               {errors.country && (
-                <p className="text-red-400 text-sm mt-1">{errors.country.message}</p>
+                <p className="text-red-400 text-sm mt-1">
+                  {errors.country.message}
+                </p>
               )}
             </motion.div>
           </div>
@@ -318,7 +355,7 @@ export function PersonalInfoForm({ onBack, onSuccess }: PersonalInfoFormProps) {
               "hover:from-blue-600 hover:via-purple-600 hover:to-pink-600",
               "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-transparent",
               "disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2",
-              isLoading && "animate-pulse"
+              isLoading && "animate-pulse",
             )}
           >
             {isLoading ? (
@@ -347,7 +384,7 @@ export function PersonalInfoForm({ onBack, onSuccess }: PersonalInfoFormProps) {
             <span className="text-white/70 text-sm">75%</span>
           </div>
           <div className="w-full bg-white/20 rounded-full h-2">
-            <motion.div 
+            <motion.div
               initial={{ width: 0 }}
               animate={{ width: "75%" }}
               transition={{ delay: 1.5, duration: 1 }}
@@ -357,5 +394,5 @@ export function PersonalInfoForm({ onBack, onSuccess }: PersonalInfoFormProps) {
         </motion.div>
       </motion.div>
     </div>
-  )
+  );
 }

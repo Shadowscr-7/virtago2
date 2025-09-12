@@ -1,48 +1,59 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { 
-  MapPin, Phone, Mail, Star, Award, Users, Building, 
-  ExternalLink, MessageCircle, Calendar, TrendingUp, Globe, Clock
-} from "lucide-react"
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Star,
+  Award,
+  Users,
+  Building,
+  ExternalLink,
+  MessageCircle,
+  Calendar,
+  TrendingUp,
+  Globe,
+  Clock,
+} from "lucide-react";
 
 interface Supplier {
-  id: string
-  name: string
-  description: string
-  category: string
-  location: string
-  rating: number
-  reviewsCount: number
-  employees: string
-  yearsInBusiness: number
-  specialties: string[]
-  certifications: string[]
-  partnershipLevel: "básico" | "silver" | "gold" | "platinum" | "estratégico"
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  location: string;
+  rating: number;
+  reviewsCount: number;
+  employees: string;
+  yearsInBusiness: number;
+  specialties: string[];
+  certifications: string[];
+  partnershipLevel: "básico" | "silver" | "gold" | "platinum" | "estratégico";
   contact: {
-    phone: string
-    email: string
-    website?: string
-  }
-  logo: string
-  responseTime: string
-  completionRate: number
-  languages: string[]
-  deliveryTime: string
-  minOrderValue: string
-  paymentTerms: string[]
+    phone: string;
+    email: string;
+    website?: string;
+  };
+  logo: string;
+  responseTime: string;
+  completionRate: number;
+  languages: string[];
+  deliveryTime: string;
+  minOrderValue: string;
+  paymentTerms: string[];
 }
 
 interface SuppliersGridProps {
-  suppliers: Supplier[]
-  loading?: boolean
+  suppliers: Supplier[];
+  loading?: boolean;
 }
 
 interface SupplierModalProps {
-  supplier: Supplier
-  isOpen: boolean
-  onClose: () => void
+  supplier: Supplier;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 function SupplierModal({ supplier, isOpen, onClose }: SupplierModalProps) {
@@ -51,8 +62,8 @@ function SupplierModal({ supplier, isOpen, onClose }: SupplierModalProps) {
     silver: "from-slate-400 to-slate-500",
     gold: "from-yellow-400 to-yellow-500",
     platinum: "from-purple-400 to-purple-500",
-    estratégico: "from-emerald-400 to-emerald-500"
-  }
+    estratégico: "from-emerald-400 to-emerald-500",
+  };
 
   return (
     <AnimatePresence>
@@ -65,7 +76,7 @@ function SupplierModal({ supplier, isOpen, onClose }: SupplierModalProps) {
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={onClose}
           />
-          
+
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -78,7 +89,7 @@ function SupplierModal({ supplier, isOpen, onClose }: SupplierModalProps) {
                 <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shrink-0">
                   {supplier.name.charAt(0)}
                 </div>
-                
+
                 <div className="flex-1">
                   <div className="flex items-start justify-between">
                     <div>
@@ -95,21 +106,24 @@ function SupplierModal({ supplier, isOpen, onClose }: SupplierModalProps) {
                             ({supplier.reviewsCount} reseñas)
                           </span>
                         </div>
-                        <div className={`px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${partnershipColors[supplier.partnershipLevel]}`}>
-                          Partner {supplier.partnershipLevel.charAt(0).toUpperCase() + supplier.partnershipLevel.slice(1)}
+                        <div
+                          className={`px-3 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${partnershipColors[supplier.partnershipLevel]}`}
+                        >
+                          Partner{" "}
+                          {supplier.partnershipLevel.charAt(0).toUpperCase() +
+                            supplier.partnershipLevel.slice(1)}
                         </div>
                       </div>
                     </div>
-                    
+
                     <button
                       onClick={onClose}
                       className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                     >
-                      <span className="sr-only">Cerrar</span>
-                      ✕
+                      <span className="sr-only">Cerrar</span>✕
                     </button>
                   </div>
-                  
+
                   <div className="flex items-center gap-6 text-sm text-slate-600 dark:text-slate-400">
                     <div className="flex items-center gap-2">
                       <MapPin className="w-4 h-4" />
@@ -144,23 +158,39 @@ function SupplierModal({ supplier, isOpen, onClose }: SupplierModalProps) {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center p-4 bg-slate-50 dark:bg-slate-700 rounded-xl">
                   <Clock className="w-6 h-6 text-blue-500 mx-auto mb-2" />
-                  <div className="font-semibold text-slate-900 dark:text-white">{supplier.responseTime}</div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400">Tiempo de Respuesta</div>
+                  <div className="font-semibold text-slate-900 dark:text-white">
+                    {supplier.responseTime}
+                  </div>
+                  <div className="text-xs text-slate-600 dark:text-slate-400">
+                    Tiempo de Respuesta
+                  </div>
                 </div>
                 <div className="text-center p-4 bg-slate-50 dark:bg-slate-700 rounded-xl">
                   <TrendingUp className="w-6 h-6 text-green-500 mx-auto mb-2" />
-                  <div className="font-semibold text-slate-900 dark:text-white">{supplier.completionRate}%</div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400">Tasa de Cumplimiento</div>
+                  <div className="font-semibold text-slate-900 dark:text-white">
+                    {supplier.completionRate}%
+                  </div>
+                  <div className="text-xs text-slate-600 dark:text-slate-400">
+                    Tasa de Cumplimiento
+                  </div>
                 </div>
                 <div className="text-center p-4 bg-slate-50 dark:bg-slate-700 rounded-xl">
                   <Calendar className="w-6 h-6 text-purple-500 mx-auto mb-2" />
-                  <div className="font-semibold text-slate-900 dark:text-white">{supplier.yearsInBusiness}</div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400">Años en el Mercado</div>
+                  <div className="font-semibold text-slate-900 dark:text-white">
+                    {supplier.yearsInBusiness}
+                  </div>
+                  <div className="text-xs text-slate-600 dark:text-slate-400">
+                    Años en el Mercado
+                  </div>
                 </div>
                 <div className="text-center p-4 bg-slate-50 dark:bg-slate-700 rounded-xl">
                   <Globe className="w-6 h-6 text-orange-500 mx-auto mb-2" />
-                  <div className="font-semibold text-slate-900 dark:text-white">{supplier.deliveryTime}</div>
-                  <div className="text-xs text-slate-600 dark:text-slate-400">Tiempo de Entrega</div>
+                  <div className="font-semibold text-slate-900 dark:text-white">
+                    {supplier.deliveryTime}
+                  </div>
+                  <div className="text-xs text-slate-600 dark:text-slate-400">
+                    Tiempo de Entrega
+                  </div>
                 </div>
               </div>
 
@@ -207,24 +237,38 @@ function SupplierModal({ supplier, isOpen, onClose }: SupplierModalProps) {
                   </h3>
                   <div className="space-y-3">
                     <div>
-                      <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Pedido Mínimo:</span>
-                      <span className="ml-2 text-slate-900 dark:text-white">{supplier.minOrderValue}</span>
+                      <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                        Pedido Mínimo:
+                      </span>
+                      <span className="ml-2 text-slate-900 dark:text-white">
+                        {supplier.minOrderValue}
+                      </span>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Términos de Pago:</span>
+                      <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                        Términos de Pago:
+                      </span>
                       <div className="mt-1 flex flex-wrap gap-1">
                         {supplier.paymentTerms.map((term, index) => (
-                          <span key={index} className="px-2 py-1 bg-slate-100 dark:bg-slate-700 rounded text-sm">
+                          <span
+                            key={index}
+                            className="px-2 py-1 bg-slate-100 dark:bg-slate-700 rounded text-sm"
+                          >
                             {term}
                           </span>
                         ))}
                       </div>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Idiomas:</span>
+                      <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                        Idiomas:
+                      </span>
                       <div className="mt-1 flex flex-wrap gap-1">
                         {supplier.languages.map((lang, index) => (
-                          <span key={index} className="px-2 py-1 bg-slate-100 dark:bg-slate-700 rounded text-sm">
+                          <span
+                            key={index}
+                            className="px-2 py-1 bg-slate-100 dark:bg-slate-700 rounded text-sm"
+                          >
                             {lang}
                           </span>
                         ))}
@@ -240,11 +284,15 @@ function SupplierModal({ supplier, isOpen, onClose }: SupplierModalProps) {
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
                       <Phone className="w-5 h-5 text-blue-500" />
-                      <span className="text-slate-900 dark:text-white">{supplier.contact.phone}</span>
+                      <span className="text-slate-900 dark:text-white">
+                        {supplier.contact.phone}
+                      </span>
                     </div>
                     <div className="flex items-center gap-3">
                       <Mail className="w-5 h-5 text-blue-500" />
-                      <span className="text-slate-900 dark:text-white">{supplier.contact.email}</span>
+                      <span className="text-slate-900 dark:text-white">
+                        {supplier.contact.email}
+                      </span>
                     </div>
                     {supplier.contact.website && (
                       <div className="flex items-center gap-3">
@@ -279,25 +327,33 @@ function SupplierModal({ supplier, isOpen, onClose }: SupplierModalProps) {
         </div>
       )}
     </AnimatePresence>
-  )
+  );
 }
 
-export function SuppliersGrid({ suppliers, loading = false }: SuppliersGridProps) {
-  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null)
+export function SuppliersGrid({
+  suppliers,
+  loading = false,
+}: SuppliersGridProps) {
+  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(
+    null,
+  );
 
   const partnershipColors = {
     básico: "from-slate-500 to-slate-600",
     silver: "from-slate-400 to-slate-500",
     gold: "from-yellow-400 to-yellow-500",
     platinum: "from-purple-400 to-purple-500",
-    estratégico: "from-emerald-400 to-emerald-500"
-  }
+    estratégico: "from-emerald-400 to-emerald-500",
+  };
 
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {Array.from({ length: 6 }).map((_, index) => (
-          <div key={index} className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg animate-pulse">
+          <div
+            key={index}
+            className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg animate-pulse"
+          >
             <div className="flex items-start gap-4 mb-4">
               <div className="w-16 h-16 bg-slate-200 dark:bg-slate-700 rounded-xl" />
               <div className="flex-1">
@@ -313,7 +369,7 @@ export function SuppliersGrid({ suppliers, loading = false }: SuppliersGridProps
           </div>
         ))}
       </div>
-    )
+    );
   }
 
   return (
@@ -348,8 +404,11 @@ export function SuppliersGrid({ suppliers, loading = false }: SuppliersGridProps
                     </span>
                   </div>
                 </div>
-                <div className={`inline-block px-2 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${partnershipColors[supplier.partnershipLevel]}`}>
-                  {supplier.partnershipLevel.charAt(0).toUpperCase() + supplier.partnershipLevel.slice(1)}
+                <div
+                  className={`inline-block px-2 py-1 rounded-full text-xs font-semibold text-white bg-gradient-to-r ${partnershipColors[supplier.partnershipLevel]}`}
+                >
+                  {supplier.partnershipLevel.charAt(0).toUpperCase() +
+                    supplier.partnershipLevel.slice(1)}
                 </div>
               </div>
             </div>
@@ -359,7 +418,7 @@ export function SuppliersGrid({ suppliers, loading = false }: SuppliersGridProps
               <p className="text-slate-600 dark:text-slate-400 text-sm line-clamp-2">
                 {supplier.description}
               </p>
-              
+
               <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                 <MapPin className="w-4 h-4" />
                 <span>{supplier.location}</span>
@@ -398,12 +457,20 @@ export function SuppliersGrid({ suppliers, loading = false }: SuppliersGridProps
             {/* Quick Stats */}
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div className="text-center p-2 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                <div className="text-xs text-slate-600 dark:text-slate-400 mb-1">Respuesta</div>
-                <div className="font-semibold text-sm text-slate-900 dark:text-white">{supplier.responseTime}</div>
+                <div className="text-xs text-slate-600 dark:text-slate-400 mb-1">
+                  Respuesta
+                </div>
+                <div className="font-semibold text-sm text-slate-900 dark:text-white">
+                  {supplier.responseTime}
+                </div>
               </div>
               <div className="text-center p-2 bg-slate-50 dark:bg-slate-700 rounded-lg">
-                <div className="text-xs text-slate-600 dark:text-slate-400 mb-1">Cumplimiento</div>
-                <div className="font-semibold text-sm text-slate-900 dark:text-white">{supplier.completionRate}%</div>
+                <div className="text-xs text-slate-600 dark:text-slate-400 mb-1">
+                  Cumplimiento
+                </div>
+                <div className="font-semibold text-sm text-slate-900 dark:text-white">
+                  {supplier.completionRate}%
+                </div>
               </div>
             </div>
 
@@ -411,8 +478,8 @@ export function SuppliersGrid({ suppliers, loading = false }: SuppliersGridProps
             <div className="flex gap-2">
               <button
                 onClick={(e) => {
-                  e.stopPropagation()
-                  setSelectedSupplier(supplier)
+                  e.stopPropagation();
+                  setSelectedSupplier(supplier);
                 }}
                 className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-300"
               >
@@ -438,5 +505,5 @@ export function SuppliersGrid({ suppliers, loading = false }: SuppliersGridProps
         />
       )}
     </>
-  )
+  );
 }

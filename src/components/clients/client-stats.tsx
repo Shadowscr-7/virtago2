@@ -1,46 +1,48 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { FileText, TrendingUp, Calendar, CreditCard } from "lucide-react"
+import { motion } from "framer-motion";
+import { FileText, TrendingUp, Calendar, CreditCard } from "lucide-react";
 
 interface ClientStatsData {
-  registrationDate: string
-  lastPurchase: string
-  totalPurchases: number
-  creditLimit: number
-  currencyCode: string
+  registrationDate: string;
+  lastPurchase: string;
+  totalPurchases: number;
+  creditLimit: number;
+  currencyCode: string;
 }
 
 interface ClientStatsProps {
-  clientData: ClientStatsData
+  clientData: ClientStatsData;
 }
 
 export function ClientStats({ clientData }: ClientStatsProps) {
   const formatCurrency = (amount: number, currency: string) => {
-    const formatter = new Intl.NumberFormat('es-UY', {
-      style: 'currency',
-      currency: currency === 'UYU' ? 'UYU' : currency === 'USD' ? 'USD' : 'EUR',
+    const formatter = new Intl.NumberFormat("es-UY", {
+      style: "currency",
+      currency: currency === "UYU" ? "UYU" : currency === "USD" ? "USD" : "EUR",
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    })
-    return formatter.format(amount)
-  }
+      maximumFractionDigits: 0,
+    });
+    return formatter.format(amount);
+  };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-UY', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    })
-  }
+    return new Date(dateString).toLocaleDateString("es-UY", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
   const daysSinceLastPurchase = Math.floor(
-    (new Date().getTime() - new Date(clientData.lastPurchase).getTime()) / (1000 * 3600 * 24)
-  )
+    (new Date().getTime() - new Date(clientData.lastPurchase).getTime()) /
+      (1000 * 3600 * 24),
+  );
 
   const membershipDays = Math.floor(
-    (new Date().getTime() - new Date(clientData.registrationDate).getTime()) / (1000 * 3600 * 24)
-  )
+    (new Date().getTime() - new Date(clientData.registrationDate).getTime()) /
+      (1000 * 3600 * 24),
+  );
 
   return (
     <motion.div
@@ -87,7 +89,9 @@ export function ClientStats({ clientData }: ClientStatsProps) {
                 {formatDate(clientData.lastPurchase)}
               </div>
               <div className="text-xs text-green-600/70 dark:text-green-400/70 mt-1">
-                {daysSinceLastPurchase === 0 ? 'Hoy' : `Hace ${daysSinceLastPurchase} días`}
+                {daysSinceLastPurchase === 0
+                  ? "Hoy"
+                  : `Hace ${daysSinceLastPurchase} días`}
               </div>
             </div>
           </div>
@@ -101,7 +105,10 @@ export function ClientStats({ clientData }: ClientStatsProps) {
                 Total Compras
               </div>
               <div className="text-lg font-semibold text-purple-900 dark:text-purple-200">
-                {formatCurrency(clientData.totalPurchases, clientData.currencyCode)}
+                {formatCurrency(
+                  clientData.totalPurchases,
+                  clientData.currencyCode,
+                )}
               </div>
               <div className="text-xs text-purple-600/70 dark:text-purple-400/70 mt-1">
                 Volumen acumulado
@@ -118,7 +125,10 @@ export function ClientStats({ clientData }: ClientStatsProps) {
                 Límite de Crédito
               </div>
               <div className="text-lg font-semibold text-amber-900 dark:text-amber-200">
-                {formatCurrency(clientData.creditLimit, clientData.currencyCode)}
+                {formatCurrency(
+                  clientData.creditLimit,
+                  clientData.currencyCode,
+                )}
               </div>
               <div className="text-xs text-amber-600/70 dark:text-amber-400/70 mt-1">
                 Crédito disponible
@@ -128,5 +138,5 @@ export function ClientStats({ clientData }: ClientStatsProps) {
         </div>
       </div>
     </motion.div>
-  )
+  );
 }

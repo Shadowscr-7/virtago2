@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { Save, RotateCcw, AlertTriangle } from "lucide-react"
+import { motion } from "framer-motion";
+import { Save, RotateCcw, AlertTriangle } from "lucide-react";
 
 interface UnsavedChangesNotificationProps {
-  onSave: () => void
-  onDiscard: () => void
+  onSave: () => void;
+  onDiscard: () => void;
 }
 
 export function UnsavedChangesNotification({
   onSave,
-  onDiscard
+  onDiscard,
 }: UnsavedChangesNotificationProps) {
   return (
     <motion.div
@@ -25,7 +25,7 @@ export function UnsavedChangesNotification({
           <div className="flex-shrink-0 p-3 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-xl">
             <AlertTriangle className="w-6 h-6 text-orange-600 dark:text-orange-400" />
           </div>
-          
+
           {/* Contenido */}
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -35,7 +35,7 @@ export function UnsavedChangesNotification({
               Tienes modificaciones pendientes en este producto
             </p>
           </div>
-          
+
           {/* Acciones */}
           <div className="flex items-center gap-3">
             <motion.button
@@ -47,7 +47,7 @@ export function UnsavedChangesNotification({
               <RotateCcw className="w-4 h-4" />
               <span className="font-medium">Descartar</span>
             </motion.button>
-            
+
             <motion.button
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
@@ -61,5 +61,5 @@ export function UnsavedChangesNotification({
         </div>
       </div>
     </motion.div>
-  )
+  );
 }

@@ -1,37 +1,39 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { Heart, ShoppingCart, Eye, Lock } from "lucide-react"
-import Image from "next/image"
-import { cn } from "@/lib/utils"
+import { motion } from "framer-motion";
+import { Heart, ShoppingCart, Eye, Lock } from "lucide-react";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 interface ProductCardProps {
-  name: string
-  brand: string
-  supplier: string
-  image: string
-  price?: number
-  originalPrice?: number
-  description?: string
-  isAuthenticated?: boolean
-  isFavorite?: boolean
-  className?: string
+  name: string;
+  brand: string;
+  supplier: string;
+  image: string;
+  price?: number;
+  originalPrice?: number;
+  description?: string;
+  isAuthenticated?: boolean;
+  isFavorite?: boolean;
+  className?: string;
 }
 
-export function ProductCard({ 
-  name, 
-  brand, 
-  supplier, 
-  image, 
-  price, 
-  originalPrice, 
+export function ProductCard({
+  name,
+  brand,
+  supplier,
+  image,
+  price,
+  originalPrice,
   description,
   isAuthenticated = false,
   isFavorite = false,
-  className 
+  className,
 }: ProductCardProps) {
-  const hasDiscount = originalPrice && price && originalPrice > price
-  const discountPercentage = hasDiscount ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0
+  const hasDiscount = originalPrice && price && originalPrice > price;
+  const discountPercentage = hasDiscount
+    ? Math.round(((originalPrice - price) / originalPrice) * 100)
+    : 0;
 
   return (
     <motion.div
@@ -41,12 +43,12 @@ export function ProductCard({
       className={cn(
         "group relative bg-card rounded-xl border shadow-sm hover:shadow-xl transition-all duration-300",
         "overflow-hidden backdrop-blur-sm",
-        className
+        className,
       )}
     >
       {/* Efecto de gradiente en hover */}
       <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-pink-500/0 to-cyan-500/0 group-hover:from-purple-500/5 group-hover:via-pink-500/5 group-hover:to-cyan-500/5 transition-all duration-500" />
-      
+
       {/* Badge de descuento */}
       {hasDiscount && isAuthenticated && (
         <motion.div
@@ -64,11 +66,13 @@ export function ProductCard({
         whileTap={{ scale: 0.9 }}
         className="absolute top-2 right-2 z-10 p-2 rounded-full bg-background/80 backdrop-blur-sm shadow-lg hover:bg-background transition-colors"
       >
-        <Heart 
+        <Heart
           className={cn(
             "h-4 w-4 transition-colors",
-            isFavorite ? "fill-red-500 text-red-500" : "text-muted-foreground hover:text-red-500"
-          )} 
+            isFavorite
+              ? "fill-red-500 text-red-500"
+              : "text-muted-foreground hover:text-red-500",
+          )}
         />
       </motion.button>
 
@@ -80,7 +84,7 @@ export function ProductCard({
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-110"
         />
-        
+
         {/* Overlay con acciones */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -95,7 +99,7 @@ export function ProductCard({
           >
             <Eye className="h-4 w-4 text-gray-700" />
           </motion.button>
-          
+
           {isAuthenticated && (
             <motion.button
               initial={{ y: 20, opacity: 0 }}
@@ -177,12 +181,12 @@ export function ProductCard({
             "w-full mt-3 py-2 rounded-lg font-medium text-sm transition-all duration-300",
             isAuthenticated
               ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl"
-              : "bg-muted text-muted-foreground cursor-not-allowed"
+              : "bg-muted text-muted-foreground cursor-not-allowed",
           )}
         >
           {isAuthenticated ? "Agregar al carrito" : "Requiere autenticación"}
         </motion.button>
       </div>
     </motion.div>
-  )
+  );
 }

@@ -1,48 +1,48 @@
-"use client"
+"use client";
 
-import { ProductImageGallery } from "./product-image-gallery"
-import { ProductInfoPanel } from "./product-info-panel"
-import { ProductDetailsTabs } from "./product-details-tabs"
-import { motion } from "framer-motion"
-import { ArrowLeft } from "lucide-react"
-import Link from "next/link"
+import { ProductImageGallery } from "./product-image-gallery";
+import { ProductInfoPanel } from "./product-info-panel";
+import { ProductDetailsTabs } from "./product-details-tabs";
+import { motion } from "framer-motion";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 interface Product {
-  id: string
-  name: string
-  brand: string
-  supplier: string
-  images: string[]
-  price: number
-  originalPrice?: number
-  description: string
-  longDescription: string
-  category: string
-  subcategory: string
-  inStock: boolean
-  stockQuantity: number
-  rating?: number
-  reviews?: number
-  tags: string[]
-  specifications: Record<string, string>
-  features: string[]
-  warranty: string
+  id: string;
+  name: string;
+  brand: string;
+  supplier: string;
+  images: string[];
+  price: number;
+  originalPrice?: number;
+  description: string;
+  longDescription: string;
+  category: string;
+  subcategory: string;
+  inStock: boolean;
+  stockQuantity: number;
+  rating?: number;
+  reviews?: number;
+  tags: string[];
+  specifications: Record<string, string>;
+  features: string[];
+  warranty: string;
   shipping: {
-    free: boolean
-    estimatedDays: string
-    cost: number
-  }
+    free: boolean;
+    estimatedDays: string;
+    cost: number;
+  };
   supplier_info: {
-    name: string
-    rating: number
-    reviews: number
-    response_time: string
-    verified: boolean
-  }
+    name: string;
+    rating: number;
+    reviews: number;
+    response_time: string;
+    verified: boolean;
+  };
 }
 
 interface ProductDetailSectionProps {
-  product: Product
+  product: Product;
 }
 
 export function ProductDetailSection({ product }: ProductDetailSectionProps) {
@@ -62,19 +62,29 @@ export function ProductDetailSection({ product }: ProductDetailSectionProps) {
             <ArrowLeft className="w-4 h-4" />
             <span className="font-medium">Volver a Productos</span>
           </Link>
-          
+
           <div className="flex items-center gap-2 mt-2 text-sm text-slate-500 dark:text-slate-400">
-            <Link href="/" className="hover:text-slate-700 dark:hover:text-slate-300">
+            <Link
+              href="/"
+              className="hover:text-slate-700 dark:hover:text-slate-300"
+            >
               Inicio
             </Link>
             <span>/</span>
-            <Link href="/productos" className="hover:text-slate-700 dark:hover:text-slate-300">
+            <Link
+              href="/productos"
+              className="hover:text-slate-700 dark:hover:text-slate-300"
+            >
               Productos
             </Link>
             <span>/</span>
-            <span className="text-slate-700 dark:text-slate-300">{product.category}</span>
+            <span className="text-slate-700 dark:text-slate-300">
+              {product.category}
+            </span>
             <span>/</span>
-            <span className="text-slate-900 dark:text-white font-medium">{product.name}</span>
+            <span className="text-slate-900 dark:text-white font-medium">
+              {product.name}
+            </span>
           </div>
         </motion.div>
 
@@ -86,7 +96,10 @@ export function ProductDetailSection({ product }: ProductDetailSectionProps) {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <ProductImageGallery images={product.images} productName={product.name} />
+            <ProductImageGallery
+              images={product.images}
+              productName={product.name}
+            />
           </motion.div>
 
           {/* Product Info */}
@@ -121,7 +134,10 @@ export function ProductDetailSection({ product }: ProductDetailSectionProps) {
             </h2>
             <div className="text-center text-slate-500 dark:text-slate-400">
               <p className="text-lg mb-4">🔄</p>
-              <p>Próximamente: productos relacionados y recomendaciones personalizadas</p>
+              <p>
+                Próximamente: productos relacionados y recomendaciones
+                personalizadas
+              </p>
               <div className="mt-6">
                 <Link
                   href="/productos"
@@ -151,7 +167,7 @@ export function ProductDetailSection({ product }: ProductDetailSectionProps) {
                 Tus datos están protegidos con encriptación SSL
               </p>
             </div>
-            
+
             <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl text-center">
               <div className="text-4xl mb-3">🚚</div>
               <h3 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">
@@ -161,7 +177,7 @@ export function ProductDetailSection({ product }: ProductDetailSectionProps) {
                 Entrega en {product.shipping.estimatedDays}
               </p>
             </div>
-            
+
             <div className="bg-purple-50 dark:bg-purple-900/20 p-6 rounded-xl text-center">
               <div className="text-4xl mb-3">⭐</div>
               <h3 className="font-semibold text-purple-800 dark:text-purple-300 mb-2">
@@ -175,5 +191,5 @@ export function ProductDetailSection({ product }: ProductDetailSectionProps) {
         </motion.div>
       </div>
     </div>
-  )
+  );
 }

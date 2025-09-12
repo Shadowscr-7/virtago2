@@ -1,6 +1,6 @@
-export { ContactSection } from './contact-section'
-export { ContactHero } from './contact-hero'
-export { ContactInfo } from './contact-info'
-export { ContactForm } from './contact-form'
-export { ContactMap } from './contact-map'
-export { ContactFAQ } from './contact-faq'
+export { ContactSection } from "./contact-section";
+export { ContactHero } from "./contact-hero";
+export { ContactInfo } from "./contact-info";
+export { ContactForm } from "./contact-form";
+export { ContactMap } from "./contact-map";
+export { ContactFAQ } from "./contact-faq";

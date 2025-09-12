@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { Search, Tag, TrendingDown, Clock, Gift, Zap } from "lucide-react"
+import { motion } from "framer-motion";
+import { Search, Tag, TrendingDown, Clock, Gift, Zap } from "lucide-react";
 
 export function OffersHero() {
   return (
@@ -9,11 +9,14 @@ export function OffersHero() {
       {/* Background Effects */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 opacity-20">
-          <div className="w-full h-full" style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M30 30c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20zm10 0c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-          }} />
+          <div
+            className="w-full h-full"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M30 30c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20zm10 0c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+            }}
+          />
         </div>
-        
+
         {/* Floating Elements */}
         <motion.div
           className="absolute top-20 left-20 w-32 h-32 bg-white/10 rounded-full blur-xl"
@@ -24,7 +27,7 @@ export function OffersHero() {
           transition={{
             duration: 6,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: "easeInOut",
           }}
         />
         <motion.div
@@ -36,11 +39,11 @@ export function OffersHero() {
           transition={{
             duration: 8,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: "easeInOut",
           }}
         />
       </div>
-      
+
       <div className="relative container mx-auto px-4 py-20">
         <div className="max-w-4xl mx-auto text-center text-white">
           {/* Badge */}
@@ -53,7 +56,7 @@ export function OffersHero() {
             <Tag className="w-4 h-4" />
             <span className="text-sm font-medium">Ofertas Exclusivas B2B</span>
           </motion.div>
-          
+
           {/* Main Title */}
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
@@ -66,7 +69,7 @@ export function OffersHero() {
               Imperdibles
             </span>
           </motion.h1>
-          
+
           {/* Subtitle */}
           <motion.p
             initial={{ opacity: 0, y: 30 }}
@@ -79,7 +82,7 @@ export function OffersHero() {
               Aprovecha precios mayoristas y ofertas por tiempo limitado.
             </span>
           </motion.p>
-          
+
           {/* CTA Buttons */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -96,7 +99,7 @@ export function OffersHero() {
               Ofertas Flash
             </button>
           </motion.div>
-          
+
           {/* Stats */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -135,10 +138,14 @@ export function OffersHero() {
           </motion.div>
         </div>
       </div>
-      
+
       {/* Bottom Wave */}
       <div className="absolute bottom-0 left-0 right-0">
-        <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg
+          viewBox="0 0 1440 120"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
           <path
             d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
             fill="currentColor"
@@ -147,5 +154,5 @@ export function OffersHero() {
         </svg>
       </div>
     </section>
-  )
+  );
 }

@@ -1,28 +1,34 @@
-"use client"
+"use client";
 
-import { useEffect, useCallback } from "react"
-import { motion } from "framer-motion"
-import { CheckCircle, Sparkles, ArrowRight, Building2, User } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useAuthStore } from "@/store/auth"
+import { useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
+import {
+  CheckCircle,
+  Sparkles,
+  ArrowRight,
+  Building2,
+  User,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth";
 
 export function RegistrationSuccess() {
-  const router = useRouter()
-  const { user, resetRegistration } = useAuthStore()
+  const router = useRouter();
+  const { user, resetRegistration } = useAuthStore();
 
   const handleContinue = useCallback(() => {
-    resetRegistration()
-    router.push('/')
-  }, [resetRegistration, router])
+    resetRegistration();
+    router.push("/");
+  }, [resetRegistration, router]);
 
   useEffect(() => {
     // Auto-redirect después de 5 segundos
     const timer = setTimeout(() => {
-      handleContinue()
-    }, 5000)
+      handleContinue();
+    }, 5000);
 
-    return () => clearTimeout(timer)
-  }, [handleContinue])
+    return () => clearTimeout(timer);
+  }, [handleContinue]);
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -36,18 +42,18 @@ export function RegistrationSuccess() {
         <motion.div
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
-          transition={{ 
-            delay: 0.3, 
-            duration: 0.8, 
-            type: "spring", 
-            stiffness: 150, 
-            damping: 10 
+          transition={{
+            delay: 0.3,
+            duration: 0.8,
+            type: "spring",
+            stiffness: 150,
+            damping: 10,
           }}
           className="relative w-24 h-24 mx-auto mb-8"
         >
           {/* Círculo de fondo con gradiente */}
           <div className="absolute inset-0 rounded-full bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500" />
-          
+
           {/* Círculo interior */}
           <div className="absolute inset-2 rounded-full bg-slate-900 flex items-center justify-center">
             <CheckCircle className="h-10 w-10 text-green-400" />
@@ -55,13 +61,13 @@ export function RegistrationSuccess() {
 
           {/* Efectos de brillos */}
           <motion.div
-            animate={{ 
+            animate={{
               rotate: 360,
-              scale: [1, 1.1, 1]
+              scale: [1, 1.1, 1],
             }}
-            transition={{ 
+            transition={{
               rotate: { duration: 3, repeat: Infinity, ease: "linear" },
-              scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+              scale: { duration: 2, repeat: Infinity, ease: "easeInOut" },
             }}
             className="absolute -inset-4"
           >
@@ -81,9 +87,12 @@ export function RegistrationSuccess() {
           <h1 className="text-4xl font-bold text-white mb-4">
             ¡Registro Completado!
           </h1>
-          
+
           <p className="text-xl text-white/80 mb-8">
-            Bienvenido a <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 font-bold">Virtago</span>
+            Bienvenido a{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 font-bold">
+              Virtago
+            </span>
           </p>
         </motion.div>
 
@@ -97,7 +106,7 @@ export function RegistrationSuccess() {
           >
             <div className="flex items-center justify-center gap-4 mb-4">
               <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-                {user.userType === 'distributor' ? (
+                {user.userType === "distributor" ? (
                   <Building2 className="h-6 w-6 text-white" />
                 ) : (
                   <User className="h-6 w-6 text-white" />
@@ -108,14 +117,12 @@ export function RegistrationSuccess() {
                   {user.firstName} {user.lastName}
                 </h3>
                 <p className="text-white/70">
-                  {user.userType === 'distributor' ? 'Distribuidor' : 'Cliente'}
+                  {user.userType === "distributor" ? "Distribuidor" : "Cliente"}
                 </p>
               </div>
             </div>
-            
-            <p className="text-white/60 text-sm">
-              {user.email}
-            </p>
+
+            <p className="text-white/60 text-sm">{user.email}</p>
           </motion.div>
         )}
 
@@ -127,11 +134,13 @@ export function RegistrationSuccess() {
           className="mb-8"
         >
           <h4 className="text-lg font-semibold text-white mb-4">
-            {user?.userType === 'distributor' ? 'Beneficios de Distribuidor:' : 'Beneficios de Cliente:'}
+            {user?.userType === "distributor"
+              ? "Beneficios de Distribuidor:"
+              : "Beneficios de Cliente:"}
           </h4>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-left">
-            {user?.userType === 'distributor' ? (
+            {user?.userType === "distributor" ? (
               <>
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
@@ -246,7 +255,7 @@ export function RegistrationSuccess() {
             <Sparkles className="h-8 w-8 text-purple-400" />
           </motion.div>
         </div>
-        
+
         <div className="absolute bottom-4 left-4 opacity-20">
           <motion.div
             animate={{ rotate: -360 }}
@@ -257,5 +266,5 @@ export function RegistrationSuccess() {
         </div>
       </motion.div>
     </div>
-  )
+  );
 }

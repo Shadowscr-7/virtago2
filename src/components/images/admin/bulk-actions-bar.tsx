@@ -1,26 +1,26 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { 
-  X, 
-  Trash2, 
-  Download, 
-  Tag, 
+import { motion } from "framer-motion";
+import {
+  X,
+  Trash2,
+  Download,
+  Tag,
   ExternalLink,
   Sparkles,
   Archive,
   CheckCircle,
-  AlertTriangle
-} from "lucide-react"
+  AlertTriangle,
+} from "lucide-react";
 
 interface BulkActionsBarProps {
-  selectedCount: number
-  onAssignToProducts: () => void
-  onDelete: () => void
-  onDownload: () => void
-  onClearSelection: () => void
-  onAddTags?: () => void
-  onArchive?: () => void
+  selectedCount: number;
+  onAssignToProducts: () => void;
+  onDelete: () => void;
+  onDownload: () => void;
+  onClearSelection: () => void;
+  onAddTags?: () => void;
+  onArchive?: () => void;
 }
 
 export function BulkActionsBar({
@@ -30,7 +30,7 @@ export function BulkActionsBar({
   onDownload,
   onClearSelection,
   onAddTags,
-  onArchive
+  onArchive,
 }: BulkActionsBarProps) {
   return (
     <motion.div
@@ -48,7 +48,8 @@ export function BulkActionsBar({
             </div>
             <div>
               <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                {selectedCount} imagen{selectedCount !== 1 ? 'es' : ''} seleccionada{selectedCount !== 1 ? 's' : ''}
+                {selectedCount} imagen{selectedCount !== 1 ? "es" : ""}{" "}
+                seleccionada{selectedCount !== 1 ? "s" : ""}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Elige una acción para aplicar
@@ -152,18 +153,20 @@ export function BulkActionsBar({
         {/* Indicador de advertencia para acciones destructivas */}
         <motion.div
           initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
+          animate={{ opacity: 1, height: "auto" }}
           className="mt-3 pt-3 border-t border-gray-200/50 dark:border-gray-600/50"
         >
           <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400">
             <AlertTriangle className="w-3 h-3" />
             <span>
-              Las acciones se aplicarán a todas las imágenes seleccionadas. 
-              <strong className="ml-1">Esta acción no se puede deshacer.</strong>
+              Las acciones se aplicarán a todas las imágenes seleccionadas.
+              <strong className="ml-1">
+                Esta acción no se puede deshacer.
+              </strong>
             </span>
           </div>
         </motion.div>
       </div>
     </motion.div>
-  )
+  );
 }

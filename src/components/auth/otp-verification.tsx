@@ -1,110 +1,122 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion } from "framer-motion"
-import { ArrowLeft, Mail, ArrowRight, RefreshCw } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { useAuthStore } from "@/store/auth"
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { ArrowLeft, Mail, ArrowRight, RefreshCw } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/auth";
 
 interface OTPVerificationProps {
-  email: string
-  onBack: () => void
-  onSuccess: () => void
+  email: string;
+  onBack: () => void;
+  onSuccess: () => void;
 }
 
-export function OTPVerification({ email, onBack, onSuccess }: OTPVerificationProps) {
-  const [otp, setOtp] = useState<string[]>(new Array(6).fill(""))
-  const [timeLeft, setTimeLeft] = useState(1800) // 30 minutos en segundos
-  const [canResend, setCanResend] = useState(false)
-  
-  const { verifyOTP, resendOTP, isLoading } = useAuthStore()
+export function OTPVerification({
+  email,
+  onBack,
+  onSuccess,
+}: OTPVerificationProps) {
+  const [otp, setOtp] = useState<string[]>(new Array(6).fill(""));
+  const [timeLeft, setTimeLeft] = useState(1800); // 30 minutos en segundos
+  const [canResend, setCanResend] = useState(false);
+
+  const { verifyOTP, resendOTP, isLoading } = useAuthStore();
 
   // Countdown timer
   useEffect(() => {
     if (timeLeft > 0) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000)
-      return () => clearTimeout(timer)
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      return () => clearTimeout(timer);
     } else {
-      setCanResend(true)
+      setCanResend(true);
     }
-  }, [timeLeft])
+  }, [timeLeft]);
 
   // Formatear tiempo restante
   const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60)
-    const remainingSeconds = seconds % 60
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
-  }
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+  };
 
   // Calcular progreso del timer
-  const progress = ((1800 - timeLeft) / 1800) * 100
+  const progress = ((1800 - timeLeft) / 1800) * 100;
 
   // Manejar cambio en input OTP
   const handleOTPChange = (element: HTMLInputElement, index: number) => {
-    if (isNaN(Number(element.value))) return false
+    if (isNaN(Number(element.value))) return false;
 
-    setOtp([...otp.map((d, idx) => (idx === index ? element.value : d))])
+    setOtp([...otp.map((d, idx) => (idx === index ? element.value : d))]);
 
     // Enfocar siguiente input
     if (element.value !== "" && element.nextSibling) {
-      (element.nextSibling as HTMLInputElement).focus()
+      (element.nextSibling as HTMLInputElement).focus();
     }
-  }
+  };
 
   // Manejar teclas especiales
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number,
+  ) => {
     if (e.key === "Backspace") {
       if (otp[index] === "" && e.currentTarget.previousSibling) {
-        (e.currentTarget.previousSibling as HTMLInputElement).focus()
+        (e.currentTarget.previousSibling as HTMLInputElement).focus();
       }
-      setOtp([...otp.map((d, idx) => (idx === index ? "" : d))])
+      setOtp([...otp.map((d, idx) => (idx === index ? "" : d))]);
     }
-  }
+  };
 
   // Pegar código OTP
   const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault()
-    const pasteData = e.clipboardData.getData('text')
-    const pasteArray = pasteData.slice(0, 6).split('').filter(char => !isNaN(Number(char)))
-    
+    e.preventDefault();
+    const pasteData = e.clipboardData.getData("text");
+    const pasteArray = pasteData
+      .slice(0, 6)
+      .split("")
+      .filter((char) => !isNaN(Number(char)));
+
     if (pasteArray.length === 6) {
-      setOtp(pasteArray)
+      setOtp(pasteArray);
       // Enfocar último input
-      const inputs = document.querySelectorAll('.otp-input')
-      ;(inputs[5] as HTMLInputElement).focus()
+      const inputs = document.querySelectorAll(".otp-input");
+      (inputs[5] as HTMLInputElement).focus();
     }
-  }
+  };
 
   // Verificar OTP
   const handleVerifyOTP = async () => {
-    const otpCode = otp.join("")
-    if (otpCode.length !== 6) return
+    const otpCode = otp.join("");
+    if (otpCode.length !== 6) return;
 
     try {
-      await verifyOTP(otpCode)
-      onSuccess()
+      await verifyOTP(otpCode);
+      onSuccess();
     } catch (error) {
-      console.error('Error verifying OTP:', error)
+      console.error("Error verifying OTP:", error);
       // Reset OTP en caso de error
-      setOtp(new Array(6).fill(""))
-      const firstInput = document.querySelector('.otp-input') as HTMLInputElement
-      firstInput?.focus()
+      setOtp(new Array(6).fill(""));
+      const firstInput = document.querySelector(
+        ".otp-input",
+      ) as HTMLInputElement;
+      firstInput?.focus();
     }
-  }
+  };
 
   // Reenviar OTP
   const handleResendOTP = async () => {
     try {
-      await resendOTP()
-      setTimeLeft(1800) // Reset timer
-      setCanResend(false)
-      setOtp(new Array(6).fill("")) // Reset OTP
+      await resendOTP();
+      setTimeLeft(1800); // Reset timer
+      setCanResend(false);
+      setOtp(new Array(6).fill("")); // Reset OTP
     } catch (error) {
-      console.error('Error resending OTP:', error)
+      console.error("Error resending OTP:", error);
     }
-  }
+  };
 
-  const isOTPComplete = otp.every(digit => digit !== "")
+  const isOTPComplete = otp.every((digit) => digit !== "");
 
   return (
     <div className="w-full max-w-md mx-auto">
@@ -139,7 +151,7 @@ export function OTPVerification({ email, onBack, onSuccess }: OTPVerificationPro
               </div>
             </div>
           </motion.div>
-          
+
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -148,7 +160,7 @@ export function OTPVerification({ email, onBack, onSuccess }: OTPVerificationPro
           >
             Verificar Email
           </motion.h1>
-          
+
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -182,7 +194,13 @@ export function OTPVerification({ email, onBack, onSuccess }: OTPVerificationPro
               cx="50"
               cy="50"
               r="45"
-              stroke={timeLeft > 300 ? "#10B981" : timeLeft > 60 ? "#F59E0B" : "#EF4444"}
+              stroke={
+                timeLeft > 300
+                  ? "#10B981"
+                  : timeLeft > 60
+                    ? "#F59E0B"
+                    : "#EF4444"
+              }
               strokeWidth="10"
               fill="none"
               strokeLinecap="round"
@@ -191,13 +209,19 @@ export function OTPVerification({ email, onBack, onSuccess }: OTPVerificationPro
               className="transition-all duration-1000 ease-linear"
             />
           </svg>
-          
+
           {/* Tiempo restante */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className={cn(
-              "text-sm font-bold transition-colors",
-              timeLeft > 300 ? "text-green-400" : timeLeft > 60 ? "text-yellow-400" : "text-red-400"
-            )}>
+            <span
+              className={cn(
+                "text-sm font-bold transition-colors",
+                timeLeft > 300
+                  ? "text-green-400"
+                  : timeLeft > 60
+                    ? "text-yellow-400"
+                    : "text-red-400",
+              )}
+            >
               {formatTime(timeLeft)}
             </span>
           </div>
@@ -222,7 +246,7 @@ export function OTPVerification({ email, onBack, onSuccess }: OTPVerificationPro
                   "bg-white/10 border border-white/20 rounded-lg text-white",
                   "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent",
                   "transition-all duration-200",
-                  data && "bg-white/20 border-purple-500"
+                  data && "bg-white/20 border-purple-500",
                 )}
                 type="text"
                 maxLength={1}
@@ -252,7 +276,7 @@ export function OTPVerification({ email, onBack, onSuccess }: OTPVerificationPro
               "hover:from-green-600 hover:via-blue-600 hover:to-purple-600",
               "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-transparent",
               "disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2",
-              (!isOTPComplete || isLoading) && "animate-pulse"
+              (!isOTPComplete || isLoading) && "animate-pulse",
             )}
           >
             {isLoading ? (
@@ -300,5 +324,5 @@ export function OTPVerification({ email, onBack, onSuccess }: OTPVerificationPro
         </motion.div>
       </motion.div>
     </div>
-  )
+  );
 }

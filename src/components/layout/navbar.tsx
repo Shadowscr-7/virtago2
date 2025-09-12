@@ -1,13 +1,22 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Search, User, Menu, Settings, LogOut, ShoppingBag, Heart, Shield } from "lucide-react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { cn } from "@/lib/utils"
-import { CartButton } from "@/components/cart/cart-button"
-import { useAuthStore } from "@/lib/auth-store"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Search,
+  User,
+  Menu,
+  Settings,
+  LogOut,
+  ShoppingBag,
+  Heart,
+  Shield,
+} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { CartButton } from "@/components/cart/cart-button";
+import { useAuthStore } from "@/lib/auth-store";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,22 +24,22 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 
 interface NavbarProps {
-  isAdminMode?: boolean
+  isAdminMode?: boolean;
 }
 
 export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
-  const [isSearchFocused, setIsSearchFocused] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const { user, isAuthenticated, logout } = useAuthStore()
-  const router = useRouter()
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { user, isAuthenticated, logout } = useAuthStore();
+  const router = useRouter();
 
   const handleLogout = () => {
-    logout()
-    router.push("/")
-  }
+    logout();
+    router.push("/");
+  };
 
   return (
     <motion.header
@@ -72,7 +81,7 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                 }}
                 className={cn(
                   "relative transition-all duration-300",
-                  isSearchFocused && "drop-shadow-lg"
+                  isSearchFocused && "drop-shadow-lg",
                 )}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-cyan-500/20 rounded-full blur-sm" />
@@ -88,7 +97,7 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                     className={cn(
                       "w-full pl-10 pr-4 py-2 rounded-full border bg-background/50 backdrop-blur",
                       "transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/50",
-                      isSearchFocused && "bg-background/80 shadow-lg"
+                      isSearchFocused && "bg-background/80 shadow-lg",
                     )}
                   />
                   {searchQuery && (
@@ -122,12 +131,19 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                   >
                     <div className="text-2xl">{user.avatar}</div>
                     <div className="text-left hidden sm:block">
-                      <p className="text-sm font-medium text-white">{user.name}</p>
-                      <p className="text-xs text-white/70 capitalize">{user.role}</p>
+                      <p className="text-sm font-medium text-white">
+                        {user.name}
+                      </p>
+                      <p className="text-xs text-white/70 capitalize">
+                        {user.role}
+                      </p>
                     </div>
                   </motion.button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-purple-900/50 backdrop-blur-lg border border-purple-500/30 shadow-xl">
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 bg-purple-900/50 backdrop-blur-lg border border-purple-500/30 shadow-xl"
+                >
                   <DropdownMenuLabel>
                     <div className="flex items-center space-x-2">
                       <div className="text-lg">{user.avatar}</div>
@@ -138,24 +154,33 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-purple-500/30" />
-                  
+
                   <DropdownMenuItem asChild>
-                    <Link href="/perfil" className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1">
+                    <Link
+                      href="/perfil"
+                      className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1"
+                    >
                       <User className="mr-2 h-4 w-4" />
                       <span>Mi Perfil</span>
                     </Link>
                   </DropdownMenuItem>
-                  
-                  {user.role === 'cliente' ? (
+
+                  {user.role === "cliente" ? (
                     <>
                       <DropdownMenuItem asChild>
-                        <Link href="/mis-pedidos" className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1">
+                        <Link
+                          href="/mis-pedidos"
+                          className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1"
+                        >
                           <ShoppingBag className="mr-2 h-4 w-4" />
                           <span>Mis Pedidos</span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/favoritos" className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1">
+                        <Link
+                          href="/favoritos"
+                          className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1"
+                        >
                           <Heart className="mr-2 h-4 w-4" />
                           <span>Favoritos</span>
                         </Link>
@@ -164,35 +189,50 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                   ) : (
                     <>
                       <DropdownMenuItem asChild>
-                        <Link href="/admin" className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1">
+                        <Link
+                          href="/admin"
+                          className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1"
+                        >
                           <Shield className="mr-2 h-4 w-4" />
                           <span>Administración</span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/mis-pedidos" className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1">
+                        <Link
+                          href="/mis-pedidos"
+                          className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1"
+                        >
                           <ShoppingBag className="mr-2 h-4 w-4" />
                           <span>Mis Pedidos</span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/favoritos" className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1">
+                        <Link
+                          href="/favoritos"
+                          className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1"
+                        >
                           <Heart className="mr-2 h-4 w-4" />
                           <span>Favoritos</span>
                         </Link>
                       </DropdownMenuItem>
                     </>
                   )}
-                  
+
                   <DropdownMenuItem asChild>
-                    <Link href="/configuracion" className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1">
+                    <Link
+                      href="/configuracion"
+                      className="flex items-center text-white hover:bg-purple-500/20 hover:text-purple-100 transition-all duration-200 rounded-md mx-1"
+                    >
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Configuración</span>
                     </Link>
                   </DropdownMenuItem>
-                  
+
                   <DropdownMenuSeparator className="bg-purple-500/30" />
-                  <DropdownMenuItem onClick={handleLogout} className="text-red-300 hover:text-red-200 hover:bg-red-500/20 focus:text-red-200 focus:bg-red-500/20 transition-all duration-200 rounded-md mx-1">
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="text-red-300 hover:text-red-200 hover:bg-red-500/20 focus:text-red-200 focus:bg-red-500/20 transition-all duration-200 rounded-md mx-1"
+                  >
                     <LogOut className="mr-2 h-4 w-4" />
                     <span>Cerrar Sesión</span>
                   </DropdownMenuItem>
@@ -249,7 +289,7 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
             { name: "Marcas", href: "/marcas" },
             { name: "Proveedores", href: "/suppliers" },
             { name: "Ofertas", href: "/ofertas" },
-            { name: "Contacto", href: "/contacto" }
+            { name: "Contacto", href: "/contacto" },
           ].map((item) => (
             <Link key={item.name} href={item.href}>
               <motion.span
@@ -257,14 +297,12 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative group cursor-pointer"
               >
                 {item.name}
-                <motion.div
-                  className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500 group-hover:w-full transition-all duration-300"
-                />
+                <motion.div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500 group-hover:w-full transition-all duration-300" />
               </motion.span>
             </Link>
           ))}
         </nav>
       </div>
     </motion.header>
-  )
+  );
 }

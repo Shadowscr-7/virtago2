@@ -1,59 +1,79 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { ArrowLeft, Building2, User, Mail, Phone, MapPin, Globe, FileText, ArrowRight, CheckCircle } from "lucide-react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { cn } from "@/lib/utils"
-import { useAuthStore } from "@/store/auth"
+import { motion } from "framer-motion";
+import {
+  ArrowLeft,
+  Building2,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Globe,
+  FileText,
+  ArrowRight,
+  CheckCircle,
+} from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/auth";
 
 const businessInfoSchema = z.object({
-  businessName: z.string().min(2, "El nombre de la empresa debe tener al menos 2 caracteres"),
+  businessName: z
+    .string()
+    .min(2, "El nombre de la empresa debe tener al menos 2 caracteres"),
   businessType: z.string().min(1, "El tipo de empresa es requerido"),
   rfc: z.string().min(12, "El RFC debe tener al least 12 caracteres"),
-  businessAddress: z.string().min(5, "La dirección comercial debe tener al menos 5 caracteres"),
+  businessAddress: z
+    .string()
+    .min(5, "La dirección comercial debe tener al menos 5 caracteres"),
   businessCity: z.string().min(2, "La ciudad es requerida"),
   businessCountry: z.string().min(2, "El país es requerido"),
-  businessPhone: z.string().min(10, "El teléfono comercial debe tener al menos 10 dígitos"),
+  businessPhone: z
+    .string()
+    .min(10, "El teléfono comercial debe tener al menos 10 dígitos"),
   businessEmail: z.string().email("Email comercial inválido"),
   website: z.string().url("Website inválido").optional().or(z.literal("")),
-  description: z.string().min(10, "La descripción debe tener al menos 10 caracteres"),
+  description: z
+    .string()
+    .min(10, "La descripción debe tener al menos 10 caracteres"),
   yearsInBusiness: z.string().min(1, "Los años en el negocio son requeridos"),
-  numberOfEmployees: z.string().min(1, "El número de empleados es requerido")
-})
+  numberOfEmployees: z.string().min(1, "El número de empleados es requerido"),
+});
 
-type BusinessInfoFormData = z.infer<typeof businessInfoSchema>
+type BusinessInfoFormData = z.infer<typeof businessInfoSchema>;
 
 interface BusinessInfoFormProps {
-  onBack: () => void
-  onSuccess: () => void
+  onBack: () => void;
+  onSuccess: () => void;
 }
 
 const businessTypes = [
   "Distribuidor mayorista",
-  "Tienda minorista", 
+  "Tienda minorista",
   "Empresa de servicios",
   "Manufacturera",
   "Importador/Exportador",
   "E-commerce",
   "Franquicia",
-  "Otro"
-]
+  "Otro",
+];
 
 const employeeRanges = [
   "1-5",
-  "6-10", 
+  "6-10",
   "11-25",
   "26-50",
   "51-100",
   "101-500",
-  "500+"
-]
+  "500+",
+];
 
 export function BusinessInfoForm({ onBack, onSuccess }: BusinessInfoFormProps) {
-  const { updateBusinessInfo, isLoading, completeRegistration } = useAuthStore()
-  
+  const { updateBusinessInfo, isLoading, completeRegistration } =
+    useAuthStore();
+
   const {
     register,
     handleSubmit,
@@ -61,20 +81,20 @@ export function BusinessInfoForm({ onBack, onSuccess }: BusinessInfoFormProps) {
   } = useForm<BusinessInfoFormData>({
     resolver: zodResolver(businessInfoSchema),
     defaultValues: {
-      businessCountry: 'México',
-      website: ''
-    }
-  })
+      businessCountry: "México",
+      website: "",
+    },
+  });
 
   const onSubmit = async (data: BusinessInfoFormData) => {
     try {
-      await updateBusinessInfo(data)
-      await completeRegistration()
-      onSuccess()
+      await updateBusinessInfo(data);
+      await completeRegistration();
+      onSuccess();
     } catch (error) {
-      console.error('Error updating business info:', error)
+      console.error("Error updating business info:", error);
     }
-  }
+  };
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -109,7 +129,7 @@ export function BusinessInfoForm({ onBack, onSuccess }: BusinessInfoFormProps) {
               </div>
             </div>
           </motion.div>
-          
+
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -118,7 +138,7 @@ export function BusinessInfoForm({ onBack, onSuccess }: BusinessInfoFormProps) {
           >
             Información de Empresa
           </motion.h1>
-          
+
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -151,13 +171,16 @@ export function BusinessInfoForm({ onBack, onSuccess }: BusinessInfoFormProps) {
                     className={cn(
                       "w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50",
                       "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                      errors.businessName && "border-red-500 focus:ring-red-500"
+                      errors.businessName &&
+                        "border-red-500 focus:ring-red-500",
                     )}
                     placeholder="Distribuidora ABC S.A. de C.V."
                   />
                 </div>
                 {errors.businessName && (
-                  <p className="text-red-400 text-sm mt-1">{errors.businessName.message}</p>
+                  <p className="text-red-400 text-sm mt-1">
+                    {errors.businessName.message}
+                  </p>
                 )}
               </motion.div>
 
@@ -177,10 +200,13 @@ export function BusinessInfoForm({ onBack, onSuccess }: BusinessInfoFormProps) {
                     className={cn(
                       "w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white",
                       "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                      errors.businessType && "border-red-500 focus:ring-red-500"
+                      errors.businessType &&
+                        "border-red-500 focus:ring-red-500",
                     )}
                   >
-                    <option value="" className="bg-slate-800">Selecciona un tipo</option>
+                    <option value="" className="bg-slate-800">
+                      Selecciona un tipo
+                    </option>
                     {businessTypes.map((type) => (
                       <option key={type} value={type} className="bg-slate-800">
                         {type}
@@ -189,7 +215,9 @@ export function BusinessInfoForm({ onBack, onSuccess }: BusinessInfoFormProps) {
                   </select>
                 </div>
                 {errors.businessType && (
-                  <p className="text-red-400 text-sm mt-1">{errors.businessType.message}</p>
+                  <p className="text-red-400 text-sm mt-1">
+                    {errors.businessType.message}
+                  </p>
                 )}
               </motion.div>
 
@@ -209,14 +237,16 @@ export function BusinessInfoForm({ onBack, onSuccess }: BusinessInfoFormProps) {
                     className={cn(
                       "w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 uppercase",
                       "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                      errors.rfc && "border-red-500 focus:ring-red-500"
+                      errors.rfc && "border-red-500 focus:ring-red-500",
                     )}
                     placeholder="ABC123456ABC"
-                    style={{ textTransform: 'uppercase' }}
+                    style={{ textTransform: "uppercase" }}
                   />
                 </div>
                 {errors.rfc && (
-                  <p className="text-red-400 text-sm mt-1">{errors.rfc.message}</p>
+                  <p className="text-red-400 text-sm mt-1">
+                    {errors.rfc.message}
+                  </p>
                 )}
               </motion.div>
 
@@ -237,13 +267,16 @@ export function BusinessInfoForm({ onBack, onSuccess }: BusinessInfoFormProps) {
                     className={cn(
                       "w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50",
                       "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                      errors.businessPhone && "border-red-500 focus:ring-red-500"
+                      errors.businessPhone &&
+                        "border-red-500 focus:ring-red-500",
                     )}
                     placeholder="+52 55 1234 5678"
                   />
                 </div>
                 {errors.businessPhone && (
-                  <p className="text-red-400 text-sm mt-1">{errors.businessPhone.message}</p>
+                  <p className="text-red-400 text-sm mt-1">
+                    {errors.businessPhone.message}
+                  </p>
                 )}
               </motion.div>
 
@@ -264,13 +297,16 @@ export function BusinessInfoForm({ onBack, onSuccess }: BusinessInfoFormProps) {
                     className={cn(
                       "w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50",
                       "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                      errors.businessEmail && "border-red-500 focus:ring-red-500"
+                      errors.businessEmail &&
+                        "border-red-500 focus:ring-red-500",
                     )}
                     placeholder="contacto@empresa.com"
                   />
                 </div>
                 {errors.businessEmail && (
-                  <p className="text-red-400 text-sm mt-1">{errors.businessEmail.message}</p>
+                  <p className="text-red-400 text-sm mt-1">
+                    {errors.businessEmail.message}
+                  </p>
                 )}
               </motion.div>
 
@@ -291,13 +327,15 @@ export function BusinessInfoForm({ onBack, onSuccess }: BusinessInfoFormProps) {
                     className={cn(
                       "w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50",
                       "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                      errors.website && "border-red-500 focus:ring-red-500"
+                      errors.website && "border-red-500 focus:ring-red-500",
                     )}
                     placeholder="https://www.empresa.com"
                   />
                 </div>
                 {errors.website && (
-                  <p className="text-red-400 text-sm mt-1">{errors.website.message}</p>
+                  <p className="text-red-400 text-sm mt-1">
+                    {errors.website.message}
+                  </p>
                 )}
               </motion.div>
             </div>
@@ -320,13 +358,16 @@ export function BusinessInfoForm({ onBack, onSuccess }: BusinessInfoFormProps) {
                     className={cn(
                       "w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50",
                       "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                      errors.businessAddress && "border-red-500 focus:ring-red-500"
+                      errors.businessAddress &&
+                        "border-red-500 focus:ring-red-500",
                     )}
                     placeholder="Av. Insurgentes 123, Col. Centro"
                   />
                 </div>
                 {errors.businessAddress && (
-                  <p className="text-red-400 text-sm mt-1">{errors.businessAddress.message}</p>
+                  <p className="text-red-400 text-sm mt-1">
+                    {errors.businessAddress.message}
+                  </p>
                 )}
               </motion.div>
 
@@ -347,13 +388,16 @@ export function BusinessInfoForm({ onBack, onSuccess }: BusinessInfoFormProps) {
                       className={cn(
                         "w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50",
                         "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                        errors.businessCity && "border-red-500 focus:ring-red-500"
+                        errors.businessCity &&
+                          "border-red-500 focus:ring-red-500",
                       )}
                       placeholder="Ciudad de México"
                     />
                   </div>
                   {errors.businessCity && (
-                    <p className="text-red-400 text-sm mt-1">{errors.businessCity.message}</p>
+                    <p className="text-red-400 text-sm mt-1">
+                      {errors.businessCity.message}
+                    </p>
                   )}
                 </motion.div>
 
@@ -372,21 +416,40 @@ export function BusinessInfoForm({ onBack, onSuccess }: BusinessInfoFormProps) {
                       className={cn(
                         "w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white",
                         "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                        errors.businessCountry && "border-red-500 focus:ring-red-500"
+                        errors.businessCountry &&
+                          "border-red-500 focus:ring-red-500",
                       )}
                     >
-                      <option value="México" className="bg-slate-800">México</option>
-                      <option value="Estados Unidos" className="bg-slate-800">Estados Unidos</option>
-                      <option value="Canadá" className="bg-slate-800">Canadá</option>
-                      <option value="España" className="bg-slate-800">España</option>
-                      <option value="Colombia" className="bg-slate-800">Colombia</option>
-                      <option value="Argentina" className="bg-slate-800">Argentina</option>
-                      <option value="Chile" className="bg-slate-800">Chile</option>
-                      <option value="Perú" className="bg-slate-800">Perú</option>
+                      <option value="México" className="bg-slate-800">
+                        México
+                      </option>
+                      <option value="Estados Unidos" className="bg-slate-800">
+                        Estados Unidos
+                      </option>
+                      <option value="Canadá" className="bg-slate-800">
+                        Canadá
+                      </option>
+                      <option value="España" className="bg-slate-800">
+                        España
+                      </option>
+                      <option value="Colombia" className="bg-slate-800">
+                        Colombia
+                      </option>
+                      <option value="Argentina" className="bg-slate-800">
+                        Argentina
+                      </option>
+                      <option value="Chile" className="bg-slate-800">
+                        Chile
+                      </option>
+                      <option value="Perú" className="bg-slate-800">
+                        Perú
+                      </option>
                     </select>
                   </div>
                   {errors.businessCountry && (
-                    <p className="text-red-400 text-sm mt-1">{errors.businessCountry.message}</p>
+                    <p className="text-red-400 text-sm mt-1">
+                      {errors.businessCountry.message}
+                    </p>
                   )}
                 </motion.div>
               </div>
@@ -409,12 +472,15 @@ export function BusinessInfoForm({ onBack, onSuccess }: BusinessInfoFormProps) {
                     className={cn(
                       "w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50",
                       "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                      errors.yearsInBusiness && "border-red-500 focus:ring-red-500"
+                      errors.yearsInBusiness &&
+                        "border-red-500 focus:ring-red-500",
                     )}
                     placeholder="5"
                   />
                   {errors.yearsInBusiness && (
-                    <p className="text-red-400 text-sm mt-1">{errors.yearsInBusiness.message}</p>
+                    <p className="text-red-400 text-sm mt-1">
+                      {errors.yearsInBusiness.message}
+                    </p>
                   )}
                 </motion.div>
 
@@ -431,18 +497,27 @@ export function BusinessInfoForm({ onBack, onSuccess }: BusinessInfoFormProps) {
                     className={cn(
                       "w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white",
                       "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                      errors.numberOfEmployees && "border-red-500 focus:ring-red-500"
+                      errors.numberOfEmployees &&
+                        "border-red-500 focus:ring-red-500",
                     )}
                   >
-                    <option value="" className="bg-slate-800">Selecciona rango</option>
+                    <option value="" className="bg-slate-800">
+                      Selecciona rango
+                    </option>
                     {employeeRanges.map((range) => (
-                      <option key={range} value={range} className="bg-slate-800">
+                      <option
+                        key={range}
+                        value={range}
+                        className="bg-slate-800"
+                      >
                         {range} empleados
                       </option>
                     ))}
                   </select>
                   {errors.numberOfEmployees && (
-                    <p className="text-red-400 text-sm mt-1">{errors.numberOfEmployees.message}</p>
+                    <p className="text-red-400 text-sm mt-1">
+                      {errors.numberOfEmployees.message}
+                    </p>
                   )}
                 </motion.div>
               </div>
@@ -462,12 +537,14 @@ export function BusinessInfoForm({ onBack, onSuccess }: BusinessInfoFormProps) {
                   className={cn(
                     "w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 resize-none",
                     "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                    errors.description && "border-red-500 focus:ring-red-500"
+                    errors.description && "border-red-500 focus:ring-red-500",
                   )}
                   placeholder="Describe brevemente tu empresa, productos que distribuyes, mercado objetivo, etc."
                 />
                 {errors.description && (
-                  <p className="text-red-400 text-sm mt-1">{errors.description.message}</p>
+                  <p className="text-red-400 text-sm mt-1">
+                    {errors.description.message}
+                  </p>
                 )}
               </motion.div>
             </div>
@@ -488,7 +565,7 @@ export function BusinessInfoForm({ onBack, onSuccess }: BusinessInfoFormProps) {
               "hover:from-green-600 hover:via-blue-600 hover:to-purple-600",
               "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-transparent",
               "disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2",
-              isLoading && "animate-pulse"
+              isLoading && "animate-pulse",
             )}
           >
             {isLoading ? (
@@ -518,7 +595,7 @@ export function BusinessInfoForm({ onBack, onSuccess }: BusinessInfoFormProps) {
             <span className="text-white/70 text-sm">100%</span>
           </div>
           <div className="w-full bg-white/20 rounded-full h-2">
-            <motion.div 
+            <motion.div
               initial={{ width: 0 }}
               animate={{ width: "100%" }}
               transition={{ delay: 1.5, duration: 1 }}
@@ -528,5 +605,5 @@ export function BusinessInfoForm({ onBack, onSuccess }: BusinessInfoFormProps) {
         </motion.div>
       </motion.div>
     </div>
-  )
+  );
 }

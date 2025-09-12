@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { Mail, Phone, MapPin, Clock, Sparkles } from "lucide-react"
+import { motion } from "framer-motion";
+import { Mail, Phone, MapPin, Clock, Sparkles } from "lucide-react";
 
 export function ContactHero() {
   return (
@@ -33,16 +33,16 @@ export function ContactHero() {
                   V
                 </span>
               </div>
-              
+
               {/* Floating sparkles */}
               <motion.div
-                animate={{ 
+                animate={{
                   rotate: 360,
-                  scale: [1, 1.2, 1]
+                  scale: [1, 1.2, 1],
                 }}
-                transition={{ 
+                transition={{
                   rotate: { duration: 3, repeat: Infinity, ease: "linear" },
-                  scale: { duration: 2, repeat: Infinity, ease: "easeInOut" }
+                  scale: { duration: 2, repeat: Infinity, ease: "easeInOut" },
                 }}
                 className="absolute -inset-6"
               >
@@ -77,8 +77,9 @@ export function ContactHero() {
             transition={{ delay: 0.5, duration: 0.8 }}
             className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed"
           >
-            Estamos aquí para ayudarte. Nuestro equipo de expertos está listo para 
-            responder tus consultas y brindarte el mejor soporte para tu negocio B2B.
+            Estamos aquí para ayudarte. Nuestro equipo de expertos está listo
+            para responder tus consultas y brindarte el mejor soporte para tu
+            negocio B2B.
           </motion.p>
 
           {/* Quick Contact Info */}
@@ -93,28 +94,28 @@ export function ContactHero() {
                 icon: Phone,
                 title: "Llámanos",
                 value: "+52 55 1234 5678",
-                gradient: "from-green-500 to-emerald-500"
+                gradient: "from-green-500 to-emerald-500",
               },
               {
                 icon: Mail,
                 title: "Escríbenos",
                 value: "contacto@virtago.com",
-                gradient: "from-blue-500 to-cyan-500"
+                gradient: "from-blue-500 to-cyan-500",
               },
               {
                 icon: MapPin,
                 title: "Visítanos",
                 value: "Ciudad de México, MX",
-                gradient: "from-purple-500 to-pink-500"
+                gradient: "from-purple-500 to-pink-500",
               },
               {
                 icon: Clock,
                 title: "Horarios",
                 value: "Lun - Vie 9:00 - 18:00",
-                gradient: "from-orange-500 to-red-500"
-              }
+                gradient: "from-orange-500 to-red-500",
+              },
             ].map((item, index) => {
-              const Icon = item.icon
+              const Icon = item.icon;
               return (
                 <motion.div
                   key={item.title}
@@ -124,17 +125,21 @@ export function ContactHero() {
                   whileHover={{ y: -5, scale: 1.05 }}
                   className="bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-white/20 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300"
                 >
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${item.gradient} flex items-center justify-center mb-4 mx-auto`}>
+                  <div
+                    className={`w-12 h-12 rounded-xl bg-gradient-to-r ${item.gradient} flex items-center justify-center mb-4 mx-auto`}
+                  >
                     <Icon className="h-6 w-6 text-white" />
                   </div>
-                  <h3 className="font-semibold text-foreground mb-2">{item.title}</h3>
+                  <h3 className="font-semibold text-foreground mb-2">
+                    {item.title}
+                  </h3>
                   <p className="text-sm text-muted-foreground">{item.value}</p>
                 </motion.div>
-              )
+              );
             })}
           </motion.div>
         </div>
       </div>
     </section>
-  )
+  );
 }

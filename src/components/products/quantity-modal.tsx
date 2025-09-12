@@ -1,74 +1,81 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { X, Plus, Minus, ShoppingCart, Package } from "lucide-react"
-import Image from "next/image"
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Plus, Minus, ShoppingCart, Package } from "lucide-react";
+import Image from "next/image";
 
 interface Product {
-  id: string
-  name: string
-  brand: string
-  supplier: string
-  image: string
-  price: number
-  originalPrice?: number
-  description: string
-  category: string
-  subcategory: string
-  inStock: boolean
-  stockQuantity: number
-  rating?: number
-  reviews?: number
-  tags: string[]
-  specifications: Record<string, string>
+  id: string;
+  name: string;
+  brand: string;
+  supplier: string;
+  image: string;
+  price: number;
+  originalPrice?: number;
+  description: string;
+  category: string;
+  subcategory: string;
+  inStock: boolean;
+  stockQuantity: number;
+  rating?: number;
+  reviews?: number;
+  tags: string[];
+  specifications: Record<string, string>;
 }
 
 interface QuantityModalProps {
-  product: Product | null
-  isOpen: boolean
-  onClose: () => void
-  onAddToCart: (product: Product, quantity: number) => void
+  product: Product | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onAddToCart: (product: Product, quantity: number) => void;
 }
 
-export function QuantityModal({ product, isOpen, onClose, onAddToCart }: QuantityModalProps) {
-  const [quantity, setQuantity] = useState(1)
-  const [notes, setNotes] = useState("")
+export function QuantityModal({
+  product,
+  isOpen,
+  onClose,
+  onAddToCart,
+}: QuantityModalProps) {
+  const [quantity, setQuantity] = useState(1);
+  const [notes, setNotes] = useState("");
 
-  if (!product) return null
+  if (!product) return null;
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 0
-    }).format(price)
-  }
+    return new Intl.NumberFormat("es-AR", {
+      style: "currency",
+      currency: "ARS",
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
 
   const handleQuantityChange = (delta: number) => {
-    setQuantity(prev => Math.max(1, Math.min(prev + delta, product.stockQuantity)))
-  }
+    setQuantity((prev) =>
+      Math.max(1, Math.min(prev + delta, product.stockQuantity)),
+    );
+  };
 
   const handleAddToCart = () => {
-    onAddToCart(product, quantity)
-    setQuantity(1)
-    setNotes("")
-    onClose()
-  }
+    onAddToCart(product, quantity);
+    setQuantity(1);
+    setNotes("");
+    onClose();
+  };
 
-  const subtotal = product.price * quantity
+  const subtotal = product.price * quantity;
 
   // Calcular descuentos por volumen (simulado)
   const getVolumeDiscount = (qty: number) => {
-    if (qty >= 100) return 0.15 // 15% descuento
-    if (qty >= 50) return 0.10 // 10% descuento
-    if (qty >= 20) return 0.05 // 5% descuento
-    return 0
-  }
+    if (qty >= 100) return 0.15; // 15% descuento
+    if (qty >= 50) return 0.1; // 10% descuento
+    if (qty >= 20) return 0.05; // 5% descuento
+    return 0;
+  };
 
-  const volumeDiscount = getVolumeDiscount(quantity)
-  const discountAmount = subtotal * volumeDiscount
-  const finalTotal = subtotal - discountAmount
+  const volumeDiscount = getVolumeDiscount(quantity);
+  const discountAmount = subtotal * volumeDiscount;
+  const finalTotal = subtotal - discountAmount;
 
   return (
     <AnimatePresence>
@@ -82,7 +89,7 @@ export function QuantityModal({ product, isOpen, onClose, onAddToCart }: Quantit
             onClick={onClose}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
           />
-          
+
           {/* Modal */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -156,16 +163,26 @@ export function QuantityModal({ product, isOpen, onClose, onAddToCart }: Quantit
                     >
                       <Minus className="w-4 h-4" />
                     </button>
-                    
+
                     <input
                       type="number"
                       min="1"
                       max={product.stockQuantity}
                       value={quantity}
-                      onChange={(e) => setQuantity(Math.max(1, Math.min(Number(e.target.value) || 1, product.stockQuantity)))}
+                      onChange={(e) =>
+                        setQuantity(
+                          Math.max(
+                            1,
+                            Math.min(
+                              Number(e.target.value) || 1,
+                              product.stockQuantity,
+                            ),
+                          ),
+                        )
+                      }
                       className="w-20 text-center py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                    
+
                     <button
                       onClick={() => handleQuantityChange(1)}
                       disabled={quantity >= product.stockQuantity}
@@ -173,7 +190,7 @@ export function QuantityModal({ product, isOpen, onClose, onAddToCart }: Quantit
                     >
                       <Plus className="w-4 h-4" />
                     </button>
-                    
+
                     <div className="text-sm text-slate-500 dark:text-slate-400">
                       de {product.stockQuantity} disponibles
                     </div>
@@ -186,10 +203,12 @@ export function QuantityModal({ product, isOpen, onClose, onAddToCart }: Quantit
                     Cantidades rápidas:
                   </label>
                   <div className="grid grid-cols-4 gap-2">
-                    {[10, 25, 50, 100].map(qty => (
+                    {[10, 25, 50, 100].map((qty) => (
                       <button
                         key={qty}
-                        onClick={() => setQuantity(Math.min(qty, product.stockQuantity))}
+                        onClick={() =>
+                          setQuantity(Math.min(qty, product.stockQuantity))
+                        }
                         disabled={qty > product.stockQuantity}
                         className="py-2 px-3 text-sm border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                       >
@@ -209,7 +228,8 @@ export function QuantityModal({ product, isOpen, onClose, onAddToCart }: Quantit
                     <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
                       <Package className="w-4 h-4" />
                       <span className="text-sm font-medium">
-                        ¡Descuento por volumen! {(volumeDiscount * 100).toFixed(0)}% OFF
+                        ¡Descuento por volumen!{" "}
+                        {(volumeDiscount * 100).toFixed(0)}% OFF
                       </span>
                     </div>
                     <p className="text-xs text-green-600 dark:text-green-400 mt-1">
@@ -243,18 +263,19 @@ export function QuantityModal({ product, isOpen, onClose, onAddToCart }: Quantit
                     {formatPrice(subtotal)}
                   </span>
                 </div>
-                
+
                 {volumeDiscount > 0 && (
                   <div className="flex justify-between text-sm">
                     <span className="text-green-600 dark:text-green-400">
-                      Descuento por volumen ({(volumeDiscount * 100).toFixed(0)}%):
+                      Descuento por volumen ({(volumeDiscount * 100).toFixed(0)}
+                      %):
                     </span>
                     <span className="text-green-600 dark:text-green-400">
                       -{formatPrice(discountAmount)}
                     </span>
                   </div>
                 )}
-                
+
                 <div className="flex justify-between text-lg font-semibold border-t border-slate-200 dark:border-slate-600 pt-2">
                   <span className="text-slate-900 dark:text-white">Total:</span>
                   <span className="text-slate-900 dark:text-white">
@@ -285,5 +306,5 @@ export function QuantityModal({ product, isOpen, onClose, onAddToCart }: Quantit
         </>
       )}
     </AnimatePresence>
-  )
+  );
 }

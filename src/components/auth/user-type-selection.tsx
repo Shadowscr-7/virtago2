@@ -1,59 +1,68 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { ArrowLeft, User, Building2, UserCheck, ArrowRight } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { useAuthStore } from "@/store/auth"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  ArrowLeft,
+  User,
+  Building2,
+  UserCheck,
+  ArrowRight,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/auth";
 
 interface UserTypeSelectionProps {
-  onBack: () => void
-  onSuccess: () => void
+  onBack: () => void;
+  onSuccess: () => void;
 }
 
 const userTypes = [
   {
-    id: 'client',
-    title: 'Cliente',
-    description: 'Comprador final de productos',
+    id: "client",
+    title: "Cliente",
+    description: "Comprador final de productos",
     icon: User,
     features: [
-      'Acceso al catálogo completo',
-      'Precios especiales para clientes',
-      'Historial de compras',
-      'Soporte dedicado'
+      "Acceso al catálogo completo",
+      "Precios especiales para clientes",
+      "Historial de compras",
+      "Soporte dedicado",
     ],
-    gradient: 'from-blue-500 via-purple-500 to-pink-500'
+    gradient: "from-blue-500 via-purple-500 to-pink-500",
   },
   {
-    id: 'distributor',
-    title: 'Distribuidor',
-    description: 'Socio comercial con beneficios especiales',
+    id: "distributor",
+    title: "Distribuidor",
+    description: "Socio comercial con beneficios especiales",
     icon: Building2,
     features: [
-      'Precios mayoristas',
-      'Dashboard de ventas',
-      'Gestión de territorio',
-      'Comisiones y bonificaciones'
+      "Precios mayoristas",
+      "Dashboard de ventas",
+      "Gestión de territorio",
+      "Comisiones y bonificaciones",
     ],
-    gradient: 'from-green-500 via-blue-500 to-purple-500'
-  }
-]
+    gradient: "from-green-500 via-blue-500 to-purple-500",
+  },
+];
 
-export function UserTypeSelection({ onBack, onSuccess }: UserTypeSelectionProps) {
-  const [selectedType, setSelectedType] = useState<string>('')
-  const { setUserType, isLoading } = useAuthStore()
+export function UserTypeSelection({
+  onBack,
+  onSuccess,
+}: UserTypeSelectionProps) {
+  const [selectedType, setSelectedType] = useState<string>("");
+  const { setUserType, isLoading } = useAuthStore();
 
   const handleContinue = async () => {
-    if (!selectedType) return
+    if (!selectedType) return;
 
     try {
-      await setUserType(selectedType as 'client' | 'distributor')
-      onSuccess()
+      await setUserType(selectedType as "client" | "distributor");
+      onSuccess();
     } catch (error) {
-      console.error('Error setting user type:', error)
+      console.error("Error setting user type:", error);
     }
-  }
+  };
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -88,7 +97,7 @@ export function UserTypeSelection({ onBack, onSuccess }: UserTypeSelectionProps)
               </div>
             </div>
           </motion.div>
-          
+
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -97,7 +106,7 @@ export function UserTypeSelection({ onBack, onSuccess }: UserTypeSelectionProps)
           >
             Tipo de Usuario
           </motion.h1>
-          
+
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -116,8 +125,8 @@ export function UserTypeSelection({ onBack, onSuccess }: UserTypeSelectionProps)
           className="grid gap-6 mb-8"
         >
           {userTypes.map((type, index) => {
-            const Icon = type.icon
-            const isSelected = selectedType === type.id
+            const Icon = type.icon;
+            const isSelected = selectedType === type.id;
 
             return (
               <motion.button
@@ -133,16 +142,18 @@ export function UserTypeSelection({ onBack, onSuccess }: UserTypeSelectionProps)
                   "hover:border-white/40 hover:bg-white/5",
                   isSelected
                     ? "border-purple-500 bg-white/10"
-                    : "border-white/20 bg-white/5"
+                    : "border-white/20 bg-white/5",
                 )}
               >
                 <div className="flex items-start gap-4">
                   {/* Icono */}
-                  <div className={cn(
-                    "flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center",
-                    `bg-gradient-to-r ${type.gradient}`,
-                    isSelected && "scale-110"
-                  )}>
+                  <div
+                    className={cn(
+                      "flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center",
+                      `bg-gradient-to-r ${type.gradient}`,
+                      isSelected && "scale-110",
+                    )}
+                  >
                     <Icon className="h-6 w-6 text-white" />
                   </div>
 
@@ -162,10 +173,8 @@ export function UserTypeSelection({ onBack, onSuccess }: UserTypeSelectionProps)
                         </motion.div>
                       )}
                     </div>
-                    
-                    <p className="text-white/70 mb-4">
-                      {type.description}
-                    </p>
+
+                    <p className="text-white/70 mb-4">{type.description}</p>
 
                     {/* Características */}
                     <div className="grid grid-cols-2 gap-2">
@@ -185,7 +194,7 @@ export function UserTypeSelection({ onBack, onSuccess }: UserTypeSelectionProps)
                   </div>
                 </div>
               </motion.button>
-            )
+            );
           })}
         </motion.div>
 
@@ -204,7 +213,7 @@ export function UserTypeSelection({ onBack, onSuccess }: UserTypeSelectionProps)
             "hover:from-purple-600 hover:via-pink-600 hover:to-cyan-600",
             "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-transparent",
             "disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2",
-            (!selectedType || isLoading) && "animate-pulse"
+            (!selectedType || isLoading) && "animate-pulse",
           )}
         >
           {isLoading ? (
@@ -228,10 +237,11 @@ export function UserTypeSelection({ onBack, onSuccess }: UserTypeSelectionProps)
           className="mt-6 p-4 bg-white/5 rounded-lg border border-white/10"
         >
           <p className="text-white/70 text-sm text-center">
-            💡 <strong>Tip:</strong> Puedes cambiar tu tipo de usuario más tarde desde tu perfil
+            💡 <strong>Tip:</strong> Puedes cambiar tu tipo de usuario más tarde
+            desde tu perfil
           </p>
         </motion.div>
       </motion.div>
     </div>
-  )
+  );
 }

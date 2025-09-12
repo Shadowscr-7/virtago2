@@ -1,76 +1,79 @@
-"use client"
+"use client";
 
-import { useState, useRef, useEffect } from "react"
-import { ChevronDown, Check } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
+import { useState, useRef, useEffect } from "react";
+import { ChevronDown, Check } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Option {
-  value: string
-  label: string
-  icon?: string
+  value: string;
+  label: string;
+  icon?: string;
 }
 
 interface StyledSelectProps {
-  value: string
-  onChange: (value: string) => void
-  options: Option[]
-  placeholder?: string
-  className?: string
-  label?: string
-  disabled?: boolean
+  value: string;
+  onChange: (value: string) => void;
+  options: Option[];
+  placeholder?: string;
+  className?: string;
+  label?: string;
+  disabled?: boolean;
 }
 
-export function StyledSelect({ 
-  value, 
-  onChange, 
-  options, 
+export function StyledSelect({
+  value,
+  onChange,
+  options,
   placeholder = "Seleccionar...",
   className = "",
   label,
-  disabled = false
+  disabled = false,
 }: StyledSelectProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
-  const selectRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const selectRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const selectedOption = options.find(opt => opt.value === value)
-  
-  const filteredOptions = options.filter(option =>
-    option.label.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const selectedOption = options.find((opt) => opt.value === value);
+
+  const filteredOptions = options.filter((option) =>
+    option.label.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (selectRef.current && !selectRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-        setSearchTerm("")
+      if (
+        selectRef.current &&
+        !selectRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+        setSearchTerm("");
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Enfocar el input cuando se abre
   useEffect(() => {
     if (isOpen && inputRef.current) {
-      inputRef.current.focus()
+      inputRef.current.focus();
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   const handleSelect = (optionValue: string) => {
-    onChange(optionValue)
-    setIsOpen(false)
-    setSearchTerm("")
-  }
+    onChange(optionValue);
+    setIsOpen(false);
+    setSearchTerm("");
+  };
 
   const handleToggle = () => {
     if (!disabled) {
-      setIsOpen(!isOpen)
-      setSearchTerm("")
+      setIsOpen(!isOpen);
+      setSearchTerm("");
     }
-  }
+  };
 
   return (
     <div className={className}>
@@ -79,7 +82,7 @@ export function StyledSelect({
           {label}
         </label>
       )}
-      
+
       <div className="relative" ref={selectRef}>
         {/* Trigger Button */}
         <motion.button
@@ -92,14 +95,17 @@ export function StyledSelect({
             w-full h-full px-4 py-0 bg-white/80 dark:bg-slate-700/80 border-2 border-white/40 dark:border-slate-600/40 
             rounded-2xl text-left transition-all duration-300 backdrop-blur-lg shadow-lg shadow-purple-500/5
             flex items-center justify-between min-h-[3.5rem]
-            ${disabled 
-              ? 'cursor-not-allowed opacity-60 bg-gray-200/60 dark:bg-gray-600/60' 
-              : 'cursor-pointer hover:border-purple-400/40 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50'
+            ${
+              disabled
+                ? "cursor-not-allowed opacity-60 bg-gray-200/60 dark:bg-gray-600/60"
+                : "cursor-pointer hover:border-purple-400/40 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50"
             }
-            ${isOpen ? 'border-purple-500/50 ring-2 ring-purple-500/20' : ''}
+            ${isOpen ? "border-purple-500/50 ring-2 ring-purple-500/20" : ""}
           `}
         >
-          <span className={`flex items-center gap-2 text-gray-900 dark:text-white ${!selectedOption ? 'text-gray-500 dark:text-gray-400' : ''}`}>
+          <span
+            className={`flex items-center gap-2 text-gray-900 dark:text-white ${!selectedOption ? "text-gray-500 dark:text-gray-400" : ""}`}
+          >
             {selectedOption ? (
               <>
                 {selectedOption.icon && <span>{selectedOption.icon}</span>}
@@ -109,11 +115,11 @@ export function StyledSelect({
               placeholder
             )}
           </span>
-          
+
           <motion.div
             animate={{ rotate: isOpen ? 180 : 0 }}
             transition={{ duration: 0.2 }}
-            className={`flex-shrink-0 ${disabled ? 'opacity-50' : ''}`}
+            className={`flex-shrink-0 ${disabled ? "opacity-50" : ""}`}
           >
             <ChevronDown className="w-5 h-5 text-gray-400" />
           </motion.div>
@@ -161,9 +167,10 @@ export function StyledSelect({
                       className={`
                         w-full px-4 py-3 text-left flex items-center justify-between transition-all duration-200
                         hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:text-purple-700 dark:hover:text-purple-300
-                        ${value === option.value 
-                          ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 font-medium' 
-                          : 'text-gray-700 dark:text-gray-300'
+                        ${
+                          value === option.value
+                            ? "bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 font-medium"
+                            : "text-gray-700 dark:text-gray-300"
                         }
                       `}
                     >
@@ -171,7 +178,7 @@ export function StyledSelect({
                         {option.icon && <span>{option.icon}</span>}
                         {option.label}
                       </span>
-                      
+
                       {value === option.value && (
                         <motion.div
                           initial={{ scale: 0 }}
@@ -190,5 +197,5 @@ export function StyledSelect({
         </AnimatePresence>
       </div>
     </div>
-  )
+  );
 }

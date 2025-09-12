@@ -1,30 +1,31 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { useAuthStore } from "@/store/auth"
-import { RegisterForm } from "./register-form"
-import { OTPVerification } from "./otp-verification"
-import { UserTypeSelection } from "./user-type-selection"
-import { PersonalInfoForm } from "./personal-info-form"
-import { BusinessInfoForm } from "./business-info-form"
-import { RegistrationSuccess } from "./registration-success"
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAuthStore } from "@/store/auth";
+import { RegisterForm } from "./register-form";
+import { OTPVerification } from "./otp-verification";
+import { UserTypeSelection } from "./user-type-selection";
+import { PersonalInfoForm } from "./personal-info-form";
+import { BusinessInfoForm } from "./business-info-form";
+import { RegistrationSuccess } from "./registration-success";
 
 export function MultiStepRegistration() {
-  const { registrationStep, registrationData, resetRegistration } = useAuthStore()
-  const [mounted, setMounted] = useState(false)
+  const { registrationStep, registrationData, resetRegistration } =
+    useAuthStore();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   if (!mounted) {
-    return null // Prevent hydration issues
+    return null; // Prevent hydration issues
   }
 
   const renderStep = () => {
     switch (registrationStep) {
-      case 'initial':
+      case "initial":
         return (
           <RegisterForm
             key="register"
@@ -32,21 +33,21 @@ export function MultiStepRegistration() {
               // El store maneja el cambio de paso automáticamente
             }}
           />
-        )
+        );
 
-      case 'otp':
+      case "otp":
         return (
           <OTPVerification
             key="otp"
-            email={registrationData?.email || ''}
+            email={registrationData?.email || ""}
             onBack={() => resetRegistration()}
             onSuccess={() => {
               // El store maneja el cambio de paso automáticamente
             }}
           />
-        )
+        );
 
-      case 'userType':
+      case "userType":
         return (
           <UserTypeSelection
             key="userType"
@@ -55,9 +56,9 @@ export function MultiStepRegistration() {
               // El store maneja el cambio de paso automáticamente
             }}
           />
-        )
+        );
 
-      case 'personalInfo':
+      case "personalInfo":
         return (
           <PersonalInfoForm
             key="personalInfo"
@@ -66,9 +67,9 @@ export function MultiStepRegistration() {
               // El store maneja el cambio de paso automáticamente
             }}
           />
-        )
+        );
 
-      case 'businessInfo':
+      case "businessInfo":
         return (
           <BusinessInfoForm
             key="businessInfo"
@@ -77,14 +78,10 @@ export function MultiStepRegistration() {
               // El store maneja el cambio de paso automáticamente
             }}
           />
-        )
+        );
 
-      case 'completed':
-        return (
-          <RegistrationSuccess
-            key="success"
-          />
-        )
+      case "completed":
+        return <RegistrationSuccess key="success" />;
 
       default:
         return (
@@ -94,9 +91,9 @@ export function MultiStepRegistration() {
               // El store maneja el cambio de paso automáticamente
             }}
           />
-        )
+        );
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
@@ -114,34 +111,47 @@ export function MultiStepRegistration() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-4 bg-white/10 backdrop-blur-lg rounded-full px-6 py-3 border border-white/20"
         >
-          {['initial', 'otp', 'userType', 'personalInfo', 'businessInfo', 'completed'].map((step, index) => {
-            const isActive = registrationStep === step
-            const isCompleted = ['initial', 'otp', 'userType', 'personalInfo', 'businessInfo', 'completed'].indexOf(registrationStep) > index
-            
+          {[
+            "initial",
+            "otp",
+            "userType",
+            "personalInfo",
+            "businessInfo",
+            "completed",
+          ].map((step, index) => {
+            const isActive = registrationStep === step;
+            const isCompleted =
+              [
+                "initial",
+                "otp",
+                "userType",
+                "personalInfo",
+                "businessInfo",
+                "completed",
+              ].indexOf(registrationStep) > index;
+
             return (
               <motion.div
                 key={step}
                 className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                  isActive 
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 scale-125' 
-                    : isCompleted 
-                    ? 'bg-green-500' 
-                    : 'bg-white/30'
+                  isActive
+                    ? "bg-gradient-to-r from-purple-500 to-pink-500 scale-125"
+                    : isCompleted
+                      ? "bg-green-500"
+                      : "bg-white/30"
                 }`}
                 animate={{
                   scale: isActive ? 1.25 : 1,
                 }}
               />
-            )
+            );
           })}
         </motion.div>
       </div>
 
       {/* Contenido principal */}
       <div className="relative z-10 w-full">
-        <AnimatePresence mode="wait">
-          {renderStep()}
-        </AnimatePresence>
+        <AnimatePresence mode="wait">{renderStep()}</AnimatePresence>
       </div>
 
       {/* Información adicional en el footer */}
@@ -154,12 +164,15 @@ export function MultiStepRegistration() {
         >
           <p>
             ¿Necesitas ayuda? Contacta a soporte en{" "}
-            <a href="mailto:soporte@virtago.com" className="text-purple-400 hover:text-purple-300 transition-colors">
+            <a
+              href="mailto:soporte@virtago.com"
+              className="text-purple-400 hover:text-purple-300 transition-colors"
+            >
               soporte@virtago.com
             </a>
           </p>
         </motion.div>
       </div>
     </div>
-  )
+  );
 }

@@ -1,32 +1,32 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { ChevronDown, ChevronUp, CheckCircle } from "lucide-react"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { ChevronDown, ChevronUp, CheckCircle } from "lucide-react";
 
 interface ProductDetails {
-  description: string
-  longDescription: string
-  specifications: Record<string, string>
-  features: string[]
+  description: string;
+  longDescription: string;
+  specifications: Record<string, string>;
+  features: string[];
 }
 
 interface ProductDetailsTabsProps {
-  product: ProductDetails
+  product: ProductDetails;
 }
 
 export function ProductDetailsTabs({ product }: ProductDetailsTabsProps) {
-  const [activeTab, setActiveTab] = useState("description")
-  const [expandedSpecs, setExpandedSpecs] = useState(false)
+  const [activeTab, setActiveTab] = useState("description");
+  const [expandedSpecs, setExpandedSpecs] = useState(false);
 
   const tabs = [
     { id: "description", label: "Descripción", icon: "📝" },
     { id: "specifications", label: "Especificaciones", icon: "⚙️" },
-    { id: "features", label: "Características", icon: "✨" }
-  ]
+    { id: "features", label: "Características", icon: "✨" },
+  ];
 
-  const specEntries = Object.entries(product.specifications)
-  const visibleSpecs = expandedSpecs ? specEntries : specEntries.slice(0, 6)
+  const specEntries = Object.entries(product.specifications);
+  const visibleSpecs = expandedSpecs ? specEntries : specEntries.slice(0, 6);
 
   return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700">
@@ -38,8 +38,8 @@ export function ProductDetailsTabs({ product }: ProductDetailsTabsProps) {
             onClick={() => setActiveTab(tab.id)}
             className={`flex-1 px-6 py-4 text-left font-medium transition-all duration-300 ${
               activeTab === tab.id
-                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 bg-blue-50/50 dark:bg-blue-900/20'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50'
+                ? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 bg-blue-50/50 dark:bg-blue-900/20"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50"
             }`}
           >
             <div className="flex items-center gap-2">
@@ -68,7 +68,7 @@ export function ProductDetailsTabs({ product }: ProductDetailsTabsProps) {
                   {product.description}
                 </p>
               </div>
-              
+
               <div>
                 <h4 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">
                   Descripción Detallada
@@ -87,7 +87,7 @@ export function ProductDetailsTabs({ product }: ProductDetailsTabsProps) {
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
                 Especificaciones Técnicas
               </h3>
-              
+
               <div className="grid grid-cols-1 gap-3">
                 {visibleSpecs.map(([key, value], index) => (
                   <motion.div
@@ -135,7 +135,7 @@ export function ProductDetailsTabs({ product }: ProductDetailsTabsProps) {
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
                 Características Principales
               </h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {product.features.map((feature, index) => (
                   <motion.div
@@ -157,5 +157,5 @@ export function ProductDetailsTabs({ product }: ProductDetailsTabsProps) {
         </motion.div>
       </div>
     </div>
-  )
+  );
 }

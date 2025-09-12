@@ -1,30 +1,34 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { Building, Phone, Mail, MapPin } from "lucide-react"
-import { StyledSelect } from "@/components/ui/styled-select"
+import { motion } from "framer-motion";
+import { Building, Phone, Mail, MapPin } from "lucide-react";
+import { StyledSelect } from "@/components/ui/styled-select";
 
 interface ClientAdditionalData {
-  paymentMethodCode: string
-  contactName: string
-  contactPhone: string
-  contactEmail: string
-  fiscalName: string
-  city: string
-  neighborhood: string
-  address: string
-  postalCode: string
-  country: string
-  observations: string
+  paymentMethodCode: string;
+  contactName: string;
+  contactPhone: string;
+  contactEmail: string;
+  fiscalName: string;
+  city: string;
+  neighborhood: string;
+  address: string;
+  postalCode: string;
+  country: string;
+  observations: string;
 }
 
 interface ClientAdditionalInfoProps {
-  clientData: ClientAdditionalData
-  isEditing: boolean
-  onInputChange: (field: keyof ClientAdditionalData, value: string) => void
+  clientData: ClientAdditionalData;
+  isEditing: boolean;
+  onInputChange: (field: keyof ClientAdditionalData, value: string) => void;
 }
 
-export function ClientAdditionalInfo({ clientData, isEditing, onInputChange }: ClientAdditionalInfoProps) {
+export function ClientAdditionalInfo({
+  clientData,
+  isEditing,
+  onInputChange,
+}: ClientAdditionalInfoProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -49,14 +53,14 @@ export function ClientAdditionalInfo({ clientData, isEditing, onInputChange }: C
           <div className="relative h-14">
             <StyledSelect
               value={clientData.paymentMethodCode}
-              onChange={(value) => onInputChange('paymentMethodCode', value)}
+              onChange={(value) => onInputChange("paymentMethodCode", value)}
               disabled={!isEditing}
               options={[
                 { value: "EFECTIVO", label: "💵 Efectivo" },
                 { value: "TRANSFERENCIA", label: "🏦 Transferencia Bancaria" },
                 { value: "CREDITO", label: "💳 Tarjeta de Crédito" },
                 { value: "DEBITO", label: "💸 Tarjeta de Débito" },
-                { value: "CHEQUE", label: "📝 Cheque" }
+                { value: "CHEQUE", label: "📝 Cheque" },
               ]}
             />
           </div>
@@ -70,7 +74,7 @@ export function ClientAdditionalInfo({ clientData, isEditing, onInputChange }: C
             <input
               type="text"
               value={clientData.contactName}
-              onChange={(e) => onInputChange('contactName', e.target.value)}
+              onChange={(e) => onInputChange("contactName", e.target.value)}
               disabled={!isEditing}
               className="w-full h-full px-4 bg-white/80 dark:bg-slate-700/80 border-2 border-white/40 dark:border-slate-600/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:border-purple-400/40 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 shadow-lg shadow-purple-500/5"
               placeholder="Nombre del contacto principal"
@@ -90,7 +94,7 @@ export function ClientAdditionalInfo({ clientData, isEditing, onInputChange }: C
             <input
               type="text"
               value={clientData.contactPhone}
-              onChange={(e) => onInputChange('contactPhone', e.target.value)}
+              onChange={(e) => onInputChange("contactPhone", e.target.value)}
               disabled={!isEditing}
               className="w-full h-full px-4 pl-12 bg-white/80 dark:bg-slate-700/80 border-2 border-white/40 dark:border-slate-600/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:border-purple-400/40 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 shadow-lg shadow-purple-500/5"
               placeholder="Teléfono del contacto"
@@ -110,7 +114,7 @@ export function ClientAdditionalInfo({ clientData, isEditing, onInputChange }: C
             <input
               type="email"
               value={clientData.contactEmail}
-              onChange={(e) => onInputChange('contactEmail', e.target.value)}
+              onChange={(e) => onInputChange("contactEmail", e.target.value)}
               disabled={!isEditing}
               className="w-full h-full px-4 pl-12 bg-white/80 dark:bg-slate-700/80 border-2 border-white/40 dark:border-slate-600/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:border-purple-400/40 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 shadow-lg shadow-purple-500/5"
               placeholder="Email del contacto"
@@ -126,7 +130,7 @@ export function ClientAdditionalInfo({ clientData, isEditing, onInputChange }: C
             <input
               type="text"
               value={clientData.fiscalName}
-              onChange={(e) => onInputChange('fiscalName', e.target.value)}
+              onChange={(e) => onInputChange("fiscalName", e.target.value)}
               disabled={!isEditing}
               className="w-full h-full px-4 bg-white/80 dark:bg-slate-700/80 border-2 border-white/40 dark:border-slate-600/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:border-purple-400/40 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 shadow-lg shadow-purple-500/5"
               placeholder="Razón social para facturación"
@@ -146,7 +150,7 @@ export function ClientAdditionalInfo({ clientData, isEditing, onInputChange }: C
             <input
               type="text"
               value={clientData.city}
-              onChange={(e) => onInputChange('city', e.target.value)}
+              onChange={(e) => onInputChange("city", e.target.value)}
               disabled={!isEditing}
               className="w-full h-full px-4 pl-12 bg-white/80 dark:bg-slate-700/80 border-2 border-white/40 dark:border-slate-600/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:border-purple-400/40 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 shadow-lg shadow-purple-500/5"
               placeholder="Ciudad"
@@ -162,7 +166,7 @@ export function ClientAdditionalInfo({ clientData, isEditing, onInputChange }: C
             <input
               type="text"
               value={clientData.neighborhood}
-              onChange={(e) => onInputChange('neighborhood', e.target.value)}
+              onChange={(e) => onInputChange("neighborhood", e.target.value)}
               disabled={!isEditing}
               className="w-full h-full px-4 bg-white/80 dark:bg-slate-700/80 border-2 border-white/40 dark:border-slate-600/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:border-purple-400/40 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 shadow-lg shadow-purple-500/5"
               placeholder="Barrio o zona"
@@ -178,7 +182,7 @@ export function ClientAdditionalInfo({ clientData, isEditing, onInputChange }: C
             <input
               type="text"
               value={clientData.address}
-              onChange={(e) => onInputChange('address', e.target.value)}
+              onChange={(e) => onInputChange("address", e.target.value)}
               disabled={!isEditing}
               className="w-full h-full px-4 bg-white/80 dark:bg-slate-700/80 border-2 border-white/40 dark:border-slate-600/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:border-purple-400/40 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 shadow-lg shadow-purple-500/5"
               placeholder="Dirección completa"
@@ -194,7 +198,7 @@ export function ClientAdditionalInfo({ clientData, isEditing, onInputChange }: C
             <input
               type="text"
               value={clientData.postalCode}
-              onChange={(e) => onInputChange('postalCode', e.target.value)}
+              onChange={(e) => onInputChange("postalCode", e.target.value)}
               disabled={!isEditing}
               className="w-full h-full px-4 bg-white/80 dark:bg-slate-700/80 border-2 border-white/40 dark:border-slate-600/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:border-purple-400/40 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 shadow-lg shadow-purple-500/5"
               placeholder="Código postal"
@@ -209,7 +213,7 @@ export function ClientAdditionalInfo({ clientData, isEditing, onInputChange }: C
           <div className="relative h-14">
             <StyledSelect
               value={clientData.country}
-              onChange={(value) => onInputChange('country', value)}
+              onChange={(value) => onInputChange("country", value)}
               disabled={!isEditing}
               options={[
                 { value: "Uruguay", label: "🇺🇾 Uruguay" },
@@ -218,7 +222,7 @@ export function ClientAdditionalInfo({ clientData, isEditing, onInputChange }: C
                 { value: "Chile", label: "🇨🇱 Chile" },
                 { value: "Paraguay", label: "🇵🇾 Paraguay" },
                 { value: "Colombia", label: "🇨🇴 Colombia" },
-                { value: "Perú", label: "🇵🇪 Perú" }
+                { value: "Perú", label: "🇵🇪 Perú" },
               ]}
             />
           </div>
@@ -231,7 +235,7 @@ export function ClientAdditionalInfo({ clientData, isEditing, onInputChange }: C
           <div className="relative">
             <textarea
               value={clientData.observations}
-              onChange={(e) => onInputChange('observations', e.target.value)}
+              onChange={(e) => onInputChange("observations", e.target.value)}
               disabled={!isEditing}
               rows={4}
               className="w-full px-4 py-3 bg-white/80 dark:bg-slate-700/80 border-2 border-white/40 dark:border-slate-600/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:border-purple-400/40 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 shadow-lg shadow-purple-500/5 resize-none"
@@ -241,5 +245,5 @@ export function ClientAdditionalInfo({ clientData, isEditing, onInputChange }: C
         </div>
       </div>
     </motion.div>
-  )
+  );
 }

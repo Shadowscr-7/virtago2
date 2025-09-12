@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { 
+import { useState } from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
   LayoutDashboard,
   Zap,
   Users,
@@ -16,8 +16,8 @@ import {
   ShoppingCart,
   Ticket,
   ChevronLeft,
-  ChevronRight
-} from "lucide-react"
+  ChevronRight,
+} from "lucide-react";
 
 const menuItems = [
   {
@@ -25,87 +25,87 @@ const menuItems = [
     label: "Inicio",
     icon: LayoutDashboard,
     href: "/admin",
-    color: "from-blue-500 to-cyan-500"
+    color: "from-blue-500 to-cyan-500",
   },
   {
     id: "quick-setup",
     label: "Configuración Rápida",
     icon: Zap,
     href: "/admin/configuracion-rapida",
-    color: "from-purple-500 to-pink-500"
+    color: "from-purple-500 to-pink-500",
   },
   {
     id: "customers",
     label: "Clientes",
     icon: Users,
     href: "/admin/clientes",
-    color: "from-green-500 to-emerald-500"
+    color: "from-green-500 to-emerald-500",
   },
   {
     id: "products",
     label: "Productos",
     icon: Package,
     href: "/admin/productos",
-    color: "from-orange-500 to-red-500"
+    color: "from-orange-500 to-red-500",
   },
   {
     id: "images",
     label: "Imágenes",
     icon: Images,
     href: "/admin/imagenes",
-    color: "from-indigo-500 to-purple-500"
+    color: "from-indigo-500 to-purple-500",
   },
   {
     id: "price-lists",
     label: "Lista de Precios",
     icon: FileText,
     href: "/admin/listas-precios",
-    color: "from-yellow-500 to-orange-500"
+    color: "from-yellow-500 to-orange-500",
   },
   {
     id: "prices",
     label: "Precios",
     icon: DollarSign,
     href: "/admin/precios",
-    color: "from-emerald-500 to-teal-500"
+    color: "from-emerald-500 to-teal-500",
   },
   {
     id: "discounts",
     label: "Descuentos",
     icon: Percent,
     href: "/admin/descuentos",
-    color: "from-red-500 to-pink-500"
+    color: "from-red-500 to-pink-500",
   },
   {
     id: "orders",
     label: "Órdenes",
     icon: ShoppingCart,
     href: "/admin/ordenes",
-    color: "from-blue-500 to-indigo-500"
+    color: "from-blue-500 to-indigo-500",
   },
   {
     id: "coupons",
     label: "Cupones",
     icon: Ticket,
     href: "/admin/cupones",
-    color: "from-pink-500 to-rose-500"
-  }
-]
+    color: "from-pink-500 to-rose-500",
+  },
+];
 
 interface AdminSidebarProps {
-  className?: string
+  className?: string;
 }
 
 export function AdminSidebar({ className = "" }: AdminSidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false)
-  const pathname = usePathname()
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const pathname = usePathname();
 
   const isActive = (href: string) => {
     if (href === "/admin") {
-      return pathname === "/admin"
+      return pathname === "/admin";
     }
-    return pathname.startsWith(href)
-  }
+    return pathname.startsWith(href);
+  };
 
   return (
     <motion.aside
@@ -115,7 +115,7 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
       className={`
         relative h-screen bg-gradient-to-b from-slate-900 via-purple-900/20 to-slate-900 
         border-r border-white/10 backdrop-blur-xl
-        ${isCollapsed ? 'w-16' : 'w-64'} 
+        ${isCollapsed ? "w-16" : "w-64"} 
         transition-all duration-300 ease-in-out
         ${className}
       `}
@@ -148,9 +148,9 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
       {/* Navigation */}
       <nav className="p-2 space-y-1">
         {menuItems.map((item, index) => {
-          const IconComponent = item.icon
-          const active = isActive(item.href)
-          
+          const IconComponent = item.icon;
+          const active = isActive(item.href);
+
           return (
             <motion.div
               key={item.id}
@@ -164,10 +164,11 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
                   whileTap={{ scale: 0.98 }}
                   className={`
                     relative group flex items-center gap-3 p-3 rounded-xl transition-all duration-300
-                    ${isCollapsed ? 'justify-center' : ''}
-                    ${active 
-                      ? `bg-gradient-to-r ${item.color} text-white shadow-lg shadow-${item.color.split(' ')[1]}/25` 
-                      : 'text-gray-300 hover:text-white hover:bg-white/10'
+                    ${isCollapsed ? "justify-center" : ""}
+                    ${
+                      active
+                        ? `bg-gradient-to-r ${item.color} text-white shadow-lg shadow-${item.color.split(" ")[1]}/25`
+                        : "text-gray-300 hover:text-white hover:bg-white/10"
                     }
                   `}
                 >
@@ -176,7 +177,11 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
                     <motion.div
                       layoutId="activeIndicator"
                       className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full"
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 500,
+                        damping: 30,
+                      }}
                     />
                   )}
 
@@ -184,13 +189,16 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
                   <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
                   {/* Icono */}
-                  <div className={`
+                  <div
+                    className={`
                     relative z-10 p-2 rounded-lg transition-all duration-300
-                    ${active 
-                      ? 'bg-white/20' 
-                      : 'bg-white/5 group-hover:bg-white/10'
+                    ${
+                      active
+                        ? "bg-white/20"
+                        : "bg-white/5 group-hover:bg-white/10"
                     }
-                  `}>
+                  `}
+                  >
                     <IconComponent className="w-5 h-5" />
                   </div>
 
@@ -219,7 +227,7 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
                 </motion.div>
               </Link>
             </motion.div>
-          )
+          );
         })}
       </nav>
 
@@ -249,5 +257,5 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
         )}
       </div>
     </motion.aside>
-  )
+  );
 }

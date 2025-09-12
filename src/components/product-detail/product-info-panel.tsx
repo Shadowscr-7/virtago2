@@ -1,77 +1,81 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { 
-  Star, 
-  Heart, 
-  Share2, 
-  ShoppingCart, 
-  Minus, 
-  Plus, 
-  Shield, 
-  Truck, 
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Star,
+  Heart,
+  Share2,
+  ShoppingCart,
+  Minus,
+  Plus,
+  Shield,
+  Truck,
   RotateCcw,
   CreditCard,
   AlertCircle,
-  Check
-} from "lucide-react"
-import { useCartStore } from "@/components/cart/cart-store"
+  Check,
+} from "lucide-react";
+import { useCartStore } from "@/components/cart/cart-store";
 
 interface ProductInfo {
-  id: string
-  name: string
-  brand: string
-  supplier: string
-  images: string[]
-  price: number
-  originalPrice?: number
-  description: string
-  longDescription: string
-  category: string
-  subcategory: string
-  inStock: boolean
-  stockQuantity: number
-  rating?: number
-  reviews?: number
-  tags: string[]
-  warranty: string
+  id: string;
+  name: string;
+  brand: string;
+  supplier: string;
+  images: string[];
+  price: number;
+  originalPrice?: number;
+  description: string;
+  longDescription: string;
+  category: string;
+  subcategory: string;
+  inStock: boolean;
+  stockQuantity: number;
+  rating?: number;
+  reviews?: number;
+  tags: string[];
+  warranty: string;
   shipping: {
-    free: boolean
-    estimatedDays: string
-    cost: number
-  }
+    free: boolean;
+    estimatedDays: string;
+    cost: number;
+  };
   supplier_info: {
-    name: string
-    rating: number
-    reviews: number
-    response_time: string
-    verified: boolean
-  }
+    name: string;
+    rating: number;
+    reviews: number;
+    response_time: string;
+    verified: boolean;
+  };
 }
 
 interface ProductInfoPanelProps {
-  product: ProductInfo
+  product: ProductInfo;
 }
 
 export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
-  const [quantity, setQuantity] = useState(1)
-  const [isFavorite, setIsFavorite] = useState(false)
-  
-  const { addItem } = useCartStore()
+  const [quantity, setQuantity] = useState(1);
+  const [isFavorite, setIsFavorite] = useState(false);
 
-  const isOnSale = product.originalPrice && product.originalPrice > product.price
-  const discountPercentage = isOnSale 
-    ? Math.round(((product.originalPrice! - product.price) / product.originalPrice!) * 100)
-    : 0
-  
-  const savings = isOnSale ? product.originalPrice! - product.price : 0
+  const { addItem } = useCartStore();
+
+  const isOnSale =
+    product.originalPrice && product.originalPrice > product.price;
+  const discountPercentage = isOnSale
+    ? Math.round(
+        ((product.originalPrice! - product.price) / product.originalPrice!) *
+          100,
+      )
+    : 0;
+
+  const savings = isOnSale ? product.originalPrice! - product.price : 0;
 
   const handleQuantityChange = (newQuantity: number) => {
     if (newQuantity >= 1 && newQuantity <= product.stockQuantity) {
-      setQuantity(newQuantity)
+      setQuantity(newQuantity);
     }
-  }
+  };
 
   const handleAddToCart = () => {
     addItem({
@@ -79,20 +83,20 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
       name: product.name,
       brand: product.brand,
       supplier: product.supplier_info.name,
-      supplierId: product.supplier_info.name.toLowerCase().replace(/\s+/g, '-'),
-      image: product.images[0] || '',
+      supplierId: product.supplier_info.name.toLowerCase().replace(/\s+/g, "-"),
+      image: product.images[0] || "",
       price: product.price,
       originalPrice: product.originalPrice,
       quantity: quantity,
       inStock: product.inStock,
       stockQuantity: product.stockQuantity,
-      category: product.category
-    })
+      category: product.category,
+    });
     // Reset quantity after adding
-    setQuantity(1)
-  }
+    setQuantity(1);
+  };
 
-  const totalPrice = product.price * quantity
+  const totalPrice = product.price * quantity;
 
   return (
     <div className="space-y-8">
@@ -115,9 +119,9 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
             <button
               onClick={() => setIsFavorite(!isFavorite)}
               className={`p-2 rounded-full transition-colors ${
-                isFavorite 
-                  ? 'bg-red-500 text-white' 
-                  : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900'
+                isFavorite
+                  ? "bg-red-500 text-white"
+                  : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900"
               }`}
             >
               <Heart className="w-5 h-5" />
@@ -143,8 +147,8 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
                     key={i}
                     className={`w-5 h-5 ${
                       i < Math.floor(product.rating!)
-                        ? 'text-yellow-400 fill-yellow-400'
-                        : 'text-slate-300 dark:text-slate-600'
+                        ? "text-yellow-400 fill-yellow-400"
+                        : "text-slate-300 dark:text-slate-600"
                     }`}
                   />
                 ))}
@@ -204,7 +208,9 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
       {/* Stock Status */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="font-medium text-slate-900 dark:text-white">Disponibilidad:</span>
+          <span className="font-medium text-slate-900 dark:text-white">
+            Disponibilidad:
+          </span>
           <div className="flex items-center gap-2">
             {product.inStock ? (
               <>
@@ -240,7 +246,9 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
       {product.inStock && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <span className="font-medium text-slate-900 dark:text-white">Cantidad:</span>
+            <span className="font-medium text-slate-900 dark:text-white">
+              Cantidad:
+            </span>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => handleQuantityChange(quantity - 1)}
@@ -266,7 +274,7 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
           <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl">
             <div className="flex items-center justify-between">
               <span className="font-medium text-slate-700 dark:text-slate-300">
-                Total ({quantity} {quantity === 1 ? 'unidad' : 'unidades'}):
+                Total ({quantity} {quantity === 1 ? "unidad" : "unidades"}):
               </span>
               <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 ${totalPrice.toLocaleString()}
@@ -285,12 +293,12 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
           whileTap={{ scale: product.inStock ? 0.98 : 1 }}
           className={`w-full py-4 px-6 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all duration-300 ${
             product.inStock
-              ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/25'
-              : 'bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed'
+              ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/25"
+              : "bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed"
           }`}
         >
           <ShoppingCart className="w-5 h-5" />
-          {product.inStock ? 'Agregar al Carrito' : 'Sin Stock'}
+          {product.inStock ? "Agregar al Carrito" : "Sin Stock"}
         </motion.button>
 
         <button className="w-full py-3 px-6 rounded-xl font-semibold border-2 border-blue-600 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
@@ -308,7 +316,9 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
             <Truck className="w-5 h-5 text-green-600" />
             <div>
               <p className="font-medium text-green-800 dark:text-green-300">
-                {product.shipping.free ? 'Envío Gratis' : `Envío $${product.shipping.cost}`}
+                {product.shipping.free
+                  ? "Envío Gratis"
+                  : `Envío $${product.shipping.cost}`}
               </p>
               <p className="text-sm text-green-600 dark:text-green-400">
                 Entrega estimada: {product.shipping.estimatedDays}
@@ -361,7 +371,9 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
         </h3>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-slate-600 dark:text-slate-400">Proveedor:</span>
+            <span className="text-slate-600 dark:text-slate-400">
+              Proveedor:
+            </span>
             <div className="flex items-center gap-2">
               <span className="font-medium text-slate-900 dark:text-white">
                 {product.supplier_info.name}
@@ -372,7 +384,9 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-slate-600 dark:text-slate-400">Calificación:</span>
+            <span className="text-slate-600 dark:text-slate-400">
+              Calificación:
+            </span>
             <div className="flex items-center gap-2">
               <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
               <span className="font-medium text-slate-900 dark:text-white">
@@ -384,7 +398,9 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-slate-600 dark:text-slate-400">Tiempo de respuesta:</span>
+            <span className="text-slate-600 dark:text-slate-400">
+              Tiempo de respuesta:
+            </span>
             <span className="font-medium text-slate-900 dark:text-white">
               {product.supplier_info.response_time}
             </span>
@@ -392,5 +408,5 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

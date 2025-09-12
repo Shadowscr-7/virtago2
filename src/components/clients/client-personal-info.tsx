@@ -1,24 +1,28 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { User, Building, FileText, Mail, Phone } from "lucide-react"
+import { motion } from "framer-motion";
+import { User, Building, FileText, Mail, Phone } from "lucide-react";
 
 interface ClientData {
-  name: string
-  businessName: string
-  rut: string
-  email: string
-  phone: string
-  phoneSecond: string
+  name: string;
+  businessName: string;
+  rut: string;
+  email: string;
+  phone: string;
+  phoneSecond: string;
 }
 
 interface ClientPersonalInfoProps {
-  clientData: ClientData
-  isEditing: boolean
-  onInputChange: (field: keyof ClientData, value: string) => void
+  clientData: ClientData;
+  isEditing: boolean;
+  onInputChange: (field: keyof ClientData, value: string) => void;
 }
 
-export function ClientPersonalInfo({ clientData, isEditing, onInputChange }: ClientPersonalInfoProps) {
+export function ClientPersonalInfo({
+  clientData,
+  isEditing,
+  onInputChange,
+}: ClientPersonalInfoProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -44,7 +48,7 @@ export function ClientPersonalInfo({ clientData, isEditing, onInputChange }: Cli
             <input
               type="text"
               value={clientData.name}
-              onChange={(e) => onInputChange('name', e.target.value)}
+              onChange={(e) => onInputChange("name", e.target.value)}
               disabled={!isEditing}
               className="w-full h-full pl-12 pr-4 bg-white/80 dark:bg-slate-700/80 border-2 border-white/40 dark:border-slate-600/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:border-purple-400/40 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 shadow-lg shadow-purple-500/5"
               placeholder="Nombre del cliente"
@@ -61,7 +65,7 @@ export function ClientPersonalInfo({ clientData, isEditing, onInputChange }: Cli
             <input
               type="text"
               value={clientData.businessName}
-              onChange={(e) => onInputChange('businessName', e.target.value)}
+              onChange={(e) => onInputChange("businessName", e.target.value)}
               disabled={!isEditing}
               className="w-full h-full pl-12 pr-4 bg-white/80 dark:bg-slate-700/80 border-2 border-white/40 dark:border-slate-600/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:border-purple-400/40 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 shadow-lg shadow-purple-500/5"
               placeholder="Razón social completa"
@@ -78,7 +82,7 @@ export function ClientPersonalInfo({ clientData, isEditing, onInputChange }: Cli
             <input
               type="text"
               value={clientData.rut}
-              onChange={(e) => onInputChange('rut', e.target.value)}
+              onChange={(e) => onInputChange("rut", e.target.value)}
               disabled={!isEditing}
               className="w-full h-full pl-12 pr-4 bg-white/80 dark:bg-slate-700/80 border-2 border-white/40 dark:border-slate-600/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:border-purple-400/40 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 shadow-lg shadow-purple-500/5"
               placeholder="12.345.678.901"
@@ -98,7 +102,7 @@ export function ClientPersonalInfo({ clientData, isEditing, onInputChange }: Cli
             <input
               type="email"
               value={clientData.email}
-              onChange={(e) => onInputChange('email', e.target.value)}
+              onChange={(e) => onInputChange("email", e.target.value)}
               disabled={!isEditing}
               className="w-full h-full pl-12 pr-4 bg-white/80 dark:bg-slate-700/80 border-2 border-white/40 dark:border-slate-600/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:border-purple-400/40 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 shadow-lg shadow-purple-500/5"
               placeholder="contacto@empresa.com"
@@ -118,7 +122,7 @@ export function ClientPersonalInfo({ clientData, isEditing, onInputChange }: Cli
             <input
               type="tel"
               value={clientData.phone}
-              onChange={(e) => onInputChange('phone', e.target.value)}
+              onChange={(e) => onInputChange("phone", e.target.value)}
               disabled={!isEditing}
               className="w-full h-full pl-12 pr-4 bg-white/80 dark:bg-slate-700/80 border-2 border-white/40 dark:border-slate-600/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:border-purple-400/40 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 shadow-lg shadow-purple-500/5"
               placeholder="+598 99 123 456"
@@ -135,7 +139,7 @@ export function ClientPersonalInfo({ clientData, isEditing, onInputChange }: Cli
             <input
               type="tel"
               value={clientData.phoneSecond}
-              onChange={(e) => onInputChange('phoneSecond', e.target.value)}
+              onChange={(e) => onInputChange("phoneSecond", e.target.value)}
               disabled={!isEditing}
               className="w-full h-full pl-12 pr-4 bg-white/80 dark:bg-slate-700/80 border-2 border-white/40 dark:border-slate-600/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:border-purple-400/40 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 shadow-lg shadow-purple-500/5"
               placeholder="+598 99 765 432"
@@ -144,5 +148,5 @@ export function ClientPersonalInfo({ clientData, isEditing, onInputChange }: Cli
         </div>
       </div>
     </motion.div>
-  )
+  );
 }

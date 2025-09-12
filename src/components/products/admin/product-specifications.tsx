@@ -1,58 +1,62 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Settings, Plus, X, Edit2 } from "lucide-react"
-import type { ProductData } from "@/app/admin/productos/[id]/page"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Settings, Plus, X, Edit2 } from "lucide-react";
+import type { ProductData } from "@/app/admin/productos/[id]/page";
 
 interface ProductSpecificationsProps {
-  productData: ProductData
-  isEditing: boolean
-  onChange: (updates: Partial<ProductData>) => void
+  productData: ProductData;
+  isEditing: boolean;
+  onChange: (updates: Partial<ProductData>) => void;
 }
 
 export function ProductSpecifications({
   productData,
   isEditing,
-  onChange
+  onChange,
 }: ProductSpecificationsProps) {
-  const [newSpecKey, setNewSpecKey] = useState("")
-  const [newSpecValue, setNewSpecValue] = useState("")
-  const [editingSpec, setEditingSpec] = useState<string | null>(null)
+  const [newSpecKey, setNewSpecKey] = useState("");
+  const [newSpecValue, setNewSpecValue] = useState("");
+  const [editingSpec, setEditingSpec] = useState<string | null>(null);
 
   const addSpecification = () => {
-    if (!newSpecKey.trim() || !newSpecValue.trim()) return
+    if (!newSpecKey.trim() || !newSpecValue.trim()) return;
 
     const updatedSpecs = {
       ...productData.specifications,
-      [newSpecKey.trim()]: newSpecValue.trim()
-    }
+      [newSpecKey.trim()]: newSpecValue.trim(),
+    };
 
-    onChange({ specifications: updatedSpecs as any })
-    setNewSpecKey("")
-    setNewSpecValue("")
-  }
+    onChange({ specifications: updatedSpecs as any });
+    setNewSpecKey("");
+    setNewSpecValue("");
+  };
 
   const removeSpecification = (key: string) => {
-    const updatedSpecs = { ...productData.specifications } as any
-    delete updatedSpecs[key]
-    onChange({ specifications: updatedSpecs })
-  }
+    const updatedSpecs = { ...productData.specifications } as any;
+    delete updatedSpecs[key];
+    onChange({ specifications: updatedSpecs });
+  };
 
-  const updateSpecification = (oldKey: string, newKey: string, newValue: string) => {
-    const updatedSpecs = { ...productData.specifications } as any
-    
+  const updateSpecification = (
+    oldKey: string,
+    newKey: string,
+    newValue: string,
+  ) => {
+    const updatedSpecs = { ...productData.specifications } as any;
+
     // Si cambió la clave, eliminar la anterior
     if (oldKey !== newKey) {
-      delete updatedSpecs[oldKey]
+      delete updatedSpecs[oldKey];
     }
-    
-    updatedSpecs[newKey] = newValue
-    onChange({ specifications: updatedSpecs })
-    setEditingSpec(null)
-  }
 
-  const specificationEntries = Object.entries(productData.specifications || {})
+    updatedSpecs[newKey] = newValue;
+    onChange({ specifications: updatedSpecs });
+    setEditingSpec(null);
+  };
+
+  const specificationEntries = Object.entries(productData.specifications || {});
 
   return (
     <motion.div
@@ -86,7 +90,9 @@ export function ProductSpecifications({
               isEditing={isEditing}
               isEditingThis={editingSpec === key}
               onEdit={() => setEditingSpec(key)}
-              onSave={(newKey, newValue) => updateSpecification(key, newKey, newValue)}
+              onSave={(newKey, newValue) =>
+                updateSpecification(key, newKey, newValue)
+              }
               onCancel={() => setEditingSpec(null)}
               onRemove={() => removeSpecification(key)}
             />
@@ -98,10 +104,9 @@ export function ProductSpecifications({
               No hay especificaciones
             </h3>
             <p className="text-gray-500 dark:text-gray-400">
-              {isEditing 
+              {isEditing
                 ? "Agrega especificaciones técnicas del producto"
-                : "Este producto no tiene especificaciones definidas"
-              }
+                : "Este producto no tiene especificaciones definidas"}
             </p>
           </div>
         )}
@@ -118,7 +123,7 @@ export function ProductSpecifications({
             <Plus className="w-5 h-5" />
             Agregar Especificación
           </h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -132,7 +137,7 @@ export function ProductSpecifications({
                 placeholder="Ej: Procesador, Pantalla, Memoria..."
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Valor
@@ -144,14 +149,14 @@ export function ProductSpecifications({
                 className="w-full px-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
                 placeholder="Ej: Intel Core i7, 15.6 pulgadas, 16GB..."
                 onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    addSpecification()
+                  if (e.key === "Enter") {
+                    addSpecification();
                   }
                 }}
               />
             </div>
           </div>
-          
+
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -165,18 +170,18 @@ export function ProductSpecifications({
         </motion.div>
       )}
     </motion.div>
-  )
+  );
 }
 
 interface SpecificationItemProps {
-  specKey: string
-  specValue: string
-  isEditing: boolean
-  isEditingThis: boolean
-  onEdit: () => void
-  onSave: (key: string, value: string) => void
-  onCancel: () => void
-  onRemove: () => void
+  specKey: string;
+  specValue: string;
+  isEditing: boolean;
+  isEditingThis: boolean;
+  onEdit: () => void;
+  onSave: (key: string, value: string) => void;
+  onCancel: () => void;
+  onRemove: () => void;
 }
 
 function SpecificationItem({
@@ -187,21 +192,21 @@ function SpecificationItem({
   onEdit,
   onSave,
   onCancel,
-  onRemove
+  onRemove,
 }: SpecificationItemProps) {
-  const [editKey, setEditKey] = useState(specKey)
-  const [editValue, setEditValue] = useState(specValue)
+  const [editKey, setEditKey] = useState(specKey);
+  const [editValue, setEditValue] = useState(specValue);
 
   const handleSave = () => {
-    if (!editKey.trim() || !editValue.trim()) return
-    onSave(editKey.trim(), editValue.trim())
-  }
+    if (!editKey.trim() || !editValue.trim()) return;
+    onSave(editKey.trim(), editValue.trim());
+  };
 
   const handleCancel = () => {
-    setEditKey(specKey)
-    setEditValue(specValue)
-    onCancel()
-  }
+    setEditKey(specKey);
+    setEditValue(specValue);
+    onCancel();
+  };
 
   if (isEditingThis) {
     return (
@@ -217,7 +222,7 @@ function SpecificationItem({
           className="px-3 py-2 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all backdrop-blur-sm"
           placeholder="Característica"
         />
-        
+
         <div className="flex gap-2">
           <input
             type="text"
@@ -226,12 +231,12 @@ function SpecificationItem({
             className="flex-1 px-3 py-2 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all backdrop-blur-sm"
             placeholder="Valor"
             onKeyPress={(e) => {
-              if (e.key === 'Enter') {
-                handleSave()
+              if (e.key === "Enter") {
+                handleSave();
               }
             }}
           />
-          
+
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -240,7 +245,7 @@ function SpecificationItem({
           >
             ✓
           </motion.button>
-          
+
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -251,7 +256,7 @@ function SpecificationItem({
           </motion.button>
         </div>
       </motion.div>
-    )
+    );
   }
 
   return (
@@ -266,12 +271,10 @@ function SpecificationItem({
           </span>
         </div>
         <div>
-          <span className="text-gray-900 dark:text-white">
-            {specValue}
-          </span>
+          <span className="text-gray-900 dark:text-white">{specValue}</span>
         </div>
       </div>
-      
+
       {isEditing && (
         <div className="flex items-center gap-2 ml-4">
           <motion.button
@@ -283,7 +286,7 @@ function SpecificationItem({
           >
             <Edit2 className="w-4 h-4" />
           </motion.button>
-          
+
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
@@ -296,5 +299,5 @@ function SpecificationItem({
         </div>
       )}
     </motion.div>
-  )
+  );
 }

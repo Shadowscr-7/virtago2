@@ -1,7 +1,14 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { MapPin, Phone, Mail, Clock, Navigation, Building2 } from "lucide-react"
+import { motion } from "framer-motion";
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  Navigation,
+  Building2,
+} from "lucide-react";
 
 export function ContactMap() {
   const offices = [
@@ -12,7 +19,7 @@ export function ContactMap() {
       phone: "+52 55 1234 5678",
       email: "contacto@virtago.com",
       hours: "Lun - Vie: 9:00 - 18:00",
-      type: "Matriz"
+      type: "Matriz",
     },
     {
       name: "Centro de Distribución",
@@ -21,9 +28,9 @@ export function ContactMap() {
       phone: "+52 55 1234 5679",
       email: "logistica@virtago.com",
       hours: "Lun - Sáb: 8:00 - 17:00",
-      type: "Almacén"
-    }
-  ]
+      type: "Almacén",
+    },
+  ];
 
   return (
     <div className="space-y-8">
@@ -39,7 +46,9 @@ export function ContactMap() {
           {/* Placeholder del mapa */}
           <div className="text-center">
             <MapPin className="h-16 w-16 text-purple-500 mx-auto mb-4" />
-            <h4 className="text-xl font-semibold text-foreground mb-2">Mapa Interactivo</h4>
+            <h4 className="text-xl font-semibold text-foreground mb-2">
+              Mapa Interactivo
+            </h4>
             <p className="text-muted-foreground mb-4">
               Encuentra nuestras ubicaciones en Ciudad de México
             </p>
@@ -48,7 +57,7 @@ export function ContactMap() {
               Ver en Google Maps
             </button>
           </div>
-          
+
           {/* Overlay de ubicaciones */}
           <div className="absolute top-4 right-4">
             <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-xl p-3 shadow-lg">
@@ -75,23 +84,29 @@ export function ContactMap() {
           >
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                  office.type === 'Matriz' 
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500' 
-                    : 'bg-gradient-to-r from-blue-500 to-cyan-500'
-                }`}>
+                <div
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                    office.type === "Matriz"
+                      ? "bg-gradient-to-r from-purple-500 to-pink-500"
+                      : "bg-gradient-to-r from-blue-500 to-cyan-500"
+                  }`}
+                >
                   <Building2 className="h-6 w-6 text-white" />
                 </div>
               </div>
 
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <h4 className="text-lg font-semibold text-foreground">{office.name}</h4>
-                  <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                    office.type === 'Matriz'
-                      ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-                      : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                  }`}>
+                  <h4 className="text-lg font-semibold text-foreground">
+                    {office.name}
+                  </h4>
+                  <span
+                    className={`px-2 py-1 text-xs rounded-full font-medium ${
+                      office.type === "Matriz"
+                        ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                        : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                    }`}
+                  >
                     {office.type}
                   </span>
                 </div>
@@ -100,7 +115,9 @@ export function ContactMap() {
                   <div className="flex items-start gap-2">
                     <MapPin className="h-4 w-4 text-purple-500 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-foreground font-medium">{office.address}</p>
+                      <p className="text-foreground font-medium">
+                        {office.address}
+                      </p>
                       <p className="text-muted-foreground">{office.city}</p>
                     </div>
                   </div>
@@ -117,7 +134,9 @@ export function ContactMap() {
 
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-orange-500" />
-                    <span className="text-muted-foreground">{office.hours}</span>
+                    <span className="text-muted-foreground">
+                      {office.hours}
+                    </span>
                   </div>
                 </div>
 
@@ -143,22 +162,30 @@ export function ContactMap() {
         viewport={{ once: true }}
         className="bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-cyan-500/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 dark:border-slate-700/50"
       >
-        <h4 className="text-lg font-semibold text-foreground mb-4">Información de Visitantes</h4>
+        <h4 className="text-lg font-semibold text-foreground mb-4">
+          Información de Visitantes
+        </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div>
-            <h5 className="font-medium text-foreground mb-2">Citas Programadas</h5>
+            <h5 className="font-medium text-foreground mb-2">
+              Citas Programadas
+            </h5>
             <p className="text-muted-foreground">
-              Para visitas comerciales, programa tu cita con 24 horas de anticipación.
+              Para visitas comerciales, programa tu cita con 24 horas de
+              anticipación.
             </p>
           </div>
           <div>
-            <h5 className="font-medium text-foreground mb-2">Estacionamiento</h5>
+            <h5 className="font-medium text-foreground mb-2">
+              Estacionamiento
+            </h5>
             <p className="text-muted-foreground">
-              Contamos con estacionamiento gratuito para visitantes en ambas ubicaciones.
+              Contamos con estacionamiento gratuito para visitantes en ambas
+              ubicaciones.
             </p>
           </div>
         </div>
       </motion.div>
     </div>
-  )
+  );
 }

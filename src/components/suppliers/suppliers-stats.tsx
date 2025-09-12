@@ -1,7 +1,16 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { Building, Award, TrendingUp, Users, Globe, Clock, CheckCircle, Star } from "lucide-react"
+import { motion } from "framer-motion";
+import {
+  Building,
+  Award,
+  TrendingUp,
+  Users,
+  Globe,
+  Clock,
+  CheckCircle,
+  Star,
+} from "lucide-react";
 
 export function SuppliersStats() {
   const stats = [
@@ -9,69 +18,72 @@ export function SuppliersStats() {
       icon: Building,
       value: "500+",
       label: "Proveedores Activos",
-      description: "Red global de proveedores verificados"
+      description: "Red global de proveedores verificados",
     },
     {
       icon: Award,
       value: "95%",
       label: "Certificación ISO",
-      description: "Estándares de calidad internacional"
+      description: "Estándares de calidad internacional",
     },
     {
       icon: Users,
       value: "10K+",
       label: "Empresas Conectadas",
-      description: "Clientes satisfechos en toda la región"
+      description: "Clientes satisfechos en toda la región",
     },
     {
       icon: TrendingUp,
       value: "$2.5B+",
       label: "Volumen de Transacciones",
-      description: "Valor total procesado anualmente"
+      description: "Valor total procesado anualmente",
     },
     {
       icon: Globe,
       value: "35",
       label: "Países",
-      description: "Cobertura internacional"
+      description: "Cobertura internacional",
     },
     {
       icon: Clock,
       value: "24/7",
       label: "Soporte",
-      description: "Atención continua especializada"
+      description: "Atención continua especializada",
     },
     {
       icon: CheckCircle,
       value: "99.8%",
       label: "Entregas a Tiempo",
-      description: "Cumplimiento garantizado"
+      description: "Cumplimiento garantizado",
     },
     {
       icon: Star,
       value: "4.9⭐",
       label: "Rating Promedio",
-      description: "Excelencia en satisfacción"
-    }
-  ]
+      description: "Excelencia en satisfacción",
+    },
+  ];
 
   const highlights = [
     {
       title: "Verificación Rigurosa",
-      description: "Proceso de validación en 7 etapas para garantizar la confiabilidad de cada proveedor.",
-      color: "from-blue-500 to-cyan-500"
+      description:
+        "Proceso de validación en 7 etapas para garantizar la confiabilidad de cada proveedor.",
+      color: "from-blue-500 to-cyan-500",
     },
     {
       title: "Tecnología Avanzada",
-      description: "Plataforma inteligente con IA para matchmaking óptimo entre empresas y proveedores.",
-      color: "from-purple-500 to-pink-500"
+      description:
+        "Plataforma inteligente con IA para matchmaking óptimo entre empresas y proveedores.",
+      color: "from-purple-500 to-pink-500",
     },
     {
       title: "Soporte Dedicado",
-      description: "Equipo especializado en B2B para facilitar negociaciones y resolver cualquier consulta.",
-      color: "from-orange-500 to-red-500"
-    }
-  ]
+      description:
+        "Equipo especializado en B2B para facilitar negociaciones y resolver cualquier consulta.",
+      color: "from-orange-500 to-red-500",
+    },
+  ];
 
   return (
     <section className="py-20 bg-slate-50 dark:bg-slate-900">
@@ -88,7 +100,8 @@ export function SuppliersStats() {
             Liderando el Mercado B2B
           </h2>
           <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto">
-            Cifras que demuestran nuestro compromiso con la excelencia y la satisfacción de nuestros partners comerciales.
+            Cifras que demuestran nuestro compromiso con la excelencia y la
+            satisfacción de nuestros partners comerciales.
           </p>
         </motion.div>
 
@@ -137,7 +150,8 @@ export function SuppliersStats() {
             ¿Por Qué Elegirnos?
           </h3>
           <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
-            Tres pilares fundamentales que nos posicionan como la plataforma líder en conexiones B2B.
+            Tres pilares fundamentales que nos posicionan como la plataforma
+            líder en conexiones B2B.
           </p>
         </motion.div>
 
@@ -153,20 +167,26 @@ export function SuppliersStats() {
             >
               <div className="relative overflow-hidden bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-slate-200 dark:border-slate-700">
                 {/* Gradient Background */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${highlight.color} opacity-5 group-hover:opacity-10 transition-opacity duration-300`} />
-                
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${highlight.color} opacity-5 group-hover:opacity-10 transition-opacity duration-300`}
+                />
+
                 {/* Content */}
                 <div className="relative">
-                  <div className={`inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r ${highlight.color} rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                  <div
+                    className={`inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r ${highlight.color} rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300`}
+                  >
                     <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-                      <div className={`w-4 h-4 bg-gradient-to-r ${highlight.color} rounded`} />
+                      <div
+                        className={`w-4 h-4 bg-gradient-to-r ${highlight.color} rounded`}
+                      />
                     </div>
                   </div>
-                  
+
                   <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
                     {highlight.title}
                   </h4>
-                  
+
                   <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
                     {highlight.description}
                   </p>
@@ -189,7 +209,8 @@ export function SuppliersStats() {
               ¿Listo para formar parte de nuestra red?
             </h3>
             <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
-              Únete a miles de empresas que ya confían en nuestra plataforma para encontrar los mejores proveedores.
+              Únete a miles de empresas que ya confían en nuestra plataforma
+              para encontrar los mejores proveedores.
             </p>
             <button className="bg-white text-blue-600 px-8 py-3 rounded-xl font-semibold hover:bg-blue-50 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
               Comenzar Ahora
@@ -198,5 +219,5 @@ export function SuppliersStats() {
         </motion.div>
       </div>
     </section>
-  )
+  );
 }

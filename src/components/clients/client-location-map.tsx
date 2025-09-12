@@ -1,34 +1,34 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { MapPin, Navigation, ExternalLink } from "lucide-react"
+import { motion } from "framer-motion";
+import { MapPin, Navigation, ExternalLink } from "lucide-react";
 
 interface ClientLocationData {
-  address: string
-  city: string
-  neighborhood: string
-  country: string
-  latitude?: number
-  longitude?: number
+  address: string;
+  city: string;
+  neighborhood: string;
+  country: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 interface ClientLocationMapProps {
-  clientData: ClientLocationData
+  clientData: ClientLocationData;
 }
 
 export function ClientLocationMap({ clientData }: ClientLocationMapProps) {
-  const hasCoordinates = clientData.latitude && clientData.longitude
+  const hasCoordinates = clientData.latitude && clientData.longitude;
 
   const openInGoogleMaps = () => {
     if (hasCoordinates) {
-      const url = `https://www.google.com/maps?q=${clientData.latitude},${clientData.longitude}`
-      window.open(url, '_blank')
+      const url = `https://www.google.com/maps?q=${clientData.latitude},${clientData.longitude}`;
+      window.open(url, "_blank");
     } else {
-      const address = `${clientData.address}, ${clientData.neighborhood}, ${clientData.city}, ${clientData.country}`
-      const url = `https://www.google.com/maps/search/${encodeURIComponent(address)}`
-      window.open(url, '_blank')
+      const address = `${clientData.address}, ${clientData.neighborhood}, ${clientData.city}, ${clientData.country}`;
+      const url = `https://www.google.com/maps/search/${encodeURIComponent(address)}`;
+      window.open(url, "_blank");
     }
-  }
+  };
 
   return (
     <motion.div
@@ -55,7 +55,8 @@ export function ClientLocationMap({ clientData }: ClientLocationMapProps) {
         </button>
       </div>
 
-      <div className="bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-xl h-48 flex items-center justify-center border border-slate-300 dark:border-slate-600 relative overflow-hidden group cursor-pointer hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 transition-all duration-300"
+      <div
+        className="bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-xl h-48 flex items-center justify-center border border-slate-300 dark:border-slate-600 relative overflow-hidden group cursor-pointer hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-600 dark:hover:to-slate-500 transition-all duration-300"
         onClick={openInGoogleMaps}
       >
         {/* Efecto de patrón de mapa */}
@@ -66,14 +67,15 @@ export function ClientLocationMap({ clientData }: ClientLocationMapProps) {
                 key={i}
                 className="border border-slate-400 dark:border-slate-500"
                 style={{
-                  backgroundColor: Math.random() > 0.7 ? '#10b981' : 'transparent',
-                  opacity: Math.random() * 0.3
+                  backgroundColor:
+                    Math.random() > 0.7 ? "#10b981" : "transparent",
+                  opacity: Math.random() * 0.3,
                 }}
               />
             ))}
           </div>
         </div>
-        
+
         <div className="text-center z-10 relative">
           <div className="flex items-center justify-center mb-3">
             <div className="p-3 bg-teal-500/20 rounded-full border border-teal-500/30 group-hover:bg-teal-500/30 transition-all duration-200">
@@ -85,12 +87,15 @@ export function ClientLocationMap({ clientData }: ClientLocationMapProps) {
           </p>
           <div className="space-y-1 text-xs text-slate-500 dark:text-slate-400">
             <p className="font-medium">{clientData.address}</p>
-            <p>{clientData.neighborhood}, {clientData.city}</p>
+            <p>
+              {clientData.neighborhood}, {clientData.city}
+            </p>
             <p>{clientData.country}</p>
             {hasCoordinates && (
               <p className="font-mono text-xs pt-2 border-t border-slate-300 dark:border-slate-600 mt-2">
                 <Navigation className="w-3 h-3 inline mr-1" />
-                {clientData.latitude?.toFixed(4)}, {clientData.longitude?.toFixed(4)}
+                {clientData.latitude?.toFixed(4)},{" "}
+                {clientData.longitude?.toFixed(4)}
               </p>
             )}
           </div>
@@ -108,11 +113,13 @@ export function ClientLocationMap({ clientData }: ClientLocationMapProps) {
           <span className="font-medium">Dirección completa:</span>
         </div>
         <p className="text-sm text-teal-600 dark:text-teal-400 mt-1 leading-relaxed">
-          {clientData.address}<br />
-          {clientData.neighborhood}, {clientData.city}<br />
+          {clientData.address}
+          <br />
+          {clientData.neighborhood}, {clientData.city}
+          <br />
           {clientData.country}
         </p>
       </div>
     </motion.div>
-  )
+  );
 }

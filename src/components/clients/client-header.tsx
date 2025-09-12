@@ -1,25 +1,25 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { ArrowLeft, Save, X, Edit3, User } from "lucide-react"
-import Link from "next/link"
+import { motion } from "framer-motion";
+import { ArrowLeft, Save, X, Edit3, User } from "lucide-react";
+import Link from "next/link";
 
 interface ClientHeaderProps {
-  clientName: string
-  isEditing: boolean
-  hasChanges: boolean
-  onEdit: () => void
-  onSave: () => void
-  onCancel: () => void
+  clientName: string;
+  isEditing: boolean;
+  hasChanges: boolean;
+  onEdit: () => void;
+  onSave: () => void;
+  onCancel: () => void;
 }
 
-export function ClientHeader({ 
-  clientName, 
-  isEditing, 
-  hasChanges, 
-  onEdit, 
-  onSave, 
-  onCancel 
+export function ClientHeader({
+  clientName,
+  isEditing,
+  hasChanges,
+  onEdit,
+  onSave,
+  onCancel,
 }: ClientHeaderProps) {
   return (
     <motion.div
@@ -89,11 +89,11 @@ export function ClientHeader({
               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               <Save className="w-4 h-4" />
-              {hasChanges ? 'Guardar Cambios' : 'Guardar'}
+              {hasChanges ? "Guardar Cambios" : "Guardar"}
             </motion.button>
           </div>
         )}
       </div>
     </motion.div>
-  )
+  );
 }

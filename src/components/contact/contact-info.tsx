@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { 
-  HeadphonesIcon, 
-  Users, 
-  ShoppingCart, 
-  TrendingUp, 
-  MessageCircle, 
+import { motion } from "framer-motion";
+import {
+  HeadphonesIcon,
+  Users,
+  ShoppingCart,
+  TrendingUp,
+  MessageCircle,
   Shield,
   Clock,
-  Globe
-} from "lucide-react"
+  Globe,
+} from "lucide-react";
 
 export function ContactInfo() {
   const departments = [
@@ -22,7 +22,7 @@ export function ContactInfo() {
       phone: "+52 55 1234 5678",
       hours: "Lun - Vie: 8:00 - 20:00",
       gradient: "from-blue-500 to-cyan-500",
-      features: ["Soporte 24/7", "Chat en vivo", "Respuesta < 2 horas"]
+      features: ["Soporte 24/7", "Chat en vivo", "Respuesta < 2 horas"],
     },
     {
       title: "Ventas B2B",
@@ -32,7 +32,7 @@ export function ContactInfo() {
       phone: "+52 55 1234 5679",
       hours: "Lun - Vie: 9:00 - 18:00",
       gradient: "from-green-500 to-emerald-500",
-      features: ["Cotizaciones", "Precios mayoristas", "Planes personalizados"]
+      features: ["Cotizaciones", "Precios mayoristas", "Planes personalizados"],
     },
     {
       title: "Distribuidores",
@@ -42,7 +42,7 @@ export function ContactInfo() {
       phone: "+52 55 1234 5680",
       hours: "Lun - Vie: 9:00 - 18:00",
       gradient: "from-purple-500 to-pink-500",
-      features: ["Gestor dedicado", "Capacitaciones", "Material promocional"]
+      features: ["Gestor dedicado", "Capacitaciones", "Material promocional"],
     },
     {
       title: "Soporte Técnico",
@@ -52,9 +52,9 @@ export function ContactInfo() {
       phone: "+52 55 1234 5681",
       hours: "Lun - Dom: 24/7",
       gradient: "from-orange-500 to-red-500",
-      features: ["Soporte remoto", "Diagnósticos", "Actualizaciones"]
-    }
-  ]
+      features: ["Soporte remoto", "Diagnósticos", "Actualizaciones"],
+    },
+  ];
 
   return (
     <section className="py-20 bg-white/50 dark:bg-slate-900/50">
@@ -76,13 +76,14 @@ export function ContactInfo() {
             </span>
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Nuestro equipo especializado está organizado para brindarte la mejor atención según tus necesidades específicas.
+            Nuestro equipo especializado está organizado para brindarte la mejor
+            atención según tus necesidades específicas.
           </p>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {departments.map((dept, index) => {
-            const Icon = dept.icon
+            const Icon = dept.icon;
             return (
               <motion.div
                 key={dept.title}
@@ -95,7 +96,9 @@ export function ContactInfo() {
               >
                 <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 dark:border-slate-700 h-full">
                   {/* Icon */}
-                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${dept.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                  <div
+                    className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${dept.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
+                  >
                     <Icon className="h-8 w-8 text-white" />
                   </div>
 
@@ -113,24 +116,35 @@ export function ContactInfo() {
                   <div className="space-y-3 mb-6">
                     <div className="flex items-center gap-2 text-sm">
                       <MessageCircle className="h-4 w-4 text-purple-500" />
-                      <span className="text-foreground font-medium">{dept.contact}</span>
+                      <span className="text-foreground font-medium">
+                        {dept.contact}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <HeadphonesIcon className="h-4 w-4 text-green-500" />
-                      <span className="text-foreground font-medium">{dept.phone}</span>
+                      <span className="text-foreground font-medium">
+                        {dept.phone}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <Clock className="h-4 w-4 text-blue-500" />
-                      <span className="text-muted-foreground">{dept.hours}</span>
+                      <span className="text-muted-foreground">
+                        {dept.hours}
+                      </span>
                     </div>
                   </div>
 
                   {/* Features */}
                   <div className="space-y-2">
                     {dept.features.map((feature, featureIndex) => (
-                      <div key={featureIndex} className="flex items-center gap-2">
+                      <div
+                        key={featureIndex}
+                        className="flex items-center gap-2"
+                      >
                         <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500" />
-                        <span className="text-xs text-muted-foreground">{feature}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {feature}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -145,7 +159,7 @@ export function ContactInfo() {
                   </motion.button>
                 </div>
               </motion.div>
-            )
+            );
           })}
         </div>
 
@@ -160,22 +174,34 @@ export function ContactInfo() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div>
               <Globe className="h-8 w-8 text-purple-500 mx-auto mb-4" />
-              <h4 className="font-semibold text-foreground mb-2">Cobertura Nacional</h4>
-              <p className="text-sm text-muted-foreground">Atendemos todo México con envíos a nivel nacional</p>
+              <h4 className="font-semibold text-foreground mb-2">
+                Cobertura Nacional
+              </h4>
+              <p className="text-sm text-muted-foreground">
+                Atendemos todo México con envíos a nivel nacional
+              </p>
             </div>
             <div>
               <ShoppingCart className="h-8 w-8 text-pink-500 mx-auto mb-4" />
-              <h4 className="font-semibold text-foreground mb-2">+10,000 Productos</h4>
-              <p className="text-sm text-muted-foreground">Catálogo amplio de marcas reconocidas</p>
+              <h4 className="font-semibold text-foreground mb-2">
+                +10,000 Productos
+              </h4>
+              <p className="text-sm text-muted-foreground">
+                Catálogo amplio de marcas reconocidas
+              </p>
             </div>
             <div>
               <Users className="h-8 w-8 text-cyan-500 mx-auto mb-4" />
-              <h4 className="font-semibold text-foreground mb-2">+500 Distribuidores</h4>
-              <p className="text-sm text-muted-foreground">Red consolidada de socios comerciales</p>
+              <h4 className="font-semibold text-foreground mb-2">
+                +500 Distribuidores
+              </h4>
+              <p className="text-sm text-muted-foreground">
+                Red consolidada de socios comerciales
+              </p>
             </div>
           </div>
         </motion.div>
       </div>
     </section>
-  )
+  );
 }

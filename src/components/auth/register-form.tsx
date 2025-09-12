@@ -1,47 +1,59 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Building2 } from "lucide-react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { cn } from "@/lib/utils"
-import { useAuthStore } from "@/store/auth"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  User,
+  ArrowRight,
+  Building2,
+} from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/store/auth";
 
-const registerSchema = z.object({
-  firstName: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-  lastName: z.string().min(2, "El apellido debe tener al menos 2 caracteres"),
-  email: z.string().email("Email inválido"),
-  password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
-  passwordConfirmation: z.string()
-}).refine((data) => data.password === data.passwordConfirmation, {
-  message: "Las contraseñas no coinciden",
-  path: ["passwordConfirmation"],
-})
+const registerSchema = z
+  .object({
+    firstName: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
+    lastName: z.string().min(2, "El apellido debe tener al menos 2 caracteres"),
+    email: z.string().email("Email inválido"),
+    password: z
+      .string()
+      .min(8, "La contraseña debe tener al menos 8 caracteres"),
+    passwordConfirmation: z.string(),
+  })
+  .refine((data) => data.password === data.passwordConfirmation, {
+    message: "Las contraseñas no coinciden",
+    path: ["passwordConfirmation"],
+  });
 
-type RegisterFormData = z.infer<typeof registerSchema>
+type RegisterFormData = z.infer<typeof registerSchema>;
 
 interface RegisterFormProps {
-  onSuccess?: () => void
+  onSuccess?: () => void;
 }
 
 export function RegisterForm({ onSuccess }: RegisterFormProps) {
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  
-  const { register: registerUser, isLoading } = useAuthStore()
-  
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const { register: registerUser, isLoading } = useAuthStore();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
-    watch
+    watch,
   } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema)
-  })
+    resolver: zodResolver(registerSchema),
+  });
 
-  const password = watch("password")
+  const password = watch("password");
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
@@ -49,53 +61,53 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
-        password: data.password
-      })
-      onSuccess?.()
+        password: data.password,
+      });
+      onSuccess?.();
     } catch (error) {
-      console.error('Error en registro:', error)
+      console.error("Error en registro:", error);
     }
-  }
+  };
 
   // Indicador de fuerza de contraseña
   const getPasswordStrength = (password: string) => {
-    if (!password) return { strength: 0, text: "" }
-    
-    let strength = 0
-    const requirements = []
-    
+    if (!password) return { strength: 0, text: "" };
+
+    let strength = 0;
+    const requirements = [];
+
     if (password.length >= 8) {
-      strength += 25
-      requirements.push("8+ caracteres")
+      strength += 25;
+      requirements.push("8+ caracteres");
     }
     if (/[A-Z]/.test(password)) {
-      strength += 25
-      requirements.push("Mayúscula")
+      strength += 25;
+      requirements.push("Mayúscula");
     }
     if (/[a-z]/.test(password)) {
-      strength += 25
-      requirements.push("Minúscula")
+      strength += 25;
+      requirements.push("Minúscula");
     }
     if (/[0-9]/.test(password)) {
-      strength += 25
-      requirements.push("Número")
+      strength += 25;
+      requirements.push("Número");
     }
-    
-    let text = "Débil"
-    let color = "bg-red-500"
-    
-    if (strength >= 75) {
-      text = "Fuerte"
-      color = "bg-green-500"
-    } else if (strength >= 50) {
-      text = "Media"
-      color = "bg-yellow-500"
-    }
-    
-    return { strength, text, color, requirements }
-  }
 
-  const passwordStrength = getPasswordStrength(password || "")
+    let text = "Débil";
+    let color = "bg-red-500";
+
+    if (strength >= 75) {
+      text = "Fuerte";
+      color = "bg-green-500";
+    } else if (strength >= 50) {
+      text = "Media";
+      color = "bg-yellow-500";
+    }
+
+    return { strength, text, color, requirements };
+  };
+
+  const passwordStrength = getPasswordStrength(password || "");
 
   return (
     <div className="w-full max-w-md mx-auto">
@@ -120,7 +132,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
               </div>
             </div>
           </motion.div>
-          
+
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -129,7 +141,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
           >
             Crear Cuenta
           </motion.h1>
-          
+
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -160,13 +172,15 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
                   className={cn(
                     "w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50",
                     "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                    errors.firstName && "border-red-500 focus:ring-red-500"
+                    errors.firstName && "border-red-500 focus:ring-red-500",
                   )}
                   placeholder="Juan"
                 />
               </div>
               {errors.firstName && (
-                <p className="text-red-400 text-sm mt-1">{errors.firstName.message}</p>
+                <p className="text-red-400 text-sm mt-1">
+                  {errors.firstName.message}
+                </p>
               )}
             </motion.div>
 
@@ -185,13 +199,15 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
                   className={cn(
                     "w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50",
                     "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                    errors.lastName && "border-red-500 focus:ring-red-500"
+                    errors.lastName && "border-red-500 focus:ring-red-500",
                   )}
                   placeholder="Pérez"
                 />
               </div>
               {errors.lastName && (
-                <p className="text-red-400 text-sm mt-1">{errors.lastName.message}</p>
+                <p className="text-red-400 text-sm mt-1">
+                  {errors.lastName.message}
+                </p>
               )}
             </motion.div>
           </div>
@@ -213,13 +229,15 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
                 className={cn(
                   "w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50",
                   "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                  errors.email && "border-red-500 focus:ring-red-500"
+                  errors.email && "border-red-500 focus:ring-red-500",
                 )}
                 placeholder="juan@empresa.com"
               />
             </div>
             {errors.email && (
-              <p className="text-red-400 text-sm mt-1">{errors.email.message}</p>
+              <p className="text-red-400 text-sm mt-1">
+                {errors.email.message}
+              </p>
             )}
           </motion.div>
 
@@ -240,7 +258,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
                 className={cn(
                   "w-full pl-10 pr-12 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50",
                   "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                  errors.password && "border-red-500 focus:ring-red-500"
+                  errors.password && "border-red-500 focus:ring-red-500",
                 )}
                 placeholder="••••••••"
               />
@@ -249,28 +267,38 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white/70 transition-colors"
               >
-                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                {showPassword ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
               </button>
             </div>
-            
+
             {/* Indicador de fuerza de contraseña */}
             {password && (
               <div className="mt-2">
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-xs text-white/70">Fuerza de contraseña</span>
-                  <span className="text-xs text-white/70">{passwordStrength.text}</span>
+                  <span className="text-xs text-white/70">
+                    Fuerza de contraseña
+                  </span>
+                  <span className="text-xs text-white/70">
+                    {passwordStrength.text}
+                  </span>
                 </div>
                 <div className="w-full bg-white/20 rounded-full h-2">
-                  <div 
+                  <div
                     className={`h-2 rounded-full transition-all duration-300 ${passwordStrength.color}`}
                     style={{ width: `${passwordStrength.strength}%` }}
                   />
                 </div>
               </div>
             )}
-            
+
             {errors.password && (
-              <p className="text-red-400 text-sm mt-1">{errors.password.message}</p>
+              <p className="text-red-400 text-sm mt-1">
+                {errors.password.message}
+              </p>
             )}
           </motion.div>
 
@@ -291,7 +319,8 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
                 className={cn(
                   "w-full pl-10 pr-12 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50",
                   "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
-                  errors.passwordConfirmation && "border-red-500 focus:ring-red-500"
+                  errors.passwordConfirmation &&
+                    "border-red-500 focus:ring-red-500",
                 )}
                 placeholder="••••••••"
               />
@@ -300,11 +329,17 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white/70 transition-colors"
               >
-                {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                {showConfirmPassword ? (
+                  <EyeOff className="h-5 w-5" />
+                ) : (
+                  <Eye className="h-5 w-5" />
+                )}
               </button>
             </div>
             {errors.passwordConfirmation && (
-              <p className="text-red-400 text-sm mt-1">{errors.passwordConfirmation.message}</p>
+              <p className="text-red-400 text-sm mt-1">
+                {errors.passwordConfirmation.message}
+              </p>
             )}
           </motion.div>
 
@@ -323,7 +358,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
               "hover:from-purple-600 hover:via-pink-600 hover:to-cyan-600",
               "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-transparent",
               "disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2",
-              isLoading && "animate-pulse"
+              isLoading && "animate-pulse",
             )}
           >
             {isLoading ? (
@@ -356,5 +391,5 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         </motion.div>
       </motion.div>
     </div>
-  )
+  );
 }

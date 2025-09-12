@@ -1,88 +1,97 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { 
-  Star, 
-  Eye,
-  ShoppingCart,
-  Bookmark,
-  Timer
-} from "lucide-react"
-import Image from "next/image"
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Star, Eye, ShoppingCart, Bookmark, Timer } from "lucide-react";
+import Image from "next/image";
 
 interface Offer {
-  id: string
-  title: string
-  brand: string
-  originalPrice: number
-  discountedPrice: number
-  discountPercentage: number
-  category: string
-  image: string
-  rating: number
-  reviews: number
-  stockLeft: number
+  id: string;
+  title: string;
+  brand: string;
+  originalPrice: number;
+  discountedPrice: number;
+  discountPercentage: number;
+  category: string;
+  image: string;
+  rating: number;
+  reviews: number;
+  stockLeft: number;
   timeLeft: {
-    days: number
-    hours: number
-    minutes: number
-  }
-  isFlashSale: boolean
-  isFeatured: boolean
-  offerType: string
-  description: string
-  minQuantity: number
-  maxQuantity: number
-  savedAmount: number
+    days: number;
+    hours: number;
+    minutes: number;
+  };
+  isFlashSale: boolean;
+  isFeatured: boolean;
+  offerType: string;
+  description: string;
+  minQuantity: number;
+  maxQuantity: number;
+  savedAmount: number;
 }
 
 interface OffersGridProps {
-  offers: Offer[]
-  isLoading?: boolean
+  offers: Offer[];
+  isLoading?: boolean;
 }
 
 export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
-  const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null)
-  const [quantities, setQuantities] = useState<{[key: string]: number}>({})
+  const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
+  const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
 
-  const formatTimeLeft = (timeLeft: { days: number; hours: number; minutes: number }) => {
+  const formatTimeLeft = (timeLeft: {
+    days: number;
+    hours: number;
+    minutes: number;
+  }) => {
     if (timeLeft.days > 0) {
-      return `${timeLeft.days}d ${timeLeft.hours}h`
+      return `${timeLeft.days}d ${timeLeft.hours}h`;
     } else if (timeLeft.hours > 0) {
-      return `${timeLeft.hours}h ${timeLeft.minutes}m`
+      return `${timeLeft.hours}h ${timeLeft.minutes}m`;
     } else {
-      return `${timeLeft.minutes}m`
+      return `${timeLeft.minutes}m`;
     }
-  }
+  };
 
-  const getUrgencyColor = (timeLeft: { days: number; hours: number; minutes: number }) => {
-    const totalMinutes = timeLeft.days * 24 * 60 + timeLeft.hours * 60 + timeLeft.minutes
-    if (totalMinutes < 60) return 'text-red-500 bg-red-100 dark:bg-red-900'
-    if (totalMinutes < 360) return 'text-orange-500 bg-orange-100 dark:bg-orange-900'
-    return 'text-green-500 bg-green-100 dark:bg-green-900'
-  }
+  const getUrgencyColor = (timeLeft: {
+    days: number;
+    hours: number;
+    minutes: number;
+  }) => {
+    const totalMinutes =
+      timeLeft.days * 24 * 60 + timeLeft.hours * 60 + timeLeft.minutes;
+    if (totalMinutes < 60) return "text-red-500 bg-red-100 dark:bg-red-900";
+    if (totalMinutes < 360)
+      return "text-orange-500 bg-orange-100 dark:bg-orange-900";
+    return "text-green-500 bg-green-100 dark:bg-green-900";
+  };
 
   const getOfferTypeStyle = (offerType: string) => {
     const styles = {
-      'Flash Sale': 'bg-gradient-to-r from-red-500 to-orange-500 text-white',
-      'Oferta del Día': 'bg-gradient-to-r from-blue-500 to-purple-500 text-white',
-      'Descuento por Volumen': 'bg-gradient-to-r from-green-500 to-emerald-500 text-white',
-      'Liquidación': 'bg-gradient-to-r from-gray-600 to-gray-700 text-white',
-      'Black Friday': 'bg-gradient-to-r from-gray-900 to-black text-white',
-      'Cyber Monday': 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white',
-      'Fin de Temporada': 'bg-gradient-to-r from-purple-500 to-pink-500 text-white',
-      'Lanzamiento': 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white'
-    }
-    return styles[offerType as keyof typeof styles] || 'bg-slate-500 text-white'
-  }
+      "Flash Sale": "bg-gradient-to-r from-red-500 to-orange-500 text-white",
+      "Oferta del Día":
+        "bg-gradient-to-r from-blue-500 to-purple-500 text-white",
+      "Descuento por Volumen":
+        "bg-gradient-to-r from-green-500 to-emerald-500 text-white",
+      Liquidación: "bg-gradient-to-r from-gray-600 to-gray-700 text-white",
+      "Black Friday": "bg-gradient-to-r from-gray-900 to-black text-white",
+      "Cyber Monday": "bg-gradient-to-r from-cyan-500 to-blue-600 text-white",
+      "Fin de Temporada":
+        "bg-gradient-to-r from-purple-500 to-pink-500 text-white",
+      Lanzamiento: "bg-gradient-to-r from-yellow-400 to-orange-500 text-white",
+    };
+    return (
+      styles[offerType as keyof typeof styles] || "bg-slate-500 text-white"
+    );
+  };
 
   const handleQuantityChange = (offerId: string, quantity: number) => {
-    setQuantities(prev => ({
+    setQuantities((prev) => ({
       ...prev,
-      [offerId]: quantity
-    }))
-  }
+      [offerId]: quantity,
+    }));
+  };
 
   const OfferCard = ({ offer }: { offer: Offer }) => (
     <motion.div
@@ -94,7 +103,9 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
     >
       {/* Offer Type Badge */}
       <div className="absolute top-4 left-4 z-10">
-        <span className={`px-3 py-1 rounded-full text-xs font-bold ${getOfferTypeStyle(offer.offerType)}`}>
+        <span
+          className={`px-3 py-1 rounded-full text-xs font-bold ${getOfferTypeStyle(offer.offerType)}`}
+        >
           {offer.offerType}
         </span>
       </div>
@@ -126,10 +137,12 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
         {offer.isFlashSale && (
           <div className="absolute inset-0 bg-gradient-to-t from-red-500/20 to-transparent" />
         )}
-        
+
         {/* Timer Overlay */}
         <div className="absolute bottom-4 left-4 right-4">
-          <div className={`flex items-center gap-2 px-3 py-2 rounded-lg backdrop-blur-sm ${getUrgencyColor(offer.timeLeft)}`}>
+          <div
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg backdrop-blur-sm ${getUrgencyColor(offer.timeLeft)}`}
+          >
             <Timer className="w-4 h-4" />
             <span className="font-bold text-sm">
               {formatTimeLeft(offer.timeLeft)}
@@ -143,7 +156,9 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
       <div className="p-6">
         {/* Brand and Title */}
         <div className="mb-3">
-          <p className="text-sm font-medium text-orange-500 mb-1">{offer.brand}</p>
+          <p className="text-sm font-medium text-orange-500 mb-1">
+            {offer.brand}
+          </p>
           <h3 className="font-bold text-lg text-slate-900 dark:text-white line-clamp-2 leading-tight">
             {offer.title}
           </h3>
@@ -180,27 +195,33 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
         {/* Stock Info */}
         <div className="mb-4">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-600 dark:text-slate-400">Stock disponible:</span>
-            <span className={`font-semibold ${
-              offer.stockLeft < 10 
-                ? 'text-red-500' 
-                : offer.stockLeft < 50 
-                ? 'text-orange-500' 
-                : 'text-green-500'
-            }`}>
+            <span className="text-slate-600 dark:text-slate-400">
+              Stock disponible:
+            </span>
+            <span
+              className={`font-semibold ${
+                offer.stockLeft < 10
+                  ? "text-red-500"
+                  : offer.stockLeft < 50
+                    ? "text-orange-500"
+                    : "text-green-500"
+              }`}
+            >
               {offer.stockLeft} unidades
             </span>
           </div>
           <div className="mt-2 bg-slate-200 dark:bg-slate-700 rounded-full h-2">
-            <div 
+            <div
               className={`h-2 rounded-full transition-all duration-300 ${
-                offer.stockLeft < 10 
-                  ? 'bg-red-500' 
-                  : offer.stockLeft < 50 
-                  ? 'bg-orange-500' 
-                  : 'bg-green-500'
+                offer.stockLeft < 10
+                  ? "bg-red-500"
+                  : offer.stockLeft < 50
+                    ? "bg-orange-500"
+                    : "bg-green-500"
               }`}
-              style={{ width: `${Math.min((offer.stockLeft / 100) * 100, 100)}%` }}
+              style={{
+                width: `${Math.min((offer.stockLeft / 100) * 100, 100)}%`,
+              }}
             />
           </div>
         </div>
@@ -220,7 +241,7 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
         </div>
       </div>
     </motion.div>
-  )
+  );
 
   if (isLoading) {
     return (
@@ -237,7 +258,7 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
           </div>
         ))}
       </div>
-    )
+    );
   }
 
   return (
@@ -276,7 +297,9 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
                       className="object-cover"
                     />
                     <div className="absolute top-4 left-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${getOfferTypeStyle(selectedOffer.offerType)}`}>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-bold ${getOfferTypeStyle(selectedOffer.offerType)}`}
+                      >
                         {selectedOffer.offerType}
                       </span>
                     </div>
@@ -288,7 +311,9 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
                   </div>
 
                   {/* Timer */}
-                  <div className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl ${getUrgencyColor(selectedOffer.timeLeft)}`}>
+                  <div
+                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl ${getUrgencyColor(selectedOffer.timeLeft)}`}
+                  >
                     <Timer className="w-5 h-5" />
                     <span className="font-bold text-lg">
                       ⏰ {formatTimeLeft(selectedOffer.timeLeft)} restante
@@ -299,7 +324,9 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
                 {/* Details Section */}
                 <div className="space-y-6">
                   <div>
-                    <p className="text-lg font-medium text-orange-500 mb-2">{selectedOffer.brand}</p>
+                    <p className="text-lg font-medium text-orange-500 mb-2">
+                      {selectedOffer.brand}
+                    </p>
                     <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
                       {selectedOffer.title}
                     </h2>
@@ -339,28 +366,38 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
                   {/* Stock and Quantity */}
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="font-medium text-slate-900 dark:text-white">Stock disponible:</span>
-                      <span className={`font-bold ${
-                        selectedOffer.stockLeft < 10 
-                          ? 'text-red-500' 
-                          : selectedOffer.stockLeft < 50 
-                          ? 'text-orange-500' 
-                          : 'text-green-500'
-                      }`}>
+                      <span className="font-medium text-slate-900 dark:text-white">
+                        Stock disponible:
+                      </span>
+                      <span
+                        className={`font-bold ${
+                          selectedOffer.stockLeft < 10
+                            ? "text-red-500"
+                            : selectedOffer.stockLeft < 50
+                              ? "text-orange-500"
+                              : "text-green-500"
+                        }`}
+                      >
                         {selectedOffer.stockLeft} unidades
                       </span>
                     </div>
 
                     <div>
                       <label className="block font-medium text-slate-900 dark:text-white mb-2">
-                        Cantidad (mín. {selectedOffer.minQuantity}, máx. {selectedOffer.maxQuantity})
+                        Cantidad (mín. {selectedOffer.minQuantity}, máx.{" "}
+                        {selectedOffer.maxQuantity})
                       </label>
                       <div className="flex items-center gap-3">
                         <button
                           onClick={() => {
-                            const current = quantities[selectedOffer.id] || selectedOffer.minQuantity
+                            const current =
+                              quantities[selectedOffer.id] ||
+                              selectedOffer.minQuantity;
                             if (current > selectedOffer.minQuantity) {
-                              handleQuantityChange(selectedOffer.id, current - 1)
+                              handleQuantityChange(
+                                selectedOffer.id,
+                                current - 1,
+                              );
                             }
                           }}
                           className="w-10 h-10 rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-slate-700 dark:text-slate-300"
@@ -371,18 +408,33 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
                           type="number"
                           min={selectedOffer.minQuantity}
                           max={selectedOffer.maxQuantity}
-                          value={quantities[selectedOffer.id] || selectedOffer.minQuantity}
+                          value={
+                            quantities[selectedOffer.id] ||
+                            selectedOffer.minQuantity
+                          }
                           onChange={(e) => {
-                            const value = Math.max(selectedOffer.minQuantity, Math.min(selectedOffer.maxQuantity, parseInt(e.target.value) || selectedOffer.minQuantity))
-                            handleQuantityChange(selectedOffer.id, value)
+                            const value = Math.max(
+                              selectedOffer.minQuantity,
+                              Math.min(
+                                selectedOffer.maxQuantity,
+                                parseInt(e.target.value) ||
+                                  selectedOffer.minQuantity,
+                              ),
+                            );
+                            handleQuantityChange(selectedOffer.id, value);
                           }}
                           className="w-20 h-10 text-center border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
                         />
                         <button
                           onClick={() => {
-                            const current = quantities[selectedOffer.id] || selectedOffer.minQuantity
+                            const current =
+                              quantities[selectedOffer.id] ||
+                              selectedOffer.minQuantity;
                             if (current < selectedOffer.maxQuantity) {
-                              handleQuantityChange(selectedOffer.id, current + 1)
+                              handleQuantityChange(
+                                selectedOffer.id,
+                                current + 1,
+                              );
                             }
                           }}
                           className="w-10 h-10 rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-slate-700 dark:text-slate-300"
@@ -410,5 +462,5 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
         )}
       </AnimatePresence>
     </>
-  )
+  );
 }

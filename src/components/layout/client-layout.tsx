@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import { usePathname } from "next/navigation"
-import { CartSidebar } from "@/components/cart/cart-sidebar"
-import { Navbar } from "@/components/layout/navbar"
+import { usePathname } from "next/navigation";
+import { CartSidebar } from "@/components/cart/cart-sidebar";
+import { Navbar } from "@/components/layout/navbar";
 
 interface ClientLayoutProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export function ClientLayout({ children }: ClientLayoutProps) {
-  const pathname = usePathname()
-  const isAdminRoute = pathname.startsWith('/admin')
+  const pathname = usePathname();
+  const isAdminRoute = pathname.startsWith("/admin");
 
   return (
     <>
@@ -19,5 +19,5 @@ export function ClientLayout({ children }: ClientLayoutProps) {
       {children}
       <CartSidebar />
     </>
-  )
+  );
 }

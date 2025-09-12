@@ -1,53 +1,59 @@
-"use client"
+"use client";
 
-import { motion } from "framer-motion"
-import { Package, MapPin, AlertTriangle, TrendingUp, TrendingDown, Minus } from "lucide-react"
-import { StyledSwitch } from "@/components/ui/styled-switch"
-import type { ProductData } from "@/app/admin/productos/[id]/page"
+import { motion } from "framer-motion";
+import {
+  Package,
+  MapPin,
+  AlertTriangle,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+} from "lucide-react";
+import { StyledSwitch } from "@/components/ui/styled-switch";
+import type { ProductData } from "@/app/admin/productos/[id]/page";
 
 interface ProductInventoryInfoProps {
-  productData: ProductData
-  isEditing: boolean
-  onChange: (updates: Partial<ProductData>) => void
+  productData: ProductData;
+  isEditing: boolean;
+  onChange: (updates: Partial<ProductData>) => void;
 }
 
 export function ProductInventoryInfo({
   productData,
   isEditing,
-  onChange
+  onChange,
 }: ProductInventoryInfoProps) {
-
   const getStockStatus = (stock: number, minStock: number) => {
     if (stock === 0) {
       return {
         status: "SIN_STOCK",
         label: "Sin Stock",
         color: "red",
-        icon: <Minus className="w-4 h-4" />
-      }
+        icon: <Minus className="w-4 h-4" />,
+      };
     } else if (stock <= minStock) {
       return {
         status: "BAJO_STOCK",
         label: "Bajo Stock",
         color: "yellow",
-        icon: <TrendingDown className="w-4 h-4" />
-      }
+        icon: <TrendingDown className="w-4 h-4" />,
+      };
     } else {
       return {
         status: "EN_STOCK",
         label: "En Stock",
         color: "green",
-        icon: <TrendingUp className="w-4 h-4" />
-      }
+        icon: <TrendingUp className="w-4 h-4" />,
+      };
     }
-  }
+  };
 
-  const stockStatus = getStockStatus(productData.stock, productData.minStock)
+  const stockStatus = getStockStatus(productData.stock, productData.minStock);
 
   const getStockPercentage = () => {
-    if (productData.maxStock === 0) return 0
-    return (productData.stock / productData.maxStock) * 100
-  }
+    if (productData.maxStock === 0) return 0;
+    return (productData.stock / productData.maxStock) * 100;
+  };
 
   return (
     <motion.div
@@ -74,22 +80,30 @@ export function ProductInventoryInfo({
       <div className="mb-6 p-4 bg-gradient-to-r from-gray-50/50 to-white/50 dark:from-slate-700/30 dark:to-slate-600/30 rounded-xl border border-white/20">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${
-              stockStatus.color === 'green' ? 'bg-green-100/50 dark:bg-green-900/20 text-green-600' :
-              stockStatus.color === 'yellow' ? 'bg-yellow-100/50 dark:bg-yellow-900/20 text-yellow-600' :
-              'bg-red-100/50 dark:bg-red-900/20 text-red-600'
-            }`}>
+            <div
+              className={`p-2 rounded-lg ${
+                stockStatus.color === "green"
+                  ? "bg-green-100/50 dark:bg-green-900/20 text-green-600"
+                  : stockStatus.color === "yellow"
+                    ? "bg-yellow-100/50 dark:bg-yellow-900/20 text-yellow-600"
+                    : "bg-red-100/50 dark:bg-red-900/20 text-red-600"
+              }`}
+            >
               {stockStatus.icon}
             </div>
             <div>
               <h3 className="font-semibold text-gray-900 dark:text-white">
                 Estado del Stock
               </h3>
-              <span className={`text-sm font-medium ${
-                stockStatus.color === 'green' ? 'text-green-600 dark:text-green-400' :
-                stockStatus.color === 'yellow' ? 'text-yellow-600 dark:text-yellow-400' :
-                'text-red-600 dark:text-red-400'
-              }`}>
+              <span
+                className={`text-sm font-medium ${
+                  stockStatus.color === "green"
+                    ? "text-green-600 dark:text-green-400"
+                    : stockStatus.color === "yellow"
+                      ? "text-yellow-600 dark:text-yellow-400"
+                      : "text-red-600 dark:text-red-400"
+                }`}
+              >
                 {stockStatus.label}
               </span>
             </div>
@@ -103,15 +117,17 @@ export function ProductInventoryInfo({
             </div>
           </div>
         </div>
-        
+
         {/* Barra de progreso del stock */}
         <div className="relative">
           <div className="w-full bg-gray-200/50 dark:bg-gray-700/50 rounded-full h-2">
-            <div 
+            <div
               className={`h-2 rounded-full transition-all duration-300 ${
-                stockStatus.color === 'green' ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
-                stockStatus.color === 'yellow' ? 'bg-gradient-to-r from-yellow-500 to-orange-500' :
-                'bg-gradient-to-r from-red-500 to-rose-500'
+                stockStatus.color === "green"
+                  ? "bg-gradient-to-r from-green-500 to-emerald-500"
+                  : stockStatus.color === "yellow"
+                    ? "bg-gradient-to-r from-yellow-500 to-orange-500"
+                    : "bg-gradient-to-r from-red-500 to-rose-500"
               }`}
               style={{ width: `${Math.min(getStockPercentage(), 100)}%` }}
             />
@@ -146,7 +162,9 @@ export function ProductInventoryInfo({
               <span className="text-2xl font-bold text-gray-900 dark:text-white">
                 {productData.stock}
               </span>
-              <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">unidades</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
+                unidades
+              </span>
             </div>
           )}
         </div>
@@ -172,7 +190,9 @@ export function ProductInventoryInfo({
               <span className="text-lg font-semibold text-gray-900 dark:text-white">
                 {productData.minStock}
               </span>
-              <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">unidades</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
+                unidades
+              </span>
             </div>
           )}
         </div>
@@ -197,7 +217,9 @@ export function ProductInventoryInfo({
               <span className="text-lg font-semibold text-gray-900 dark:text-white">
                 {productData.maxStock}
               </span>
-              <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">unidades</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
+                unidades
+              </span>
             </div>
           )}
         </div>
@@ -211,7 +233,9 @@ export function ProductInventoryInfo({
             <input
               type="number"
               value={productData.reservedStock || 0}
-              onChange={(e) => onChange({ reservedStock: Number(e.target.value) })}
+              onChange={(e) =>
+                onChange({ reservedStock: Number(e.target.value) })
+              }
               className="w-full px-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
               placeholder="0"
               min="0"
@@ -222,7 +246,9 @@ export function ProductInventoryInfo({
               <span className="text-lg font-semibold text-gray-900 dark:text-white">
                 {productData.reservedStock || 0}
               </span>
-              <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">unidades</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
+                unidades
+              </span>
             </div>
           )}
         </div>
@@ -236,7 +262,7 @@ export function ProductInventoryInfo({
           {isEditing ? (
             <input
               type="text"
-              value={productData.location || ''}
+              value={productData.location || ""}
               onChange={(e) => onChange({ location: e.target.value })}
               className="w-full px-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
               placeholder="Ej: A-1-15, Pasillo A, Estante 1, Nivel 15"
@@ -244,7 +270,7 @@ export function ProductInventoryInfo({
           ) : (
             <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
               <span className="text-gray-900 dark:text-white">
-                {productData.location || 'No especificada'}
+                {productData.location || "No especificada"}
               </span>
             </div>
           )}
@@ -258,7 +284,7 @@ export function ProductInventoryInfo({
           {isEditing ? (
             <input
               type="text"
-              value={productData.supplier_sku || ''}
+              value={productData.supplier_sku || ""}
               onChange={(e) => onChange({ supplier_sku: e.target.value })}
               className="w-full px-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
               placeholder="SKU del proveedor"
@@ -266,7 +292,7 @@ export function ProductInventoryInfo({
           ) : (
             <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
               <span className="text-gray-900 dark:text-white font-mono">
-                {productData.supplier_sku || 'No especificado'}
+                {productData.supplier_sku || "No especificado"}
               </span>
             </div>
           )}
@@ -278,7 +304,7 @@ export function ProductInventoryInfo({
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Configuraciones de Inventario
         </h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Seguimiento de stock */}
           <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50/50 to-cyan-50/50 dark:from-blue-900/10 dark:to-cyan-900/10 rounded-xl border border-blue-200/30">
@@ -333,5 +359,5 @@ export function ProductInventoryInfo({
         </div>
       </div>
     </motion.div>
-  )
+  );
 }
