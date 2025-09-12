@@ -1,0 +1,5 @@
+export { SuppliersHero } from "./suppliers-hero"
+export { SuppliersStats } from "./suppliers-stats"
+export { SuppliersFilters } from "./suppliers-filters"
+export { SuppliersGrid } from "./suppliers-grid"
+export { SuppliersSection } from "./suppliers-section"

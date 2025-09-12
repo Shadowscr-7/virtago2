@@ -16,6 +16,7 @@ import {
 import { ProductFilters } from "./products-section"
 import { QuantityModal } from "./quantity-modal"
 import Image from "next/image"
+import Link from "next/link"
 
 interface Product {
   id: string
@@ -164,9 +165,12 @@ export function ProductsGrid({
             >
               <Heart className="w-4 h-4" />
             </button>
-            <button className="p-2 bg-white/90 text-slate-600 rounded-full backdrop-blur-sm hover:bg-blue-500 hover:text-white transition-colors">
+            <Link 
+              href={`/producto/${product.id}`}
+              className="p-2 bg-white/90 text-slate-600 rounded-full backdrop-blur-sm hover:bg-blue-500 hover:text-white transition-colors"
+            >
               <Eye className="w-4 h-4" />
-            </button>
+            </Link>
           </div>
 
           {/* Quick Add */}
@@ -390,9 +394,12 @@ export function ProductsGrid({
                   >
                     <Heart className="w-4 h-4" />
                   </button>
-                  <button className="p-2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-blue-500 hover:text-white transition-colors">
+                  <Link 
+                    href={`/producto/${product.id}`}
+                    className="p-2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-blue-500 hover:text-white transition-colors"
+                  >
                     <Eye className="w-4 h-4" />
-                  </button>
+                  </Link>
                   <button 
                     onClick={() => handleAddToCart(product)}
                     disabled={!product.inStock}

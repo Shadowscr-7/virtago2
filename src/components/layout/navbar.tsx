@@ -171,7 +171,7 @@ export function Navbar() {
             { name: "Inicio", href: "/" },
             { name: "Productos", href: "/productos" },
             { name: "Marcas", href: "/marcas" },
-            { name: "Proveedores", href: "/proveedores" },
+            { name: "Proveedores", href: "/suppliers" },
             { name: "Ofertas", href: "/ofertas" },
             { name: "Contacto", href: "/contacto" }
           ].map((item) => (
