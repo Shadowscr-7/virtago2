@@ -105,7 +105,9 @@ export default function OrderDetailPage({
     notFound();
   }
 
-  const statusInfo = statusConfig[order.status as keyof typeof statusConfig] || statusConfig.pending;
+  const statusInfo =
+    statusConfig[order.status as keyof typeof statusConfig] ||
+    statusConfig.pending;
   const StatusIcon = statusInfo.icon;
 
   return (

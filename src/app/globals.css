@@ -145,9 +145,17 @@ body {
 
 /* Gradientes dinámicos basados en el tema actual */
 .theme-gradient-primary {
-  background: linear-gradient(135deg, var(--theme-primary), var(--theme-secondary));
+  background: linear-gradient(
+    135deg,
+    var(--theme-primary),
+    var(--theme-secondary)
+  );
 }
 
 .theme-gradient-secondary {
-  background: linear-gradient(135deg, var(--theme-secondary), var(--theme-accent));
+  background: linear-gradient(
+    135deg,
+    var(--theme-secondary),
+    var(--theme-accent)
+  );
 }

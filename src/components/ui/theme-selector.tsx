@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Palette, Check, X } from 'lucide-react';
-import { useTheme, type ThemeVariant } from '@/contexts/theme-context';
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { Palette, Check, X } from "lucide-react";
+import { useTheme, type ThemeVariant } from "@/contexts/theme-context";
 
 export function ThemeSelector() {
   const [isOpen, setIsOpen] = useState(false);
@@ -41,30 +41,31 @@ export function ThemeSelector() {
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[101] w-full max-w-2xl mx-4"
           >
-              <div className="bg-gradient-to-br from-slate-800/98 to-slate-900/98 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="text-xl font-bold text-white mb-1">
-                      Selector de Temas
-                    </h3>
-                    <p className="text-gray-400 text-sm">
-                      Elige tu paleta de colores favorita
-                    </p>
-                  </div>
-                  <motion.button
-                    whileHover={{ scale: 1.1, rotate: 90 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => setIsOpen(false)}
-                    className="p-2 text-gray-400 hover:text-white transition-all duration-200 rounded-lg hover:bg-red-500/20"
-                  >
-                    <X className="w-5 h-5" />
-                  </motion.button>
+            <div className="bg-gradient-to-br from-slate-800/98 to-slate-900/98 backdrop-blur-xl border border-white/20 rounded-2xl p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-1">
+                    Selector de Temas
+                  </h3>
+                  <p className="text-gray-400 text-sm">
+                    Elige tu paleta de colores favorita
+                  </p>
                 </div>
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setIsOpen(false)}
+                  className="p-2 text-gray-400 hover:text-white transition-all duration-200 rounded-lg hover:bg-red-500/20"
+                >
+                  <X className="w-5 h-5" />
+                </motion.button>
+              </div>
 
-                {/* Grid de temas */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {Object.entries(availableThemes).map(([themeKey, theme], index) => (
+              {/* Grid de temas */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Object.entries(availableThemes).map(
+                  ([themeKey, theme], index) => (
                     <motion.div
                       key={themeKey}
                       initial={{ opacity: 0, y: 20 }}
@@ -72,11 +73,13 @@ export function ThemeSelector() {
                       transition={{ delay: index * 0.1 }}
                       whileHover={{ scale: 1.02, y: -5 }}
                       whileTap={{ scale: 0.98 }}
-                      onClick={() => handleThemeSelect(themeKey as ThemeVariant)}
+                      onClick={() =>
+                        handleThemeSelect(themeKey as ThemeVariant)
+                      }
                       className={`relative p-4 rounded-xl border-2 transition-all duration-300 cursor-pointer group ${
                         currentTheme === themeKey
-                          ? 'border-white/40 bg-white/10 shadow-lg'
-                          : 'border-white/10 hover:border-white/20 hover:bg-white/5 hover:shadow-md'
+                          ? "border-white/40 bg-white/10 shadow-lg"
+                          : "border-white/10 hover:border-white/20 hover:bg-white/5 hover:shadow-md"
                       }`}
                     >
                       {/* Indicador de tema activo */}
@@ -154,21 +157,23 @@ export function ThemeSelector() {
                         />
                       </div>
                     </motion.div>
-                  ))}
-                </div>
-
-                {/* Footer */}
-                <div className="mt-6 pt-4 border-t border-white/10">
-                  <p className="text-gray-400 text-xs text-center">
-                    Los cambios se aplican inmediatamente y se guardan automáticamente
-                  </p>
-                </div>
+                  ),
+                )}
               </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-    );
+
+              {/* Footer */}
+              <div className="mt-6 pt-4 border-t border-white/10">
+                <p className="text-gray-400 text-xs text-center">
+                  Los cambios se aplican inmediatamente y se guardan
+                  automáticamente
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
 
   return (
     <>

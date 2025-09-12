@@ -498,7 +498,6 @@ export default function DireccionesEnvioPage() {
                       }
                       label="Establecer como dirección principal"
                       description="Esta dirección se usará por defecto en tus pedidos"
-                      color="orange"
                       className="p-4 bg-white/5 rounded-xl border border-white/10"
                     />
 

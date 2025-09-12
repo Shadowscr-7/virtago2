@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/auth-store";
+import { useTheme } from "@/contexts/theme-context";
 import { useToast } from "@/components/ui/toast";
 import { setToastFunction } from "@/components/cart/cart-store";
 import { StyledSwitch } from "@/components/ui/styled-switch";
@@ -27,8 +28,28 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
 
   const { login } = useAuthStore();
+  const { themeColors } = useTheme();
   const { showToast } = useToast();
   const router = useRouter();
+
+  // Estilos dinámicos para inputs
+  const inputStyle = {
+    backgroundColor: themeColors.surface + "40",
+    borderColor: themeColors.primary + "30",
+    color: themeColors.text.primary,
+    transition: "all 0.3s ease",
+  };
+
+  const inputFocusStyle = {
+    borderColor: themeColors.primary,
+    boxShadow: `0 0 20px ${themeColors.primary}60, 0 0 0 2px ${themeColors.primary}80`,
+    backgroundColor: themeColors.surface + "60",
+  };
+
+  const inputHoverStyle = {
+    borderColor: themeColors.primary + "60",
+    boxShadow: `0 0 10px ${themeColors.primary}40`,
+  };
 
   // Set up toast function
   useEffect(() => {
@@ -87,7 +108,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{
+        background: `linear-gradient(135deg, ${themeColors.background}, ${themeColors.primary}20, ${themeColors.background})`,
+      }}
+    >
       {/* Partículas de fondo */}
       <div className="absolute inset-0 overflow-hidden">
         {[...Array(30)].map((_, i) => (
@@ -106,10 +132,11 @@ export default function LoginPage() {
               delay: i * 0.2,
               ease: "easeInOut",
             }}
-            className="absolute w-1 h-1 bg-purple-400 rounded-full"
+            className="absolute w-1 h-1 rounded-full"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
+              backgroundColor: themeColors.primary + "60",
             }}
           />
         ))}
@@ -124,7 +151,10 @@ export default function LoginPage() {
         >
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-white/70 hover:text-white transition-colors"
+            className="inline-flex items-center gap-2 transition-colors"
+            style={{
+              color: themeColors.text.secondary,
+            }}
           >
             <ArrowLeft className="h-4 w-4" />
             Volver al inicio
@@ -136,7 +166,11 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 p-8 shadow-2xl"
+          className="backdrop-blur-lg rounded-2xl border p-8 shadow-2xl"
+          style={{
+            backgroundColor: themeColors.surface + "40",
+            borderColor: themeColors.primary + "30",
+          }}
         >
           {/* Logo y título */}
           <div className="text-center mb-8">
@@ -147,9 +181,22 @@ export default function LoginPage() {
               className="w-16 h-16 mx-auto mb-4"
             >
               <div className="relative">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-500" />
-                <div className="absolute inset-2 rounded-full bg-slate-900 flex items-center justify-center">
-                  <span className="text-2xl font-bold text-white">V</span>
+                <div
+                  className="absolute inset-0 rounded-full"
+                  style={{
+                    background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.accent})`,
+                  }}
+                />
+                <div
+                  className="absolute inset-2 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: themeColors.background }}
+                >
+                  <span
+                    className="text-2xl font-bold"
+                    style={{ color: themeColors.primary }}
+                  >
+                    V
+                  </span>
                 </div>
               </div>
             </motion.div>
@@ -158,7 +205,8 @@ export default function LoginPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
-              className="text-3xl font-bold text-white mb-2"
+              className="text-3xl font-bold mb-2"
+              style={{ color: themeColors.text.primary }}
             >
               Iniciar Sesión
             </motion.h1>
@@ -167,7 +215,7 @@ export default function LoginPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.6 }}
-              className="text-white/70"
+              style={{ color: themeColors.text.secondary }}
             >
               Accede a precios exclusivos B2B
             </motion.p>
@@ -209,51 +257,92 @@ export default function LoginPage() {
 
           {/* Formulario */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5, duration: 0.6 }}
             >
-              <label className="block text-white/90 text-sm font-medium mb-2">
+              <label
+                className="block text-sm font-medium mb-2"
+                style={{ color: themeColors.text.primary }}
+              >
                 Correo electrónico
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 h-5 w-5" />
+                <Mail
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5"
+                  style={{ color: themeColors.text.secondary }}
+                />
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-4 py-3 border rounded-lg transition-all duration-300 focus:outline-none"
+                  style={inputStyle}
+                  onFocus={(e) => {
+                    Object.assign(e.target.style, inputFocusStyle);
+                  }}
+                  onBlur={(e) => {
+                    Object.assign(e.target.style, inputStyle);
+                  }}
+                  onMouseEnter={(e) => {
+                    Object.assign(e.target.style, inputHoverStyle);
+                  }}
+                  onMouseLeave={(e) => {
+                    if (document.activeElement !== e.target) {
+                      Object.assign(e.target.style, inputStyle);
+                    }
+                  }}
                   placeholder="tu@empresa.com"
                 />
               </div>
             </motion.div>
 
-            {/* Contraseña */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.6, duration: 0.6 }}
             >
-              <label className="block text-white/90 text-sm font-medium mb-2">
+              <label
+                className="block text-sm font-medium mb-2"
+                style={{ color: themeColors.text.primary }}
+              >
                 Contraseña
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/50 h-5 w-5" />
+                <Lock
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5"
+                  style={{ color: themeColors.text.secondary }}
+                />
                 <input
                   type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-12 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-12 py-3 border rounded-lg transition-all duration-300 focus:outline-none"
+                  style={inputStyle}
+                  onFocus={(e) => {
+                    Object.assign(e.target.style, inputFocusStyle);
+                  }}
+                  onBlur={(e) => {
+                    Object.assign(e.target.style, inputStyle);
+                  }}
+                  onMouseEnter={(e) => {
+                    Object.assign(e.target.style, inputHoverStyle);
+                  }}
+                  onMouseLeave={(e) => {
+                    if (document.activeElement !== e.target) {
+                      Object.assign(e.target.style, inputStyle);
+                    }
+                  }}
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white/70 transition-colors"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 transition-colors"
+                  style={{ color: themeColors.text.secondary }}
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5" />
@@ -275,8 +364,6 @@ export default function LoginPage() {
                 checked={rememberMe}
                 onChange={setRememberMe}
                 label="Recordarme"
-                size="sm"
-                color="purple"
               />
               <a
                 href="#"
@@ -286,7 +373,6 @@ export default function LoginPage() {
               </a>
             </motion.div>
 
-            {/* Botón de login */}
             <motion.button
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -297,12 +383,14 @@ export default function LoginPage() {
               disabled={isLoading}
               className={cn(
                 "w-full py-3 px-6 rounded-lg font-semibold text-white transition-all duration-300",
-                "bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-500",
-                "hover:from-purple-600 hover:via-pink-600 hover:to-cyan-600",
-                "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-transparent",
+                "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent",
                 "disabled:opacity-50 disabled:cursor-not-allowed",
                 isLoading && "animate-pulse",
               )}
+              style={{
+                background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
+                boxShadow: `0 0 0 2px ${themeColors.primary}50`,
+              }}
             >
               {isLoading ? (
                 <div className="flex items-center justify-center gap-2">
@@ -326,7 +414,8 @@ export default function LoginPage() {
               ¿No tienes cuenta?{" "}
               <Link
                 href="/register"
-                className="text-purple-400 hover:text-purple-300 font-medium transition-colors"
+                className="font-medium transition-colors hover:underline"
+                style={{ color: themeColors.primary }}
               >
                 Regístrate aquí
               </Link>
@@ -340,7 +429,10 @@ export default function LoginPage() {
             transition={{ delay: 1, duration: 0.6 }}
             className="mt-6 flex items-center justify-center gap-2 p-3 bg-white/5 rounded-lg border border-white/10"
           >
-            <Building2 className="h-4 w-4 text-purple-400" />
+            <Building2
+              className="h-4 w-4"
+              style={{ color: themeColors.primary }}
+            />
             <span className="text-sm text-white/70">
               Plataforma exclusiva para empresas
             </span>

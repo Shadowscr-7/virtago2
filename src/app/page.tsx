@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { OfferBanner } from "@/components/banners/offer-banner";
 import { ProductCard } from "@/components/products/product-card";
 import { useTheme } from "@/contexts/theme-context";
+import { AnimatedBackground } from "@/components/ui/animated-background";
 import { ArrowRight, Star, TrendingUp, Users, ShieldCheck } from "lucide-react";
 
 // Mock data para productos
@@ -67,8 +68,9 @@ export default function Home() {
   const { themeColors } = useTheme();
 
   return (
-    <div className="min-h-screen bg-background">
-      <main className="container mx-auto px-4 py-8 space-y-12">
+    <div className="min-h-screen bg-background relative">
+      <AnimatedBackground />
+      <main className="container mx-auto px-4 py-8 space-y-12 relative z-10">
         {/* Hero Section con banners */}
         <section className="space-y-6">
           <motion.div
@@ -77,10 +79,10 @@ export default function Home() {
             transition={{ duration: 0.6 }}
             className="text-center mb-8"
           >
-            <h1 
+            <h1
               className="text-4xl md:text-6xl font-bold bg-clip-text text-transparent mb-4"
               style={{
-                backgroundImage: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.accent})`
+                backgroundImage: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.accent})`,
               }}
             >
               Bienvenido a Virtago
@@ -145,8 +147,8 @@ export default function Home() {
               transition={{ delay: 0.1 * index, duration: 0.4 }}
               className="text-center p-6 rounded-xl bg-card border hover:shadow-lg transition-shadow"
             >
-              <stat.icon 
-                className="h-8 w-8 mx-auto mb-2" 
+              <stat.icon
+                className="h-8 w-8 mx-auto mb-2"
                 style={{ color: themeColors.primary }}
               />
               <p className="text-2xl font-bold text-foreground">{stat.value}</p>
@@ -164,19 +166,16 @@ export default function Home() {
             className="border rounded-xl p-6 text-center"
             style={{
               background: `linear-gradient(135deg, ${themeColors.primary}10, ${themeColors.secondary}10)`,
-              borderColor: themeColors.primary + '30'
+              borderColor: themeColors.primary + "30",
             }}
           >
-            <h3 
+            <h3
               className="text-lg font-semibold mb-2"
               style={{ color: themeColors.primary }}
             >
               ¿Eres una empresa? Accede a precios exclusivos B2B
             </h3>
-            <p 
-              className="mb-4"
-              style={{ color: themeColors.text.secondary }}
-            >
+            <p className="mb-4" style={{ color: themeColors.text.secondary }}>
               Regístrate o inicia sesión para ver precios mayoristas y
               descuentos especiales
             </p>
@@ -193,9 +192,9 @@ export default function Home() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="px-6 py-2 border rounded-lg font-medium transition-all"
-                style={{ 
+                style={{
                   borderColor: themeColors.primary,
-                  color: themeColors.primary
+                  color: themeColors.primary,
                 }}
               >
                 Registrarse
@@ -285,22 +284,27 @@ export default function Home() {
               },
             ].map((category) => {
               // Rotar entre los colores del tema
-              const colors = [themeColors.primary, themeColors.secondary, themeColors.accent, themeColors.primary];
+              const colors = [
+                themeColors.primary,
+                themeColors.secondary,
+                themeColors.accent,
+                themeColors.primary,
+              ];
               const categoryColor = colors[category.colorIndex];
-              
+
               return (
                 <motion.div
                   key={category.name}
                   whileHover={{ scale: 1.05, y: -5 }}
                   className="relative p-6 rounded-xl bg-card border hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden group"
                   style={{
-                    background: `linear-gradient(135deg, ${categoryColor}05, ${categoryColor}10)`
+                    background: `linear-gradient(135deg, ${categoryColor}05, ${categoryColor}10)`,
                   }}
                 >
-                  <div 
+                  <div
                     className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity"
                     style={{
-                      background: `linear-gradient(135deg, ${categoryColor}, ${categoryColor}80)`
+                      background: `linear-gradient(135deg, ${categoryColor}, ${categoryColor}80)`,
                     }}
                   />
                   <div className="relative z-10">

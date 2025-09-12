@@ -194,7 +194,6 @@ export default function ConfiguracionPage() {
                     }
                     label={item.label}
                     description={item.description}
-                    color="purple"
                     className="p-4 bg-white/5 rounded-xl border border-white/10"
                   />
                 ))}
@@ -231,7 +230,6 @@ export default function ConfiguracionPage() {
                     }
                     label={item.label}
                     description={item.description}
-                    color="blue"
                     className="p-4 bg-white/5 rounded-xl border border-white/10"
                   />
                 ))}
@@ -286,7 +284,6 @@ export default function ConfiguracionPage() {
                   }
                   label={item.label}
                   description={item.description}
-                  color="green"
                   className="p-4 bg-white/5 rounded-xl border border-white/10"
                 />
               ))}
@@ -311,7 +308,6 @@ export default function ConfiguracionPage() {
                 onChange={setDarkMode}
                 label="Modo oscuro"
                 description="Cambia entre tema claro y oscuro"
-                color="purple"
                 className="p-4 bg-white/5 rounded-xl border border-white/10"
               />
 

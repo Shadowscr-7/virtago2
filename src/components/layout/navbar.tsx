@@ -64,14 +64,14 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                 transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
                 className="w-8 h-8"
               >
-                <div 
+                <div
                   className="absolute inset-0 rounded-lg"
-                  style={{ 
-                    background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.accent})` 
+                  style={{
+                    background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.accent})`,
                   }}
                 />
                 <div className="absolute inset-0.5 rounded-lg bg-background flex items-center justify-center">
-                  <span 
+                  <span
                     className="text-xs font-bold"
                     style={{ color: themeColors.primary }}
                   >
@@ -80,10 +80,10 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                 </div>
               </motion.div>
             </div>
-            <span 
+            <span
               className="text-xl font-bold bg-clip-text text-transparent"
-              style={{ 
-                backgroundImage: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})` 
+              style={{
+                backgroundImage: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
               }}
             >
               VIRTAGO
@@ -102,10 +102,10 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                   isSearchFocused && "drop-shadow-lg",
                 )}
               >
-                <div 
+                <div
                   className="absolute inset-0 rounded-full blur-sm opacity-30"
-                  style={{ 
-                    background: `linear-gradient(90deg, ${themeColors.primary}20, ${themeColors.secondary}20, ${themeColors.accent}20)` 
+                  style={{
+                    background: `linear-gradient(90deg, ${themeColors.primary}20, ${themeColors.secondary}20, ${themeColors.accent}20)`,
                   }}
                 />
                 <div className="relative">
@@ -124,9 +124,9 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                     )}
                     style={{
                       ...(isSearchFocused && {
-                        borderColor: themeColors.primary + '50',
-                        boxShadow: `0 0 0 2px ${themeColors.primary}50`
-                      })
+                        borderColor: themeColors.primary + "50",
+                        boxShadow: `0 0 0 2px ${themeColors.primary}50`,
+                      }),
                     }}
                   />
                   {searchQuery && (
@@ -148,7 +148,7 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
           <div className="flex items-center space-x-4">
             {/* Selector de temas */}
             <ThemeSelector />
-            
+
             {/* Carrito */}
             {!isAdminMode && <CartButton />}
 
@@ -161,8 +161,8 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                     whileTap={{ scale: 0.95 }}
                     className="flex items-center space-x-2 p-2 rounded-xl border transition-all"
                     style={{
-                      backgroundColor: themeColors.surface + '20',
-                      borderColor: themeColors.primary + '30',
+                      backgroundColor: themeColors.surface + "20",
+                      borderColor: themeColors.primary + "30",
                     }}
                   >
                     <div className="text-2xl">{user.avatar}</div>
@@ -180,21 +180,27 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                   align="end"
                   className="w-56 border shadow-xl"
                   style={{
-                    backgroundColor: themeColors.surface + 'CC',
-                    borderColor: themeColors.primary + '30',
-                    backdropFilter: 'blur(12px)',
+                    backgroundColor: themeColors.surface + "CC",
+                    borderColor: themeColors.primary + "30",
+                    backdropFilter: "blur(12px)",
                   }}
                 >
                   <DropdownMenuLabel>
                     <div className="flex items-center space-x-2">
                       <div className="text-lg">{user.avatar}</div>
                       <div>
-                        <p className="font-medium text-foreground">{user.name}</p>
-                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                        <p className="font-medium text-foreground">
+                          {user.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {user.email}
+                        </p>
                       </div>
                     </div>
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator style={{ backgroundColor: themeColors.primary + '30' }} />
+                  <DropdownMenuSeparator
+                    style={{ backgroundColor: themeColors.primary + "30" }}
+                  />
 
                   <DropdownMenuItem asChild>
                     <Link
@@ -269,7 +275,9 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                     </Link>
                   </DropdownMenuItem>
 
-                  <DropdownMenuSeparator style={{ backgroundColor: themeColors.primary + '30' }} />
+                  <DropdownMenuSeparator
+                    style={{ backgroundColor: themeColors.primary + "30" }}
+                  />
                   <DropdownMenuItem
                     onClick={handleLogout}
                     className="text-red-400 hover:text-red-300 hover:bg-red-500/20 focus:text-red-300 focus:bg-red-500/20 transition-all duration-200 rounded-md mx-1"
@@ -342,10 +350,10 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative group cursor-pointer"
               >
                 {item.name}
-                <motion.div 
+                <motion.div
                   className="absolute -bottom-1 left-0 w-0 h-0.5 group-hover:w-full transition-all duration-300"
                   style={{
-                    background: `linear-gradient(90deg, ${themeColors.primary}, ${themeColors.secondary})`
+                    background: `linear-gradient(90deg, ${themeColors.primary}, ${themeColors.secondary})`,
                   }}
                 />
               </motion.span>

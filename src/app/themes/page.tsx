@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Demostración de Temas | Virtago",
-  description: "Explora los diferentes temas y paletas de colores disponibles en Virtago",
+  description:
+    "Explora los diferentes temas y paletas de colores disponibles en Virtago",
 };
 
 export default function ThemeDemoPage() {
@@ -15,8 +16,9 @@ export default function ThemeDemoPage() {
             Demostración de Temas
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Explora cómo se ven los diferentes elementos de la interfaz con cada tema. 
-            Utiliza el selector de temas en la barra de navegación para cambiar entre estilos.
+            Explora cómo se ven los diferentes elementos de la interfaz con cada
+            tema. Utiliza el selector de temas en la barra de navegación para
+            cambiar entre estilos.
           </p>
         </div>
 

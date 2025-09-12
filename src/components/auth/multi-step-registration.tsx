@@ -98,23 +98,23 @@ export function MultiStepRegistration() {
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen flex items-center justify-center p-4"
       style={{
-        background: `linear-gradient(135deg, ${themeColors.background}, ${themeColors.primary}20, ${themeColors.background})`
+        background: `linear-gradient(135deg, ${themeColors.background}, ${themeColors.primary}20, ${themeColors.background})`,
       }}
     >
       {/* Partículas de fondo */}
       <div className="absolute inset-0 overflow-hidden">
-        <div 
+        <div
           className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-10"
           style={{ backgroundColor: themeColors.primary }}
         />
-        <div 
+        <div
           className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-10"
           style={{ backgroundColor: themeColors.accent }}
         />
-        <div 
+        <div
           className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl opacity-10"
           style={{ backgroundColor: themeColors.secondary }}
         />
@@ -127,8 +127,8 @@ export function MultiStepRegistration() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-4 backdrop-blur-lg rounded-full px-6 py-3 border"
           style={{
-            backgroundColor: themeColors.surface + '40',
-            borderColor: themeColors.primary + '30'
+            backgroundColor: themeColors.surface + "40",
+            borderColor: themeColors.primary + "30",
           }}
         >
           {[
@@ -159,7 +159,7 @@ export function MultiStepRegistration() {
                     ? themeColors.primary
                     : isCompleted
                       ? themeColors.accent
-                      : themeColors.surface + '60'
+                      : themeColors.surface + "60",
                 }}
                 animate={{
                   scale: isActive ? 1.25 : 1,
@@ -189,7 +189,7 @@ export function MultiStepRegistration() {
             <a
               href="mailto:soporte@virtago.com"
               className="transition-colors"
-              style={{ 
+              style={{
                 color: themeColors.primary,
               }}
             >

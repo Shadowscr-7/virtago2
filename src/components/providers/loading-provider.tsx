@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "@/contexts/theme-context";
 
 interface LoadingContextType {
   isLoading: boolean;
@@ -57,12 +58,22 @@ export function LoadingProvider({ children }: LoadingProviderProps) {
 }
 
 function VirtagoLoader() {
+  const { themeColors } = useTheme();
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 dark:from-slate-950 dark:via-purple-950 dark:to-slate-950"
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{
+        background: `
+          radial-gradient(ellipse at top left, ${themeColors.primary}15, transparent 50%),
+          radial-gradient(ellipse at top right, ${themeColors.secondary}15, transparent 50%),
+          radial-gradient(ellipse at bottom, ${themeColors.accent}10, transparent 50%),
+          linear-gradient(135deg, #0f172a, #1e293b, #0f172a)
+        `,
+      }}
     >
       <div className="text-center">
         {/* Logo animado */}
@@ -78,8 +89,18 @@ function VirtagoLoader() {
               transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
               className="w-20 h-20 mx-auto"
             >
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-500 animate-pulse" />
-              <div className="absolute inset-2 rounded-full bg-gradient-to-br from-slate-900 to-purple-900 flex items-center justify-center">
+              <div
+                className="absolute inset-0 rounded-full animate-pulse"
+                style={{
+                  background: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.accent})`,
+                }}
+              />
+              <div
+                className="absolute inset-2 rounded-full flex items-center justify-center"
+                style={{
+                  background: `linear-gradient(to bottom right, #0f172a, ${themeColors.primary}20, #1e293b)`,
+                }}
+              >
                 <span className="text-2xl font-bold text-white">V</span>
               </div>
             </motion.div>
@@ -91,7 +112,10 @@ function VirtagoLoader() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.8 }}
-          className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent mb-4"
+          className="text-4xl font-bold bg-clip-text text-transparent mb-4"
+          style={{
+            backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.accent})`,
+          }}
         >
           VIRTAGO
         </motion.h1>
@@ -119,7 +143,10 @@ function VirtagoLoader() {
                 delay: index * 0.1,
                 ease: "easeInOut",
               }}
-              className="w-1 bg-gradient-to-t from-purple-500 to-cyan-500 rounded-full"
+              className="w-1 rounded-full"
+              style={{
+                background: `linear-gradient(to top, ${themeColors.primary}, ${themeColors.accent})`,
+              }}
             />
           ))}
         </div>
@@ -153,8 +180,9 @@ function VirtagoLoader() {
               delay: i * 0.2,
               ease: "easeInOut",
             }}
-            className="absolute w-2 h-2 bg-purple-400 rounded-full"
+            className="absolute w-2 h-2 rounded-full"
             style={{
+              backgroundColor: themeColors.primary,
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
             }}

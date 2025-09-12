@@ -50,7 +50,7 @@ export function OfferBanner({
         style={{
           background: isPrimary
             ? `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.accent})`
-            : `linear-gradient(135deg, ${themeColors.surface}, ${themeColors.primary}80, ${themeColors.surface})`
+            : `linear-gradient(135deg, ${themeColors.surface}, ${themeColors.primary}80, ${themeColors.surface})`,
         }}
       />
 
@@ -103,75 +103,82 @@ export function OfferBanner({
 
       {/* Contenido */}
       <div className="relative h-full flex flex-col justify-center p-6 md:p-8 text-white z-10">
-        {/* Badge de descuento */}
-        {discount && (
-          <motion.div
-            initial={{ scale: 0, rotate: -12 }}
-            animate={{ scale: 1, rotate: -12 }}
-            className="inline-flex items-center gap-1 w-fit mb-4 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold"
-          >
-            <Sparkles className="h-3 w-3" />
-            {discount}
-          </motion.div>
-        )}
-
-        {/* Subtítulo */}
-        {subtitle && (
-          <motion.p
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-sm md:text-base text-white/80 mb-2"
-          >
-            {subtitle}
-          </motion.p>
-        )}
-
-        {/* Título principal */}
-        <motion.h2
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-          className={cn(
-            "font-bold text-white mb-4 leading-tight",
-            isPrimary ? "text-2xl md:text-4xl" : "text-xl md:text-2xl",
+        {/* Backdrop blur overlay para mejor legibilidad */}
+        <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px] rounded-2xl" />
+        <div className="relative z-10">
+          {/* Badge de descuento */}
+          {discount && (
+            <motion.div
+              initial={{ scale: 0, rotate: -12 }}
+              animate={{ scale: 1, rotate: -12 }}
+              className="inline-flex items-center gap-1 w-fit mb-4 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold"
+            >
+              <Sparkles className="h-3 w-3" />
+              {discount}
+            </motion.div>
           )}
-        >
-          {title}
-        </motion.h2>
 
-        {/* Descripción */}
-        {description && (
-          <motion.p
+          {/* Subtítulo */}
+          {subtitle && (
+            <motion.p
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-sm md:text-base text-white/80 mb-2"
+            >
+              {subtitle}
+            </motion.p>
+          )}
+
+          {/* Título principal */}
+          <motion.h2
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 }}
-            className="text-sm md:text-base text-white/90 mb-6 max-w-md"
+            transition={{ delay: 0.3 }}
+            className={cn(
+              "font-bold text-white mb-4 leading-tight",
+              isPrimary ? "text-2xl md:text-4xl" : "text-xl md:text-2xl",
+            )}
           >
-            {description}
-          </motion.p>
-        )}
+            {title}
+          </motion.h2>
 
-        {/* Call to Action */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <motion.a
-            href={ctaLink}
-            whileHover={{ scale: 1.05, x: 5 }}
-            whileTap={{ scale: 0.95 }}
-            className="inline-flex items-center gap-2 px-6 py-3 backdrop-blur-sm rounded-full font-semibold text-white transition-all duration-300 group/cta"
-            style={{
-              backgroundColor: isPrimary ? 'rgba(255,255,255,0.2)' : `${themeColors.accent}40`
-            }}
+          {/* Descripción */}
+          {description && (
+            <motion.p
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+              className="text-sm md:text-base text-white/90 mb-6 max-w-md"
+            >
+              {description}
+            </motion.p>
+          )}
+
+          {/* Call to Action */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
           >
-            <Zap className="h-4 w-4" />
-            {ctaText}
-            <ArrowRight className="h-4 w-4 group-hover/cta:translate-x-1 transition-transform" />
-          </motion.a>
-        </motion.div>
+            <motion.a
+              href={ctaLink}
+              whileHover={{ scale: 1.05, x: 5 }}
+              whileTap={{ scale: 0.95 }}
+              className="inline-flex items-center gap-2 px-6 py-3 backdrop-blur-sm rounded-full font-semibold text-white transition-all duration-300 group/cta"
+              style={{
+                backgroundColor: isPrimary
+                  ? "rgba(255,255,255,0.2)"
+                  : `${themeColors.accent}40`,
+              }}
+            >
+              <Zap className="h-4 w-4" />
+              {ctaText}
+              <ArrowRight className="h-4 w-4 group-hover/cta:translate-x-1 transition-transform" />
+            </motion.a>
+          </motion.div>
+        </div>{" "}
+        {/* Cierre del div con z-10 para el backdrop */}
       </div>
 
       {/* Efecto de brillo en hover */}
