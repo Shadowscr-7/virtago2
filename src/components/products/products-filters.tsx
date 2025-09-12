@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { 
   Search, 
@@ -40,6 +40,45 @@ export function ProductsFilters({ filters, onFiltersChange, filterData }: Produc
     price: true,
     options: true
   })
+  
+  // Estados para búsquedas en filtros
+  const [categorySearch, setCategorySearch] = useState("")
+  const [brandSearch, setBrandSearch] = useState("")
+  const [supplierSearch, setSupplierSearch] = useState("")
+  
+  // Estados para "ver más"
+  const [showAllCategories, setShowAllCategories] = useState(false)
+  const [showAllBrands, setShowAllBrands] = useState(false)
+  const [showAllSuppliers, setShowAllSuppliers] = useState(false)
+  
+  // Estados para slider de precio
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 100000 })
+  
+  const ITEMS_LIMIT = 8
+
+  // Funciones de filtrado para búsquedas
+  const filteredCategories = useMemo(() => {
+    return filterData.categories.filter(category =>
+      category.name.toLowerCase().includes(categorySearch.toLowerCase())
+    )
+  }, [filterData.categories, categorySearch])
+
+  const filteredBrands = useMemo(() => {
+    return filterData.brands.filter(brand =>
+      brand.name.toLowerCase().includes(brandSearch.toLowerCase())
+    )
+  }, [filterData.brands, brandSearch])
+
+  const filteredSuppliers = useMemo(() => {
+    return filterData.suppliers.filter(supplier =>
+      supplier.name.toLowerCase().includes(supplierSearch.toLowerCase())
+    )
+  }, [filterData.suppliers, supplierSearch])
+
+  // Obtener items limitados para mostrar
+  const getDisplayedItems = <T,>(items: T[], showAll: boolean): T[] => {
+    return showAll ? items : items.slice(0, ITEMS_LIMIT)
+  }
 
   const updateFilter = (key: keyof ProductFilters, value: string | boolean) => {
     const newFilters = { ...filters, [key]: value }
@@ -214,28 +253,52 @@ export function ProductsFilters({ filters, onFiltersChange, filterData }: Produc
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="space-y-2"
+                    className="space-y-3"
                   >
-                    {filterData.categories.map(category => (
-                      <label
-                        key={category.id}
-                        className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="radio"
-                            name="category"
-                            checked={filters.category === category.id}
-                            onChange={() => updateFilter("category", category.id)}
-                            className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
-                          />
-                          <span className="text-slate-700 dark:text-slate-300">{category.name}</span>
-                        </div>
-                        <span className="text-xs text-slate-500 bg-slate-100 dark:bg-slate-600 px-2 py-1 rounded-full">
-                          {category.count}
-                        </span>
-                      </label>
-                    ))}
+                    {/* Search input for categories */}
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Buscar categorías..."
+                        value={categorySearch}
+                        onChange={(e) => setCategorySearch(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      {getDisplayedItems(filteredCategories, showAllCategories).map(category => (
+                        <label
+                          key={category.id}
+                          className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="radio"
+                              name="category"
+                              checked={filters.category === category.id}
+                              onChange={() => updateFilter("category", category.id)}
+                              className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
+                            />
+                            <span className="text-slate-700 dark:text-slate-300">{category.name}</span>
+                          </div>
+                          <span className="text-xs text-slate-500 bg-slate-100 dark:bg-slate-600 px-2 py-1 rounded-full">
+                            {category.count}
+                          </span>
+                        </label>
+                      ))}
+                      
+                      {/* Show more/less button */}
+                      {filteredCategories.length > ITEMS_LIMIT && (
+                        <button
+                          onClick={() => setShowAllCategories(!showAllCategories)}
+                          className="w-full text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 py-2 transition-colors"
+                        >
+                          {showAllCategories ? 'Ver menos' : `Ver ${filteredCategories.length - ITEMS_LIMIT} más`}
+                        </button>
+                      )}
+                    </div>
                     
                     {/* Subcategories */}
                     {getSubcategories().length > 0 && (
@@ -299,28 +362,52 @@ export function ProductsFilters({ filters, onFiltersChange, filterData }: Produc
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="space-y-2"
+                    className="space-y-3"
                   >
-                    {filterData.brands.map(brand => (
-                      <label
-                        key={brand.id}
-                        className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
-                      >
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="radio"
-                            name="brand"
-                            checked={filters.brand === brand.id}
-                            onChange={() => updateFilter("brand", brand.id)}
-                            className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
-                          />
-                          <span className="text-slate-700 dark:text-slate-300">{brand.name}</span>
-                        </div>
-                        <span className="text-xs text-slate-500 bg-slate-100 dark:bg-slate-600 px-2 py-1 rounded-full">
-                          {brand.count}
-                        </span>
-                      </label>
-                    ))}
+                    {/* Search input for brands */}
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Buscar marcas..."
+                        value={brandSearch}
+                        onChange={(e) => setBrandSearch(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      {getDisplayedItems(filteredBrands, showAllBrands).map(brand => (
+                        <label
+                          key={brand.id}
+                          className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="radio"
+                              name="brand"
+                              checked={filters.brand === brand.id}
+                              onChange={() => updateFilter("brand", brand.id)}
+                              className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
+                            />
+                            <span className="text-slate-700 dark:text-slate-300">{brand.name}</span>
+                          </div>
+                          <span className="text-xs text-slate-500 bg-slate-100 dark:bg-slate-600 px-2 py-1 rounded-full">
+                            {brand.count}
+                          </span>
+                        </label>
+                      ))}
+                      
+                      {/* Show more/less button */}
+                      {filteredBrands.length > ITEMS_LIMIT && (
+                        <button
+                          onClick={() => setShowAllBrands(!showAllBrands)}
+                          className="w-full text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 py-2 transition-colors"
+                        >
+                          {showAllBrands ? 'Ver menos' : `Ver ${filteredBrands.length - ITEMS_LIMIT} más`}
+                        </button>
+                      )}
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -350,23 +437,47 @@ export function ProductsFilters({ filters, onFiltersChange, filterData }: Produc
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="space-y-2"
+                    className="space-y-3"
                   >
-                    {filterData.suppliers.map(supplier => (
-                      <label
-                        key={supplier.id}
-                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
-                      >
-                        <input
-                          type="radio"
-                          name="supplier"
-                          checked={filters.supplier === supplier.id}
-                          onChange={() => updateFilter("supplier", supplier.id)}
-                          className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
-                        />
-                        <span className="text-slate-700 dark:text-slate-300">{supplier.name}</span>
-                      </label>
-                    ))}
+                    {/* Search input for suppliers */}
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Buscar proveedores..."
+                        value={supplierSearch}
+                        onChange={(e) => setSupplierSearch(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      {getDisplayedItems(filteredSuppliers, showAllSuppliers).map(supplier => (
+                        <label
+                          key={supplier.id}
+                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
+                        >
+                          <input
+                            type="radio"
+                            name="supplier"
+                            checked={filters.supplier === supplier.id}
+                            onChange={() => updateFilter("supplier", supplier.id)}
+                            className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
+                          />
+                          <span className="text-slate-700 dark:text-slate-300">{supplier.name}</span>
+                        </label>
+                      ))}
+                      
+                      {/* Show more/less button */}
+                      {filteredSuppliers.length > ITEMS_LIMIT && (
+                        <button
+                          onClick={() => setShowAllSuppliers(!showAllSuppliers)}
+                          className="w-full text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 py-2 transition-colors"
+                        >
+                          {showAllSuppliers ? 'Ver menos' : `Ver ${filteredSuppliers.length - ITEMS_LIMIT} más`}
+                        </button>
+                      )}
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -396,23 +507,120 @@ export function ProductsFilters({ filters, onFiltersChange, filterData }: Produc
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="space-y-2"
+                    className="space-y-4"
                   >
-                    {filterData.priceRanges.map(range => (
-                      <label
-                        key={range.id}
-                        className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
-                      >
-                        <input
-                          type="radio"
-                          name="priceRange"
-                          checked={filters.priceRange === range.id}
-                          onChange={() => updateFilter("priceRange", range.id)}
-                          className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
+                    {/* Price Range Slider */}
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-sm text-slate-600 dark:text-slate-400">
+                        <span>${priceRange.min.toLocaleString()}</span>
+                        <span>${priceRange.max.toLocaleString()}</span>
+                      </div>
+                      
+                      {/* Custom Dual Range Slider */}
+                      <div className="relative h-2 bg-slate-200 dark:bg-slate-600 rounded-full">
+                        {/* Track */}
+                        <div 
+                          className="absolute h-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"
+                          style={{
+                            left: `${(priceRange.min / 100000) * 100}%`,
+                            width: `${((priceRange.max - priceRange.min) / 100000) * 100}%`
+                          }}
                         />
-                        <span className="text-slate-700 dark:text-slate-300">{range.name}</span>
-                      </label>
-                    ))}
+                        
+                        {/* Min Handle */}
+                        <input
+                          type="range"
+                          min="0"
+                          max="100000"
+                          value={priceRange.min}
+                          onChange={(e) => setPriceRange(prev => ({ 
+                            ...prev, 
+                            min: Math.min(Number(e.target.value), prev.max - 1000) 
+                          }))}
+                          className="absolute w-full h-2 bg-transparent appearance-none cursor-pointer slider-thumb"
+                          style={{ background: 'transparent' }}
+                        />
+                        
+                        {/* Max Handle */}
+                        <input
+                          type="range"
+                          min="0"
+                          max="100000"
+                          value={priceRange.max}
+                          onChange={(e) => setPriceRange(prev => ({ 
+                            ...prev, 
+                            max: Math.max(Number(e.target.value), prev.min + 1000) 
+                          }))}
+                          className="absolute w-full h-2 bg-transparent appearance-none cursor-pointer slider-thumb"
+                          style={{ background: 'transparent' }}
+                        />
+                      </div>
+                      
+                      {/* Manual Input */}
+                      <div className="flex gap-2 items-center">
+                        <div className="flex-1">
+                          <label className="block text-xs text-slate-500 mb-1">Mínimo</label>
+                          <input
+                            type="number"
+                            value={priceRange.min}
+                            onChange={(e) => setPriceRange(prev => ({ 
+                              ...prev, 
+                              min: Math.max(0, Math.min(Number(e.target.value) || 0, prev.max - 1000))
+                            }))}
+                            className="w-full px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                            placeholder="0"
+                          />
+                        </div>
+                        <div className="text-slate-400 pt-4">-</div>
+                        <div className="flex-1">
+                          <label className="block text-xs text-slate-500 mb-1">Máximo</label>
+                          <input
+                            type="number"
+                            value={priceRange.max}
+                            onChange={(e) => setPriceRange(prev => ({ 
+                              ...prev, 
+                              max: Math.max(prev.min + 1000, Number(e.target.value) || 100000)
+                            }))}
+                            className="w-full px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                            placeholder="100000"
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Apply Price Filter Button */}
+                      <button
+                        onClick={() => {
+                          // Aquí aplicarías el filtro de precio personalizado
+                          // Por ahora solo actualizamos el estado
+                          console.log('Applying price filter:', priceRange)
+                        }}
+                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                      >
+                        Aplicar Filtro de Precio
+                      </button>
+                    </div>
+
+                    {/* Quick Price Ranges */}
+                    <div className="space-y-2 pt-3 border-t border-slate-200 dark:border-slate-600">
+                      <div className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
+                        Rangos rápidos:
+                      </div>
+                      {filterData.priceRanges.map(range => (
+                        <label
+                          key={range.id}
+                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
+                        >
+                          <input
+                            type="radio"
+                            name="priceRange"
+                            checked={filters.priceRange === range.id}
+                            onChange={() => updateFilter("priceRange", range.id)}
+                            className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
+                          />
+                          <span className="text-slate-700 dark:text-slate-300">{range.name}</span>
+                        </label>
+                      ))}
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -472,4 +680,44 @@ export function ProductsFilters({ filters, onFiltersChange, filterData }: Produc
       </AnimatePresence>
     </div>
   )
+}
+
+// Estilos CSS para el slider personalizado
+const sliderStyles = `
+  .slider-thumb::-webkit-slider-thumb {
+    appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #3B82F6, #8B5CF6);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    border: 2px solid white;
+  }
+  
+  .slider-thumb::-moz-range-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #3B82F6, #8B5CF6);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    border: 2px solid white;
+  }
+  
+  .slider-thumb::-webkit-slider-track {
+    background: transparent;
+  }
+  
+  .slider-thumb::-moz-range-track {
+    background: transparent;
+  }
+`
+
+// Inyectar estilos si no existen
+if (typeof document !== 'undefined' && !document.getElementById('slider-styles')) {
+  const style = document.createElement('style')
+  style.id = 'slider-styles'
+  style.textContent = sliderStyles
+  document.head.appendChild(style)
 }

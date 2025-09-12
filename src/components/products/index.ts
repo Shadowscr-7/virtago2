@@ -1,0 +1,7 @@
+export { ProductsSection } from './products-section'
+export { ProductsHero } from './products-hero'
+export { ProductsStats } from './products-stats'
+export { ProductsFilters } from './products-filters'
+export { ProductsGrid } from './products-grid'
+export { QuantityModal } from './quantity-modal'
+export { ProductCard } from './product-card'

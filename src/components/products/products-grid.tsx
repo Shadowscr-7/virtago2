@@ -14,6 +14,7 @@ import {
   AlertCircle
 } from "lucide-react"
 import { ProductFilters } from "./products-section"
+import { QuantityModal } from "./quantity-modal"
 import Image from "next/image"
 
 interface Product {
@@ -54,6 +55,8 @@ export function ProductsGrid({
 }: ProductsGridProps) {
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
   const [currentPage, setCurrentPage] = useState(1)
+  const [quantityModalProduct, setQuantityModalProduct] = useState<Product | null>(null)
+  const [isQuantityModalOpen, setIsQuantityModalOpen] = useState(false)
   const itemsPerPage = 12
 
   const sortOptions = [
@@ -88,6 +91,18 @@ export function ProductsGrid({
 
   const calculateDiscount = (original: number, current: number) => {
     return Math.round(((original - current) / original) * 100)
+  }
+
+  const handleAddToCart = (product: Product) => {
+    setQuantityModalProduct(product)
+    setIsQuantityModalOpen(true)
+  }
+
+  const handleCartConfirm = (product: Product, quantity: number) => {
+    // Aquí manejarías la lógica de agregar al carrito
+    console.log(`Agregando al carrito: ${quantity} x ${product.name}`)
+    // Podrías usar un store como Zustand para manejar el carrito
+    setIsQuantityModalOpen(false)
   }
 
   // Pagination
@@ -156,9 +171,13 @@ export function ProductsGrid({
 
           {/* Quick Add */}
           <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <button className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+            <button 
+              onClick={() => handleAddToCart(product)}
+              disabled={!product.inStock}
+              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+            >
               <ShoppingCart className="w-4 h-4" />
-              Agregar al Carrito
+              {product.inStock ? 'Agregar al Carrito' : 'Sin Stock'}
             </button>
           </div>
         </div>
@@ -374,9 +393,13 @@ export function ProductsGrid({
                   <button className="p-2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-blue-500 hover:text-white transition-colors">
                     <Eye className="w-4 h-4" />
                   </button>
-                  <button className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2">
+                  <button 
+                    onClick={() => handleAddToCart(product)}
+                    disabled={!product.inStock}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                  >
                     <ShoppingCart className="w-4 h-4" />
-                    Agregar
+                    {product.inStock ? 'Agregar' : 'Sin Stock'}
                   </button>
                 </div>
               </div>
@@ -543,6 +566,14 @@ export function ProductsGrid({
           )}
         </>
       )}
+
+      {/* Quantity Modal */}
+      <QuantityModal
+        product={quantityModalProduct}
+        isOpen={isQuantityModalOpen}
+        onClose={() => setIsQuantityModalOpen(false)}
+        onAddToCart={handleCartConfirm}
+      />
     </div>
   )
 }
