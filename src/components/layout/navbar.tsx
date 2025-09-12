@@ -167,18 +167,25 @@ export function Navbar() {
 
         {/* Menú de navegación */}
         <nav className="hidden md:flex items-center space-x-6 pb-2">
-          {["Inicio", "Productos", "Marcas", "Proveedores", "Ofertas", "Contacto"].map((item) => (
-            <motion.a
-              key={item}
-              href="#"
-              whileHover={{ y: -2 }}
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative group"
-            >
-              {item}
-              <motion.div
-                className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500 group-hover:w-full transition-all duration-300"
-              />
-            </motion.a>
+          {[
+            { name: "Inicio", href: "/" },
+            { name: "Productos", href: "/productos" },
+            { name: "Marcas", href: "/marcas" },
+            { name: "Proveedores", href: "/proveedores" },
+            { name: "Ofertas", href: "/ofertas" },
+            { name: "Contacto", href: "/contacto" }
+          ].map((item) => (
+            <Link key={item.name} href={item.href}>
+              <motion.span
+                whileHover={{ y: -2 }}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative group cursor-pointer"
+              >
+                {item.name}
+                <motion.div
+                  className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-pink-500 group-hover:w-full transition-all duration-300"
+                />
+              </motion.span>
+            </Link>
           ))}
         </nav>
       </div>
