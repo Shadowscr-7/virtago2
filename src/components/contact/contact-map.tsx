@@ -9,8 +9,11 @@ import {
   Navigation,
   Building2,
 } from "lucide-react";
+import { useTheme } from "@/contexts/theme-context";
 
 export function ContactMap() {
+  const { themeColors } = useTheme();
+
   const offices = [
     {
       name: "Oficina Principal",
@@ -20,6 +23,7 @@ export function ContactMap() {
       email: "contacto@virtago.com",
       hours: "Lun - Vie: 9:00 - 18:00",
       type: "Matriz",
+      color: themeColors.primary,
     },
     {
       name: "Centro de Distribución",
@@ -29,6 +33,7 @@ export function ContactMap() {
       email: "logistica@virtago.com",
       hours: "Lun - Sáb: 8:00 - 17:00",
       type: "Almacén",
+      color: themeColors.secondary,
     },
   ];
 
@@ -40,19 +45,42 @@ export function ContactMap() {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
-        className="bg-white dark:bg-slate-800 rounded-3xl p-2 shadow-xl border border-gray-100 dark:border-slate-700 overflow-hidden"
+        className="rounded-3xl p-2 shadow-xl border overflow-hidden"
+        style={{
+          backgroundColor: themeColors.surface + "90",
+          borderColor: themeColors.primary + "20"
+        }}
       >
-        <div className="relative h-80 bg-gradient-to-br from-purple-100 via-pink-50 to-cyan-100 dark:from-purple-900/20 dark:via-pink-900/20 dark:to-cyan-900/20 rounded-2xl flex items-center justify-center">
+        <div 
+          className="relative h-80 rounded-2xl flex items-center justify-center"
+          style={{
+            background: `linear-gradient(135deg, ${themeColors.primary}10, ${themeColors.secondary}10, ${themeColors.accent}10)`
+          }}
+        >
           {/* Placeholder del mapa */}
           <div className="text-center">
-            <MapPin className="h-16 w-16 text-purple-500 mx-auto mb-4" />
-            <h4 className="text-xl font-semibold text-foreground mb-2">
+            <MapPin 
+              className="h-16 w-16 mx-auto mb-4" 
+              style={{ color: themeColors.primary }}
+            />
+            <h4 
+              className="text-xl font-semibold mb-2"
+              style={{ color: themeColors.text.primary }}
+            >
               Mapa Interactivo
             </h4>
-            <p className="text-muted-foreground mb-4">
+            <p 
+              className="mb-4"
+              style={{ color: themeColors.text.secondary }}
+            >
               Encuentra nuestras ubicaciones en Ciudad de México
             </p>
-            <button className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all inline-flex items-center gap-2">
+            <button 
+              className="px-6 py-3 text-white rounded-xl transition-all inline-flex items-center gap-2"
+              style={{
+                backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+              }}
+            >
               <Navigation className="h-4 w-4" />
               Ver en Google Maps
             </button>
@@ -60,10 +88,18 @@ export function ContactMap() {
 
           {/* Overlay de ubicaciones */}
           <div className="absolute top-4 right-4">
-            <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-xl p-3 shadow-lg">
-              <div className="flex items-center gap-2 text-sm text-foreground">
-                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-                2 Ubicaciones
+            <div 
+              className="backdrop-blur-sm rounded-xl p-3 shadow-lg"
+              style={{ backgroundColor: themeColors.surface + "90" }}
+            >
+              <div className="flex items-center gap-2 text-sm">
+                <div 
+                  className="w-3 h-3 rounded-full animate-pulse"
+                  style={{ backgroundColor: themeColors.accent }}
+                />
+                <span style={{ color: themeColors.text.primary }}>
+                  2 Ubicaciones
+                </span>
               </div>
             </div>
           </div>
@@ -80,16 +116,17 @@ export function ContactMap() {
             transition={{ delay: index * 0.1, duration: 0.8 }}
             viewport={{ once: true }}
             whileHover={{ scale: 1.02 }}
-            className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-gray-100 dark:border-slate-700 hover:shadow-xl transition-all duration-300"
+            className="rounded-2xl p-6 shadow-lg border hover:shadow-xl transition-all duration-300"
+            style={{
+              backgroundColor: themeColors.surface + "90",
+              borderColor: themeColors.primary + "20"
+            }}
           >
             <div className="flex items-start gap-4">
               <div className="flex-shrink-0">
                 <div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                    office.type === "Matriz"
-                      ? "bg-gradient-to-r from-purple-500 to-pink-500"
-                      : "bg-gradient-to-r from-blue-500 to-cyan-500"
-                  }`}
+                  className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: office.color }}
                 >
                   <Building2 className="h-6 w-6 text-white" />
                 </div>
@@ -97,15 +134,18 @@ export function ContactMap() {
 
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <h4 className="text-lg font-semibold text-foreground">
+                  <h4 
+                    className="text-lg font-semibold"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     {office.name}
                   </h4>
                   <span
-                    className={`px-2 py-1 text-xs rounded-full font-medium ${
-                      office.type === "Matriz"
-                        ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
-                        : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                    }`}
+                    className="px-2 py-1 text-xs rounded-full font-medium"
+                    style={{
+                      backgroundColor: office.color + "20",
+                      color: office.color
+                    }}
                   >
                     {office.type}
                   </span>
@@ -113,38 +153,71 @@ export function ContactMap() {
 
                 <div className="space-y-2 text-sm">
                   <div className="flex items-start gap-2">
-                    <MapPin className="h-4 w-4 text-purple-500 mt-0.5 flex-shrink-0" />
+                    <MapPin 
+                      className="h-4 w-4 mt-0.5 flex-shrink-0" 
+                      style={{ color: themeColors.primary }}
+                    />
                     <div>
-                      <p className="text-foreground font-medium">
+                      <p 
+                        className="font-medium"
+                        style={{ color: themeColors.text.primary }}
+                      >
                         {office.address}
                       </p>
-                      <p className="text-muted-foreground">{office.city}</p>
+                      <p style={{ color: themeColors.text.secondary }}>
+                        {office.city}
+                      </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-green-500" />
-                    <span className="text-foreground">{office.phone}</span>
+                    <Phone 
+                      className="h-4 w-4" 
+                      style={{ color: themeColors.secondary }}
+                    />
+                    <span style={{ color: themeColors.text.primary }}>
+                      {office.phone}
+                    </span>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-blue-500" />
-                    <span className="text-foreground">{office.email}</span>
+                    <Mail 
+                      className="h-4 w-4" 
+                      style={{ color: themeColors.accent }}
+                    />
+                    <span style={{ color: themeColors.text.primary }}>
+                      {office.email}
+                    </span>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-orange-500" />
-                    <span className="text-muted-foreground">
+                    <Clock 
+                      className="h-4 w-4" 
+                      style={{ color: themeColors.primary }}
+                    />
+                    <span style={{ color: themeColors.text.secondary }}>
                       {office.hours}
                     </span>
                   </div>
                 </div>
 
                 <div className="flex gap-2 mt-4">
-                  <button className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all">
+                  <button 
+                    className="px-4 py-2 text-white text-xs rounded-lg transition-all"
+                    style={{
+                      backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+                    }}
+                  >
                     Obtener Direcciones
                   </button>
-                  <button className="px-4 py-2 bg-gray-100 dark:bg-slate-700 text-foreground text-xs rounded-lg hover:bg-gray-200 dark:hover:bg-slate-600 transition-all">
+                  <button 
+                    className="px-4 py-2 text-xs rounded-lg transition-all border"
+                    style={{
+                      backgroundColor: themeColors.surface + "50",
+                      color: themeColors.text.primary,
+                      borderColor: themeColors.primary + "30"
+                    }}
+                  >
                     Llamar Ahora
                   </button>
                 </div>
@@ -160,26 +233,39 @@ export function ContactMap() {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.8 }}
         viewport={{ once: true }}
-        className="bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-cyan-500/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 dark:border-slate-700/50"
+        className="backdrop-blur-sm rounded-2xl p-6 border"
+        style={{
+          background: `linear-gradient(135deg, ${themeColors.primary}10, ${themeColors.secondary}10, ${themeColors.accent}10)`,
+          borderColor: themeColors.primary + "20"
+        }}
       >
-        <h4 className="text-lg font-semibold text-foreground mb-4">
+        <h4 
+          className="text-lg font-semibold mb-4"
+          style={{ color: themeColors.text.primary }}
+        >
           Información de Visitantes
         </h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
           <div>
-            <h5 className="font-medium text-foreground mb-2">
+            <h5 
+              className="font-medium mb-2"
+              style={{ color: themeColors.text.primary }}
+            >
               Citas Programadas
             </h5>
-            <p className="text-muted-foreground">
+            <p style={{ color: themeColors.text.secondary }}>
               Para visitas comerciales, programa tu cita con 24 horas de
               anticipación.
             </p>
           </div>
           <div>
-            <h5 className="font-medium text-foreground mb-2">
+            <h5 
+              className="font-medium mb-2"
+              style={{ color: themeColors.text.primary }}
+            >
               Estacionamiento
             </h5>
-            <p className="text-muted-foreground">
+            <p style={{ color: themeColors.text.secondary }}>
               Contamos con estacionamiento gratuito para visitantes en ambas
               ubicaciones.
             </p>

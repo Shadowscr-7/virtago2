@@ -16,6 +16,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/contexts/theme-context";
 
 const contactSchema = z.object({
   firstName: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
@@ -32,6 +33,7 @@ const contactSchema = z.object({
 type ContactFormData = z.infer<typeof contactSchema>;
 
 export function ContactForm() {
+  const { themeColors } = useTheme();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -78,7 +80,11 @@ export function ContactForm() {
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-xl border border-gray-100 dark:border-slate-700"
+        className="rounded-3xl p-8 shadow-xl border"
+        style={{
+          backgroundColor: themeColors.surface + "90",
+          borderColor: themeColors.primary + "20"
+        }}
       >
         <div className="text-center">
           <motion.div
@@ -87,22 +93,34 @@ export function ContactForm() {
             transition={{ delay: 0.2, duration: 0.5, type: "spring" }}
             className="w-16 h-16 mx-auto mb-6"
           >
-            <div className="w-16 h-16 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 flex items-center justify-center">
+            <div 
+              className="w-16 h-16 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: themeColors.secondary }}
+            >
               <CheckCircle className="h-8 w-8 text-white" />
             </div>
           </motion.div>
 
-          <h3 className="text-2xl font-bold text-foreground mb-4">
+          <h3 
+            className="text-2xl font-bold mb-4"
+            style={{ color: themeColors.text.primary }}
+          >
             ¡Mensaje Enviado!
           </h3>
-          <p className="text-muted-foreground mb-6">
+          <p 
+            className="mb-6"
+            style={{ color: themeColors.text.secondary }}
+          >
             Gracias por contactarnos. Nuestro equipo te responderá en las
             próximas 24 horas.
           </p>
 
           <button
             onClick={() => setIsSubmitted(false)}
-            className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all"
+            className="px-6 py-3 text-white rounded-xl transition-all"
+            style={{
+              backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+            }}
           >
             Enviar otro mensaje
           </button>
@@ -117,13 +135,20 @@ export function ContactForm() {
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8 }}
       viewport={{ once: true }}
-      className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-xl border border-gray-100 dark:border-slate-700"
+      className="rounded-3xl p-8 shadow-xl border"
+      style={{
+        backgroundColor: themeColors.surface + "90",
+        borderColor: themeColors.primary + "20"
+      }}
     >
       <div className="mb-8">
-        <h3 className="text-2xl font-bold text-foreground mb-2">
+        <h3 
+          className="text-2xl font-bold mb-2"
+          style={{ color: themeColors.text.primary }}
+        >
           Envíanos un Mensaje
         </h3>
-        <p className="text-muted-foreground">
+        <p style={{ color: themeColors.text.secondary }}>
           Completa el formulario y nos pondremos en contacto contigo lo antes
           posible.
         </p>
@@ -133,18 +158,30 @@ export function ContactForm() {
         {/* Nombre y Apellido */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
+            <label 
+              className="block text-sm font-medium mb-2"
+              style={{ color: themeColors.text.primary }}
+            >
               Nombre *
             </label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+              <User 
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" 
+                style={{ color: themeColors.text.secondary }}
+              />
               <input
                 {...register("firstName")}
                 className={cn(
-                  "w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-foreground placeholder-muted-foreground",
-                  "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
+                  "w-full pl-10 pr-4 py-3 border rounded-xl transition-all",
+                  "focus:outline-none focus:ring-2 focus:border-transparent",
                   errors.firstName && "border-red-500 focus:ring-red-500",
                 )}
+                style={{
+                  backgroundColor: themeColors.surface + "50",
+                  borderColor: errors.firstName ? "#ef4444" : themeColors.primary + "30",
+                  color: themeColors.text.primary,
+                  '--tw-ring-color': errors.firstName ? "#ef4444" : themeColors.primary
+                } as React.CSSProperties}
                 placeholder="Juan"
               />
             </div>
@@ -156,18 +193,30 @@ export function ContactForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
+            <label 
+              className="block text-sm font-medium mb-2"
+              style={{ color: themeColors.text.primary }}
+            >
               Apellido *
             </label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+              <User 
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" 
+                style={{ color: themeColors.text.secondary }}
+              />
               <input
                 {...register("lastName")}
                 className={cn(
-                  "w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-foreground placeholder-muted-foreground",
-                  "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
+                  "w-full pl-10 pr-4 py-3 border rounded-xl transition-all",
+                  "focus:outline-none focus:ring-2 focus:border-transparent",
                   errors.lastName && "border-red-500 focus:ring-red-500",
                 )}
+                style={{
+                  backgroundColor: themeColors.surface + "50",
+                  borderColor: errors.lastName ? "#ef4444" : themeColors.primary + "30",
+                  color: themeColors.text.primary,
+                  '--tw-ring-color': errors.lastName ? "#ef4444" : themeColors.primary
+                } as React.CSSProperties}
                 placeholder="Pérez"
               />
             </div>
@@ -182,19 +231,31 @@ export function ContactForm() {
         {/* Email y Teléfono */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
+            <label 
+              className="block text-sm font-medium mb-2"
+              style={{ color: themeColors.text.primary }}
+            >
               Email *
             </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+              <Mail 
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" 
+                style={{ color: themeColors.text.secondary }}
+              />
               <input
                 {...register("email")}
                 type="email"
                 className={cn(
-                  "w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-foreground placeholder-muted-foreground",
-                  "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
+                  "w-full pl-10 pr-4 py-3 border rounded-xl transition-all",
+                  "focus:outline-none focus:ring-2 focus:border-transparent",
                   errors.email && "border-red-500 focus:ring-red-500",
                 )}
+                style={{
+                  backgroundColor: themeColors.surface + "50",
+                  borderColor: errors.email ? "#ef4444" : themeColors.primary + "30",
+                  color: themeColors.text.primary,
+                  '--tw-ring-color': errors.email ? "#ef4444" : themeColors.primary
+                } as React.CSSProperties}
                 placeholder="juan@empresa.com"
               />
             </div>
@@ -206,19 +267,31 @@ export function ContactForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
+            <label 
+              className="block text-sm font-medium mb-2"
+              style={{ color: themeColors.text.primary }}
+            >
               Teléfono *
             </label>
             <div className="relative">
-              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+              <Phone 
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" 
+                style={{ color: themeColors.text.secondary }}
+              />
               <input
                 {...register("phone")}
                 type="tel"
                 className={cn(
-                  "w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-foreground placeholder-muted-foreground",
-                  "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
+                  "w-full pl-10 pr-4 py-3 border rounded-xl transition-all",
+                  "focus:outline-none focus:ring-2 focus:border-transparent",
                   errors.phone && "border-red-500 focus:ring-red-500",
                 )}
+                style={{
+                  backgroundColor: themeColors.surface + "50",
+                  borderColor: errors.phone ? "#ef4444" : themeColors.primary + "30",
+                  color: themeColors.text.primary,
+                  '--tw-ring-color': errors.phone ? "#ef4444" : themeColors.primary
+                } as React.CSSProperties}
                 placeholder="+52 55 1234 5678"
               />
             </div>
@@ -232,18 +305,30 @@ export function ContactForm() {
 
         {/* Empresa */}
         <div>
-          <label className="block text-sm font-medium text-foreground mb-2">
+          <label 
+            className="block text-sm font-medium mb-2"
+            style={{ color: themeColors.text.primary }}
+          >
             Empresa *
           </label>
           <div className="relative">
-            <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
+            <Building2 
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5" 
+              style={{ color: themeColors.text.secondary }}
+            />
             <input
               {...register("company")}
               className={cn(
-                "w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-foreground placeholder-muted-foreground",
-                "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
+                "w-full pl-10 pr-4 py-3 border rounded-xl transition-all",
+                "focus:outline-none focus:ring-2 focus:border-transparent",
                 errors.company && "border-red-500 focus:ring-red-500",
               )}
+              style={{
+                backgroundColor: themeColors.surface + "50",
+                borderColor: errors.company ? "#ef4444" : themeColors.primary + "30",
+                color: themeColors.text.primary,
+                '--tw-ring-color': errors.company ? "#ef4444" : themeColors.primary
+              } as React.CSSProperties}
               placeholder="Distribuidora ABC S.A. de C.V."
             />
           </div>
@@ -257,16 +342,25 @@ export function ContactForm() {
         {/* Departamento y Urgencia */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
+            <label 
+              className="block text-sm font-medium mb-2"
+              style={{ color: themeColors.text.primary }}
+            >
               Departamento *
             </label>
             <select
               {...register("department")}
               className={cn(
-                "w-full px-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-foreground",
-                "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
+                "w-full px-4 py-3 border rounded-xl transition-all",
+                "focus:outline-none focus:ring-2 focus:border-transparent",
                 errors.department && "border-red-500 focus:ring-red-500",
               )}
+              style={{
+                backgroundColor: themeColors.surface + "50",
+                borderColor: errors.department ? "#ef4444" : themeColors.primary + "30",
+                color: themeColors.text.primary,
+                '--tw-ring-color': errors.department ? "#ef4444" : themeColors.primary
+              } as React.CSSProperties}
             >
               <option value="">Selecciona un departamento</option>
               {departments.map((dept) => (
@@ -283,16 +377,25 @@ export function ContactForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
+            <label 
+              className="block text-sm font-medium mb-2"
+              style={{ color: themeColors.text.primary }}
+            >
               Urgencia *
             </label>
             <select
               {...register("urgency")}
               className={cn(
-                "w-full px-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-foreground",
-                "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
+                "w-full px-4 py-3 border rounded-xl transition-all",
+                "focus:outline-none focus:ring-2 focus:border-transparent",
                 errors.urgency && "border-red-500 focus:ring-red-500",
               )}
+              style={{
+                backgroundColor: themeColors.surface + "50",
+                borderColor: errors.urgency ? "#ef4444" : themeColors.primary + "30",
+                color: themeColors.text.primary,
+                '--tw-ring-color': errors.urgency ? "#ef4444" : themeColors.primary
+              } as React.CSSProperties}
             >
               <option value="">Selecciona la urgencia</option>
               {urgencyLevels.map((level) => (
@@ -311,16 +414,25 @@ export function ContactForm() {
 
         {/* Asunto */}
         <div>
-          <label className="block text-sm font-medium text-foreground mb-2">
+          <label 
+            className="block text-sm font-medium mb-2"
+            style={{ color: themeColors.text.primary }}
+          >
             Asunto *
           </label>
           <input
             {...register("subject")}
             className={cn(
-              "w-full px-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-foreground placeholder-muted-foreground",
-              "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
+              "w-full px-4 py-3 border rounded-xl transition-all",
+              "focus:outline-none focus:ring-2 focus:border-transparent",
               errors.subject && "border-red-500 focus:ring-red-500",
             )}
+            style={{
+              backgroundColor: themeColors.surface + "50",
+              borderColor: errors.subject ? "#ef4444" : themeColors.primary + "30",
+              color: themeColors.text.primary,
+              '--tw-ring-color': errors.subject ? "#ef4444" : themeColors.primary
+            } as React.CSSProperties}
             placeholder="Consulta sobre precios mayoristas"
           />
           {errors.subject && (
@@ -332,19 +444,31 @@ export function ContactForm() {
 
         {/* Mensaje */}
         <div>
-          <label className="block text-sm font-medium text-foreground mb-2">
+          <label 
+            className="block text-sm font-medium mb-2"
+            style={{ color: themeColors.text.primary }}
+          >
             Mensaje *
           </label>
           <div className="relative">
-            <MessageSquare className="absolute left-3 top-3 text-muted-foreground h-5 w-5" />
+            <MessageSquare 
+              className="absolute left-3 top-3 h-5 w-5" 
+              style={{ color: themeColors.text.secondary }}
+            />
             <textarea
               {...register("message")}
               rows={5}
               className={cn(
-                "w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded-xl text-foreground placeholder-muted-foreground resize-none",
-                "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all",
+                "w-full pl-10 pr-4 py-3 border rounded-xl resize-none transition-all",
+                "focus:outline-none focus:ring-2 focus:border-transparent",
                 errors.message && "border-red-500 focus:ring-red-500",
               )}
+              style={{
+                backgroundColor: themeColors.surface + "50",
+                borderColor: errors.message ? "#ef4444" : themeColors.primary + "30",
+                color: themeColors.text.primary,
+                '--tw-ring-color': errors.message ? "#ef4444" : themeColors.primary
+              } as React.CSSProperties}
               placeholder="Describe tu consulta o solicitud detalladamente..."
             />
           </div>
@@ -363,12 +487,14 @@ export function ContactForm() {
           whileTap={{ scale: 0.98 }}
           className={cn(
             "w-full py-4 px-6 rounded-xl font-semibold text-white transition-all duration-300",
-            "bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-500",
-            "hover:from-purple-600 hover:via-pink-600 hover:to-cyan-600",
-            "focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2",
+            "focus:outline-none focus:ring-2 focus:ring-offset-2",
             "disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2",
             isLoading && "animate-pulse",
           )}
+          style={{
+            backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
+            '--tw-ring-color': themeColors.primary
+          } as React.CSSProperties}
         >
           {isLoading ? (
             <>

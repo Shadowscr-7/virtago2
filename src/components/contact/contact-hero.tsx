@@ -2,15 +2,27 @@
 
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Clock, Sparkles } from "lucide-react";
+import { useTheme } from "@/contexts/theme-context";
 
 export function ContactHero() {
+  const { themeColors } = useTheme();
+
   return (
     <section className="relative py-20 overflow-hidden">
       {/* Background Effects */}
       <div className="absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl" />
+        <div 
+          className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl"
+          style={{ backgroundColor: themeColors.primary + "10" }}
+        />
+        <div 
+          className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl"
+          style={{ backgroundColor: themeColors.secondary + "10" }}
+        />
+        <div 
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl"
+          style={{ backgroundColor: themeColors.accent + "10" }}
+        />
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
@@ -26,10 +38,19 @@ export function ContactHero() {
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-cyan-500"
+                className="absolute inset-0 rounded-2xl"
+                style={{
+                  background: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.accent})`
+                }}
               />
-              <div className="absolute inset-1 rounded-xl bg-background flex items-center justify-center">
-                <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <div 
+                className="absolute inset-1 rounded-xl flex items-center justify-center"
+                style={{ backgroundColor: themeColors.background }}
+              >
+                <span 
+                  className="text-2xl font-bold"
+                  style={{ color: themeColors.primary }}
+                >
                   V
                 </span>
               </div>
@@ -46,10 +67,10 @@ export function ContactHero() {
                 }}
                 className="absolute -inset-6"
               >
-                <Sparkles className="absolute top-0 right-0 h-4 w-4 text-yellow-500" />
-                <Sparkles className="absolute bottom-0 left-0 h-3 w-3 text-purple-500" />
-                <Sparkles className="absolute top-1/2 left-0 h-2 w-2 text-cyan-500" />
-                <Sparkles className="absolute bottom-0 right-1/3 h-3 w-3 text-pink-500" />
+                <Sparkles className="absolute top-0 right-0 h-4 w-4" style={{ color: themeColors.accent }} />
+                <Sparkles className="absolute bottom-0 left-0 h-3 w-3" style={{ color: themeColors.primary }} />
+                <Sparkles className="absolute top-1/2 left-0 h-2 w-2" style={{ color: themeColors.secondary }} />
+                <Sparkles className="absolute bottom-0 right-1/3 h-3 w-3" style={{ color: themeColors.accent }} />
               </motion.div>
             </div>
           </motion.div>
@@ -61,11 +82,16 @@ export function ContactHero() {
             transition={{ delay: 0.3, duration: 0.8 }}
             className="text-5xl md:text-6xl font-bold mb-6"
           >
-            <span className="bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 dark:from-white dark:via-purple-100 dark:to-white bg-clip-text text-transparent">
+            <span style={{ color: themeColors.text.primary }}>
               Contacta con
             </span>
             <br />
-            <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 bg-clip-text text-transparent">
+            <span 
+              className="bg-gradient-to-r bg-clip-text text-transparent"
+              style={{
+                backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.accent})`
+              }}
+            >
               Virtago
             </span>
           </motion.h1>
@@ -75,7 +101,8 @@ export function ContactHero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.8 }}
-            className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed"
+            className="text-xl mb-12 max-w-2xl mx-auto leading-relaxed"
+            style={{ color: themeColors.text.secondary }}
           >
             Estamos aquí para ayudarte. Nuestro equipo de expertos está listo
             para responder tus consultas y brindarte el mejor soporte para tu
@@ -94,25 +121,25 @@ export function ContactHero() {
                 icon: Phone,
                 title: "Llámanos",
                 value: "+52 55 1234 5678",
-                gradient: "from-green-500 to-emerald-500",
+                color: themeColors.primary,
               },
               {
                 icon: Mail,
                 title: "Escríbenos",
                 value: "contacto@virtago.com",
-                gradient: "from-blue-500 to-cyan-500",
+                color: themeColors.secondary,
               },
               {
                 icon: MapPin,
                 title: "Visítanos",
                 value: "Ciudad de México, MX",
-                gradient: "from-purple-500 to-pink-500",
+                color: themeColors.accent,
               },
               {
                 icon: Clock,
                 title: "Horarios",
                 value: "Lun - Vie 9:00 - 18:00",
-                gradient: "from-orange-500 to-red-500",
+                color: themeColors.primary,
               },
             ].map((item, index) => {
               const Icon = item.icon;
@@ -123,17 +150,30 @@ export function ContactHero() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.8 + index * 0.1, duration: 0.6 }}
                   whileHover={{ y: -5, scale: 1.05 }}
-                  className="bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-white/20 dark:border-slate-700/50 hover:shadow-xl transition-all duration-300"
+                  className="backdrop-blur-sm rounded-2xl p-6 border hover:shadow-xl transition-all duration-300"
+                  style={{
+                    backgroundColor: themeColors.surface + "50",
+                    borderColor: themeColors.primary + "20"
+                  }}
                 >
                   <div
-                    className={`w-12 h-12 rounded-xl bg-gradient-to-r ${item.gradient} flex items-center justify-center mb-4 mx-auto`}
+                    className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 mx-auto"
+                    style={{ backgroundColor: item.color }}
                   >
                     <Icon className="h-6 w-6 text-white" />
                   </div>
-                  <h3 className="font-semibold text-foreground mb-2">
+                  <h3 
+                    className="font-semibold mb-2"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     {item.title}
                   </h3>
-                  <p className="text-sm text-muted-foreground">{item.value}</p>
+                  <p 
+                    className="text-sm"
+                    style={{ color: themeColors.text.secondary }}
+                  >
+                    {item.value}
+                  </p>
                 </motion.div>
               );
             })}

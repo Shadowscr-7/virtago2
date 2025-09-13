@@ -9,8 +9,10 @@ import {
   Clock,
   Users,
 } from "lucide-react";
+import { useTheme } from "@/contexts/theme-context";
 
 export function ContactFAQ() {
+  const { themeColors } = useTheme();
   const [openItems, setOpenItems] = useState<number[]>([0]);
 
   const toggleItem = (index: number) => {
@@ -23,7 +25,7 @@ export function ContactFAQ() {
     {
       category: "General",
       icon: HelpCircle,
-      color: "from-purple-500 to-pink-500",
+      color: themeColors.primary,
       questions: [
         {
           question: "¿Qué es Virtago y cómo funciona?",
@@ -45,7 +47,7 @@ export function ContactFAQ() {
     {
       category: "Productos y Precios",
       icon: MessageCircle,
-      color: "from-blue-500 to-cyan-500",
+      color: themeColors.secondary,
       questions: [
         {
           question: "¿Por qué no veo precios sin registrarme?",
@@ -67,7 +69,7 @@ export function ContactFAQ() {
     {
       category: "Envíos y Logística",
       icon: Clock,
-      color: "from-green-500 to-emerald-500",
+      color: themeColors.accent,
       questions: [
         {
           question: "¿Cuáles son los tiempos de entrega?",
@@ -89,7 +91,7 @@ export function ContactFAQ() {
     {
       category: "Soporte y Cuenta",
       icon: Users,
-      color: "from-orange-500 to-red-500",
+      color: themeColors.primary,
       questions: [
         {
           question: "¿Cómo puedo actualizar mi información de facturación?",
@@ -111,7 +113,10 @@ export function ContactFAQ() {
   ];
 
   return (
-    <section className="py-20 bg-gray-50 dark:bg-slate-900">
+    <section 
+      className="py-20"
+      style={{ backgroundColor: themeColors.surface + "30" }}
+    >
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -121,15 +126,23 @@ export function ContactFAQ() {
           className="text-center mb-16"
         >
           <h2 className="text-4xl font-bold mb-6">
-            <span className="bg-gradient-to-r from-slate-900 to-purple-900 dark:from-white dark:to-purple-100 bg-clip-text text-transparent">
+            <span style={{ color: themeColors.text.primary }}>
               Preguntas
             </span>
             <br />
-            <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <span 
+              className="bg-gradient-to-r bg-clip-text text-transparent"
+              style={{
+                backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+              }}
+            >
               Frecuentes
             </span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p 
+            className="text-xl max-w-2xl mx-auto"
+            style={{ color: themeColors.text.secondary }}
+          >
             Encuentra respuestas rápidas a las consultas más comunes sobre
             nuestros servicios y plataforma.
           </p>
@@ -145,16 +158,24 @@ export function ContactFAQ() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: categoryIndex * 0.1, duration: 0.8 }}
                 viewport={{ once: true }}
-                className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-lg border border-gray-100 dark:border-slate-700"
+                className="rounded-3xl p-6 shadow-lg border"
+                style={{
+                  backgroundColor: themeColors.surface + "80",
+                  borderColor: themeColors.primary + "20"
+                }}
               >
                 {/* Category Header */}
                 <div className="flex items-center gap-3 mb-6">
                   <div
-                    className={`w-12 h-12 rounded-xl bg-gradient-to-r ${category.color} flex items-center justify-center`}
+                    className="w-12 h-12 rounded-xl flex items-center justify-center"
+                    style={{ backgroundColor: category.color }}
                   >
                     <Icon className="h-6 w-6 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-foreground">
+                  <h3 
+                    className="text-xl font-bold"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     {category.category}
                   </h3>
                 </div>
@@ -168,20 +189,30 @@ export function ContactFAQ() {
                     return (
                       <div
                         key={questionIndex}
-                        className="border border-gray-100 dark:border-slate-700 rounded-xl overflow-hidden"
+                        className="border rounded-xl overflow-hidden"
+                        style={{ borderColor: themeColors.primary + "20" }}
                       >
                         <button
                           onClick={() => toggleItem(globalIndex)}
-                          className="w-full px-4 py-4 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
+                          className="w-full px-4 py-4 text-left flex items-center justify-between transition-colors"
+                          style={{
+                            backgroundColor: isOpen ? themeColors.primary + "10" : "transparent"
+                          }}
                         >
-                          <span className="font-medium text-foreground pr-4">
+                          <span 
+                            className="font-medium pr-4"
+                            style={{ color: themeColors.text.primary }}
+                          >
                             {faq.question}
                           </span>
                           <motion.div
                             animate={{ rotate: isOpen ? 180 : 0 }}
                             transition={{ duration: 0.2 }}
                           >
-                            <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                            <ChevronDown 
+                              className="h-5 w-5" 
+                              style={{ color: themeColors.text.secondary }}
+                            />
                           </motion.div>
                         </button>
 
@@ -194,7 +225,10 @@ export function ContactFAQ() {
                               transition={{ duration: 0.3, ease: "easeInOut" }}
                               className="overflow-hidden"
                             >
-                              <div className="px-4 pb-4 text-muted-foreground leading-relaxed">
+                              <div 
+                                className="px-4 pb-4 leading-relaxed"
+                                style={{ color: themeColors.text.secondary }}
+                              >
                                 {faq.answer}
                               </div>
                             </motion.div>
@@ -217,21 +251,45 @@ export function ContactFAQ() {
           viewport={{ once: true }}
           className="text-center mt-16"
         >
-          <div className="bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-cyan-500/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20 dark:border-slate-700/50">
-            <h3 className="text-2xl font-bold text-foreground mb-4">
+          <div 
+            className="backdrop-blur-sm rounded-3xl p-8 border"
+            style={{
+              background: `linear-gradient(135deg, ${themeColors.primary}10, ${themeColors.secondary}10, ${themeColors.accent}10)`,
+              borderColor: themeColors.primary + "20"
+            }}
+          >
+            <h3 
+              className="text-2xl font-bold mb-4"
+              style={{ color: themeColors.text.primary }}
+            >
               ¿No encuentras lo que buscas?
             </h3>
-            <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+            <p 
+              className="mb-6 max-w-2xl mx-auto"
+              style={{ color: themeColors.text.secondary }}
+            >
               Nuestro equipo de soporte está disponible para ayudarte con
               cualquier consulta específica sobre nuestros productos y
               servicios.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-8 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all inline-flex items-center justify-center gap-2">
+              <button 
+                className="px-8 py-3 text-white rounded-xl transition-all inline-flex items-center justify-center gap-2"
+                style={{
+                  backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+                }}
+              >
                 <MessageCircle className="h-5 w-5" />
                 Contactar Soporte
               </button>
-              <button className="px-8 py-3 bg-gray-100 dark:bg-slate-700 text-foreground rounded-xl hover:bg-gray-200 dark:hover:bg-slate-600 transition-all">
+              <button 
+                className="px-8 py-3 rounded-xl transition-all border"
+                style={{
+                  backgroundColor: themeColors.surface + "50",
+                  color: themeColors.text.primary,
+                  borderColor: themeColors.primary + "30"
+                }}
+              >
                 Ver Más FAQs
               </button>
             </div>

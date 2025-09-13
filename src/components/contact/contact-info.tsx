@@ -11,8 +11,11 @@ import {
   Clock,
   Globe,
 } from "lucide-react";
+import { useTheme } from "@/contexts/theme-context";
 
 export function ContactInfo() {
+  const { themeColors } = useTheme();
+
   const departments = [
     {
       title: "Atención al Cliente",
@@ -21,7 +24,7 @@ export function ContactInfo() {
       contact: "soporte@virtago.com",
       phone: "+52 55 1234 5678",
       hours: "Lun - Vie: 8:00 - 20:00",
-      gradient: "from-blue-500 to-cyan-500",
+      color: themeColors.primary,
       features: ["Soporte 24/7", "Chat en vivo", "Respuesta < 2 horas"],
     },
     {
@@ -31,7 +34,7 @@ export function ContactInfo() {
       contact: "ventas@virtago.com",
       phone: "+52 55 1234 5679",
       hours: "Lun - Vie: 9:00 - 18:00",
-      gradient: "from-green-500 to-emerald-500",
+      color: themeColors.secondary,
       features: ["Cotizaciones", "Precios mayoristas", "Planes personalizados"],
     },
     {
@@ -41,7 +44,7 @@ export function ContactInfo() {
       contact: "distribuidores@virtago.com",
       phone: "+52 55 1234 5680",
       hours: "Lun - Vie: 9:00 - 18:00",
-      gradient: "from-purple-500 to-pink-500",
+      color: themeColors.accent,
       features: ["Gestor dedicado", "Capacitaciones", "Material promocional"],
     },
     {
@@ -51,13 +54,16 @@ export function ContactInfo() {
       contact: "tecnico@virtago.com",
       phone: "+52 55 1234 5681",
       hours: "Lun - Dom: 24/7",
-      gradient: "from-orange-500 to-red-500",
+      color: themeColors.primary,
       features: ["Soporte remoto", "Diagnósticos", "Actualizaciones"],
     },
   ];
 
   return (
-    <section className="py-20 bg-white/50 dark:bg-slate-900/50">
+    <section 
+      className="py-20"
+      style={{ backgroundColor: themeColors.surface + "50" }}
+    >
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -67,15 +73,23 @@ export function ContactInfo() {
           className="text-center mb-16"
         >
           <h2 className="text-4xl font-bold mb-6">
-            <span className="bg-gradient-to-r from-slate-900 to-purple-900 dark:from-white dark:to-purple-100 bg-clip-text text-transparent">
+            <span style={{ color: themeColors.text.primary }}>
               Departamentos de
             </span>
             <br />
-            <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <span 
+              className="bg-gradient-to-r bg-clip-text text-transparent"
+              style={{
+                backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+              }}
+            >
               Atención
             </span>
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p 
+            className="text-xl max-w-2xl mx-auto"
+            style={{ color: themeColors.text.secondary }}
+          >
             Nuestro equipo especializado está organizado para brindarte la mejor
             atención según tus necesidades específicas.
           </p>
@@ -94,41 +108,60 @@ export function ContactInfo() {
                 whileHover={{ y: -10, scale: 1.02 }}
                 className="group"
               >
-                <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border border-gray-100 dark:border-slate-700 h-full">
+                <div 
+                  className="rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-all duration-500 border h-full"
+                  style={{
+                    backgroundColor: themeColors.surface + "80",
+                    borderColor: themeColors.primary + "20"
+                  }}
+                >
                   {/* Icon */}
                   <div
-                    className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${dept.gradient} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300"
+                    style={{ backgroundColor: dept.color }}
                   >
                     <Icon className="h-8 w-8 text-white" />
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-purple-600 transition-colors">
+                  <h3 
+                    className="text-xl font-bold mb-3 group-hover:opacity-80 transition-opacity"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     {dept.title}
                   </h3>
 
                   {/* Description */}
-                  <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
+                  <p 
+                    className="mb-6 text-sm leading-relaxed"
+                    style={{ color: themeColors.text.secondary }}
+                  >
                     {dept.description}
                   </p>
 
                   {/* Contact Info */}
                   <div className="space-y-3 mb-6">
                     <div className="flex items-center gap-2 text-sm">
-                      <MessageCircle className="h-4 w-4 text-purple-500" />
-                      <span className="text-foreground font-medium">
+                      <MessageCircle className="h-4 w-4" style={{ color: themeColors.primary }} />
+                      <span 
+                        className="font-medium"
+                        style={{ color: themeColors.text.primary }}
+                      >
                         {dept.contact}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                      <HeadphonesIcon className="h-4 w-4 text-green-500" />
-                      <span className="text-foreground font-medium">
+                      <HeadphonesIcon className="h-4 w-4" style={{ color: themeColors.secondary }} />
+                      <span 
+                        className="font-medium"
+                        style={{ color: themeColors.text.primary }}
+                      >
                         {dept.phone}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
-                      <Clock className="h-4 w-4 text-blue-500" />
-                      <span className="text-muted-foreground">
+                      <Clock className="h-4 w-4" style={{ color: themeColors.accent }} />
+                      <span style={{ color: themeColors.text.secondary }}>
                         {dept.hours}
                       </span>
                     </div>
@@ -141,8 +174,14 @@ export function ContactInfo() {
                         key={featureIndex}
                         className="flex items-center gap-2"
                       >
-                        <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-purple-500 to-pink-500" />
-                        <span className="text-xs text-muted-foreground">
+                        <div 
+                          className="w-1.5 h-1.5 rounded-full"
+                          style={{ backgroundColor: dept.color }}
+                        />
+                        <span 
+                          className="text-xs"
+                          style={{ color: themeColors.text.secondary }}
+                        >
                           {feature}
                         </span>
                       </div>
@@ -153,7 +192,8 @@ export function ContactInfo() {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className={`w-full mt-6 py-3 px-4 rounded-xl bg-gradient-to-r ${dept.gradient} text-white font-medium text-sm hover:shadow-lg transition-all duration-300`}
+                    className="w-full mt-6 py-3 px-4 rounded-xl text-white font-medium text-sm hover:shadow-lg transition-all duration-300"
+                    style={{ backgroundColor: dept.color }}
                   >
                     Contactar Ahora
                   </motion.button>
@@ -169,33 +209,55 @@ export function ContactInfo() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.8 }}
           viewport={{ once: true }}
-          className="mt-16 bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-cyan-500/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20 dark:border-slate-700/50"
+          className="mt-16 backdrop-blur-sm rounded-3xl p-8 border"
+          style={{
+            backgroundColor: themeColors.primary + "10",
+            borderColor: themeColors.primary + "20"
+          }}
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div>
-              <Globe className="h-8 w-8 text-purple-500 mx-auto mb-4" />
-              <h4 className="font-semibold text-foreground mb-2">
+              <Globe className="h-8 w-8 mx-auto mb-4" style={{ color: themeColors.primary }} />
+              <h4 
+                className="font-semibold mb-2"
+                style={{ color: themeColors.text.primary }}
+              >
                 Cobertura Nacional
               </h4>
-              <p className="text-sm text-muted-foreground">
+              <p 
+                className="text-sm"
+                style={{ color: themeColors.text.secondary }}
+              >
                 Atendemos todo México con envíos a nivel nacional
               </p>
             </div>
             <div>
-              <ShoppingCart className="h-8 w-8 text-pink-500 mx-auto mb-4" />
-              <h4 className="font-semibold text-foreground mb-2">
+              <ShoppingCart className="h-8 w-8 mx-auto mb-4" style={{ color: themeColors.secondary }} />
+              <h4 
+                className="font-semibold mb-2"
+                style={{ color: themeColors.text.primary }}
+              >
                 +10,000 Productos
               </h4>
-              <p className="text-sm text-muted-foreground">
+              <p 
+                className="text-sm"
+                style={{ color: themeColors.text.secondary }}
+              >
                 Catálogo amplio de marcas reconocidas
               </p>
             </div>
             <div>
-              <Users className="h-8 w-8 text-cyan-500 mx-auto mb-4" />
-              <h4 className="font-semibold text-foreground mb-2">
+              <Users className="h-8 w-8 mx-auto mb-4" style={{ color: themeColors.accent }} />
+              <h4 
+                className="font-semibold mb-2"
+                style={{ color: themeColors.text.primary }}
+              >
                 +500 Distribuidores
               </h4>
-              <p className="text-sm text-muted-foreground">
+              <p 
+                className="text-sm"
+                style={{ color: themeColors.text.secondary }}
+              >
                 Red consolidada de socios comerciales
               </p>
             </div>
