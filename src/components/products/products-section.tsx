@@ -53,7 +53,7 @@ const mockProducts = [
       ram: "16GB",
       almacenamiento: "512GB SSD",
       pantalla: "16.2 pulgadas",
-    },
+    } as Record<string, string>,
   },
   {
     id: "3",
@@ -75,7 +75,7 @@ const mockProducts = [
       almacenamiento: "256GB",
       ram: "12GB",
       bateria: "5000 mAh",
-    },
+    } as Record<string, string>,
   },
   {
     id: "4",
@@ -98,7 +98,7 @@ const mockProducts = [
       bateria: "30 horas",
       resistencia: "IPX4",
       cancelacion: "Activa",
-    },
+    } as Record<string, string>,
   },
   {
     id: "5",
@@ -120,7 +120,7 @@ const mockProducts = [
       ram: "16GB",
       almacenamiento: "512GB SSD",
       pantalla: "13.4 pulgadas",
-    },
+    } as Record<string, string>,
   },
   {
     id: "6",
@@ -143,7 +143,7 @@ const mockProducts = [
       resolucion: "3440 x 1440",
       curvatura: "1000R",
       conectividad: "USB-C, HDMI",
-    },
+    } as Record<string, string>,
   },
   {
     id: "7",
@@ -166,7 +166,7 @@ const mockProducts = [
       peso_max: "150 kg",
       garantia: "12 años",
       ajustes: "8 puntos",
-    },
+    } as Record<string, string>,
   },
   {
     id: "8",
@@ -188,7 +188,7 @@ const mockProducts = [
       video: "8K RAW",
       estabilizacion: "IBIS 8 pasos",
       conectividad: "WiFi 6, USB-C",
-    },
+    } as Record<string, string>,
   },
   {
     id: "9",
@@ -211,7 +211,7 @@ const mockProducts = [
       cancelacion: "V1 + QN1",
       codecs: "LDAC, Hi-Res",
       peso: "250g",
-    },
+    } as Record<string, string>,
   },
   {
     id: "10",
@@ -233,7 +233,7 @@ const mockProducts = [
       pantalla: "12.9 pulgadas",
       almacenamiento: "256GB",
       conectividad: "USB-C, 5G",
-    },
+    } as Record<string, string>,
   },
 ];
 

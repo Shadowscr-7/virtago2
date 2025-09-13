@@ -67,7 +67,7 @@ const initialProductData: ProductData = {
   images: [],
 
   // Especificaciones técnicas
-  specifications: {} as any,
+  specifications: {} as Record<string, string>,
 
   // Estadísticas de ventas (vacías para producto nuevo)
   salesStats: {

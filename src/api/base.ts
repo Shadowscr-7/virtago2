@@ -8,6 +8,14 @@ const defaultHeaders = {
   Accept: "application/json",
 };
 
+// Tipo para los datos que se pueden enviar en las requests
+type ApiRequestData =
+  | Record<string, unknown>
+  | unknown[]
+  | FormData
+  | string
+  | null;
+
 // Función helper para hacer requests
 async function apiRequest(endpoint: string, options: RequestInit = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
@@ -48,19 +56,44 @@ export async function get(endpoint: string) {
   return apiRequest(endpoint, { method: "GET" });
 }
 
+// Helper para serializar datos según su tipo
+function serializeData(data?: ApiRequestData): string | FormData | undefined {
+  if (data === null || data === undefined) {
+    return undefined;
+  }
+
+  if (data instanceof FormData) {
+    return data;
+  }
+
+  if (typeof data === "string") {
+    return data;
+  }
+
+  return JSON.stringify(data);
+}
+
 // Helper para requests POST
-export async function post(endpoint: string, data?: any) {
+export async function post(endpoint: string, data?: ApiRequestData) {
+  const body = serializeData(data);
+  const headers = data instanceof FormData ? {} : defaultHeaders;
+
   return apiRequest(endpoint, {
     method: "POST",
-    body: data ? JSON.stringify(data) : undefined,
+    headers,
+    body,
   });
 }
 
 // Helper para requests PUT
-export async function put(endpoint: string, data?: any) {
+export async function put(endpoint: string, data?: ApiRequestData) {
+  const body = serializeData(data);
+  const headers = data instanceof FormData ? {} : defaultHeaders;
+
   return apiRequest(endpoint, {
     method: "PUT",
-    body: data ? JSON.stringify(data) : undefined,
+    headers,
+    body,
   });
 }
 
@@ -70,10 +103,14 @@ export async function del(endpoint: string) {
 }
 
 // Helper para requests PATCH
-export async function patch(endpoint: string, data?: any) {
+export async function patch(endpoint: string, data?: ApiRequestData) {
+  const body = serializeData(data);
+  const headers = data instanceof FormData ? {} : defaultHeaders;
+
   return apiRequest(endpoint, {
     method: "PATCH",
-    body: data ? JSON.stringify(data) : undefined,
+    headers,
+    body,
   });
 }
 

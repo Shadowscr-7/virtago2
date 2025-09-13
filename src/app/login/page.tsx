@@ -2,15 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import {
-  Eye,
-  EyeOff,
-  Mail,
-  Lock,
-  ArrowLeft,
-  Building2,
-  User,
-} from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, ArrowLeft, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/auth-store";
 import { useTheme } from "@/contexts/theme-context";
@@ -281,17 +273,29 @@ export default function LoginPage() {
                   className="w-full pl-10 pr-4 py-3 border rounded-lg transition-all duration-300 focus:outline-none"
                   style={inputStyle}
                   onFocus={(e) => {
-                    Object.assign(e.target.style, inputFocusStyle);
+                    Object.assign(
+                      (e.target as HTMLInputElement).style,
+                      inputFocusStyle,
+                    );
                   }}
                   onBlur={(e) => {
-                    Object.assign(e.target.style, inputStyle);
+                    Object.assign(
+                      (e.target as HTMLInputElement).style,
+                      inputStyle,
+                    );
                   }}
                   onMouseEnter={(e) => {
-                    Object.assign(e.target.style, inputHoverStyle);
+                    Object.assign(
+                      (e.target as HTMLInputElement).style,
+                      inputHoverStyle,
+                    );
                   }}
                   onMouseLeave={(e) => {
                     if (document.activeElement !== e.target) {
-                      Object.assign(e.target.style, inputStyle);
+                      Object.assign(
+                        (e.target as HTMLInputElement).style,
+                        inputStyle,
+                      );
                     }
                   }}
                   placeholder="tu@empresa.com"
@@ -323,17 +327,29 @@ export default function LoginPage() {
                   className="w-full pl-10 pr-12 py-3 border rounded-lg transition-all duration-300 focus:outline-none"
                   style={inputStyle}
                   onFocus={(e) => {
-                    Object.assign(e.target.style, inputFocusStyle);
+                    Object.assign(
+                      (e.target as HTMLInputElement).style,
+                      inputFocusStyle,
+                    );
                   }}
                   onBlur={(e) => {
-                    Object.assign(e.target.style, inputStyle);
+                    Object.assign(
+                      (e.target as HTMLInputElement).style,
+                      inputStyle,
+                    );
                   }}
                   onMouseEnter={(e) => {
-                    Object.assign(e.target.style, inputHoverStyle);
+                    Object.assign(
+                      (e.target as HTMLInputElement).style,
+                      inputHoverStyle,
+                    );
                   }}
                   onMouseLeave={(e) => {
                     if (document.activeElement !== e.target) {
-                      Object.assign(e.target.style, inputStyle);
+                      Object.assign(
+                        (e.target as HTMLInputElement).style,
+                        inputStyle,
+                      );
                     }
                   }}
                   placeholder="••••••••"

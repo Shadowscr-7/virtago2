@@ -1,12 +1,12 @@
 import { get, post, put, patch } from "./base";
 
 // Tipos para las APIs
-export interface LoginData {
+export interface LoginData extends Record<string, unknown> {
   email: string;
   password: string;
 }
 
-export interface RegisterData {
+export interface RegisterData extends Record<string, unknown> {
   firstName: string;
   lastName: string;
   email: string;
@@ -14,12 +14,12 @@ export interface RegisterData {
   passwordConfirmation: string;
 }
 
-export interface OTPVerifyData {
+export interface OTPVerifyData extends Record<string, unknown> {
   email: string;
   otp: string;
 }
 
-export interface UserDetailsData {
+export interface UserDetailsData extends Record<string, unknown> {
   email?: string;
   firstName?: string;
   lastName?: string;
@@ -31,7 +31,7 @@ export interface UserDetailsData {
   zip?: string;
 }
 
-export interface ClientDetailsData {
+export interface ClientDetailsData extends Record<string, unknown> {
   phoneOptional?: string;
   documentType?: string;
   document?: string;
@@ -158,7 +158,8 @@ export const cartApi = {
 // Repositorio de APIs de Pedidos
 export const orderApi = {
   // Crear pedido
-  createOrder: (orderData: unknown) => post("/orders", orderData),
+  createOrder: (orderData: Record<string, unknown>) =>
+    post("/orders", orderData),
 
   // Obtener pedidos del usuario
   getOrders: (params?: { page?: number; limit?: number }) =>

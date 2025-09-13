@@ -104,7 +104,7 @@ const mockProductData = {
     Material: "Titanio grado aeroespacial",
     Colores: "Titanio Natural, Titanio Azul, Titanio Blanco, Titanio Negro",
     "Sistema operativo": "iOS 17",
-  },
+  } as Record<string, string>,
 
   // Estadísticas de ventas
   salesStats: {

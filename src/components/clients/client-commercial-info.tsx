@@ -14,7 +14,10 @@ interface ClientCommercialData {
 interface ClientCommercialInfoProps {
   clientData: ClientCommercialData;
   isEditing: boolean;
-  onInputChange: (field: keyof ClientCommercialData, value: any) => void;
+  onInputChange: (
+    field: keyof ClientCommercialData,
+    value: string | number,
+  ) => void;
 }
 
 export function ClientCommercialInfo({

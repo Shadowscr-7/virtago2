@@ -224,17 +224,26 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
                   }}
                   onFocus={(e) => {
                     if (!errors.firstName) {
-                      Object.assign(e.target.style, inputFocusStyle);
+                      Object.assign(
+                        (e.target as HTMLInputElement).style,
+                        inputFocusStyle,
+                      );
                     }
                   }}
                   onBlur={(e) => {
                     if (!errors.firstName) {
-                      Object.assign(e.target.style, inputStyle);
+                      Object.assign(
+                        (e.target as HTMLInputElement).style,
+                        inputStyle,
+                      );
                     }
                   }}
                   onMouseEnter={(e) => {
                     if (!errors.firstName) {
-                      Object.assign(e.target.style, inputHoverStyle);
+                      Object.assign(
+                        (e.target as HTMLInputElement).style,
+                        inputHoverStyle,
+                      );
                     }
                   }}
                   onMouseLeave={(e) => {
@@ -242,7 +251,10 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
                       !errors.firstName &&
                       document.activeElement !== e.target
                     ) {
-                      Object.assign(e.target.style, inputStyle);
+                      Object.assign(
+                        (e.target as HTMLInputElement).style,
+                        inputStyle,
+                      );
                     }
                   }}
                   placeholder="Juan"
@@ -283,17 +295,26 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
                   }}
                   onFocus={(e) => {
                     if (!errors.lastName) {
-                      Object.assign(e.target.style, inputFocusStyle);
+                      Object.assign(
+                        (e.target as HTMLInputElement).style,
+                        inputFocusStyle,
+                      );
                     }
                   }}
                   onBlur={(e) => {
                     if (!errors.lastName) {
-                      Object.assign(e.target.style, inputStyle);
+                      Object.assign(
+                        (e.target as HTMLInputElement).style,
+                        inputStyle,
+                      );
                     }
                   }}
                   onMouseEnter={(e) => {
                     if (!errors.lastName) {
-                      Object.assign(e.target.style, inputHoverStyle);
+                      Object.assign(
+                        (e.target as HTMLInputElement).style,
+                        inputHoverStyle,
+                      );
                     }
                   }}
                   onMouseLeave={(e) => {
@@ -301,7 +322,10 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
                       !errors.lastName &&
                       document.activeElement !== e.target
                     ) {
-                      Object.assign(e.target.style, inputStyle);
+                      Object.assign(
+                        (e.target as HTMLInputElement).style,
+                        inputStyle,
+                      );
                     }
                   }}
                   placeholder="Pérez"
@@ -344,22 +368,34 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
                 }}
                 onFocus={(e) => {
                   if (!errors.email) {
-                    Object.assign(e.target.style, inputFocusStyle);
+                    Object.assign(
+                      (e.target as HTMLInputElement).style,
+                      inputFocusStyle,
+                    );
                   }
                 }}
                 onBlur={(e) => {
                   if (!errors.email) {
-                    Object.assign(e.target.style, inputStyle);
+                    Object.assign(
+                      (e.target as HTMLInputElement).style,
+                      inputStyle,
+                    );
                   }
                 }}
                 onMouseEnter={(e) => {
                   if (!errors.email) {
-                    Object.assign(e.target.style, inputHoverStyle);
+                    Object.assign(
+                      (e.target as HTMLInputElement).style,
+                      inputHoverStyle,
+                    );
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!errors.email && document.activeElement !== e.target) {
-                    Object.assign(e.target.style, inputStyle);
+                    Object.assign(
+                      (e.target as HTMLInputElement).style,
+                      inputStyle,
+                    );
                   }
                 }}
                 placeholder="juan@empresa.com"
@@ -401,22 +437,34 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
                 }}
                 onFocus={(e) => {
                   if (!errors.password) {
-                    Object.assign(e.target.style, inputFocusStyle);
+                    Object.assign(
+                      (e.target as HTMLInputElement).style,
+                      inputFocusStyle,
+                    );
                   }
                 }}
                 onBlur={(e) => {
                   if (!errors.password) {
-                    Object.assign(e.target.style, inputStyle);
+                    Object.assign(
+                      (e.target as HTMLInputElement).style,
+                      inputStyle,
+                    );
                   }
                 }}
                 onMouseEnter={(e) => {
                   if (!errors.password) {
-                    Object.assign(e.target.style, inputHoverStyle);
+                    Object.assign(
+                      (e.target as HTMLInputElement).style,
+                      inputHoverStyle,
+                    );
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!errors.password && document.activeElement !== e.target) {
-                    Object.assign(e.target.style, inputStyle);
+                    Object.assign(
+                      (e.target as HTMLInputElement).style,
+                      inputStyle,
+                    );
                   }
                 }}
                 placeholder="••••••••"
@@ -510,17 +558,26 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
                 }}
                 onFocus={(e) => {
                   if (!errors.passwordConfirmation) {
-                    Object.assign(e.target.style, inputFocusStyle);
+                    Object.assign(
+                      (e.target as HTMLInputElement).style,
+                      inputFocusStyle,
+                    );
                   }
                 }}
                 onBlur={(e) => {
                   if (!errors.passwordConfirmation) {
-                    Object.assign(e.target.style, inputStyle);
+                    Object.assign(
+                      (e.target as HTMLInputElement).style,
+                      inputStyle,
+                    );
                   }
                 }}
                 onMouseEnter={(e) => {
                   if (!errors.passwordConfirmation) {
-                    Object.assign(e.target.style, inputHoverStyle);
+                    Object.assign(
+                      (e.target as HTMLInputElement).style,
+                      inputHoverStyle,
+                    );
                   }
                 }}
                 onMouseLeave={(e) => {
@@ -528,7 +585,10 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
                     !errors.passwordConfirmation &&
                     document.activeElement !== e.target
                   ) {
-                    Object.assign(e.target.style, inputStyle);
+                    Object.assign(
+                      (e.target as HTMLInputElement).style,
+                      inputStyle,
+                    );
                   }
                 }}
                 placeholder="••••••••"

@@ -48,10 +48,10 @@ export function StyledSwitch({
           relative w-11 h-6 rounded-full transition-all duration-200 ease-in-out
           ${disabled ? "cursor-not-allowed" : "cursor-pointer"}
           focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800
+          ${checked ? "focus:ring-purple-500/50" : "focus:ring-gray-300/50"}
         `}
         style={{
           backgroundColor: checked ? themeColors.primary : "#d1d5db",
-          focusRingColor: checked ? themeColors.primary + "50" : "#d1d5db50",
         }}
       >
         <motion.div

@@ -5,6 +5,9 @@ import { motion } from "framer-motion";
 import { Settings, Plus, X, Edit2 } from "lucide-react";
 import type { ProductData } from "@/app/admin/productos/[id]/page";
 
+// Tipo para las especificaciones - flexible para permitir agregar/eliminar dinámicamente
+type ProductSpecifications = Record<string, string>;
+
 interface ProductSpecificationsProps {
   productData: ProductData;
   isEditing: boolean;
@@ -23,20 +26,22 @@ export function ProductSpecifications({
   const addSpecification = () => {
     if (!newSpecKey.trim() || !newSpecValue.trim()) return;
 
-    const updatedSpecs = {
+    const updatedSpecs: ProductSpecifications = {
       ...productData.specifications,
       [newSpecKey.trim()]: newSpecValue.trim(),
     };
 
-    onChange({ specifications: updatedSpecs as any });
+    onChange({ specifications: updatedSpecs as ProductData["specifications"] });
     setNewSpecKey("");
     setNewSpecValue("");
   };
 
   const removeSpecification = (key: string) => {
-    const updatedSpecs = { ...productData.specifications } as any;
+    const updatedSpecs: ProductSpecifications = {
+      ...productData.specifications,
+    };
     delete updatedSpecs[key];
-    onChange({ specifications: updatedSpecs });
+    onChange({ specifications: updatedSpecs as ProductData["specifications"] });
   };
 
   const updateSpecification = (
@@ -44,7 +49,9 @@ export function ProductSpecifications({
     newKey: string,
     newValue: string,
   ) => {
-    const updatedSpecs = { ...productData.specifications } as any;
+    const updatedSpecs: ProductSpecifications = {
+      ...productData.specifications,
+    };
 
     // Si cambió la clave, eliminar la anterior
     if (oldKey !== newKey) {
@@ -52,7 +59,7 @@ export function ProductSpecifications({
     }
 
     updatedSpecs[newKey] = newValue;
-    onChange({ specifications: updatedSpecs });
+    onChange({ specifications: updatedSpecs as ProductData["specifications"] });
     setEditingSpec(null);
   };
 

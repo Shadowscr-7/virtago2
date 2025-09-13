@@ -15,7 +15,7 @@ import {
   Phone,
   Mail,
 } from "lucide-react";
-import { useAuthStore } from "@/lib/auth-store";
+import { useAuthStore, Order } from "@/lib/auth-store";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -62,12 +62,12 @@ export default function OrderDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { user, getOrderById } = useAuthStore();
-  const [order, setOrder] = useState<any>(null);
+  const [order, setOrder] = useState<Order | null>(null);
 
   useEffect(() => {
     params.then((resolvedParams) => {
       const foundOrder = getOrderById(resolvedParams.id);
-      setOrder(foundOrder);
+      setOrder(foundOrder || null);
     });
   }, [params, getOrderById]);
 
@@ -202,7 +202,7 @@ export default function OrderDetailPage({
                   Productos
                 </h2>
                 <div className="space-y-4">
-                  {order.items?.map((item: any) => (
+                  {order.items?.map((item: Order["items"][0]) => (
                     <div
                       key={item.id}
                       className="flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg"
