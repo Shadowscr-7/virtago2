@@ -562,7 +562,7 @@ export default function PriceListDetailPage({
               </div>
 
               {/* Filtro por categoría */}
-              <div className="w-48 relative z-10">
+              <div className="w-48 relative z-1">
                 <StyledSelect
                   value={categoryFilter}
                   onChange={setCategoryFilter}

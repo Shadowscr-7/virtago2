@@ -7,9 +7,9 @@ import { AdminLayout } from "@/components/admin/admin-layout";
 import { StyledSelect } from "@/components/ui/styled-select";
 import { ImageUploadZone } from "@/components/images/admin/image-upload-zone";
 import { ImageGallery } from "@/components/images/admin/image-gallery";
-import { ImageStats } from "@/components/images/admin/image-stats";
 import { AutoAssignModal } from "@/components/images/admin/auto-assign-modal";
 import { BulkActionsBar } from "@/components/images/admin/bulk-actions-bar";
+import { useTheme } from "@/contexts/theme-context";
 
 // Tipos para imágenes
 interface ImageData {
@@ -113,6 +113,7 @@ const mockImages: ImageData[] = [
 ];
 
 export default function ImagenesAdminPage() {
+  const { themeColors } = useTheme();
   const [images] = useState<ImageData[]>(mockImages);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -169,7 +170,7 @@ export default function ImagenesAdminPage() {
     );
   };
 
-  const handleBulkUpload = async (_files: FileList) => {
+  const handleBulkUpload = async () => {
     setIsUploading(true);
     // Aquí iría la lógica de carga masiva
     setTimeout(() => {
@@ -189,7 +190,12 @@ export default function ImagenesAdminPage() {
         >
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <h1 
+                className="text-3xl font-bold bg-clip-text text-transparent"
+                style={{
+                  backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+                }}
+              >
                 Gestión de Imágenes
               </h1>
               <p className="text-gray-600 dark:text-gray-300 mt-1">
@@ -203,7 +209,10 @@ export default function ImagenesAdminPage() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setIsAutoAssignModalOpen(true)}
-                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-medium hover:from-blue-600 hover:to-cyan-600 transition-all duration-200 flex items-center gap-2 shadow-lg"
+                className="px-4 py-2 text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-lg"
+                style={{
+                  backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+                }}
               >
                 <RefreshCw className="w-4 h-4" />
                 Auto-Asignar
@@ -212,7 +221,10 @@ export default function ImagenesAdminPage() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium hover:from-purple-600 hover:to-pink-600 transition-all duration-200 flex items-center gap-2 shadow-lg"
+                className="px-4 py-2 text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-lg"
+                style={{
+                  backgroundImage: `linear-gradient(to right, ${themeColors.accent}, ${themeColors.secondary})`
+                }}
               >
                 <Plus className="w-4 h-4" />
                 Cargar Imágenes
@@ -226,11 +238,17 @@ export default function ImagenesAdminPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-gradient-to-r from-white/80 to-gray-50/80 dark:from-slate-800/80 dark:to-slate-700/80 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 rounded-2xl p-6 shadow-xl"
+          className="backdrop-blur-sm border border-white/20 dark:border-gray-700/30 rounded-2xl p-6 shadow-xl"
+          style={{
+            background: `linear-gradient(135deg, ${themeColors.surface}80, ${themeColors.surface}40)`
+          }}
         >
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">
+              <div 
+                className="text-2xl font-bold"
+                style={{ color: themeColors.text.primary }}
+              >
                 {stats.total}
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-300">
@@ -238,7 +256,10 @@ export default function ImagenesAdminPage() {
               </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">
+              <div 
+                className="text-2xl font-bold"
+                style={{ color: themeColors.primary }}
+              >
                 {stats.assigned}
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-300">
@@ -246,7 +267,10 @@ export default function ImagenesAdminPage() {
               </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">
+              <div 
+                className="text-2xl font-bold"
+                style={{ color: themeColors.secondary }}
+              >
                 {stats.unassigned}
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-300">
@@ -254,7 +278,10 @@ export default function ImagenesAdminPage() {
               </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">
+              <div 
+                className="text-2xl font-bold"
+                style={{ color: themeColors.accent }}
+              >
                 {Math.round(stats.totalSize / 1024 / 1024)} MB
               </div>
               <div className="text-sm text-gray-600 dark:text-gray-300">
@@ -269,14 +296,20 @@ export default function ImagenesAdminPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-gradient-to-r from-white/80 to-gray-50/80 dark:from-slate-800/80 dark:to-slate-700/80 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 rounded-2xl p-6 shadow-xl"
+          className="backdrop-blur-sm border border-white/20 dark:border-gray-700/30 rounded-2xl p-6 shadow-xl"
+          style={{
+            background: `linear-gradient(135deg, ${themeColors.surface}80, ${themeColors.surface}40)`
+          }}
         >
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="flex flex-wrap gap-3">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg"
+                className="inline-flex items-center px-4 py-2 text-white rounded-lg transition-all duration-200 shadow-lg"
+                style={{
+                  backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+                }}
               >
                 <svg
                   className="w-4 h-4 mr-2"
@@ -300,7 +333,10 @@ export default function ImagenesAdminPage() {
                   onChange={(e) =>
                     setViewMode(e.target.value as "grid" | "list")
                   }
-                  className="appearance-none bg-white/70 dark:bg-slate-700/70 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
+                  className="appearance-none bg-white/70 dark:bg-slate-700/70 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 pr-8 text-sm focus:ring-2 focus:border-transparent backdrop-blur-sm"
+                  style={{
+                    '--tw-ring-color': themeColors.primary + '50'
+                  } as React.CSSProperties}
                 >
                   <option value="grid">Vista Cuadrícula</option>
                   <option value="list">Vista Lista</option>
@@ -328,7 +364,10 @@ export default function ImagenesAdminPage() {
                   placeholder="Buscar imágenes..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/70 dark:bg-slate-700/70 backdrop-blur-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white/70 dark:bg-slate-700/70 backdrop-blur-sm text-sm focus:ring-2 focus:border-transparent"
+                  style={{
+                    '--tw-ring-color': themeColors.primary + '50'
+                  } as React.CSSProperties}
                 />
                 <svg
                   className="w-4 h-4 absolute left-3 top-3 text-gray-400"
@@ -349,7 +388,10 @@ export default function ImagenesAdminPage() {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="appearance-none bg-white/70 dark:bg-slate-700/70 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
+                  className="appearance-none bg-white/70 dark:bg-slate-700/70 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 pr-8 text-sm focus:ring-2 focus:border-transparent backdrop-blur-sm"
+                  style={{
+                    '--tw-ring-color': themeColors.primary + '50'
+                  } as React.CSSProperties}
                 >
                   <option value="all">Todas</option>
                   <option value="assigned">Asignadas</option>
@@ -378,7 +420,10 @@ export default function ImagenesAdminPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-gradient-to-r from-white/80 to-gray-50/80 dark:from-slate-800/80 dark:to-slate-700/80 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 rounded-2xl p-6 shadow-xl"
+          className="backdrop-blur-sm border border-white/20 dark:border-gray-700/30 rounded-2xl p-6 shadow-xl"
+          style={{
+            background: `linear-gradient(135deg, ${themeColors.surface}80, ${themeColors.surface}40)`
+          }}
         >
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Búsqueda */}
@@ -389,13 +434,17 @@ export default function ImagenesAdminPage() {
                 placeholder="Buscar por nombre, producto asignado o etiquetas..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all placeholder-gray-400 backdrop-blur-sm"
+                className="w-full pl-12 pr-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all placeholder-gray-400 backdrop-blur-sm"
+                style={{
+                  '--tw-ring-color': themeColors.primary + '50',
+                  borderColor: themeColors.primary + '30'
+                } as React.CSSProperties}
               />
             </div>
 
             {/* Filtros */}
             <div className="flex flex-col sm:flex-row gap-3">
-              <div className="w-full sm:w-48 relative z-30">
+              <div className="w-full sm:w-48 relative z-1">
                 <StyledSelect
                   value={statusFilter}
                   onChange={setStatusFilter}
@@ -409,7 +458,7 @@ export default function ImagenesAdminPage() {
                 />
               </div>
 
-              <div className="w-full sm:w-40 relative z-20">
+              <div className="w-full sm:w-40 relative z-1">
                 <StyledSelect
                   value={formatFilter}
                   onChange={setFormatFilter}
@@ -423,7 +472,7 @@ export default function ImagenesAdminPage() {
                 />
               </div>
 
-              <div className="w-full sm:w-44 relative z-10">
+              <div className="w-full sm:w-44 relative z-1">
                 <StyledSelect
                   value={sortBy}
                   onChange={setSortBy}
@@ -442,9 +491,14 @@ export default function ImagenesAdminPage() {
                   onClick={() => setViewMode("grid")}
                   className={`p-2 rounded-md transition-all ${
                     viewMode === "grid"
-                      ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
-                      : "text-gray-600 dark:text-gray-300 hover:text-purple-600"
+                      ? "text-white shadow-lg"
+                      : "text-gray-600 dark:text-gray-300"
                   }`}
+                  style={{
+                    ...(viewMode === "grid" && {
+                      backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+                    })
+                  }}
                 >
                   <Grid3X3 className="w-4 h-4" />
                 </button>
@@ -452,9 +506,14 @@ export default function ImagenesAdminPage() {
                   onClick={() => setViewMode("list")}
                   className={`p-2 rounded-md transition-all ${
                     viewMode === "list"
-                      ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
-                      : "text-gray-600 dark:text-gray-300 hover:text-purple-600"
+                      ? "text-white shadow-lg"
+                      : "text-gray-600 dark:text-gray-300"
                   }`}
+                  style={{
+                    ...(viewMode === "list" && {
+                      backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+                    })
+                  }}
                 >
                   <List className="w-4 h-4" />
                 </button>

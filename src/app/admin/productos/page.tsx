@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/admin-layout";
 import { useAuthStore } from "@/lib/auth-store";
+import { useTheme } from "@/contexts/theme-context";
 import { StyledSelect } from "@/components/ui/styled-select";
 
 // Datos de ejemplo - después esto vendrá del servidor
@@ -231,6 +232,7 @@ const mockProducts = [
 
 export default function ProductsAdminPage() {
   const { user } = useAuthStore();
+  const { themeColors } = useTheme();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
@@ -244,19 +246,43 @@ export default function ProductsAdminPage() {
     action: "delete" | "activate" | "deactivate";
   }>({ show: false, productId: "", action: "delete" });
 
+  // Función para obtener colores del tema para productos
+  const getProductColor = (index: number) => {
+    const colors = [themeColors.primary, themeColors.secondary, themeColors.accent];
+    return colors[index % colors.length];
+  };
+
   if (!user || user.role !== "distribuidor") {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center h-full">
-          <div className="text-center p-8 bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20">
-            <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-gray-800 mb-2">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center p-8 backdrop-blur-lg rounded-2xl shadow-xl border"
+            style={{
+              backgroundColor: themeColors.surface + "80",
+              borderColor: themeColors.primary + "20"
+            }}
+          >
+            <div 
+              className="w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center"
+              style={{
+                background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`
+              }}
+            >
+              <AlertTriangle className="w-6 h-6 text-white" />
+            </div>
+            <h2 
+              className="text-xl font-bold mb-2"
+              style={{ color: themeColors.text.primary }}
+            >
               Acceso Denegado
             </h2>
-            <p className="text-gray-600">
+            <p style={{ color: themeColors.text.secondary }}>
               No tienes permisos para acceder a esta sección.
             </p>
-          </div>
+          </motion.div>
         </div>
       </AdminLayout>
     );
@@ -325,32 +351,27 @@ export default function ProductsAdminPage() {
       case "ACTIVO":
         return {
           label: "Activo",
-          className:
-            "bg-gradient-to-r from-green-500/20 to-emerald-500/20 text-green-700 dark:text-green-300 border-green-500/30",
+          color: themeColors.accent,
         };
       case "BAJO_STOCK":
         return {
           label: "Bajo Stock",
-          className:
-            "bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-700 dark:text-yellow-300 border-yellow-500/30",
+          color: themeColors.secondary,
         };
       case "SIN_STOCK":
         return {
           label: "Sin Stock",
-          className:
-            "bg-gradient-to-r from-red-500/20 to-rose-500/20 text-red-700 dark:text-red-300 border-red-500/30",
+          color: themeColors.primary,
         };
       case "INACTIVO":
         return {
           label: "Inactivo",
-          className:
-            "bg-gradient-to-r from-gray-500/20 to-slate-500/20 text-gray-700 dark:text-gray-300 border-gray-500/30",
+          color: themeColors.text.secondary,
         };
       default:
         return {
           label: "Desconocido",
-          className:
-            "bg-gradient-to-r from-gray-500/20 to-slate-500/20 text-gray-700 dark:text-gray-300 border-gray-500/30",
+          color: themeColors.text.secondary,
         };
     }
   };
@@ -385,10 +406,15 @@ export default function ProductsAdminPage() {
           className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
         >
           <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <h1 
+              className="text-2xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
+              style={{
+                backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+              }}
+            >
               Gestión de Productos
             </h1>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p style={{ color: themeColors.text.secondary }}>
               Administra tu catálogo de productos y control de inventario
             </p>
           </div>
@@ -399,24 +425,37 @@ export default function ProductsAdminPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-col xl:flex-row gap-4 p-6 bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl border border-white/30 shadow-lg"
+          className="flex flex-col xl:flex-row gap-4 p-6 backdrop-blur-xl rounded-2xl border shadow-lg"
+          style={{
+            backgroundColor: themeColors.surface + "70",
+            borderColor: themeColors.primary + "30"
+          }}
         >
           {/* Primera fila - Búsqueda y filtros */}
           <div className="flex flex-col lg:flex-row gap-4 flex-1">
             {/* Búsqueda */}
             <div className="flex-1 lg:flex-[2] relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search 
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5" 
+                style={{ color: themeColors.text.secondary }}
+              />
               <input
                 type="text"
                 placeholder="Buscar por nombre, SKU, marca o descripción..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all placeholder-gray-400 backdrop-blur-sm"
+                className="w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all placeholder-gray-400 backdrop-blur-sm"
+                style={{
+                  backgroundColor: themeColors.surface + "60",
+                  borderColor: themeColors.primary + "30",
+                  color: themeColors.text.primary,
+                  "--tw-ring-color": themeColors.primary + "50"
+                } as React.CSSProperties}
               />
             </div>
 
             {/* Filtro por categoría */}
-            <div className="w-full lg:w-56 relative z-30">
+            <div className="w-full lg:w-56 relative z-1">
               <StyledSelect
                 value={categoryFilter}
                 onChange={setCategoryFilter}
@@ -431,7 +470,7 @@ export default function ProductsAdminPage() {
             </div>
 
             {/* Filtro por estado */}
-            <div className="w-full lg:w-48 relative z-20">
+            <div className="w-full lg:w-48 relative z-1">
               <StyledSelect
                 value={statusFilter}
                 onChange={setStatusFilter}
@@ -446,7 +485,7 @@ export default function ProductsAdminPage() {
             </div>
 
             {/* Items por página */}
-            <div className="w-full lg:w-32 relative z-10">
+            <div className="w-full lg:w-32 relative z-1">
               <StyledSelect
                 value={itemsPerPage.toString()}
                 onChange={(value) => setItemsPerPage(Number(value))}
@@ -466,30 +505,45 @@ export default function ProductsAdminPage() {
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleAddProduct}
-              className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 text-purple-700 dark:text-purple-300 rounded-xl transition-all backdrop-blur-sm border border-purple-500/20"
+              className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all backdrop-blur-sm border font-medium"
+              style={{
+                backgroundColor: themeColors.primary + "20",
+                color: themeColors.text.primary,
+                borderColor: themeColors.primary + "40"
+              }}
             >
               <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline font-medium">Agregar</span>
+              <span className="hidden sm:inline">Agregar</span>
             </motion.button>
 
             <motion.button
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleDownloadTemplate}
-              className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 text-green-700 dark:text-green-300 rounded-xl transition-all backdrop-blur-sm border border-green-500/20"
+              className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all backdrop-blur-sm border font-medium"
+              style={{
+                backgroundColor: themeColors.accent + "20",
+                color: themeColors.text.primary,
+                borderColor: themeColors.accent + "40"
+              }}
             >
               <Download className="w-4 h-4" />
-              <span className="hidden sm:inline font-medium">Plantilla</span>
+              <span className="hidden sm:inline">Plantilla</span>
             </motion.button>
 
             <motion.button
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleImportProducts}
-              className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 hover:from-blue-500/30 hover:to-cyan-500/30 text-blue-700 dark:text-blue-300 rounded-xl transition-all backdrop-blur-sm border border-blue-500/20"
+              className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all backdrop-blur-sm border font-medium"
+              style={{
+                backgroundColor: themeColors.secondary + "20",
+                color: themeColors.text.primary,
+                borderColor: themeColors.secondary + "40"
+              }}
             >
               <Upload className="w-4 h-4" />
-              <span className="hidden sm:inline font-medium">Importar</span>
+              <span className="hidden sm:inline">Importar</span>
             </motion.button>
           </div>
         </motion.div>
@@ -499,11 +553,20 @@ export default function ProductsAdminPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl border border-white/30 overflow-hidden shadow-xl"
+          className="backdrop-blur-xl rounded-2xl border overflow-hidden shadow-xl"
+          style={{
+            backgroundColor: themeColors.surface + "70",
+            borderColor: themeColors.primary + "30"
+          }}
         >
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gradient-to-r from-gray-50/80 to-gray-100/80 dark:from-slate-700/80 dark:to-slate-600/80 backdrop-blur-sm">
+              <thead 
+                className="backdrop-blur-sm"
+                style={{
+                  background: `linear-gradient(90deg, ${themeColors.primary}20, ${themeColors.secondary}20)`
+                }}
+              >
                 <tr>
                   <th className="px-4 py-3 text-left">
                     <div className="flex items-center">
@@ -518,42 +581,73 @@ export default function ProductsAdminPage() {
                           onChange={handleSelectAll}
                           className="sr-only peer"
                         />
-                        <div className="relative w-5 h-5 bg-white/50 dark:bg-slate-600/50 border-2 border-gray-300 dark:border-gray-500 rounded-md peer-checked:bg-gradient-to-r peer-checked:from-purple-500 peer-checked:to-pink-500 peer-checked:border-purple-500 transition-all duration-200 peer-hover:border-purple-400">
+                        <div 
+                          className="relative w-5 h-5 border-2 rounded-md transition-all duration-200"
+                          style={{
+                            backgroundColor: themeColors.surface + "50",
+                            borderColor: themeColors.primary + "60"
+                          }}
+                        >
                           <Check className="absolute inset-0 w-3 h-3 m-auto text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" />
                         </div>
                       </label>
                     </div>
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     Producto
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     SKU
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     Precios
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     Stock
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     Estado
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     Valoración
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                  <th 
+                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     Acciones
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200/30 dark:divide-gray-700/30">
+              <tbody 
+                className="divide-y"
+                style={{ 
+                  "--tw-divide-opacity": "0.3",
+                  borderColor: themeColors.primary + "30"
+                } as React.CSSProperties}
+              >
                 {currentProducts.map((product, index) => {
                   const statusInfo = getStatusInfo(product.status);
-                  const margin = calculateMargin(
-                    product.price,
-                    product.costPrice,
-                  );
+                  const margin = calculateMargin(product.price, product.costPrice);
+                  const productColor = getProductColor(index);
 
                   return (
                     <motion.tr
@@ -561,7 +655,18 @@ export default function ProductsAdminPage() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="group hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-pink-50/50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 transition-all duration-300 backdrop-blur-sm"
+                      className="group transition-all duration-300 backdrop-blur-sm hover:backdrop-blur-md"
+                      style={{
+                        "--hover-bg": `linear-gradient(90deg, ${themeColors.primary}10, ${themeColors.secondary}10)`
+                      } as React.CSSProperties}
+                      onMouseEnter={(e) => {
+                        const target = e.currentTarget as HTMLElement;
+                        target.style.background = `linear-gradient(90deg, ${themeColors.primary}10, ${themeColors.secondary}10)`;
+                      }}
+                      onMouseLeave={(e) => {
+                        const target = e.currentTarget as HTMLElement;
+                        target.style.background = "transparent";
+                      }}
                     >
                       <td className="px-4 py-3">
                         <label className="relative inline-flex items-center cursor-pointer">
@@ -571,7 +676,13 @@ export default function ProductsAdminPage() {
                             onChange={() => handleSelectProduct(product.id)}
                             className="sr-only peer"
                           />
-                          <div className="relative w-5 h-5 bg-white/50 dark:bg-slate-600/50 border-2 border-gray-300 dark:border-gray-500 rounded-md peer-checked:bg-gradient-to-r peer-checked:from-purple-500 peer-checked:to-pink-500 peer-checked:border-purple-500 transition-all duration-200 peer-hover:border-purple-400 group-hover:border-purple-300">
+                          <div 
+                            className="relative w-5 h-5 border-2 rounded-md transition-all duration-200"
+                            style={{
+                              backgroundColor: themeColors.surface + "50",
+                              borderColor: themeColors.primary + "60"
+                            }}
+                          >
                             <Check className="absolute inset-0 w-3 h-3 m-auto text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" />
                           </div>
                         </label>
@@ -580,7 +691,10 @@ export default function ProductsAdminPage() {
                         <div className="flex items-center gap-3">
                           <motion.div
                             whileHover={{ scale: 1.1 }}
-                            className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg overflow-hidden"
+                            className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg overflow-hidden"
+                            style={{
+                              background: `linear-gradient(45deg, ${productColor}, ${productColor}90)`
+                            }}
                           >
                             {product.image ? (
                               <Image
@@ -595,13 +709,22 @@ export default function ProductsAdminPage() {
                             )}
                           </motion.div>
                           <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-gray-900 dark:text-white text-sm truncate">
+                            <div 
+                              className="font-semibold text-sm truncate"
+                              style={{ color: themeColors.text.primary }}
+                            >
                               {product.name}
                             </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                            <div 
+                              className="text-xs"
+                              style={{ color: themeColors.text.secondary }}
+                            >
                               {product.brand} • {product.category}
                             </div>
-                            <div className="text-xs text-gray-400 dark:text-gray-500">
+                            <div 
+                              className="text-xs"
+                              style={{ color: themeColors.text.secondary }}
+                            >
                               {product.totalSales} ventas
                             </div>
                           </div>
@@ -609,10 +732,19 @@ export default function ProductsAdminPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="space-y-1">
-                          <div className="text-sm font-mono bg-blue-100/50 dark:bg-blue-900/20 px-2 py-1 rounded-md inline-block text-blue-700 dark:text-blue-300">
+                          <div 
+                            className="text-sm font-mono px-2 py-1 rounded-md inline-block"
+                            style={{
+                              backgroundColor: themeColors.secondary + "20",
+                              color: themeColors.text.primary
+                            }}
+                          >
                             {product.sku}
                           </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                          <div 
+                            className="text-xs"
+                            style={{ color: themeColors.text.secondary }}
+                          >
                             Desde{" "}
                             {new Date(product.createdAt).toLocaleDateString()}
                           </div>
@@ -620,13 +752,27 @@ export default function ProductsAdminPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="space-y-2">
-                          <div className="text-lg font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                          <div 
+                            className="text-lg font-bold bg-gradient-to-r bg-clip-text text-transparent"
+                            style={{
+                              backgroundImage: `linear-gradient(to right, ${productColor}, ${productColor}90)`
+                            }}
+                          >
                             {formatCurrency(product.price)}
                           </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                          <div 
+                            className="text-xs"
+                            style={{ color: themeColors.text.secondary }}
+                          >
                             Costo: {formatCurrency(product.costPrice)}
                           </div>
-                          <div className="text-xs bg-green-100/50 dark:bg-green-900/20 text-green-700 dark:text-green-300 px-2 py-1 rounded-full inline-block">
+                          <div 
+                            className="text-xs px-2 py-1 rounded-full inline-block"
+                            style={{
+                              backgroundColor: themeColors.accent + "20",
+                              color: themeColors.text.primary
+                            }}
+                          >
                             +{margin}% margen
                           </div>
                         </div>
@@ -635,21 +781,33 @@ export default function ProductsAdminPage() {
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-2">
                             <div
-                              className={`p-2 rounded-lg ${
-                                product.stock === 0
-                                  ? "bg-red-100/50 dark:bg-red-900/20 text-red-600"
+                              className="p-2 rounded-lg"
+                              style={{
+                                backgroundColor: product.stock === 0
+                                  ? themeColors.primary + "20"
                                   : product.stock <= product.minStock
-                                    ? "bg-yellow-100/50 dark:bg-yellow-900/20 text-yellow-600"
-                                    : "bg-green-100/50 dark:bg-green-900/20 text-green-600"
-                              }`}
+                                    ? themeColors.secondary + "20"
+                                    : themeColors.accent + "20",
+                                color: product.stock === 0
+                                  ? themeColors.primary
+                                  : product.stock <= product.minStock
+                                    ? themeColors.secondary
+                                    : themeColors.accent
+                              }}
                             >
                               {getStockIcon(product.stock, product.minStock)}
                             </div>
                             <div>
-                              <div className="text-xl font-bold text-gray-900 dark:text-white">
+                              <div 
+                                className="text-xl font-bold"
+                                style={{ color: themeColors.text.primary }}
+                              >
                                 {product.stock}
                               </div>
-                              <div className="text-xs text-gray-500 dark:text-gray-400">
+                              <div 
+                                className="text-xs"
+                                style={{ color: themeColors.text.secondary }}
+                              >
                                 Min: {product.minStock}
                               </div>
                             </div>
@@ -658,7 +816,12 @@ export default function ProductsAdminPage() {
                       </td>
                       <td className="px-4 py-3">
                         <span
-                          className={`inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold transition-all backdrop-blur-sm border ${statusInfo.className}`}
+                          className="inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold transition-all backdrop-blur-sm border"
+                          style={{
+                            backgroundColor: statusInfo.color + "20",
+                            color: statusInfo.color,
+                            borderColor: statusInfo.color + "40"
+                          }}
                         >
                           {statusInfo.label}
                         </span>
@@ -666,12 +829,21 @@ export default function ProductsAdminPage() {
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
                           <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                            <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                            <Star 
+                              className="w-4 h-4 fill-current"
+                              style={{ color: themeColors.accent }}
+                            />
+                            <span 
+                              className="text-sm font-semibold"
+                              style={{ color: themeColors.text.primary }}
+                            >
                               {product.rating.toFixed(1)}
                             </span>
                           </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                          <div 
+                            className="text-xs"
+                            style={{ color: themeColors.text.secondary }}
+                          >
                             ({product.totalSales} reseñas)
                           </div>
                         </div>
@@ -682,7 +854,12 @@ export default function ProductsAdminPage() {
                             whileHover={{ scale: 1.1, y: -2 }}
                             whileTap={{ scale: 0.9 }}
                             onClick={() => handleViewProduct(product.id)}
-                            className="p-3 text-blue-600 hover:text-blue-700 bg-blue-50/50 hover:bg-blue-100/70 dark:bg-blue-900/20 dark:hover:bg-blue-900/40 rounded-xl transition-all backdrop-blur-sm border border-blue-200/30"
+                            className="p-3 rounded-xl transition-all backdrop-blur-sm border"
+                            style={{
+                              backgroundColor: themeColors.secondary + "20",
+                              color: themeColors.secondary,
+                              borderColor: themeColors.secondary + "40"
+                            }}
                           >
                             <Eye className="w-4 h-4" />
                           </motion.button>
@@ -690,7 +867,12 @@ export default function ProductsAdminPage() {
                             whileHover={{ scale: 1.1, y: -2 }}
                             whileTap={{ scale: 0.9 }}
                             onClick={() => handleEditProduct(product.id)}
-                            className="p-3 text-purple-600 hover:text-purple-700 bg-purple-50/50 hover:bg-purple-100/70 dark:bg-purple-900/20 dark:hover:bg-purple-900/40 rounded-xl transition-all backdrop-blur-sm border border-purple-200/30"
+                            className="p-3 rounded-xl transition-all backdrop-blur-sm border"
+                            style={{
+                              backgroundColor: themeColors.primary + "20",
+                              color: themeColors.primary,
+                              borderColor: themeColors.primary + "40"
+                            }}
                           >
                             <Edit className="w-4 h-4" />
                           </motion.button>
@@ -704,19 +886,40 @@ export default function ProductsAdminPage() {
           </div>
 
           {/* Paginación */}
-          <div className="px-4 py-3 border-t border-gray-200/30 dark:border-gray-700/30 bg-gray-50/30 dark:bg-slate-700/30 backdrop-blur-sm">
+          <div 
+            className="px-4 py-3 border-t backdrop-blur-sm"
+            style={{
+              borderColor: themeColors.primary + "30",
+              backgroundColor: themeColors.surface + "30"
+            }}
+          >
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="text-sm text-gray-600 dark:text-gray-300 bg-white/50 dark:bg-slate-600/50 px-3 py-2 rounded-lg backdrop-blur-sm">
+              <div 
+                className="text-sm px-3 py-2 rounded-lg backdrop-blur-sm"
+                style={{
+                  backgroundColor: themeColors.surface + "50",
+                  color: themeColors.text.secondary
+                }}
+              >
                 Mostrando{" "}
-                <span className="font-semibold text-purple-600">
+                <span 
+                  className="font-semibold"
+                  style={{ color: themeColors.primary }}
+                >
                   {startIndex + 1}
                 </span>{" "}
                 a{" "}
-                <span className="font-semibold text-purple-600">
+                <span 
+                  className="font-semibold"
+                  style={{ color: themeColors.primary }}
+                >
                   {Math.min(endIndex, filteredProducts.length)}
                 </span>{" "}
                 de{" "}
-                <span className="font-semibold text-purple-600">
+                <span 
+                  className="font-semibold"
+                  style={{ color: themeColors.primary }}
+                >
                   {filteredProducts.length}
                 </span>{" "}
                 productos
@@ -728,7 +931,12 @@ export default function ProductsAdminPage() {
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
-                  className="p-3 rounded-xl bg-white/60 dark:bg-slate-700/60 border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/80 dark:hover:bg-slate-600/80 transition-all backdrop-blur-sm"
+                  className="p-3 rounded-xl border disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm"
+                  style={{
+                    backgroundColor: themeColors.surface + "60",
+                    borderColor: themeColors.primary + "30",
+                    color: themeColors.text.primary
+                  }}
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </motion.button>
@@ -736,17 +944,28 @@ export default function ProductsAdminPage() {
                 <div className="flex items-center gap-2">
                   {[...Array(Math.min(5, totalPages))].map((_, i) => {
                     const pageNum = i + 1;
+                    const isActive = currentPage === pageNum;
                     return (
                       <motion.button
                         key={pageNum}
                         whileHover={{ scale: 1.05, y: -2 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => setCurrentPage(pageNum)}
-                        className={`w-10 h-10 rounded-xl text-sm font-semibold transition-all backdrop-blur-sm ${
-                          currentPage === pageNum
-                            ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg border border-purple-400"
-                            : "bg-white/60 dark:bg-slate-700/60 border border-white/30 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 text-gray-700 dark:text-gray-300"
-                        }`}
+                        className="w-10 h-10 rounded-xl text-sm font-semibold transition-all backdrop-blur-sm border"
+                        style={{
+                          backgroundColor: isActive 
+                            ? `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})` 
+                            : themeColors.surface + "60",
+                          borderColor: isActive 
+                            ? themeColors.primary + "60" 
+                            : themeColors.primary + "30",
+                          color: isActive 
+                            ? "white" 
+                            : themeColors.text.primary,
+                          background: isActive 
+                            ? `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})` 
+                            : themeColors.surface + "60"
+                        }}
                       >
                         {pageNum}
                       </motion.button>
@@ -761,7 +980,12 @@ export default function ProductsAdminPage() {
                     setCurrentPage(Math.min(totalPages, currentPage + 1))
                   }
                   disabled={currentPage === totalPages}
-                  className="p-3 rounded-xl bg-white/60 dark:bg-slate-700/60 border border-white/30 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/80 dark:hover:bg-slate-600/80 transition-all backdrop-blur-sm"
+                  className="p-3 rounded-xl border disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm"
+                  style={{
+                    backgroundColor: themeColors.surface + "60",
+                    borderColor: themeColors.primary + "30",
+                    color: themeColors.text.primary
+                  }}
                 >
                   <ChevronRight className="w-4 h-4" />
                 </motion.button>
@@ -775,28 +999,50 @@ export default function ProductsAdminPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="bg-white dark:bg-slate-800 rounded-2xl p-6 max-w-md w-full border border-white/20"
+              className="rounded-2xl p-6 max-w-md w-full border"
+              style={{
+                backgroundColor: themeColors.surface + "95",
+                borderColor: themeColors.primary + "30"
+              }}
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/20 rounded-full flex items-center justify-center">
-                  <AlertTriangle className="w-6 h-6 text-orange-600" />
+                <div 
+                  className="w-12 h-12 rounded-full flex items-center justify-center"
+                  style={{
+                    backgroundColor: themeColors.accent + "20"
+                  }}
+                >
+                  <AlertTriangle 
+                    className="w-6 h-6"
+                    style={{ color: themeColors.accent }}
+                  />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  <h3 
+                    className="text-lg font-semibold"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     Confirmar Acción
                   </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p 
+                    className="text-sm"
+                    style={{ color: themeColors.text.secondary }}
+                  >
                     Esta acción afectará el producto
                   </p>
                 </div>
               </div>
 
-              <p className="text-gray-600 dark:text-gray-300 mb-6">
+              <p 
+                className="mb-6"
+                style={{ color: themeColors.text.secondary }}
+              >
                 ¿Estás seguro que deseas realizar esta acción?
               </p>
 
@@ -811,7 +1057,11 @@ export default function ProductsAdminPage() {
                       action: "delete",
                     })
                   }
-                  className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-lg transition-all"
+                  className="px-4 py-2 rounded-lg transition-all"
+                  style={{
+                    color: themeColors.text.secondary,
+                    backgroundColor: themeColors.surface + "50"
+                  }}
                 >
                   Cancelar
                 </motion.button>
@@ -825,7 +1075,10 @@ export default function ProductsAdminPage() {
                       action: "delete",
                     })
                   }
-                  className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
+                  className="px-4 py-2 text-white rounded-lg transition-all"
+                  style={{
+                    background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`
+                  }}
                 >
                   Confirmar
                 </motion.button>

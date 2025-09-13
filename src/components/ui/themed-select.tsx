@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTheme } from "@/contexts/theme-context";
 
 interface Option {
   value: string;
@@ -10,7 +11,7 @@ interface Option {
   icon?: string;
 }
 
-interface StyledSelectProps {
+interface ThemedSelectProps {
   value: string;
   onChange: (value: string) => void;
   options: Option[];
@@ -20,7 +21,7 @@ interface StyledSelectProps {
   disabled?: boolean;
 }
 
-export function StyledSelect({
+export function ThemedSelect({
   value,
   onChange,
   options,
@@ -28,7 +29,8 @@ export function StyledSelect({
   className = "",
   label,
   disabled = false,
-}: StyledSelectProps) {
+}: ThemedSelectProps) {
+  const { themeColors } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const selectRef = useRef<HTMLDivElement>(null);
@@ -78,7 +80,7 @@ export function StyledSelect({
   return (
     <div className={className}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>
           {label}
         </label>
       )}
@@ -92,19 +94,29 @@ export function StyledSelect({
           whileHover={disabled ? {} : { scale: 1.01 }}
           whileTap={disabled ? {} : { scale: 0.99 }}
           className={`
-            w-full h-full px-4 py-0 bg-white/80 dark:bg-slate-700/80 border-2 border-white/40 dark:border-slate-600/40 
-            rounded-2xl text-left transition-all duration-300 backdrop-blur-lg shadow-lg shadow-purple-500/5
+            w-full px-4 py-3 rounded-xl border-2 text-left transition-all duration-300 backdrop-blur-lg
             flex items-center justify-between min-h-[3.5rem]
             ${
               disabled
-                ? "cursor-not-allowed opacity-60 bg-gray-200/60 dark:bg-gray-600/60"
-                : "cursor-pointer hover:border-purple-400/40 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50"
+                ? "cursor-not-allowed opacity-60"
+                : "cursor-pointer hover:scale-[1.01] focus:outline-none focus:ring-2"
             }
-            ${isOpen ? "border-purple-500/50 ring-2 ring-purple-500/20" : ""}
           `}
+          style={{
+            backgroundColor: disabled 
+              ? `${themeColors.surface}40` 
+              : `${themeColors.surface}80`,
+            borderColor: isOpen 
+              ? themeColors.primary 
+              : `${themeColors.primary}30`,
+            color: themeColors.text.primary,
+            ...(isOpen && {
+              boxShadow: `0 0 0 3px ${themeColors.primary}20`,
+            }),
+          }}
         >
           <span
-            className={`flex items-center gap-2 text-gray-900 dark:text-white ${!selectedOption ? "text-gray-500 dark:text-gray-400" : ""}`}
+            className={`flex items-center gap-2 ${!selectedOption ? "opacity-60" : ""}`}
           >
             {selectedOption ? (
               <>
@@ -121,7 +133,7 @@ export function StyledSelect({
             transition={{ duration: 0.2 }}
             className={`flex-shrink-0 ${disabled ? "opacity-50" : ""}`}
           >
-            <ChevronDown className="w-5 h-5 text-gray-400" />
+            <ChevronDown className="w-5 h-5" style={{ color: themeColors.text.secondary }} />
           </motion.div>
         </motion.button>
 
@@ -133,18 +145,28 @@ export function StyledSelect({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="absolute z-[9999] w-full mt-2 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/40 dark:border-slate-600/40 rounded-2xl shadow-2xl shadow-purple-500/10 overflow-hidden enhanced-select-dropdown"
+              className="absolute z-[9999] w-full mt-2 backdrop-blur-xl border rounded-2xl shadow-2xl overflow-hidden enhanced-select-dropdown"
+              style={{
+                backgroundColor: `${themeColors.surface}95`,
+                borderColor: `${themeColors.primary}40`,
+                boxShadow: `0 20px 25px -5px ${themeColors.primary}10, 0 10px 10px -5px ${themeColors.primary}04`,
+              }}
             >
               {/* Search Input */}
               {options.length > 5 && (
-                <div className="p-3 border-b border-gray-200/50 dark:border-gray-600/50">
+                <div className="p-3 border-b" style={{ borderColor: `${themeColors.primary}20` }}>
                   <input
                     ref={inputRef}
                     type="text"
                     placeholder="Buscar..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-50/80 dark:bg-slate-700/80 border border-gray-200 dark:border-slate-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-200"
+                    className="w-full px-3 py-2 border rounded-xl text-sm focus:outline-none focus:ring-2 transition-all duration-200"
+                    style={{
+                      backgroundColor: `${themeColors.surface}80`,
+                      borderColor: `${themeColors.primary}30`,
+                      color: themeColors.text.primary,
+                    }}
                   />
                 </div>
               )}
@@ -152,7 +174,7 @@ export function StyledSelect({
               {/* Options List */}
               <div className="max-h-60 overflow-y-auto">
                 {filteredOptions.length === 0 ? (
-                  <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
+                  <div className="px-4 py-3 text-sm text-center" style={{ color: themeColors.text.secondary }}>
                     No se encontraron opciones
                   </div>
                 ) : (
@@ -164,15 +186,29 @@ export function StyledSelect({
                       transition={{ delay: index * 0.02 }}
                       type="button"
                       onClick={() => handleSelect(option.value)}
-                      className={`
-                        w-full px-4 py-3 text-left flex items-center justify-between transition-all duration-200
-                        hover:bg-purple-50 dark:hover:bg-purple-900/30 hover:text-purple-700 dark:hover:text-purple-300
-                        ${
-                          value === option.value
-                            ? "bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 font-medium"
-                            : "text-gray-700 dark:text-gray-300"
+                      className="w-full px-4 py-3 text-left flex items-center justify-between transition-all duration-200 hover:scale-[1.01]"
+                      style={{
+                        ...(value === option.value && {
+                          backgroundColor: `${themeColors.primary}20`,
+                          color: themeColors.primary,
+                          fontWeight: "500",
+                        }),
+                        ...(value !== option.value && {
+                          color: themeColors.text.primary,
+                        }),
+                      }}
+                      onMouseEnter={(e) => {
+                        if (value !== option.value) {
+                          e.currentTarget.style.backgroundColor = `${themeColors.primary}10`;
+                          e.currentTarget.style.color = themeColors.primary;
                         }
-                      `}
+                      }}
+                      onMouseLeave={(e) => {
+                        if (value !== option.value) {
+                          e.currentTarget.style.backgroundColor = "transparent";
+                          e.currentTarget.style.color = themeColors.text.primary;
+                        }
+                      }}
                     >
                       <span className="flex items-center gap-2">
                         {option.icon && <span>{option.icon}</span>}
@@ -183,7 +219,7 @@ export function StyledSelect({
                         <motion.div
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
-                          className="text-purple-600 dark:text-purple-400"
+                          style={{ color: themeColors.primary }}
                         >
                           <Check className="w-4 h-4" />
                         </motion.div>

@@ -81,7 +81,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
 
       {/* Toast Container */}
-      <div className="fixed top-4 right-4 z-[9999] space-y-2">
+      <div className="fixed top-4 right-4 z-[9998] space-y-2">
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.div

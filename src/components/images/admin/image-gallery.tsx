@@ -16,6 +16,7 @@ import {
   Clock,
   CheckCircle,
 } from "lucide-react";
+import { useTheme } from "@/contexts/theme-context";
 
 interface ImageData {
   id: string;
@@ -58,6 +59,8 @@ export function ImageGallery({
   onImageSelect,
   onSelectAll,
 }: ImageGalleryProps) {
+  const { themeColors } = useTheme();
+  
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return "0 B";
     const k = 1024;
@@ -79,9 +82,9 @@ export function ImageGallery({
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "ASSIGNED":
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
+        return <CheckCircle className="w-4 h-4" style={{ color: themeColors.primary }} />;
       case "PROCESSING":
-        return <Clock className="w-4 h-4 text-blue-500 animate-pulse" />;
+        return <Clock className="w-4 h-4 animate-pulse" style={{ color: themeColors.secondary }} />;
       case "ERROR":
         return <AlertCircle className="w-4 h-4 text-red-500" />;
       default:
@@ -92,13 +95,13 @@ export function ImageGallery({
   const getStatusColor = (status: string) => {
     switch (status) {
       case "ASSIGNED":
-        return "from-green-500/20 to-emerald-500/20 border-green-200 dark:border-green-700";
+        return `${themeColors.primary}20`;
       case "PROCESSING":
-        return "from-blue-500/20 to-cyan-500/20 border-blue-200 dark:border-blue-700";
+        return `${themeColors.secondary}20`;
       case "ERROR":
-        return "from-red-500/20 to-pink-500/20 border-red-200 dark:border-red-700";
+        return "rgba(239, 68, 68, 0.2)";
       default:
-        return "from-gray-500/20 to-slate-500/20 border-gray-200 dark:border-gray-700";
+        return "rgba(156, 163, 175, 0.2)";
     }
   };
 
@@ -107,9 +110,17 @@ export function ImageGallery({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-r from-white/80 to-gray-50/80 dark:from-slate-800/80 dark:to-slate-700/80 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 rounded-2xl p-12 shadow-xl text-center"
+        className="backdrop-blur-sm border border-white/20 dark:border-gray-700/30 rounded-2xl p-12 shadow-xl text-center"
+        style={{
+          background: `linear-gradient(135deg, ${themeColors.surface}80, ${themeColors.surface}40)`
+        }}
       >
-        <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center">
+        <div 
+          className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center"
+          style={{
+            backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+          }}
+        >
           <FileText className="w-8 h-8 text-white" />
         </div>
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
@@ -128,7 +139,10 @@ export function ImageGallery({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
-      className="bg-gradient-to-r from-white/80 to-gray-50/80 dark:from-slate-800/80 dark:to-slate-700/80 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 rounded-2xl shadow-xl overflow-hidden"
+      className="backdrop-blur-sm border border-white/20 dark:border-gray-700/30 rounded-2xl shadow-xl overflow-hidden"
+      style={{
+        background: `linear-gradient(135deg, ${themeColors.surface}80, ${themeColors.surface}40)`
+      }}
     >
       {/* Header con controles */}
       <div className="p-6 border-b border-gray-200/50 dark:border-gray-700/50">
@@ -143,7 +157,15 @@ export function ImageGallery({
                 onChange={onSelectAll}
                 className="sr-only peer"
               />
-              <div className="relative w-5 h-5 bg-white/50 dark:bg-slate-600/50 border-2 border-gray-300 dark:border-gray-500 rounded-md peer-checked:bg-gradient-to-r peer-checked:from-purple-500 peer-checked:to-pink-500 peer-checked:border-purple-500 transition-all duration-200 peer-hover:border-purple-400">
+              <div 
+                className="relative w-5 h-5 bg-white/50 dark:bg-slate-600/50 border-2 border-gray-300 dark:border-gray-500 rounded-md transition-all duration-200 peer-hover:border-purple-400"
+                style={{
+                  ...(selectedImages.length === images.length && images.length > 0 && {
+                    backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
+                    borderColor: themeColors.primary
+                  })
+                }}
+              >
                 <Check className="absolute inset-0 w-3 h-3 m-auto text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" />
               </div>
             </label>
@@ -167,10 +189,15 @@ export function ImageGallery({
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.05 }}
                 className={`
-                  group relative bg-gradient-to-br ${getStatusColor(image.status)} 
-                  backdrop-blur-sm border rounded-2xl p-4 hover:shadow-xl transition-all duration-300 cursor-pointer
-                  ${selectedImages.includes(image.id) ? "ring-2 ring-purple-500 shadow-lg" : ""}
+                  group relative backdrop-blur-sm border rounded-2xl p-4 hover:shadow-xl transition-all duration-300 cursor-pointer
+                  ${selectedImages.includes(image.id) ? "ring-2 shadow-lg" : ""}
                 `}
+                style={{
+                  background: `linear-gradient(135deg, ${getStatusColor(image.status)}, ${getStatusColor(image.status)}40)`,
+                  ...(selectedImages.includes(image.id) && {
+                    ringColor: themeColors.primary
+                  })
+                }}
                 onClick={() => onImageSelect(image.id)}
               >
                 {/* Checkbox */}
@@ -180,10 +207,16 @@ export function ImageGallery({
                     w-5 h-5 rounded-md border-2 transition-all duration-200 flex items-center justify-center
                     ${
                       selectedImages.includes(image.id)
-                        ? "bg-gradient-to-r from-purple-500 to-pink-500 border-purple-500"
-                        : "bg-white/80 border-gray-300 group-hover:border-purple-400"
+                        ? "border-2"
+                        : "bg-white/80 border-gray-300 group-hover:border-gray-400"
                     }
                   `}
+                    style={{
+                      ...(selectedImages.includes(image.id) && {
+                        backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
+                        borderColor: themeColors.primary
+                      })
+                    }}
                   >
                     {selectedImages.includes(image.id) && (
                       <Check className="w-3 h-3 text-white" />
@@ -234,11 +267,17 @@ export function ImageGallery({
 
                   {/* Producto asignado */}
                   {image.assignedTo && (
-                    <div className="bg-green-100 dark:bg-green-900/20 rounded-lg p-2">
-                      <p className="text-xs font-medium text-green-700 dark:text-green-300 truncate">
+                    <div 
+                      className="rounded-lg p-2"
+                      style={{
+                        backgroundColor: `${themeColors.primary}20`,
+                        color: themeColors.primary
+                      }}
+                    >
+                      <p className="text-xs font-medium truncate">
                         {image.assignedTo.productName}
                       </p>
-                      <p className="text-xs text-green-600 dark:text-green-400">
+                      <p className="text-xs opacity-80">
                         {image.assignedTo.productSku}
                       </p>
                     </div>
@@ -248,17 +287,26 @@ export function ImageGallery({
                   {image.aiSuggestions &&
                     image.aiSuggestions.productMatches.length > 0 &&
                     !image.assignedTo && (
-                      <div className="bg-purple-100 dark:bg-purple-900/20 rounded-lg p-2">
+                      <div 
+                        className="rounded-lg p-2"
+                        style={{
+                          backgroundColor: `${themeColors.accent}20`,
+                          color: themeColors.accent
+                        }}
+                      >
                         <div className="flex items-center gap-1 mb-1">
-                          <Sparkles className="w-3 h-3 text-purple-500" />
-                          <span className="text-xs font-medium text-purple-700 dark:text-purple-300">
+                          <Sparkles 
+                            className="w-3 h-3" 
+                            style={{ color: themeColors.accent }}
+                          />
+                          <span className="text-xs font-medium">
                             IA sugiere:
                           </span>
                         </div>
-                        <p className="text-xs text-purple-600 dark:text-purple-400 truncate">
+                        <p className="text-xs truncate">
                           {image.aiSuggestions.productMatches[0].productName}
                         </p>
-                        <p className="text-xs text-purple-500 dark:text-purple-400">
+                        <p className="text-xs opacity-80">
                           {image.aiSuggestions.productMatches[0].confidence}%
                           confianza
                         </p>
@@ -297,10 +345,16 @@ export function ImageGallery({
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.02 }}
                 className={`
-                  group flex items-center gap-4 p-4 bg-gradient-to-r from-white/60 to-gray-50/60 dark:from-slate-700/60 dark:to-slate-600/60 
-                  backdrop-blur-sm border border-white/30 dark:border-gray-600/30 rounded-xl hover:shadow-lg transition-all duration-200 cursor-pointer
-                  ${selectedImages.includes(image.id) ? "ring-2 ring-purple-500 bg-gradient-to-r from-purple-50/80 to-pink-50/80 dark:from-purple-900/20 dark:to-pink-900/20" : ""}
+                  group flex items-center gap-4 p-4 backdrop-blur-sm border border-white/30 dark:border-gray-600/30 rounded-xl hover:shadow-lg transition-all duration-200 cursor-pointer
+                  ${selectedImages.includes(image.id) ? "ring-2" : ""}
                 `}
+                style={{
+                  background: `linear-gradient(135deg, ${themeColors.surface}60, ${themeColors.surface}40)`,
+                  ...(selectedImages.includes(image.id) && {
+                    ringColor: themeColors.primary,
+                    background: `linear-gradient(135deg, ${themeColors.primary}10, ${themeColors.secondary}10)`
+                  })
+                }}
                 onClick={() => onImageSelect(image.id)}
               >
                 {/* Checkbox */}
@@ -309,10 +363,16 @@ export function ImageGallery({
                   w-5 h-5 rounded-md border-2 transition-all duration-200 flex items-center justify-center flex-shrink-0
                   ${
                     selectedImages.includes(image.id)
-                      ? "bg-gradient-to-r from-purple-500 to-pink-500 border-purple-500"
-                      : "bg-white/80 border-gray-300 group-hover:border-purple-400"
+                      ? ""
+                      : "bg-white/80 border-gray-300 group-hover:border-gray-400"
                   }
                 `}
+                  style={{
+                    ...(selectedImages.includes(image.id) && {
+                      backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
+                      borderColor: themeColors.primary
+                    })
+                  }}
                 >
                   {selectedImages.includes(image.id) && (
                     <Check className="w-3 h-3 text-white" />
@@ -352,12 +412,21 @@ export function ImageGallery({
                   {image.assignedTo ? (
                     <div className="mt-2 flex items-center gap-2">
                       <div className="flex items-center gap-1">
-                        <ExternalLink className="w-3 h-3 text-green-500" />
-                        <span className="text-xs font-medium text-green-700 dark:text-green-300">
+                        <ExternalLink 
+                          className="w-3 h-3" 
+                          style={{ color: themeColors.primary }}
+                        />
+                        <span 
+                          className="text-xs font-medium"
+                          style={{ color: themeColors.primary }}
+                        >
                           {image.assignedTo.productName}
                         </span>
                       </div>
-                      <span className="text-xs text-green-600 dark:text-green-400">
+                      <span 
+                        className="text-xs"
+                        style={{ color: themeColors.primary, opacity: 0.8 }}
+                      >
                         ({image.assignedTo.productSku})
                       </span>
                     </div>
@@ -365,12 +434,21 @@ export function ImageGallery({
                     image.aiSuggestions &&
                     image.aiSuggestions.productMatches.length > 0 && (
                       <div className="mt-2 flex items-center gap-2">
-                        <Sparkles className="w-3 h-3 text-purple-500" />
-                        <span className="text-xs text-purple-700 dark:text-purple-300">
+                        <Sparkles 
+                          className="w-3 h-3" 
+                          style={{ color: themeColors.accent }}
+                        />
+                        <span 
+                          className="text-xs"
+                          style={{ color: themeColors.accent }}
+                        >
                           IA sugiere:{" "}
                           {image.aiSuggestions.productMatches[0].productName}
                         </span>
-                        <span className="text-xs text-purple-500 dark:text-purple-400">
+                        <span 
+                          className="text-xs"
+                          style={{ color: themeColors.accent, opacity: 0.8 }}
+                        >
                           ({image.aiSuggestions.productMatches[0].confidence}%)
                         </span>
                       </div>
@@ -380,10 +458,10 @@ export function ImageGallery({
 
                 {/* Acciones */}
                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button className="p-2 text-gray-400 hover:text-purple-600 transition-colors">
+                  <button className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
                     <Eye className="w-4 h-4" />
                   </button>
-                  <button className="p-2 text-gray-400 hover:text-blue-600 transition-colors">
+                  <button className="p-2 text-gray-400 hover:text-green-600 transition-colors">
                     <Edit className="w-4 h-4" />
                   </button>
                   <button className="p-2 text-gray-400 hover:text-red-600 transition-colors">

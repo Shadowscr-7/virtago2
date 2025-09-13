@@ -12,6 +12,7 @@ import {
   CheckCircle,
   AlertTriangle,
 } from "lucide-react";
+import { useTheme } from "@/contexts/theme-context";
 
 interface BulkActionsBarProps {
   selectedCount: number;
@@ -32,6 +33,8 @@ export function BulkActionsBar({
   onAddTags,
   onArchive,
 }: BulkActionsBarProps) {
+  const { themeColors } = useTheme();
+  
   return (
     <motion.div
       initial={{ opacity: 0, y: 50, scale: 0.95 }}
@@ -39,11 +42,21 @@ export function BulkActionsBar({
       exit={{ opacity: 0, y: 50, scale: 0.95 }}
       className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50"
     >
-      <div className="bg-gradient-to-r from-white/95 to-gray-50/95 dark:from-slate-800/95 dark:to-slate-700/95 backdrop-blur-lg border border-white/20 dark:border-gray-700/30 rounded-2xl shadow-2xl px-6 py-4">
+      <div 
+        className="backdrop-blur-lg border border-white/20 dark:border-gray-700/30 rounded-2xl shadow-2xl px-6 py-4"
+        style={{
+          background: `linear-gradient(135deg, ${themeColors.surface}95, ${themeColors.surface}90)`
+        }}
+      >
         <div className="flex items-center gap-6">
           {/* Contador de selección */}
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+            <div 
+              className="w-8 h-8 rounded-lg flex items-center justify-center"
+              style={{
+                backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+              }}
+            >
               <CheckCircle className="w-4 h-4 text-white" />
             </div>
             <div>
@@ -67,7 +80,10 @@ export function BulkActionsBar({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={onAssignToProducts}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg"
+              className="flex items-center gap-2 px-4 py-2 text-white rounded-lg font-medium transition-all duration-200 shadow-lg"
+              style={{
+                backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+              }}
             >
               <Sparkles className="w-4 h-4" />
               <span className="hidden sm:inline">Auto-Asignar</span>
@@ -78,7 +94,10 @@ export function BulkActionsBar({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={onAssignToProducts}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg font-medium hover:from-blue-600 hover:to-cyan-600 transition-all duration-200 shadow-lg"
+              className="flex items-center gap-2 px-4 py-2 text-white rounded-lg font-medium transition-all duration-200 shadow-lg"
+              style={{
+                backgroundImage: `linear-gradient(to right, ${themeColors.secondary}, ${themeColors.accent})`
+              }}
             >
               <ExternalLink className="w-4 h-4" />
               <span className="hidden sm:inline">Asignar</span>
@@ -90,7 +109,10 @@ export function BulkActionsBar({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onAddTags}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg font-medium hover:from-green-600 hover:to-emerald-600 transition-all duration-200 shadow-lg"
+                className="flex items-center gap-2 px-4 py-2 text-white rounded-lg font-medium transition-all duration-200 shadow-lg"
+                style={{
+                  backgroundImage: `linear-gradient(to right, ${themeColors.accent}, ${themeColors.primary})`
+                }}
               >
                 <Tag className="w-4 h-4" />
                 <span className="hidden sm:inline">Etiquetar</span>

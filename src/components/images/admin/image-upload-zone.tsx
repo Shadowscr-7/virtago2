@@ -13,6 +13,7 @@ import {
   FileImage,
   Sparkles,
 } from "lucide-react";
+import { useTheme } from "@/contexts/theme-context";
 
 interface ImageUploadZoneProps {
   onUpload: (files: FileList) => void;
@@ -37,6 +38,7 @@ export function ImageUploadZone({
   maxSizePerFile = 10 * 1024 * 1024, // 10MB por defecto
   acceptedFormats = ["image/jpeg", "image/png", "image/webp", "image/gif"],
 }: ImageUploadZoneProps) {
+  const { themeColors } = useTheme();
   const [isDragOver, setIsDragOver] = useState(false);
   const [filePreviews, setFilePreviews] = useState<FilePreview[]>([]);
   const [showPreviews, setShowPreviews] = useState(false);
@@ -173,14 +175,21 @@ export function ImageUploadZone({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={`
-          relative border-2 border-dashed rounded-2xl p-8 transition-all duration-300 cursor-pointer
+          relative border-2 border-dashed rounded-2xl p-8 transition-all duration-300 cursor-pointer backdrop-blur-sm
           ${
             isDragOver
-              ? "border-purple-500 bg-gradient-to-br from-purple-50/80 to-pink-50/80 dark:from-purple-900/20 dark:to-pink-900/20 scale-[1.02]"
-              : "border-gray-300 dark:border-gray-600 bg-gradient-to-br from-white/60 to-gray-50/60 dark:from-slate-800/60 dark:to-slate-700/60 hover:border-purple-400 hover:bg-gradient-to-br hover:from-purple-50/60 hover:to-pink-50/60 dark:hover:from-purple-900/10 dark:hover:to-pink-900/10"
+              ? "scale-[1.02]"
+              : "hover:scale-[1.01]"
           }
-          backdrop-blur-sm
         `}
+        style={{
+          borderColor: isDragOver 
+            ? themeColors.primary 
+            : 'rgb(209 213 219 / 0.6)',
+          background: isDragOver
+            ? `linear-gradient(135deg, ${themeColors.primary}10, ${themeColors.secondary}10)`
+            : `linear-gradient(135deg, ${themeColors.surface}60, ${themeColors.surface}40)`
+        }}
         onClick={() => fileInputRef.current?.click()}
       >
         {/* Efecto de brillo animado */}
@@ -200,7 +209,10 @@ export function ImageUploadZone({
             animate={
               isDragOver ? { scale: 1.1, rotate: 5 } : { scale: 1, rotate: 0 }
             }
-            className="mx-auto w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-xl"
+            className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center shadow-xl"
+            style={{
+              backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+            }}
           >
             <Upload className="w-8 h-8 text-white" />
           </motion.div>
@@ -223,11 +235,17 @@ export function ImageUploadZone({
 
           <div className="flex items-center justify-center gap-4 text-xs text-gray-500 dark:text-gray-400">
             <div className="flex items-center gap-1">
-              <Sparkles className="w-4 h-4 text-purple-500" />
+              <Sparkles 
+                className="w-4 h-4" 
+                style={{ color: themeColors.accent }}
+              />
               <span>IA Auto-detección</span>
             </div>
             <div className="flex items-center gap-1">
-              <FileImage className="w-4 h-4 text-blue-500" />
+              <FileImage 
+                className="w-4 h-4" 
+                style={{ color: themeColors.primary }}
+              />
               <span>Optimización automática</span>
             </div>
           </div>
@@ -241,12 +259,20 @@ export function ImageUploadZone({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="bg-gradient-to-r from-white/80 to-gray-50/80 dark:from-slate-800/80 dark:to-slate-700/80 backdrop-blur-sm border border-white/20 dark:border-gray-700/30 rounded-2xl p-6 shadow-xl"
+            className="backdrop-blur-sm border border-white/20 dark:border-gray-700/30 rounded-2xl p-6 shadow-xl"
+            style={{
+              background: `linear-gradient(135deg, ${themeColors.surface}80, ${themeColors.surface}40)`
+            }}
           >
             {/* Header del panel */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                <div 
+                  className="w-8 h-8 rounded-lg flex items-center justify-center"
+                  style={{
+                    backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+                  }}
+                >
                   <ImageIcon className="w-4 h-4 text-white" />
                 </div>
                 <div>
@@ -269,7 +295,10 @@ export function ImageUploadZone({
                     whileTap={{ scale: 0.95 }}
                     onClick={startUpload}
                     disabled={isUploading}
-                    className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg font-medium hover:from-green-600 hover:to-emerald-600 transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 text-white rounded-lg font-medium transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{
+                      backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+                    }}
                   >
                     {isUploading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />

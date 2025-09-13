@@ -16,31 +16,63 @@ import {
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/admin-layout";
 import { useAuthStore } from "@/lib/auth-store";
+import { useTheme } from "@/contexts/theme-context";
 import Link from "next/link";
 
 export default function AdminDashboard() {
   const { user } = useAuthStore();
+  const { themeColors } = useTheme();
 
   if (!user || user.role !== "distribuidor") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
+      <div 
+        className="min-h-screen flex items-center justify-center backdrop-blur-xl"
+        style={{
+          background: `linear-gradient(135deg, 
+            ${themeColors.surface}20 0%, 
+            ${themeColors.primary}10 25%, 
+            ${themeColors.secondary}10 75%, 
+            ${themeColors.surface}20 100%)`
+        }}
+      >
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="text-center p-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20"
+          className="text-center p-8 backdrop-blur-lg rounded-2xl shadow-xl border"
+          style={{
+            backgroundColor: themeColors.surface + "80",
+            borderColor: themeColors.primary + "20"
+          }}
         >
-          <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center">
+          <div 
+            className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
+            style={{
+              background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`
+            }}
+          >
             <Users className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold mb-4 bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
+          <h1 
+            className="text-2xl font-bold mb-4 bg-gradient-to-r bg-clip-text text-transparent"
+            style={{
+              backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+            }}
+          >
             Acceso Denegado
           </h1>
-          <p className="text-muted-foreground mb-6">
+          <p 
+            className="mb-6"
+            style={{ color: themeColors.text.secondary }}
+          >
             Solo los distribuidores pueden acceder al panel de administración
           </p>
           <Link
             href="/"
-            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
+            className="inline-block px-6 py-3 rounded-lg transition-all hover:scale-105"
+            style={{
+              background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`,
+              color: "white"
+            }}
           >
             Volver al Inicio
           </Link>
@@ -56,7 +88,7 @@ export default function AdminDashboard() {
       change: "+12.5%",
       trend: "up",
       icon: DollarSign,
-      color: "from-green-500 to-emerald-500",
+      colorIndex: 0,
     },
     {
       title: "Órdenes",
@@ -64,7 +96,7 @@ export default function AdminDashboard() {
       change: "+8.2%",
       trend: "up",
       icon: ShoppingCart,
-      color: "from-blue-500 to-cyan-500",
+      colorIndex: 1,
     },
     {
       title: "Productos",
@@ -72,7 +104,7 @@ export default function AdminDashboard() {
       change: "+15.3%",
       trend: "up",
       icon: Package,
-      color: "from-purple-500 to-pink-500",
+      colorIndex: 2,
     },
     {
       title: "Clientes",
@@ -80,7 +112,7 @@ export default function AdminDashboard() {
       change: "+23.1%",
       trend: "up",
       icon: Users,
-      color: "from-orange-500 to-red-500",
+      colorIndex: 0,
     },
   ];
 
@@ -90,30 +122,36 @@ export default function AdminDashboard() {
       description: "Añade un nuevo producto a tu catálogo",
       icon: Plus,
       href: "/admin/productos/nuevo",
-      color: "from-purple-500 to-pink-500",
+      colorIndex: 1,
     },
     {
       title: "Ver Órdenes",
       description: "Revisa las órdenes pendientes",
       icon: Eye,
       href: "/admin/ordenes",
-      color: "from-blue-500 to-cyan-500",
+      colorIndex: 2,
     },
     {
       title: "Gestionar Precios",
       description: "Actualiza precios y descuentos",
       icon: DollarSign,
       href: "/admin/precios",
-      color: "from-green-500 to-emerald-500",
+      colorIndex: 0,
     },
     {
       title: "Configuración Rápida",
       description: "Configura tu tienda paso a paso",
       icon: Activity,
       href: "/admin/configuracion-rapida",
-      color: "from-orange-500 to-red-500",
+      colorIndex: 1,
     },
   ];
+
+  // Función para obtener colores del tema
+  const getThemeColor = (index: number) => {
+    const colors = [themeColors.primary, themeColors.secondary, themeColors.accent];
+    return colors[index % colors.length];
+  };
 
   return (
     <AdminLayout>
@@ -126,14 +164,25 @@ export default function AdminDashboard() {
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <h1 
+                className="text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
+                style={{
+                  backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+                }}
+              >
                 ¡Bienvenido, {user.name}!
               </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
+              <p 
+                className="mt-2"
+                style={{ color: themeColors.text.secondary }}
+              >
                 Aquí tienes un resumen de tu actividad comercial
               </p>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
+            <div 
+              className="flex items-center gap-2 text-sm"
+              style={{ color: themeColors.text.secondary }}
+            >
               <Calendar className="w-4 h-4" />
               {new Date().toLocaleDateString("es-ES", {
                 weekday: "long",
@@ -154,6 +203,7 @@ export default function AdminDashboard() {
         >
           {stats.map((stat, index) => {
             const IconComponent = stat.icon;
+            const statColor = getThemeColor(stat.colorIndex);
             return (
               <motion.div
                 key={stat.title}
@@ -161,24 +211,40 @@ export default function AdminDashboard() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 + index * 0.1 }}
                 whileHover={{ scale: 1.02, y: -2 }}
-                className="p-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300"
+                className="p-6 backdrop-blur-lg rounded-2xl shadow-lg border hover:shadow-xl transition-all duration-300"
+                style={{
+                  backgroundColor: themeColors.surface + "80",
+                  borderColor: themeColors.primary + "20"
+                }}
               >
                 <div className="flex items-center justify-between mb-4">
                   <div
-                    className={`p-3 rounded-xl bg-gradient-to-r ${stat.color}`}
+                    className="p-3 rounded-xl"
+                    style={{
+                      background: `linear-gradient(45deg, ${statColor}, ${statColor}90)`
+                    }}
                   >
                     <IconComponent className="w-6 h-6 text-white" />
                   </div>
-                  <div className="flex items-center gap-1 text-green-500 text-sm font-medium">
+                  <div 
+                    className="flex items-center gap-1 text-sm font-medium"
+                    style={{ color: themeColors.accent }}
+                  >
                     <ArrowUpRight className="w-4 h-4" />
                     {stat.change}
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <h3 
+                    className="text-2xl font-bold"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     {stat.value}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 text-sm">
+                  <p 
+                    className="text-sm"
+                    style={{ color: themeColors.text.secondary }}
+                  >
                     {stat.title}
                   </p>
                 </div>
@@ -194,12 +260,16 @@ export default function AdminDashboard() {
           transition={{ delay: 0.3 }}
           className="mb-8"
         >
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+          <h2 
+            className="text-2xl font-bold mb-6"
+            style={{ color: themeColors.text.primary }}
+          >
             Acciones Rápidas
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {quickActions.map((action, index) => {
               const IconComponent = action.icon;
+              const actionColor = getThemeColor(action.colorIndex);
               return (
                 <Link key={action.title} href={action.href}>
                   <motion.div
@@ -207,17 +277,30 @@ export default function AdminDashboard() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 + index * 0.1 }}
                     whileHover={{ scale: 1.02, y: -2 }}
-                    className="p-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20 hover:shadow-xl transition-all duration-300 cursor-pointer group"
+                    className="p-6 backdrop-blur-lg rounded-2xl shadow-lg border hover:shadow-xl transition-all duration-300 cursor-pointer group"
+                    style={{
+                      backgroundColor: themeColors.surface + "80",
+                      borderColor: themeColors.primary + "20"
+                    }}
                   >
                     <div
-                      className={`w-12 h-12 rounded-xl bg-gradient-to-r ${action.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}
+                      className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300"
+                      style={{
+                        background: `linear-gradient(45deg, ${actionColor}, ${actionColor}90)`
+                      }}
                     >
                       <IconComponent className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    <h3 
+                      className="text-lg font-semibold mb-2"
+                      style={{ color: themeColors.text.primary }}
+                    >
                       {action.title}
                     </h3>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
+                    <p 
+                      className="text-sm"
+                      style={{ color: themeColors.text.secondary }}
+                    >
                       {action.description}
                     </p>
                   </motion.div>
@@ -235,12 +318,26 @@ export default function AdminDashboard() {
           className="grid grid-cols-1 lg:grid-cols-2 gap-6"
         >
           {/* Sales Chart */}
-          <div className="p-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20">
+          <div 
+            className="p-6 backdrop-blur-lg rounded-2xl shadow-lg border"
+            style={{
+              backgroundColor: themeColors.surface + "80",
+              borderColor: themeColors.primary + "20"
+            }}
+          >
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500">
+              <div 
+                className="p-2 rounded-lg"
+                style={{
+                  background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`
+                }}
+              >
                 <BarChart3 className="w-5 h-5 text-white" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 
+                className="text-lg font-semibold"
+                style={{ color: themeColors.text.primary }}
+              >
                 Ventas por Mes
               </h3>
             </div>
@@ -252,7 +349,10 @@ export default function AdminDashboard() {
                     initial={{ height: 0 }}
                     animate={{ height: `${height}%` }}
                     transition={{ delay: 0.6 + index * 0.1 }}
-                    className="bg-gradient-to-t from-blue-500 to-cyan-500 rounded-t-lg flex-1 min-w-0"
+                    className="rounded-t-lg flex-1 min-w-0"
+                    style={{
+                      background: `linear-gradient(to top, ${themeColors.primary}, ${themeColors.secondary})`
+                    }}
                   />
                 ),
               )}
@@ -260,12 +360,26 @@ export default function AdminDashboard() {
           </div>
 
           {/* Recent Activity */}
-          <div className="p-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20">
+          <div 
+            className="p-6 backdrop-blur-lg rounded-2xl shadow-lg border"
+            style={{
+              backgroundColor: themeColors.surface + "80",
+              borderColor: themeColors.primary + "20"
+            }}
+          >
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500">
+              <div 
+                className="p-2 rounded-lg"
+                style={{
+                  background: `linear-gradient(45deg, ${themeColors.secondary}, ${themeColors.accent})`
+                }}
+              >
                 <TrendingUp className="w-5 h-5 text-white" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 
+                className="text-lg font-semibold"
+                style={{ color: themeColors.text.primary }}
+              >
                 Actividad Reciente
               </h3>
             </div>
@@ -274,22 +388,22 @@ export default function AdminDashboard() {
                 {
                   action: "Nueva orden recibida",
                   time: "Hace 5 min",
-                  color: "text-green-500",
+                  colorIndex: 0,
                 },
                 {
                   action: "Producto actualizado",
                   time: "Hace 15 min",
-                  color: "text-blue-500",
+                  colorIndex: 1,
                 },
                 {
                   action: "Cliente registrado",
                   time: "Hace 1 hora",
-                  color: "text-purple-500",
+                  colorIndex: 2,
                 },
                 {
                   action: "Precio modificado",
                   time: "Hace 2 horas",
-                  color: "text-orange-500",
+                  colorIndex: 0,
                 },
               ].map((activity, index) => (
                 <motion.div
@@ -297,12 +411,21 @@ export default function AdminDashboard() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.7 + index * 0.1 }}
-                  className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-700/50"
+                  className="flex items-center justify-between p-3 rounded-lg"
+                  style={{
+                    backgroundColor: themeColors.primary + "10"
+                  }}
                 >
-                  <span className="text-gray-900 dark:text-white font-medium">
+                  <span 
+                    className="font-medium"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     {activity.action}
                   </span>
-                  <span className={`text-sm ${activity.color}`}>
+                  <span 
+                    className="text-sm"
+                    style={{ color: getThemeColor(activity.colorIndex) }}
+                  >
                     {activity.time}
                   </span>
                 </motion.div>

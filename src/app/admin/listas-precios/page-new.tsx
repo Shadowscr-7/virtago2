@@ -287,66 +287,69 @@ export default function ListasPreciosAdminPage() {
 
   return (
     <AdminLayout>
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+          className="backdrop-blur-xl border border-white/20 dark:border-gray-700/30 rounded-3xl p-6 shadow-2xl"
+          style={{
+            background: `linear-gradient(135deg, ${themeColors.surface}95, ${themeColors.surface}90)`
+          }}
         >
-          <div>
-            <h1 
-              className="text-2xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
-              style={{
-                backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
-              }}
-            >
-              Listas De Precios
-            </h1>
-            <p style={{ color: themeColors.text.secondary }}>
-              Administra y gestiona las listas de precios para diferentes tipos de clientes
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="px-4 py-2 text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-lg"
-              style={{
-                backgroundImage: `linear-gradient(to right, ${themeColors.secondary}, ${themeColors.accent})`
-              }}
-            >
-              <Upload className="w-4 h-4" />
-              Importar
-            </motion.button>
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <h1 
+                className="text-3xl font-bold"
+                style={{
+                  backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}
+              >
+                Listas De Precios
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300 mt-1">
+                Administra y gestiona las listas de precios para diferentes tipos de clientes
+              </p>
+            </div>
             
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="px-4 py-2 border rounded-xl font-medium transition-all duration-200 flex items-center gap-2"
-              style={{
-                backgroundColor: themeColors.surface + "60",
-                borderColor: themeColors.primary + "30",
-                color: themeColors.text.primary
-              }}
-            >
-              <Download className="w-4 h-4" />
-              Descargar Formato
-            </motion.button>
-            
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => router.push('/admin/listas-precios/nueva')}
-              className="px-4 py-2 text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-lg"
-              style={{
-                backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
-              }}
-            >
-              <Plus className="w-4 h-4" />
-              Agregar Lista De Precios
-            </motion.button>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-4 py-2 text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-lg"
+                style={{
+                  backgroundImage: `linear-gradient(to right, ${themeColors.secondary}, ${themeColors.accent})`
+                }}
+              >
+                <Upload className="w-4 h-4" />
+                Importar
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200 flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Descargar Formato
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => router.push('/admin/listas-precios/nueva')}
+                className="px-4 py-2 text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-lg"
+                style={{
+                  backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+                }}
+              >
+                <Plus className="w-4 h-4" />
+                Agregar Lista De Precios
+              </motion.button>
+            </div>
           </div>
         </motion.div>
 
@@ -369,10 +372,9 @@ export default function ListasPreciosAdminPage() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.1 + index * 0.05 }}
               whileHover={{ scale: 1.02, y: -2 }}
-              className="p-6 backdrop-blur-xl rounded-2xl border shadow-lg"
+              className="backdrop-blur-xl border border-white/20 dark:border-gray-700/30 rounded-2xl p-6 shadow-xl"
               style={{
-                backgroundColor: themeColors.surface + "70",
-                borderColor: themeColors.primary + "30"
+                background: `linear-gradient(135deg, ${themeColors.surface}70, ${themeColors.surface}60)`
               }}
             >
               <div className="flex items-center justify-between mb-3">
@@ -391,7 +393,7 @@ export default function ListasPreciosAdminPage() {
                   >
                     {stat.value.toLocaleString()}
                   </p>
-                  <p style={{ color: themeColors.text.secondary }} className="text-sm">{stat.title}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">{stat.title}</p>
                 </div>
               </div>
             </motion.div>
@@ -403,38 +405,33 @@ export default function ListasPreciosAdminPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="flex flex-col xl:flex-row gap-4 p-6 backdrop-blur-xl rounded-2xl border shadow-lg"
+          className="backdrop-blur-xl border border-white/20 dark:border-gray-700/30 rounded-2xl p-6 shadow-xl"
           style={{
-            backgroundColor: themeColors.surface + "70",
-            borderColor: themeColors.primary + "30"
+            background: `linear-gradient(135deg, ${themeColors.surface}80, ${themeColors.surface}70)`
           }}
         >
-          {/* Primera fila - Búsqueda y filtros */}
-          <div className="flex flex-col lg:flex-row gap-4 flex-1">
+          <div className="flex flex-col lg:flex-row gap-4">
             {/* Búsqueda */}
-            <div className="flex-1 lg:flex-[2] relative">
+            <div className="flex-1 relative">
               <Search 
                 className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5" 
-                style={{ color: themeColors.text.secondary }}
+                style={{ color: themeColors.primary }}
               />
               <input
                 type="text"
                 placeholder="Buscar por nombre o moneda..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all placeholder-gray-400 backdrop-blur-sm"
+                className="w-full pl-12 pr-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all placeholder-gray-400 backdrop-blur-sm"
                 style={{
-                  backgroundColor: themeColors.surface + "60",
-                  borderColor: themeColors.primary + "30",
-                  color: themeColors.text.primary,
                   '--tw-ring-color': `${themeColors.primary}50`
                 } as React.CSSProperties}
               />
             </div>
 
             {/* Filtros */}
-            <div className="flex flex-col sm:flex-row gap-3 lg:flex-[3]">
-              <div className="flex-1 min-w-[200px]">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="w-full sm:w-48 relative z-1">
                 <StyledSelect
                   value={statusFilter}
                   onChange={setStatusFilter}
@@ -448,7 +445,7 @@ export default function ListasPreciosAdminPage() {
                 />
               </div>
 
-              <div className="flex-1 min-w-[180px]">
+              <div className="w-full sm:w-40 relative z-1">
                 <StyledSelect
                   value={currencyFilter}
                   onChange={setCurrencyFilter}
@@ -462,7 +459,7 @@ export default function ListasPreciosAdminPage() {
                 />
               </div>
 
-              <div className="flex-1 min-w-[180px]">
+              <div className="w-full sm:w-44 relative z-10">
                 <StyledSelect
                   value={typeFilter}
                   onChange={setTypeFilter}
@@ -477,7 +474,7 @@ export default function ListasPreciosAdminPage() {
                 />
               </div>
 
-              <div className="w-full sm:w-32">
+              <div className="w-full sm:w-32 relative z-1">
                 <StyledSelect
                   value={itemsPerPage.toString()}
                   onChange={(value) => setItemsPerPage(Number(value))}
@@ -498,10 +495,9 @@ export default function ListasPreciosAdminPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="backdrop-blur-xl rounded-2xl border shadow-lg overflow-hidden"
+          className="backdrop-blur-xl border border-white/20 dark:border-gray-700/30 rounded-2xl shadow-xl overflow-hidden"
           style={{
-            backgroundColor: themeColors.surface + "70",
-            borderColor: themeColors.primary + "30"
+            background: `linear-gradient(135deg, ${themeColors.surface}80, ${themeColors.surface}70)`
           }}
         >
           <div className="overflow-x-auto">
@@ -509,8 +505,7 @@ export default function ListasPreciosAdminPage() {
               <thead 
                 className="backdrop-blur-sm"
                 style={{
-                  backgroundColor: themeColors.surface + "80",
-                  borderColor: themeColors.primary + "20"
+                  background: `linear-gradient(135deg, ${themeColors.primary}20, ${themeColors.secondary}15)`
                 }}
               >
                 <tr>
@@ -535,22 +530,22 @@ export default function ListasPreciosAdminPage() {
                       </label>
                     </div>
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                     Nombre
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                     Moneda
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                     Fecha Inicio
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                     Fecha Fin
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                     Estado
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                     Acciones
                   </th>
                 </tr>
@@ -562,12 +557,11 @@ export default function ListasPreciosAdminPage() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className="group hover:bg-opacity-10 transition-all duration-300 backdrop-blur-sm"
+                    className="group transition-all duration-300 backdrop-blur-sm"
                     style={{
-                      background: 'transparent'
-                    }}
-                    whileHover={{
-                      background: `linear-gradient(to right, ${themeColors.primary}10, ${themeColors.secondary}10)`
+                      ':hover': {
+                        background: `linear-gradient(to right, ${themeColors.primary}10, ${themeColors.secondary}10)`
+                      }
                     }}
                   >
                     <td className="px-4 py-3">
@@ -602,25 +596,18 @@ export default function ListasPreciosAdminPage() {
                         <div>
                           <Link 
                             href={`/admin/listas-precios/${list.id}`}
-                            className="font-semibold text-sm transition-colors duration-200 hover:underline cursor-pointer"
+                            className="font-semibold text-gray-900 dark:text-white text-sm transition-colors duration-200 hover:underline cursor-pointer"
                             style={{
-                              color: themeColors.text.primary
+                              color: undefined
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.color = themeColors.primary
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.color = ''
                             }}
                           >
-                            <span 
-                              className="hover:text-current"
-                              style={{
-                                '--hover-color': themeColors.primary
-                              } as React.CSSProperties}
-                              onMouseEnter={(e) => {
-                                e.currentTarget.style.color = themeColors.primary
-                              }}
-                              onMouseLeave={(e) => {
-                                e.currentTarget.style.color = ''
-                              }}
-                            >
-                              {list.nombre}
-                            </span>
+                            {list.nombre}
                           </Link>
                           <div className="flex items-center gap-2 mt-1">
                             <span 
@@ -629,7 +616,7 @@ export default function ListasPreciosAdminPage() {
                             >
                               {list.tipo}
                             </span>
-                            <span className="text-xs" style={{ color: themeColors.text.secondary }}>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
                               {list.cantidadProductos} productos
                             </span>
                           </div>
@@ -638,26 +625,26 @@ export default function ListasPreciosAdminPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-mono font-medium" style={{ color: themeColors.text.primary }}>
+                        <span className="text-sm font-mono font-medium text-gray-900 dark:text-white">
                           {list.moneda}
                         </span>
-                        <div className="text-xs" style={{ color: themeColors.text.secondary }}>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
                           Promedio: {formatCurrency(list.valorPromedio, list.moneda)}
                         </div>
                       </div>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" style={{ color: themeColors.text.secondary }} />
-                        <span className="text-sm" style={{ color: themeColors.text.primary }}>
+                        <Calendar className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm text-gray-900 dark:text-white">
                           {formatDate(list.fechaInicio)}
                         </span>
                       </div>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" style={{ color: themeColors.text.secondary }} />
-                        <span className="text-sm" style={{ color: themeColors.text.primary }}>
+                        <Calendar className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm text-gray-900 dark:text-white">
                           {formatDate(list.fechaFin)}
                         </span>
                       </div>
@@ -670,24 +657,35 @@ export default function ListasPreciosAdminPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <motion.button
-                          whileHover={{ 
-                            scale: 1.1,
-                            color: themeColors.secondary
-                          }}
+                          whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={() => router.push(`/admin/listas-precios/${list.id}`)}
                           className="p-2 text-gray-400 transition-colors duration-200"
+                          style={{
+                            ':hover': {
+                              color: themeColors.secondary
+                            }
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.color = themeColors.secondary
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.color = ''
+                          }}
                         >
                           <Eye className="w-4 h-4" />
                         </motion.button>
                         <motion.button
-                          whileHover={{ 
-                            scale: 1.1,
-                            color: themeColors.primary
-                          }}
+                          whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={() => router.push(`/admin/listas-precios/${list.id}/editar`)}
                           className="p-2 text-gray-400 transition-colors duration-200"
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.color = themeColors.primary
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.color = ''
+                          }}
                         >
                           <Edit className="w-4 h-4" />
                         </motion.button>
@@ -708,9 +706,9 @@ export default function ListasPreciosAdminPage() {
 
           {/* Paginación */}
           {totalPages > 1 && (
-            <div className="px-6 py-4 border-t" style={{ borderColor: themeColors.primary + "20" }}>
+            <div className="px-6 py-4 border-t border-gray-200/50 dark:border-gray-700/50">
               <div className="flex items-center justify-between">
-                <div className="text-sm" style={{ color: themeColors.text.secondary }}>
+                <div className="text-sm text-gray-600 dark:text-gray-300">
                   Mostrando {startIndex + 1} a {Math.min(startIndex + itemsPerPage, sortedLists.length)} de {sortedLists.length} resultados
                 </div>
                 
@@ -720,10 +718,7 @@ export default function ListasPreciosAdminPage() {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ 
-                      color: currentPage === 1 ? themeColors.text.secondary : themeColors.text.primary 
-                    }}
+                    className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </motion.button>
@@ -743,7 +738,7 @@ export default function ListasPreciosAdminPage() {
                             boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
                           }),
                           ...((currentPage !== page) && {
-                            color: themeColors.text.secondary
+                            color: 'rgb(107, 114, 128)'
                           })
                         }}
                       >
@@ -757,10 +752,7 @@ export default function ListasPreciosAdminPage() {
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ 
-                      color: currentPage === totalPages ? themeColors.text.secondary : themeColors.text.primary 
-                    }}
+                    className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     <ChevronRight className="w-4 h-4" />
                   </motion.button>

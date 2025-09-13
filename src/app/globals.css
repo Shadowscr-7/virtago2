@@ -139,6 +139,28 @@ body {
   color: var(--theme-text-secondary);
 }
 
+/* Estilos para dropdowns mejorados */
+.enhanced-dropdown-overlay {
+  z-index: 99999 !important;
+  position: fixed !important;
+}
+
+.enhanced-dropdown-portal {
+  z-index: 99999 !important;
+}
+
+/* Asegurar que los dropdowns aparezcan por encima de modales y overlays */
+.enhanced-select-dropdown,
+.enhanced-datepicker-dropdown {
+  z-index: 99999 !important;
+  position: absolute !important;
+}
+
+/* Evitar overflow issues en contenedores padre */
+.admin-layout-content {
+  overflow: visible !important;
+}
+
 .theme-text-muted {
   color: var(--theme-text-muted);
 }
