@@ -45,7 +45,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
 
         {/* Main content */}
         <main className="flex-1 admin-layout-content">
-          <div className="h-[calc(100vh-4rem)] overflow-y-auto">{children}</div>
+          <div className="h-[calc(100vh-4rem)] overflow-y-auto p-6">
+            {children}
+          </div>
         </main>
       </div>
     </div>

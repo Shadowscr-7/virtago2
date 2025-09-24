@@ -5,6 +5,7 @@ import { OfferBanner } from "@/components/banners/offer-banner";
 import { ProductCard } from "@/components/products/product-card";
 import { useTheme } from "@/contexts/theme-context";
 import { AnimatedBackground } from "@/components/ui/animated-background";
+import { ChatDemo } from "@/components/chat/ChatDemo";
 import { ArrowRight, Star, TrendingUp, Users, ShieldCheck } from "lucide-react";
 
 // Mock data para productos
@@ -249,6 +250,9 @@ export default function Home() {
             ))}
           </motion.div>
         </section>
+
+        {/* Chat Demo */}
+        <ChatDemo />
 
         {/* Categorías populares */}
         <motion.section

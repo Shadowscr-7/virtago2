@@ -557,12 +557,7 @@ export default function ListasPreciosAdminPage() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className="group transition-all duration-300 backdrop-blur-sm"
-                    style={{
-                      ':hover': {
-                        background: `linear-gradient(to right, ${themeColors.primary}10, ${themeColors.secondary}10)`
-                      }
-                    }}
+                    className="group transition-all duration-300 backdrop-blur-sm hover:bg-gradient-to-r hover:from-[${themeColors.primary}10] hover:to-[${themeColors.secondary}10]"
                   >
                     <td className="px-4 py-3">
                       <label className="relative inline-flex items-center cursor-pointer">
@@ -661,11 +656,6 @@ export default function ListasPreciosAdminPage() {
                           whileTap={{ scale: 0.9 }}
                           onClick={() => router.push(`/admin/listas-precios/${list.id}`)}
                           className="p-2 text-gray-400 transition-colors duration-200"
-                          style={{
-                            ':hover': {
-                              color: themeColors.secondary
-                            }
-                          }}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.color = themeColors.secondary
                           }}

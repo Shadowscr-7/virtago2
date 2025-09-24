@@ -154,7 +154,7 @@ export default function Autenticacion2FAPage() {
                 <h4 className="text-white font-medium mb-2">Instrucciones:</h4>
                 <ol className="text-gray-300 text-sm space-y-1 list-decimal list-inside">
                   <li>Abre tu app autenticadora en el móvil</li>
-                  <li>Selecciona "Agregar cuenta" o "Escanear QR"</li>
+                  <li>Selecciona &quot;Agregar cuenta&quot; o &quot;Escanear QR&quot;</li>
                   <li>Escanea este código QR</li>
                   <li>Ingresa el código de 6 dígitos que aparece</li>
                 </ol>

@@ -1,0 +1,137 @@
+[
+  {
+    "code": "LAP001",
+    "name": "Laptop Gaming RGB Ultra",
+    "description": "Laptop para gaming con iluminación RGB, procesador Intel i7, 16GB RAM, SSD 512GB",
+    "category": "Computadoras",
+    "brand": "TechPro",
+    "price": 1299.99,
+    "stock": 15
+  },
+  {
+    "code": "MON002",
+    "name": "Monitor Curvo 27 pulgadas",
+    "description": "Monitor gaming curvo de 27 pulgadas, 144Hz, resolución 2K",
+    "category": "Monitores",
+    "brand": "ViewMax",
+    "price": 399.99,
+    "stock": 8
+  },
+  {
+    "code": "TEC003",
+    "name": "Teclado Mecánico RGB",
+    "description": "Teclado mecánico gaming con switches azules y retroiluminación RGB",
+    "category": "Periféricos",
+    "brand": "KeyMaster",
+    "price": 89.99,
+    "stock": 25
+  },
+  {
+    "code": "RAT004",
+    "name": "Mouse Inalámbrico Precisión",
+    "description": "Mouse gaming inalámbrico con sensor óptico de alta precisión",
+    "category": "Periféricos",
+    "brand": "ClickPro",
+    "price": 59.99,
+    "stock": 30
+  },
+  {
+    "code": "AUD005",
+    "name": "Auriculares Gaming 7.1",
+    "description": "Auriculares gaming con sonido surround 7.1 y micrófono retráctil",
+    "category": "Audio",
+    "brand": "SoundWave",
+    "price": 79.99,
+    "stock": 12
+  },
+  {
+    "code": "CAM006",
+    "name": "Cámara Web HD 1080p",
+    "description": "Cámara web para streaming con resolución Full HD y enfoque automático",
+    "category": "Cámaras",
+    "brand": "StreamCam",
+    "price": 49.99,
+    "stock": 20
+  },
+  {
+    "code": "SSD007",
+    "name": "Disco SSD NVMe 1TB",
+    "description": "Unidad de estado sólido NVMe de 1TB con velocidades de hasta 3,500 MB/s",
+    "category": "Almacenamiento",
+    "brand": "SpeedDrive",
+    "price": 129.99,
+    "stock": 18
+  },
+  {
+    "code": "RAM008",
+    "name": "Memoria RAM DDR4 32GB",
+    "description": "Kit de memoria RAM DDR4 32GB (2x16GB) 3200MHz para gaming",
+    "category": "Componentes",
+    "brand": "MemoryPro",
+    "price": 189.99,
+    "stock": 10
+  },
+  {
+    "code": "GPU009",
+    "name": "Tarjeta Gráfica RTX Super",
+    "description": "Tarjeta gráfica de alta gama para gaming 4K y ray tracing",
+    "category": "Componentes",
+    "brand": "GraphicsMax",
+    "price": 899.99,
+    "stock": 5
+  },
+  {
+    "code": "CHR010",
+    "name": "Silla Gaming Ergonómica",
+    "description": "Silla gaming ergonómica con soporte lumbar y reposabrazos ajustables",
+    "category": "Muebles",
+    "brand": "ComfortSeat",
+    "price": 299.99,
+    "stock": 7
+  },
+  {
+    "code": "MIC011",
+    "name": "Micrófono Condensador USB",
+    "description": "Micrófono de condensador USB profesional para streaming y podcasting",
+    "category": "Audio",
+    "brand": "AudioPro",
+    "price": 149.99,
+    "stock": 14
+  },
+  {
+    "code": "COO012",
+    "name": "Sistema Refrigeración Líquida",
+    "description": "Sistema de refrigeración líquida AIO 240mm para CPU",
+    "category": "Refrigeración",
+    "brand": "CoolTech",
+    "price": 119.99,
+    "stock": 9
+  },
+  {
+    "code": "CAB013",
+    "name": "Cable HDMI 4K Premium",
+    "description": "Cable HDMI 2.1 de 2 metros, soporte 4K@120Hz y HDR",
+    "category": "Cables",
+    "brand": "CablePro",
+    "price": 24.99,
+    "stock": 50
+  },
+  {
+    "code": "HUB014",
+    "name": "Hub USB-C Multipuerto",
+    "description": "Hub USB-C con 7 puertos incluyendo HDMI, USB 3.0 y carga PD",
+    "category": "Accesorios",
+    "brand": "ConnectHub",
+    "price": 69.99,
+    "stock": 22
+  },
+  {
+    "code": "PAD015",
+    "name": "Mousepad Gaming XXL",
+    "description": "Mousepad gaming extra grande con superficie de control y base antideslizante",
+    "category": "Accesorios",
+    "brand": "PadMaster",
+    "price": 34.99,
+    "stock": 35
+  }
+]

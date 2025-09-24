@@ -1,0 +1,110 @@
+[
+  {
+    "id": "lista_001",
+    "name": "Lista Mayorista",
+    "description": "Precios especiales para clientes mayoristas con descuentos por volumen",
+    "discountPercentage": 15,
+    "products": [
+      {
+        "productCode": "LAP001",
+        "productName": "Laptop Gaming RGB Ultra",
+        "basePrice": 1299.99,
+        "listPrice": 1104.99,
+        "discountPercentage": 15
+      },
+      {
+        "productCode": "MON002",
+        "productName": "Monitor Curvo 27 pulgadas",
+        "basePrice": 399.99,
+        "listPrice": 339.99,
+        "discountPercentage": 15
+      },
+      {
+        "productCode": "TEC003",
+        "productName": "Teclado Mecánico RGB",
+        "basePrice": 89.99,
+        "listPrice": 76.49,
+        "discountPercentage": 15
+      },
+      {
+        "productCode": "GPU009",
+        "productName": "Tarjeta Gráfica RTX Super",
+        "basePrice": 899.99,
+        "listPrice": 764.99,
+        "discountPercentage": 15
+      }
+    ]
+  },
+  {
+    "id": "lista_002",
+    "name": "Lista Minorista",
+    "description": "Precios regulares para clientes finales y pequeños distribuidores",
+    "discountPercentage": 5,
+    "products": [
+      {
+        "productCode": "LAP001",
+        "productName": "Laptop Gaming RGB Ultra",
+        "basePrice": 1299.99,
+        "listPrice": 1234.99,
+        "discountPercentage": 5
+      },
+      {
+        "productCode": "TEC003",
+        "productName": "Teclado Mecánico RGB",
+        "basePrice": 89.99,
+        "listPrice": 85.49,
+        "discountPercentage": 5
+      },
+      {
+        "productCode": "RAT004",
+        "productName": "Mouse Inalámbrico Precisión",
+        "basePrice": 59.99,
+        "listPrice": 56.99,
+        "discountPercentage": 5
+      },
+      {
+        "productCode": "AUD005",
+        "productName": "Auriculares Gaming 7.1",
+        "basePrice": 79.99,
+        "listPrice": 75.99,
+        "discountPercentage": 5
+      }
+    ]
+  },
+  {
+    "id": "lista_003",
+    "name": "Lista VIP",
+    "description": "Precios preferenciales para clientes premium y distribuidores exclusivos",
+    "discountPercentage": 25,
+    "products": [
+      {
+        "productCode": "GPU009",
+        "productName": "Tarjeta Gráfica RTX Super",
+        "basePrice": 899.99,
+        "listPrice": 674.99,
+        "discountPercentage": 25
+      },
+      {
+        "productCode": "RAM008",
+        "productName": "Memoria RAM DDR4 32GB",
+        "basePrice": 189.99,
+        "listPrice": 142.49,
+        "discountPercentage": 25
+      },
+      {
+        "productCode": "LAP001",
+        "productName": "Laptop Gaming RGB Ultra",
+        "basePrice": 1299.99,
+        "listPrice": 974.99,
+        "discountPercentage": 25
+      },
+      {
+        "productCode": "MON002",
+        "productName": "Monitor Curvo 27 pulgadas",
+        "basePrice": 399.99,
+        "listPrice": 299.99,
+        "discountPercentage": 25
+      }
+    ]
+  }
+]

@@ -1,0 +1,122 @@
+[
+  {
+    "productCode": "LAP001",
+    "productName": "Laptop Gaming RGB Ultra",
+    "basePrice": 1299.99,
+    "cost": 900.00,
+    "margin": 44.44,
+    "currency": "USD"
+  },
+  {
+    "productCode": "MON002",
+    "productName": "Monitor Curvo 27 pulgadas",
+    "basePrice": 399.99,
+    "cost": 280.00,
+    "margin": 42.86,
+    "currency": "USD"
+  },
+  {
+    "productCode": "TEC003",
+    "productName": "Teclado Mecánico RGB",
+    "basePrice": 89.99,
+    "cost": 55.00,
+    "margin": 63.64,
+    "currency": "USD"
+  },
+  {
+    "productCode": "RAT004",
+    "productName": "Mouse Inalámbrico Precisión",
+    "basePrice": 59.99,
+    "cost": 35.00,
+    "margin": 71.43,
+    "currency": "USD"
+  },
+  {
+    "productCode": "AUD005",
+    "productName": "Auriculares Gaming 7.1",
+    "basePrice": 79.99,
+    "cost": 45.00,
+    "margin": 77.78,
+    "currency": "USD"
+  },
+  {
+    "productCode": "CAM006",
+    "productName": "Cámara Web HD 1080p",
+    "basePrice": 49.99,
+    "cost": 28.00,
+    "margin": 78.57,
+    "currency": "USD"
+  },
+  {
+    "productCode": "SSD007",
+    "productName": "Disco SSD NVMe 1TB",
+    "basePrice": 129.99,
+    "cost": 85.00,
+    "margin": 52.94,
+    "currency": "USD"
+  },
+  {
+    "productCode": "RAM008",
+    "productName": "Memoria RAM DDR4 32GB",
+    "basePrice": 189.99,
+    "cost": 120.00,
+    "margin": 58.33,
+    "currency": "USD"
+  },
+  {
+    "productCode": "GPU009",
+    "productName": "Tarjeta Gráfica RTX Super",
+    "basePrice": 899.99,
+    "cost": 650.00,
+    "margin": 38.46,
+    "currency": "USD"
+  },
+  {
+    "productCode": "CHR010",
+    "productName": "Silla Gaming Ergonómica",
+    "basePrice": 299.99,
+    "cost": 180.00,
+    "margin": 66.67,
+    "currency": "USD"
+  },
+  {
+    "productCode": "MIC011",
+    "productName": "Micrófono Condensador USB",
+    "basePrice": 149.99,
+    "cost": 90.00,
+    "margin": 66.67,
+    "currency": "USD"
+  },
+  {
+    "productCode": "COO012",
+    "productName": "Sistema Refrigeración Líquida",
+    "basePrice": 119.99,
+    "cost": 75.00,
+    "margin": 60.00,
+    "currency": "USD"
+  },
+  {
+    "productCode": "CAB013",
+    "productName": "Cable HDMI 4K Premium",
+    "basePrice": 24.99,
+    "cost": 8.00,
+    "margin": 212.38,
+    "currency": "USD"
+  },
+  {
+    "productCode": "HUB014",
+    "productName": "Hub USB-C Multipuerto",
+    "basePrice": 69.99,
+    "cost": 35.00,
+    "margin": 100.00,
+    "currency": "USD"
+  },
+  {
+    "productCode": "PAD015",
+    "productName": "Mousepad Gaming XXL",
+    "basePrice": 34.99,
+    "cost": 12.00,
+    "margin": 191.58,
+    "currency": "USD"
+  }
+]
