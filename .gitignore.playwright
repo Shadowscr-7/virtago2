@@ -1,0 +1,8 @@
+# Playwright Test Results
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# Playwright browsers
+/ms-playwright/

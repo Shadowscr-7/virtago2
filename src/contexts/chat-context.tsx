@@ -201,7 +201,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
       dispatch({ type: 'SET_TYPING', payload: false });
       dispatch({ type: 'ADD_MESSAGE', payload: aiResponse });
       dispatch({ type: 'SET_AI_STATUS', payload: 'idle' });
-    } catch (error) {
+    } catch {
       dispatch({ type: 'SET_TYPING', payload: false });
       dispatch({ type: 'SET_AI_STATUS', payload: 'error' });
       
