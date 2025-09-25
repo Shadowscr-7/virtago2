@@ -33,7 +33,7 @@ tests/
 
 - **Navegadores**: Chromium, Firefox, WebKit
 - **Dispositivos**: Desktop y Mobile
-- **Base URL**: http://localhost:3000
+- **Base URL**: http://localhost:3002
 - **Servidor**: Se inicia automáticamente antes de las pruebas
 
 ## 📝 Escribir Nuevas Pruebas
@@ -52,7 +52,7 @@ test.describe('Mi Módulo', () => {
 ## 🛠️ Herramientas Útiles
 
 - **Playwright Inspector**: `pnpm test:e2e:debug`
-- **Test Generator**: `npx playwright codegen localhost:3000`
+- **Test Generator**: `npx playwright codegen localhost:3002`
 - **Trace Viewer**: Incluido en el reporte HTML
 
 ## 📊 Reportes

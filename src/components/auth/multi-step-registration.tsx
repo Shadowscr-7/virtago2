@@ -9,6 +9,7 @@ import { OTPVerification } from "./otp-verification";
 import { UserTypeSelection } from "./user-type-selection";
 import { PersonalInfoForm } from "./personal-info-form";
 import { BusinessInfoForm } from "./business-info-form";
+import { PlanSelection } from "./plan-selection";
 import { RegistrationSuccess } from "./registration-success";
 
 export function MultiStepRegistration() {
@@ -82,6 +83,18 @@ export function MultiStepRegistration() {
           />
         );
 
+      case "planSelection":
+        return (
+          <PlanSelection
+            key="planSelection"
+            onBack={() => resetRegistration()}
+            onPlanSelected={(plan) => {
+              // El store maneja la selección del plan
+              useAuthStore.getState().selectPlan(plan);
+            }}
+          />
+        );
+
       case "completed":
         return <RegistrationSuccess key="success" />;
 
@@ -99,7 +112,7 @@ export function MultiStepRegistration() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4"
+      className="min-h-screen flex items-center justify-center p-4 pb-8"
       style={{
         background: `linear-gradient(135deg, ${themeColors.background}, ${themeColors.primary}20, ${themeColors.background})`,
       }}
@@ -137,6 +150,7 @@ export function MultiStepRegistration() {
             "userType",
             "personalInfo",
             "businessInfo",
+            "planSelection",
             "completed",
           ].map((step, index) => {
             const isActive = registrationStep === step;
@@ -147,6 +161,7 @@ export function MultiStepRegistration() {
                 "userType",
                 "personalInfo",
                 "businessInfo",
+                "planSelection",
                 "completed",
               ].indexOf(registrationStep) > index;
 
@@ -173,30 +188,30 @@ export function MultiStepRegistration() {
       {/* Contenido principal */}
       <div className="relative z-10 w-full">
         <AnimatePresence mode="wait">{renderStep()}</AnimatePresence>
-      </div>
-
-      {/* Información adicional en el footer */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
-          className="text-center text-sm"
-          style={{ color: themeColors.text.secondary }}
-        >
-          <p>
-            ¿Necesitas ayuda? Contacta a soporte en{" "}
-            <a
-              href="mailto:soporte@virtago.com"
-              className="transition-colors"
-              style={{
-                color: themeColors.primary,
-              }}
-            >
-              soporte@virtago.com
-            </a>
-          </p>
-        </motion.div>
+        
+        {/* Información adicional en el footer */}
+        <div className="mt-8 flex justify-center">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1 }}
+            className="text-center text-sm"
+            style={{ color: themeColors.text.secondary }}
+          >
+            <p>
+              ¿Necesitas ayuda? Contacta a soporte en{" "}
+              <a
+                href="mailto:soporte@virtago.com"
+                className="transition-colors"
+                style={{
+                  color: themeColors.primary,
+                }}
+              >
+                soporte@virtago.com
+              </a>
+            </p>
+          </motion.div>
+        </div>
       </div>
     </div>
   );

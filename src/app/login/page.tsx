@@ -1,13 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, ArrowLeft, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAuthStore } from "@/lib/auth-store";
+import { useAuthStore } from "@/store/auth";
 import { useTheme } from "@/contexts/theme-context";
-import { useToast } from "@/components/ui/toast";
-import { setToastFunction } from "@/components/cart/cart-store";
 import { StyledSwitch } from "@/components/ui/styled-switch";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -21,7 +19,6 @@ export default function LoginPage() {
 
   const { login } = useAuthStore();
   const { themeColors } = useTheme();
-  const { showToast } = useToast();
   const router = useRouter();
 
   // Estilos dinámicos para inputs
@@ -43,48 +40,21 @@ export default function LoginPage() {
     boxShadow: `0 0 10px ${themeColors.primary}40`,
   };
 
-  // Set up toast function
-  useEffect(() => {
-    setToastFunction(showToast);
-  }, [showToast]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email || !password) {
-      showToast({
-        title: "Campos requeridos",
-        description: "Por favor completa email y contraseña",
-        type: "warning",
-      });
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const success = await login(email, password);
-
-      if (success) {
-        showToast({
-          title: "¡Bienvenido!",
-          description: "Has iniciado sesión exitosamente",
-          type: "success",
-        });
-        router.push("/");
-      } else {
-        showToast({
-          title: "Error de autenticación",
-          description: "Email o contraseña incorrectos",
-          type: "error",
-        });
-      }
+      await login(email, password);
+      // Si llegamos aquí, el login fue exitoso
+      router.push("/");
     } catch {
-      showToast({
-        title: "Error",
-        description: "Ocurrió un error inesperado",
-        type: "error",
-      });
+      // Los errores ya se muestran vía toast desde el store
     } finally {
       setIsLoading(false);
     }
