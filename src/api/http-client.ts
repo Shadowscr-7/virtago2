@@ -122,10 +122,11 @@ httpClient.interceptors.response.use(
           // Si falla el refresh, remover tokens y redirigir al login
           removeToken();
           
-          // Redirigir al login (solo en cliente)
-          if (typeof window !== 'undefined') {
-            window.location.href = '/login';
-          }
+          // TEMPORALMENTE DESACTIVADO PARA DEBUG - Redirigir al login (solo en cliente)
+          console.log("🔴 DEBERÍA REDIRIGIR A /login PERO ESTÁ DESACTIVADO PARA DEBUG");
+          // if (typeof window !== 'undefined') {
+          //   window.location.href = '/login';
+          // }
           
           return Promise.reject(refreshError);
         }
@@ -133,9 +134,11 @@ httpClient.interceptors.response.use(
         // No hay refresh token, redirigir al login
         removeToken();
         
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login';
-        }
+        // TEMPORALMENTE DESACTIVADO PARA DEBUG - Redirigir al login
+        console.log("🔴 DEBERÍA REDIRIGIR A /login PERO ESTÁ DESACTIVADO PARA DEBUG (no refresh token)");
+        // if (typeof window !== 'undefined') {
+        //   window.location.href = '/login';
+        // }
       }
     }
     

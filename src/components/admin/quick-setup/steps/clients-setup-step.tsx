@@ -17,12 +17,43 @@ import {
 import { WizardStepProps } from "../setup-wizard";
 
 interface ClientData {
-  name: string;
   email: string;
-  phone?: string;
-  address?: string;
-  businessType?: string;
-  taxId?: string;
+  firstName: string;
+  lastName: string;
+  gender: string;
+  phone: string;
+  phoneOptional?: string;
+  documentType: string;
+  document: string;
+  customerClass: string;
+  customerClassTwo: string;
+  customerClassThree: string;
+  customerClassDist: string;
+  customerClassDistTwo: string;
+  latitude: number;
+  longitude: number;
+  status: string;
+  distributorCodes: string[];
+  information: {
+    paymentMethodCode: string;
+    companyCode: string;
+    salesmanName: string;
+    visitDay: string;
+    pdv: string;
+    deliveryDay: string;
+    warehouse: string;
+    frequency: string;
+    priceList: string;
+    routeName: string;
+    withCredit: boolean;
+    distributorName: string;
+    sellerId: string;
+    routeId: string;
+    clientCode: string;
+    pdvname: string;
+    paymentTerm: string;
+    customerClassDistTwo: string;
+  };
 }
 
 interface ImportMethod {
@@ -35,20 +66,277 @@ interface ImportMethod {
 
 const SAMPLE_CLIENT_DATA = [
   {
-    name: "Empresa ABC S.A.",
-    email: "contacto@empresaabc.com",
-    phone: "+54 11 1234-5678",
-    address: "Av. Corrientes 1234, CABA",
-    businessType: "Mayorista",
-    taxId: "20-12345678-9"
+    "email": "juan.perez@tiendacentral.com",
+    "firstName": "Juan Carlos",
+    "lastName": "Pérez Mendoza",
+    "gender": "M",
+    "phone": "+51987654321",
+    "phoneOptional": "+51912345678",
+    "documentType": "DNI",
+    "document": "12345678",
+    "customerClass": "A",
+    "customerClassTwo": "VIP",
+    "customerClassThree": "Premium",
+    "customerClassDist": "Nacional",
+    "customerClassDistTwo": "Mayorista",
+    "latitude": -12.0464,
+    "longitude": -77.0428,
+    "status": "A",
+    "distributorCodes": ["DIST01", "DIST05"],
+    "information": {
+      "paymentMethodCode": "CASH",
+      "companyCode": "COMP001",
+      "salesmanName": "Carlos Alberto Vendedor",
+      "visitDay": "Lunes",
+      "pdv": "PDV001",
+      "deliveryDay": "Martes",
+      "warehouse": "ALMACEN_LIMA_CENTRO",
+      "frequency": "Semanal",
+      "priceList": "LISTA_PREMIUM",
+      "routeName": "Ruta Lima Centro",
+      "withCredit": true,
+      "distributorName": "Distribuidor Lima Central",
+      "sellerId": "SELL001",
+      "routeId": "ROUTE001",
+      "clientCode": "CLI001",
+      "pdvname": "Tienda Central Lima",
+      "paymentTerm": "30 días",
+      "customerClassDistTwo": "Regional Norte"
+    }
   },
   {
-    name: "Distribuidora XYZ",
-    email: "ventas@distribuidoraxyz.com",
-    phone: "+54 11 8765-4321",
-    address: "San Martín 5678, Buenos Aires",
-    businessType: "Distribuidor",
-    taxId: "30-87654321-5"
+    "email": "maria.garcia@supermercadosur.com",
+    "firstName": "María Elena",
+    "lastName": "García Rodríguez",
+    "gender": "F",
+    "phone": "+51987654322",
+    "phoneOptional": "+51987654399",
+    "documentType": "RUC",
+    "document": "20123456789",
+    "customerClass": "B",
+    "customerClassTwo": "Corporativo",
+    "customerClassThree": "Mayorista",
+    "customerClassDist": "Regional",
+    "customerClassDistTwo": "Cadena",
+    "latitude": -12.1234,
+    "longitude": -77.0567,
+    "status": "A",
+    "distributorCodes": ["DIST02", "DIST03", "DIST07"],
+    "information": {
+      "paymentMethodCode": "CREDIT_CARD",
+      "companyCode": "COMP002",
+      "salesmanName": "Ana Patricia Vendedora",
+      "visitDay": "Miércoles",
+      "pdv": "PDV002",
+      "deliveryDay": "Jueves",
+      "warehouse": "ALMACEN_SUR_LIMA",
+      "frequency": "Quincenal",
+      "priceList": "LISTA_CORPORATIVA",
+      "routeName": "Ruta Sur Lima",
+      "withCredit": true,
+      "distributorName": "Distribuidor Sur Lima",
+      "sellerId": "SELL002",
+      "routeId": "ROUTE002",
+      "clientCode": "CLI002",
+      "pdvname": "Supermercado Sur Plaza",
+      "paymentTerm": "45 días",
+      "customerClassDistTwo": "Cadena Nacional"
+    }
+  },
+  {
+    "email": "pedro.rodriguez@minimarketnoroeste.com",
+    "firstName": "Pedro Antonio",
+    "lastName": "Rodríguez Silva",
+    "gender": "M",
+    "phone": "+51987654323",
+    "phoneOptional": "+51912345680",
+    "documentType": "DNI",
+    "document": "87654321",
+    "customerClass": "C",
+    "customerClassTwo": "Minorista",
+    "customerClassThree": "Estándar",
+    "customerClassDist": "Local",
+    "customerClassDistTwo": "Independiente",
+    "latitude": -12.0789,
+    "longitude": -77.0234,
+    "status": "A",
+    "distributorCodes": ["DIST01", "DIST04"],
+    "information": {
+      "paymentMethodCode": "TRANSFER",
+      "companyCode": "COMP003",
+      "salesmanName": "Luis Fernando Representante",
+      "visitDay": "Viernes",
+      "pdv": "PDV003",
+      "deliveryDay": "Sábado",
+      "warehouse": "ALMACEN_CALLAO",
+      "frequency": "Mensual",
+      "priceList": "LISTA_ESTANDAR",
+      "routeName": "Ruta Callao Norte",
+      "withCredit": false,
+      "distributorName": "Distribuidor Callao",
+      "sellerId": "SELL003",
+      "routeId": "ROUTE003",
+      "clientCode": "CLI003",
+      "pdvname": "Minimarket Noroeste",
+      "paymentTerm": "Contado",
+      "customerClassDistTwo": "Local Independiente"
+    }
+  },
+  {
+    "email": "ana.martinez@boticafarmacia.com",
+    "firstName": "Ana Lucía",
+    "lastName": "Martínez Flores",
+    "gender": "F",
+    "phone": "+51987654324",
+    "phoneOptional": "+51987654401",
+    "documentType": "RUC",
+    "document": "20987654321",
+    "customerClass": "A",
+    "customerClassTwo": "Especializado",
+    "customerClassThree": "Farmacia",
+    "customerClassDist": "Especializado",
+    "customerClassDistTwo": "Salud",
+    "latitude": -12.0234,
+    "longitude": -77.0789,
+    "status": "A",
+    "distributorCodes": ["DIST06", "DIST08"],
+    "information": {
+      "paymentMethodCode": "CHECK",
+      "companyCode": "COMP004",
+      "salesmanName": "Roberto Carlos Especialista",
+      "visitDay": "Martes",
+      "pdv": "PDV004",
+      "deliveryDay": "Miércoles",
+      "warehouse": "ALMACEN_ESPECIALIZADO",
+      "frequency": "Semanal",
+      "priceList": "LISTA_FARMACIA",
+      "routeName": "Ruta Farmacias Lima",
+      "withCredit": true,
+      "distributorName": "Distribuidor Farmacéutico",
+      "sellerId": "SELL004",
+      "routeId": "ROUTE004",
+      "clientCode": "CLI004",
+      "pdvname": "Botica & Farmacia Central",
+      "paymentTerm": "60 días",
+      "customerClassDistTwo": "Red Farmacéutica"
+    }
+  },
+  {
+    "email": "carlos.lopez@restaurantedeluxe.com",
+    "firstName": "Carlos Eduardo",
+    "lastName": "López Vargas",
+    "gender": "M",
+    "phone": "+51987654325",
+    "phoneOptional": "+51912345682",
+    "documentType": "RUC",
+    "document": "20456789123",
+    "customerClass": "B",
+    "customerClassTwo": "HoReCa",
+    "customerClassThree": "Restaurante",
+    "customerClassDist": "Gastronómico",
+    "customerClassDistTwo": "Alta Cocina",
+    "latitude": -12.1111,
+    "longitude": -77.0333,
+    "status": "A",
+    "distributorCodes": ["DIST09", "DIST10"],
+    "information": {
+      "paymentMethodCode": "WIRE_TRANSFER",
+      "companyCode": "COMP005",
+      "salesmanName": "Patricia Elena Ejecutiva",
+      "visitDay": "Jueves",
+      "pdv": "PDV005",
+      "deliveryDay": "Viernes",
+      "warehouse": "ALMACEN_HORECA",
+      "frequency": "Bisemanal",
+      "priceList": "LISTA_HORECA",
+      "routeName": "Ruta Restaurantes Premium",
+      "withCredit": true,
+      "distributorName": "Distribuidor HoReCa",
+      "sellerId": "SELL005",
+      "routeId": "ROUTE005",
+      "clientCode": "CLI005",
+      "pdvname": "Restaurante Deluxe Miraflores",
+      "paymentTerm": "90 días",
+      "customerClassDistTwo": "Cadena Gastronómica"
+    }
+  },
+  {
+    "email": "lucia.fernandez@kioskouniversitario.com",
+    "firstName": "Lucía Isabel",
+    "lastName": "Fernández Castro",
+    "gender": "F",
+    "phone": "+51987654326",
+    "phoneOptional": "",
+    "documentType": "DNI",
+    "document": "11223344",
+    "customerClass": "D",
+    "customerClassTwo": "Micro",
+    "customerClassThree": "Kiosko",
+    "customerClassDist": "Micro",
+    "customerClassDistTwo": "Estudiantil",
+    "latitude": -12.0678,
+    "longitude": -77.0123,
+    "status": "N",
+    "distributorCodes": ["DIST01"],
+    "information": {
+      "paymentMethodCode": "CASH",
+      "companyCode": "COMP006",
+      "salesmanName": "Miguel Angel Promotor",
+      "visitDay": "Lunes",
+      "pdv": "PDV006",
+      "deliveryDay": "Martes",
+      "warehouse": "ALMACEN_LIMA_ESTE",
+      "frequency": "Semanal",
+      "priceList": "LISTA_MICRO",
+      "routeName": "Ruta Universitaria",
+      "withCredit": false,
+      "distributorName": "Distribuidor Zona Este",
+      "sellerId": "SELL006",
+      "routeId": "ROUTE006",
+      "clientCode": "CLI006",
+      "pdvname": "Kiosko Universitario UNI",
+      "paymentTerm": "Contado",
+      "customerClassDistTwo": "Canal Educativo"
+    }
+  },
+  {
+    "email": "raul.santos@autoservicioplaza.com",
+    "firstName": "Raúl Alejandro",
+    "lastName": "Santos Mendoza",
+    "gender": "M",
+    "phone": "+51987654327",
+    "phoneOptional": "+51987654403",
+    "documentType": "RUC",
+    "document": "20789123456",
+    "customerClass": "B",
+    "customerClassTwo": "Autoservicio",
+    "customerClassThree": "Plaza",
+    "customerClassDist": "Moderno",
+    "customerClassDistTwo": "Autoservicio",
+    "latitude": -12.0890,
+    "longitude": -77.0456,
+    "status": "A",
+    "distributorCodes": ["DIST02", "DIST05", "DIST11"],
+    "information": {
+      "paymentMethodCode": "CREDIT_CARD",
+      "companyCode": "COMP007",
+      "salesmanName": "Sandra Patricia Gerente",
+      "visitDay": "Miércoles",
+      "pdv": "PDV007",
+      "deliveryDay": "Jueves",
+      "warehouse": "ALMACEN_NORTE_LIMA",
+      "frequency": "Semanal",
+      "priceList": "LISTA_AUTOSERVICIO",
+      "routeName": "Ruta Autoservicios Norte",
+      "withCredit": true,
+      "distributorName": "Distribuidor Norte Lima",
+      "sellerId": "SELL007",
+      "routeId": "ROUTE007",
+      "clientCode": "CLI007",
+      "pdvname": "Autoservicio Plaza Norte",
+      "paymentTerm": "15 días",
+      "customerClassDistTwo": "Canal Moderno"
+    }
   }
 ];
 
@@ -89,19 +377,40 @@ function FileUploadMethod({ onComplete }: { onComplete: (data: ClientData[]) => 
     }, 2000);
   };
 
-  const downloadSampleFile = () => {
-    const csvContent = "name,email,phone,address,businessType,taxId\n" +
-      SAMPLE_CLIENT_DATA.map(client => 
-        `"${client.name}","${client.email}","${client.phone}","${client.address}","${client.businessType}","${client.taxId}"`
-      ).join("\n");
-    
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'clientes_ejemplo.csv';
-    a.click();
-    window.URL.revokeObjectURL(url);
+  const downloadSampleFile = async () => {
+    console.log('🔵 Descargando archivo Excel de plantilla...');
+    try {
+      const timestamp = new Date().getTime();
+      const fileUrl = `/templates/plantilla_clientes_comentarios.xlsx?v=${timestamp}`;
+      console.log('🔵 URL del archivo:', fileUrl);
+      
+      // Fetch el archivo directamente
+      const response = await fetch(fileUrl);
+      console.log('🔵 Response status:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const blob = await response.blob();
+      console.log('🔵 Blob type:', blob.type);
+      console.log('🔵 Blob size:', blob.size);
+      
+      // Crear URL del blob y descargar
+      const blobUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = 'plantilla_clientes_comentarios.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(blobUrl);
+      
+      console.log('✅ Descarga completada exitosamente');
+    } catch (error) {
+      console.error('❌ Error al descargar archivo:', error);
+      alert('Error al descargar el archivo. Por favor intenta nuevamente.');
+    }
   };
 
   return (

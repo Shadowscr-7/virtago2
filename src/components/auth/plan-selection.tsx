@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/theme-context";
 import { api, Plan } from "@/api";
 import { showToast } from "@/store/toast-helpers";
+import { useAuthStore } from "@/store/auth";
 
 interface PlanSelectionProps {
   onPlanSelected: (plan: Plan) => void;
@@ -29,6 +30,7 @@ export function PlanSelection({ onPlanSelected, onBack }: PlanSelectionProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSelecting, setIsSelecting] = useState(false);
   const { themeColors } = useTheme();
+  const { selectPlan } = useAuthStore();
 
   useEffect(() => {
     loadPlans();
@@ -63,25 +65,27 @@ export function PlanSelection({ onPlanSelected, onBack }: PlanSelectionProps) {
   const handleContinue = async () => {
     if (!selectedPlan) return;
 
+    console.log("🔵 Iniciando creación de distribuidor...");
     setIsSelecting(true);
     try {
-      await api.plans.selectPlan(selectedPlan.id);
+      console.log("🔵 Llamando a selectPlan con:", selectedPlan.displayName);
+      // Usar la función del store que crea el distribuidor completo con toda la información del plan
+      await selectPlan(selectedPlan);
       
-      showToast({
-        title: "Plan seleccionado",
-        description: `Has seleccionado el plan ${selectedPlan.displayName}`,
-        type: "success",
-      });
-
+      console.log("✅ selectPlan completado exitosamente, redirigiendo...");
+      // Solo redirigir si la creación del distribuidor fue exitosa
       onPlanSelected(selectedPlan);
     } catch (error) {
-      console.error("Error selecting plan:", error);
+      console.error("❌ Error creating distributor:", error);
+      console.log("❌ NO redirigiendo debido al error");
       showToast({
         title: "Error",
-        description: "No se pudo seleccionar el plan. Inténtalo de nuevo.",
+        description: "No se pudo completar el registro. Inténtalo de nuevo.",
         type: "error",
       });
+      // NO llamar onPlanSelected aquí para evitar redirección en caso de error
     } finally {
+      console.log("🔵 Finalizando handleContinue, isSelecting = false");
       setIsSelecting(false);
     }
   };
@@ -410,11 +414,11 @@ export function PlanSelection({ onPlanSelected, onBack }: PlanSelectionProps) {
             {isSelecting ? (
               <>
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Seleccionando plan...
+                Creando distribuidor...
               </>
             ) : (
               <>
-                Continuar con {selectedPlan?.displayName}
+                Completar registro con {selectedPlan?.displayName}
                 <Crown className="h-5 w-5" />
               </>
             )}

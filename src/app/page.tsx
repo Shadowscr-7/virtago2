@@ -6,6 +6,8 @@ import { ProductCard } from "@/components/products/product-card";
 import { useTheme } from "@/contexts/theme-context";
 import { AnimatedBackground } from "@/components/ui/animated-background";
 import { ChatDemo } from "@/components/chat/ChatDemo";
+import { useAuthStore } from "@/store/auth";
+import { useRouter } from "next/navigation";
 import { ArrowRight, Star, TrendingUp, Users, ShieldCheck } from "lucide-react";
 
 // Mock data para productos
@@ -64,9 +66,10 @@ const featuredProducts = [
 ];
 
 export default function Home() {
-  // Simular estado de autenticación (false por defecto)
-  const isAuthenticated = false;
+  // Obtener el estado real de autenticación
+  const { isAuthenticated } = useAuthStore();
   const { themeColors } = useTheme();
+  const router = useRouter();
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -184,6 +187,7 @@ export default function Home() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => router.push('/login')}
                 className="px-6 py-2 text-white rounded-lg font-medium transition-all"
                 style={{ backgroundColor: themeColors.primary }}
               >
@@ -192,6 +196,7 @@ export default function Home() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => router.push('/register')}
                 className="px-6 py-2 border rounded-lg font-medium transition-all"
                 style={{
                   borderColor: themeColors.primary,

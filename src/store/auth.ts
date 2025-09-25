@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { Plan } from "@/api";
 import { apiHelpers } from "./api-helpers";
 import { showToast } from "./toast-helpers";
 
@@ -36,6 +37,7 @@ export interface User {
   firstName: string;
   lastName: string;
   userType?: "client" | "distributor";
+  role?: 'user' | 'admin' | 'distributor';
   isVerified: boolean;
   profile?: {
     phone?: string;
@@ -140,7 +142,7 @@ interface AuthState {
   updateDistributorInfo: (
     data: Partial<User["distributorInfo"]>,
   ) => Promise<void>;
-  selectPlan: (plan: PlanInfo) => Promise<void>;
+  selectPlan: (plan: Plan) => Promise<void>;
   resetRegistration: () => void;
 }
 
@@ -195,27 +197,44 @@ export const useAuthStore = create<AuthState>()(
 
           console.log("Login exitoso:", response.data);
 
-          const { access_token, user } = response.data;
+          const { token, user } = response.data;
+
+          // Determinar userType basado en múltiples criterios
+          const userType: 'client' | 'distributor' = 
+            user.distributorCode || 
+            user.role === 'distributor' || 
+            (user.planName && user.planName !== 'free') 
+            ? 'distributor' 
+            : 'client';
 
           // Crear el usuario con la estructura esperada
           const loggedUser: User = {
-            id: user.id,
+            id: user.email, // Usar email como ID ya que no viene ID en la respuesta
             email: user.email,
             firstName: user.firstName,
             lastName: user.lastName,
-            userType: user.userType,
-            isVerified: true,
+            userType,
+            isVerified: user.isVerified,
+            role: user.role,
+            plan: user.planId ? {
+              id: user.planId,
+              name: user.planName,
+              displayName: user.planDisplayName,
+              price: 0, // No viene en la respuesta, poner default
+              currency: 'USD',
+              billingCycle: 'monthly',
+            } : undefined,
           };
 
           set({
             user: loggedUser,
-            token: access_token,
+            token,
             isAuthenticated: true,
             isLoading: false,
           });
 
-          // El token se guarda automáticamente por el http client, pero también lo guardamos aquí por compatibilidad
-          localStorage.setItem("auth_token", access_token);
+          // Guardar el token en localStorage
+          localStorage.setItem("auth_token", token);
 
           // Mostrar notificación de éxito
           showToast({
@@ -664,11 +683,13 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      selectPlan: async (plan: PlanInfo) => {
+      selectPlan: async (plan: Plan) => {
+        console.log("🟡 Store: Iniciando selectPlan para plan:", plan.displayName);
         set({ isLoading: true });
         try {
           // Recopilar todos los datos del distribuidor
           const { user, registrationData } = get();
+          console.log("🟡 Store: Datos recopilados, creando payload...");
           
           // Crear el payload completo del distribuidor
           const distributorPayload = {
@@ -708,9 +729,23 @@ export const useAuthStore = create<AuthState>()(
             },
           };
 
-          // Llamar a la API para crear el distribuidor completo
-          await apiHelpers.createDistributor(distributorPayload);
+          // Llamar SOLO a la API para crear el distribuidor completo (incluye el plan)
+          console.log("🟡 Store: Llamando a apiHelpers.createDistributor...");
+          console.log("🟡 Store: Payload enviado:", distributorPayload);
+          
+          try {
+            const result = await apiHelpers.createDistributor(distributorPayload);
+            console.log("✅ Store: createDistributor exitoso, respuesta:", result);
+            console.log("✅ Store: Actualizando estado...");
+          } catch (apiError) {
+            console.error("❌ Store: Error específico de la API:", apiError);
+            console.log("❌ Store: Tipo de error:", typeof apiError);
+            console.log("❌ Store: Error props:", Object.keys(apiError || {}));
+            throw apiError; // Re-lanzar para que sea capturado por el catch principal
+          }
 
+          // SOLO si la API fue exitosa, actualizar el estado
+          
           // Actualizar usuario con el plan seleccionado
           if (user) {
             const updatedUser = {
@@ -742,7 +777,8 @@ export const useAuthStore = create<AuthState>()(
             type: "success",
           });
         } catch (error) {
-          console.error("Error selecting plan:", error);
+          console.error("❌ Store: Error en selectPlan:", error);
+          console.log("❌ Store: Restableciendo isLoading a false");
           set({ isLoading: false });
           
           // Mostrar notificación de error
@@ -756,6 +792,7 @@ export const useAuthStore = create<AuthState>()(
             type: "error",
           });
           
+          console.log("❌ Store: Haciendo throw del error para propagarlo al componente");
           throw error;
         }
       },

@@ -15,7 +15,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { useAuthStore } from "@/lib/auth-store";
+import { useAuthStore } from "@/store/auth";
 import { useTheme } from "@/contexts/theme-context";
 import { CartButton } from "@/components/cart/cart-button";
 import { ThemeSelector } from "@/components/ui/theme-selector";
@@ -165,13 +165,15 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                       borderColor: themeColors.primary + "30",
                     }}
                   >
-                    <div className="text-2xl">{user.avatar}</div>
+                    <div className="text-2xl">
+                      <User className="w-6 h-6" />
+                    </div>
                     <div className="text-left hidden sm:block">
                       <p className="text-sm font-medium text-foreground">
-                        {user.name}
+                        {user.firstName} {user.lastName}
                       </p>
                       <p className="text-xs text-muted-foreground capitalize">
-                        {user.role}
+                        {user.role || user.userType}
                       </p>
                     </div>
                   </motion.button>
@@ -187,10 +189,12 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                 >
                   <DropdownMenuLabel>
                     <div className="flex items-center space-x-2">
-                      <div className="text-lg">{user.avatar}</div>
+                      <div className="text-lg">
+                        <User className="w-5 h-5" />
+                      </div>
                       <div>
                         <p className="font-medium text-foreground">
-                          {user.name}
+                          {user.firstName} {user.lastName}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {user.email}
@@ -212,7 +216,7 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                     </Link>
                   </DropdownMenuItem>
 
-                  {user.role === "cliente" ? (
+                  {user.role === "user" && user.userType === "client" ? (
                     <>
                       <DropdownMenuItem asChild>
                         <Link

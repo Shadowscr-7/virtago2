@@ -7,14 +7,32 @@ export interface LoginData {
 }
 
 export interface LoginResponse {
-  access_token: string;
-  refresh_token: string;
+  success: boolean;
+  message: string;
+  token: string;
   user: {
-    id: string;
     email: string;
+    password?: string;
     firstName: string;
     lastName: string;
-    userType?: 'client' | 'distributor';
+    status: string;
+    planId: string;
+    planName: string;
+    planDisplayName: string;
+    planExpiration: string | null;
+    recentProducts: unknown[];
+    wishlist: unknown[];
+    cover: {
+      _id: string;
+      url: string;
+      blurDataURL: string;
+    };
+    recoveryPassword: boolean;
+    role: 'user' | 'admin' | 'distributor';
+    lastOtpSentAt: string;
+    isVerified: boolean;
+    otp: string | null;
+    distributorCode: string | null;
   };
 }
 

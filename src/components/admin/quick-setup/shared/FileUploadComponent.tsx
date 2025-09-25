@@ -187,7 +187,7 @@ export function FileUploadComponent<T>({
           }}
         >
           <Download className="w-4 h-4" />
-          Descargar {method === "json" ? "JSON" : "CSV"} de Ejemplo
+          Descargar {method === "json" ? "JSON" : "archivo"} de Ejemplo
         </motion.button>
       </div>
 

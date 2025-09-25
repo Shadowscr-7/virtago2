@@ -88,9 +88,10 @@ export function MultiStepRegistration() {
           <PlanSelection
             key="planSelection"
             onBack={() => resetRegistration()}
-            onPlanSelected={(plan) => {
-              // El store maneja la selección del plan
-              useAuthStore.getState().selectPlan(plan);
+            onPlanSelected={() => {
+              // NO llamar selectPlan aquí - ya se maneja en el componente PlanSelection
+              // Solo proceder al siguiente paso si llegamos aquí (significa que selectPlan fue exitoso)
+              console.log("✅ Plan seleccionado exitosamente, continuando al siguiente paso...");
             }}
           />
         );

@@ -15,7 +15,7 @@ import {
   Activity,
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/admin-layout";
-import { useAuthStore } from "@/lib/auth-store";
+import { useAuthStore } from "@/store/auth";
 import { useTheme } from "@/contexts/theme-context";
 import Link from "next/link";
 
@@ -23,7 +23,7 @@ export default function AdminDashboard() {
   const { user } = useAuthStore();
   const { themeColors } = useTheme();
 
-  if (!user || user.role !== "distribuidor") {
+  if (!user || (user.role !== "distributor" && user.role !== "admin" && user.userType !== "distributor")) {
     return (
       <div 
         className="min-h-screen flex items-center justify-center backdrop-blur-xl"
@@ -170,7 +170,7 @@ export default function AdminDashboard() {
                   backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
                 }}
               >
-                ¡Bienvenido, {user.name}!
+                ¡Bienvenido, {user.firstName} {user.lastName}!
               </h1>
               <p 
                 className="mt-2"
