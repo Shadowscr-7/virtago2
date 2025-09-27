@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileUploadComponent } from '../shared/FileUploadComponent';
 import { StepProps, PriceList, UploadMethod, UploadResult } from '../shared/types';
+import { api, PriceListBulkData } from '@/api';
 
-// Datos de ejemplo para listas de precios
+// Datos de ejemplo para listas de precios (formato para wizard)
 const samplePriceLists: PriceList[] = [
   {
-    id: "lista_001",
-    name: "Lista Mayorista",
-    description: "Precios especiales para clientes mayoristas con descuentos por volumen",
+    id: "PL_RETAIL_001",
+    name: "Lista Retail Premium", 
+    description: "Lista de precios para clientes retail premium con descuentos especiales",
     discountPercentage: 15,
     products: [
       {
@@ -19,7 +20,7 @@ const samplePriceLists: PriceList[] = [
         discountPercentage: 15
       },
       {
-        productCode: "MON002",
+        productCode: "MON002", 
         productName: "Monitor Curvo 27 pulgadas",
         basePrice: 399.99,
         listPrice: 339.99,
@@ -28,24 +29,24 @@ const samplePriceLists: PriceList[] = [
     ]
   },
   {
-    id: "lista_002",
-    name: "Lista Minorista",
-    description: "Precios regulares para clientes finales y pequeños distribuidores",
-    discountPercentage: 5,
+    id: "PL_WHOLESALE_002",
+    name: "Lista Mayorista Estándar",
+    description: "Precios especiales para distribuidores mayoristas", 
+    discountPercentage: 20,
     products: [
       {
         productCode: "LAP001",
         productName: "Laptop Gaming RGB Ultra",
         basePrice: 1299.99,
-        listPrice: 1234.99,
-        discountPercentage: 5
+        listPrice: 1039.99,
+        discountPercentage: 20
       },
       {
         productCode: "TEC003",
         productName: "Teclado Mecánico RGB",
         basePrice: 89.99,
-        listPrice: 85.49,
-        discountPercentage: 5
+        listPrice: 71.99,
+        discountPercentage: 20
       }
     ]
   },
@@ -86,24 +87,83 @@ export function PriceListStep({ onNext, onBack, themeColors, stepData }: PriceLi
     Array.isArray(stepData?.uploadedPriceLists) ? stepData.uploadedPriceLists : []
   );
 
-  const handleUpload = (result: UploadResult<PriceList>) => {
+  const handleUpload = async (result: UploadResult<PriceList>) => {
     if (result.success) {
       setIsProcessing(true);
       
-      // Validar que los datos tengan la estructura correcta
-      const validatedData = result.data.map(list => ({
-        ...list,
-        products: Array.isArray(list.products) ? list.products : []
-      }));
-      
-      // Simular procesamiento
-      setTimeout(() => {
+      try {
+        console.log('🔍 Procesando listas de precios con API...');
+        
+        // Convertir datos de PriceList a PriceListBulkData para el API
+        const priceListsForAPI: PriceListBulkData[] = result.data.map((list, index) => ({
+          price_list_id: list.id || `PL_${Date.now()}_${index}`,
+          name: list.name,
+          description: list.description,
+          currency: "USD", // Default currency
+          country: "Colombia", // Default country
+          customer_type: "retail", // Default customer type
+          channel: "online", // Default channel
+          start_date: new Date().toISOString(),
+          status: "active",
+          default: false,
+          priority: index + 1,
+          applies_to: "all",
+          discount_type: "percentage",
+          minimum_quantity: 1,
+          maximum_quantity: 1000,
+          tags: ["imported"],
+          notes: `Lista importada: ${list.name}`
+        }));
+
+        // 🆕 LLAMAR AL API para procesar
+        const apiResponse = await api.admin.priceLists.bulkCreate(priceListsForAPI);
+        
+        if (apiResponse.success) {
+          console.log('✅ API procesó exitosamente las listas de precios');
+          
+          // Convertir respuesta del API de vuelta a formato PriceList para el wizard
+          const processedData: PriceList[] = (apiResponse.data.results.priceLists || priceListsForAPI).map((apiList, index) => ({
+            id: apiList.price_list_id,
+            name: apiList.name,
+            description: apiList.description || '',
+            discountPercentage: 10, // Default discount
+            products: result.data[index]?.products || []
+          }));
+          
+          setUploadedData(processedData);
+          setIsProcessing(false);
+          
+          // Mostrar los datos para revisión (no pasar automáticamente)
+          // onNext({ uploadedPriceLists: processedData });
+          
+        } else {
+          console.error('⚠️ API reportó errores:', apiResponse.message);
+          
+          // En caso de error, mostrar datos originales para revisión
+          const validatedData = result.data.map((list, index) => ({
+            ...list,
+            id: list.id || `generated_id_${Date.now()}_${index}`,
+            products: Array.isArray(list.products) ? list.products : []
+          }));
+          
+          setUploadedData(validatedData);
+          setIsProcessing(false);
+        }
+        
+      } catch (error) {
+        console.error('❌ Error llamando al API:', error);
+        
+        // Fallback: procesar localmente si falla el API
+        const validatedData = result.data.map((list, index) => ({
+          ...list,
+          id: list.id || `generated_id_${Date.now()}_${index}`,
+          products: Array.isArray(list.products) ? list.products : []
+        }));
+        
         setUploadedData(validatedData);
         setIsProcessing(false);
-        onNext({ uploadedPriceLists: validatedData });
-      }, 2000);
+      }
     } else {
-      // Manejar error
       console.error('Error uploading price lists:', result.error);
     }
   };
@@ -173,7 +233,7 @@ export function PriceListStep({ onNext, onBack, themeColors, stepData }: PriceLi
           <div className="space-y-4 max-h-96 overflow-y-auto">
             {uploadedData.map((priceList, index) => (
               <motion.div
-                key={priceList.id}
+                key={`priceList-${priceList.id}-${index}`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1 }}

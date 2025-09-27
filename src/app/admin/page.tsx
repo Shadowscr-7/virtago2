@@ -23,6 +23,11 @@ export default function AdminDashboard() {
   const { user } = useAuthStore();
   const { themeColors } = useTheme();
 
+  // Debug logs
+  console.log('🔍 Admin Dashboard - User data:', user);
+  console.log('🔍 Admin Dashboard - user.role:', user?.role);
+  console.log('🔍 Admin Dashboard - user.userType:', user?.userType);
+
   if (!user || (user.role !== "distributor" && user.role !== "admin" && user.userType !== "distributor")) {
     return (
       <div 

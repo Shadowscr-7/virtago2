@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { FileUploadComponent } from '../shared/FileUploadComponent';
 import { StepProps, ProductData, MatchedProduct, Category, UploadMethod, UploadResult, ThemeColors } from '../shared/types';
 import { Check, Edit3, X } from 'lucide-react';
+import { api } from '@/api';
 
 // Datos de ejemplo y lógica de matching (movidos del wizard principal)
 const sampleData: ProductData[] = [
@@ -63,6 +64,8 @@ export function ProductStep({ onNext, onBack, themeColors, stepData }: ProductSt
   const [method, setMethod] = useState<UploadMethod>("file");
   const [isProcessing, setIsProcessing] = useState(false);
   const [matchedProducts, setMatchedProducts] = useState<MatchedProduct[]>(stepData?.matchedProducts || []);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
 
   const findBestCategoryMatch = (product: ProductData) => {
     const matches = mockCategories.map(cat => ({
@@ -131,12 +134,81 @@ export function ProductStep({ onNext, onBack, themeColors, stepData }: ProductSt
     return matches / Math.max(words1.length, words2.length);
   };
 
-  const handleUpload = (result: UploadResult<ProductData>) => {
+  const handleUpload = async (result: UploadResult<ProductData>) => {
     if (result.success) {
       setIsProcessing(true);
       
-      // Simular procesamiento de IA
-      setTimeout(() => {
+      try {
+        // Preparar datos para el API (formato ProductBulkData[])
+        const productData = result.data.map(product => ({
+          name: product.name,
+          fullDescription: product.description,
+          categoryCode: product.category,
+          brandId: product.brand,
+          price: product.price,
+          stockQuantity: product.stock,
+          status: "active" as const,
+          published: true
+        }));
+
+        // Llamar al API de bulk creation
+        const apiResponse = await api.admin.products.bulkCreate(productData);
+        
+        if (apiResponse.success) {
+          // Procesar respuesta del API para matching interface
+          // Como el API devuelve ProductBulkData[], necesitamos mapear a nuestro formato interno
+          const matched = result.data.map((originalProduct, index) => {
+            const apiProduct = apiResponse.data.results.products?.[index];
+            return {
+              code: originalProduct.code,
+              name: apiProduct?.name || originalProduct.name,
+              description: apiProduct?.fullDescription || originalProduct.description,
+              category: apiProduct?.categoryCode || originalProduct.category,
+              brand: apiProduct?.brandId || originalProduct.brand,
+              price: apiProduct?.price || originalProduct.price,
+              stock: apiProduct?.stockQuantity || originalProduct.stock,
+              original: { ...originalProduct },
+              aiSuggestions: {
+                category: {
+                  name: apiProduct?.categoryCode || originalProduct.category,
+                  confidence: 0.9
+                },
+                brand: {
+                  name: apiProduct?.brandId || originalProduct.brand,
+                  confidence: 0.9
+                },
+                subcategory: {
+                  name: apiProduct?.subCategoryId || 'General',
+                  confidence: 0.8
+                },
+                confidence: 0.85
+              }
+            };
+          });
+          
+          setMatchedProducts(matched);
+        } else {
+          // Manejar errores del API
+          console.error('Error en bulk creation:', apiResponse.message);
+          // Fallback a procesamiento local
+          const matched = result.data.map(product => ({
+            ...product,
+            original: { ...product },
+            aiSuggestions: {
+              category: findBestCategoryMatch(product),
+              brand: findBestBrandMatch(product),
+              subcategory: findBestSubcategoryMatch(product),
+              confidence: (findBestCategoryMatch(product).confidence + 
+                          findBestBrandMatch(product).confidence + 
+                          findBestSubcategoryMatch(product).confidence) / 3
+            }
+          }));
+          
+          setMatchedProducts(matched);
+        }
+      } catch (error) {
+        console.error('Error en el upload de productos:', error);
+        // Fallback a procesamiento local en caso de error
         const matched = result.data.map(product => ({
           ...product,
           original: { ...product },
@@ -151,21 +223,130 @@ export function ProductStep({ onNext, onBack, themeColors, stepData }: ProductSt
         }));
         
         setMatchedProducts(matched);
+      } finally {
         setIsProcessing(false);
-      }, 3000);
+      }
     }
   };
 
   // Si tenemos productos procesados, mostrar la interfaz de matching
-  if (matchedProducts.length > 0 && !isProcessing) {
+  if (matchedProducts.length > 0 && !isProcessing && !showConfirmation) {
     return (
       <ProductMatchingInterface
         products={matchedProducts}
-        onComplete={(finalProducts) => onNext({ matchedProducts: finalProducts })}
+        onComplete={(finalProducts) => {
+          setMatchedProducts(finalProducts);
+          setShowConfirmation(true);
+        }}
         onBack={() => setMatchedProducts([])}
         themeColors={themeColors}
         mockCategories={mockCategories}
       />
+    );
+  }
+
+  // Mostrar confirmación antes de proceder
+  if (showConfirmation) {
+    return (
+      <div className="space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-8 rounded-xl text-center"
+          style={{
+            backgroundColor: `${themeColors.surface}30`,
+            borderColor: `${themeColors.primary}30`,
+          }}
+        >
+          <div className="text-center mb-6">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
+                 style={{ backgroundColor: `${themeColors.primary}20` }}>
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.5, type: 'spring' }}
+                className="text-2xl"
+              >
+                ✓
+              </motion.div>
+            </div>
+            <h4 className="text-lg font-semibold mb-2" style={{ color: themeColors.text.primary }}>
+              ¿Confirmar importación de productos?
+            </h4>
+            <p className="text-sm" style={{ color: themeColors.text.secondary }}>
+              Los datos se han procesado correctamente. Revisa la información anterior y confirma si deseas continuar con estos {matchedProducts.length} productos.
+            </p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row justify-between gap-4">
+            <motion.button
+              onClick={() => setShowConfirmation(false)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="px-6 py-3 rounded-xl font-medium order-2 sm:order-1"
+              style={{
+                backgroundColor: `${themeColors.surface}50`,
+                color: themeColors.text.secondary,
+                border: `2px solid ${themeColors.surface}`,
+              }}
+            >
+              ← Volver Atrás
+            </motion.button>
+            
+            <div className="flex flex-col sm:flex-row gap-3 order-1 sm:order-2">
+              <motion.button
+                onClick={() => {
+                  setMatchedProducts([]);
+                  setShowConfirmation(false);
+                }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-6 py-3 rounded-xl font-medium"
+                style={{
+                  backgroundColor: `${themeColors.accent}20`,
+                  color: themeColors.accent,
+                  border: `2px solid ${themeColors.accent}30`,
+                }}
+              >
+                🔄 Cargar Otros Datos
+              </motion.button>
+              
+              <motion.button
+                onClick={() => {
+                  setIsConfirming(true);
+                  setTimeout(() => {
+                    onNext({ matchedProducts });
+                  }, 500);
+                }}
+                disabled={isConfirming}
+                whileHover={{ scale: isConfirming ? 1 : 1.05 }}
+                whileTap={{ scale: isConfirming ? 1 : 0.98 }}
+                className="px-8 py-3 rounded-xl font-semibold text-white shadow-lg flex items-center gap-2 min-w-[200px] justify-center"
+                style={{ 
+                  backgroundColor: isConfirming ? `${themeColors.primary}80` : themeColors.primary,
+                  boxShadow: `0 4px 12px ${themeColors.primary}30`,
+                  cursor: isConfirming ? 'wait' : 'pointer'
+                }}
+              >
+                {isConfirming ? (
+                  <>
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                      className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                    />
+                    Confirmando...
+                  </>
+                ) : (
+                  <>
+                    ✅ Confirmar y Continuar
+                  </>
+                )}
+              </motion.button>
+            </div>
+          </div>
+        </motion.div>
+      </div>
     );
   }
 
@@ -534,7 +715,7 @@ function ProductMatchingInterface({
           className="px-6 py-3 rounded-xl font-medium text-white"
           style={{ backgroundColor: themeColors.primary }}
         >
-          Continuar
+          Revisar y Confirmar
         </motion.button>
       </div>
     </div>

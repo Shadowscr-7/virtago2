@@ -195,7 +195,10 @@ export const useAuthStore = create<AuthState>()(
           // Llamar a la API real de login
           const response = await apiHelpers.login({ email, password });
 
-          console.log("Login exitoso:", response.data);
+          console.log("🔵 Login exitoso:", response.data);
+          console.log("🔵 Token recibido:", response.data.token);
+          console.log("🔵 User recibido:", response.data.user);
+          console.log("🔵 Role del user:", response.data.user.role);
 
           const { token, user } = response.data;
 
@@ -226,12 +229,17 @@ export const useAuthStore = create<AuthState>()(
             } : undefined,
           };
 
+          console.log("🔵 Usuario creado para el store:", loggedUser);
+          console.log("🔵 Role guardado en loggedUser:", loggedUser.role);
+
           set({
             user: loggedUser,
             token,
             isAuthenticated: true,
             isLoading: false,
           });
+
+          console.log("🔵 Estado actualizado en el store");
 
           // Guardar el token en localStorage
           localStorage.setItem("auth_token", token);

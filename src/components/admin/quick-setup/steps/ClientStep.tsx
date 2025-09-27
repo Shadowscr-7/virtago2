@@ -3,21 +3,50 @@ import { motion } from 'framer-motion';
 import { FileUploadComponent } from '../shared/FileUploadComponent';
 import { StepProps, UploadMethod, UploadResult } from '../shared/types';
 import { Users, Building, Mail, Phone } from 'lucide-react';
+import { api, ClientBulkData, ClientBulkCreateResponse } from '@/api';
 
 // Definir tipos para clientes
 interface ClientData {
-  code: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  city: string;
-  country: string;
-  clientType: 'individual' | 'company';
+  code?: string;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  clientType?: 'individual' | 'company';
   taxId?: string;
-  creditLimit: number;
-  paymentTerms: number;
+  creditLimit?: number;
+  paymentTerms?: number;
+  paymentTerm?: string;
+  // Campos adicionales del JSON completo
+  [key: string]: unknown;
 }
+
+// Función helper para obtener valores seguros
+const getClientValue = (client: ClientData, field: keyof ClientData, defaultValue = '') => {
+  const value = client[field];
+  return value != null ? String(value) : defaultValue;
+};
+
+const getClientName = (client: ClientData): string => {
+  if (client.name) return client.name;
+  if (client.firstName && client.lastName) return `${client.firstName} ${client.lastName}`;
+  if (client.firstName) return client.firstName;
+  return 'Cliente sin nombre';
+};
+
+const getCreditLimit = (client: ClientData): number => {
+  return typeof client.creditLimit === 'number' ? client.creditLimit : 0;
+};
+
+const getPaymentTerms = (client: ClientData): string => {
+  if (client.paymentTerm) return client.paymentTerm;
+  if (typeof client.paymentTerms === 'number') return `${client.paymentTerms} días`;
+  return 'No especificado';
+};
 
 // Datos de ejemplo para clientes
 const sampleClients: ClientData[] = [
@@ -136,20 +165,85 @@ export function ClientStep({ onNext, onBack, themeColors, stepData }: ClientStep
   const [uploadedData, setUploadedData] = useState<ClientData[]>(
     Array.isArray(stepData?.uploadedClients) ? stepData.uploadedClients : []
   );
+  const [error, setError] = useState<string | null>(null);
+  const [isConfirming, setIsConfirming] = useState(false);
 
-  const handleUpload = (result: UploadResult<ClientData>) => {
+  const handleUpload = async (result: UploadResult<ClientData>) => {
     if (result.success) {
+      setError(null); // Limpiar errores previos
       setIsProcessing(true);
       
-      // Simular procesamiento y validación de datos
-      setTimeout(() => {
-        setUploadedData(result.data);
+      try {
+        // Transformar los datos al formato esperado por la API
+        const clientsForAPI: ClientBulkData[] = result.data.map(client => ({
+          email: getClientValue(client, 'email', ''),
+          firstName: getClientValue(client, 'firstName', '') || getClientValue(client, 'name', ''),
+          lastName: getClientValue(client, 'lastName', ''),
+          phone: getClientValue(client, 'phone', ''),
+          phoneOptional: getClientValue(client, 'phoneOptional', '') || undefined,
+          gender: (getClientValue(client, 'gender', '') as "M" | "F") || undefined,
+          documentType: getClientValue(client, 'documentType', '') || undefined,
+          document: getClientValue(client, 'document', '') || undefined,
+          customerClass: getClientValue(client, 'customerClass', '') || undefined,
+          customerClassTwo: getClientValue(client, 'customerClassTwo', '') || undefined,
+          customerClassThree: getClientValue(client, 'customerClassThree', '') || undefined,
+          customerClassDist: getClientValue(client, 'customerClassDist', '') || undefined,
+          customerClassDistTwo: getClientValue(client, 'customerClassDistTwo', '') || undefined,
+          latitude: typeof client.latitude === 'number' ? client.latitude : undefined,
+          longitude: typeof client.longitude === 'number' ? client.longitude : undefined,
+          status: (getClientValue(client, 'status', 'A') as "A" | "N" | "I") || "A",
+          distributorCodes: Array.isArray(client.distributorCodes) ? client.distributorCodes : undefined,
+          information: {
+            paymentMethodCode: getClientValue(client, 'paymentMethodCode', '') || undefined,
+            companyCode: getClientValue(client, 'companyCode', '') || undefined,
+            salesmanName: getClientValue(client, 'salesmanName', '') || undefined,
+            visitDay: getClientValue(client, 'visitDay', '') || undefined,
+            pdv: getClientValue(client, 'pdv', '') || undefined,
+            deliveryDay: getClientValue(client, 'deliveryDay', '') || undefined,
+            warehouse: getClientValue(client, 'warehouse', '') || undefined,
+            frequency: getClientValue(client, 'frequency', '') || undefined,
+            priceList: getClientValue(client, 'priceList', '') || undefined,
+            routeName: getClientValue(client, 'routeName', '') || undefined,
+            withCredit: typeof client.withCredit === 'boolean' ? client.withCredit : undefined,
+            distributorName: getClientValue(client, 'distributorName', '') || undefined,
+            sellerId: getClientValue(client, 'sellerId', '') || undefined,
+            routeId: getClientValue(client, 'routeId', '') || undefined,
+            clientCode: getClientValue(client, 'code', '') || getClientValue(client, 'clientCode', '') || undefined,
+            pdvname: getClientValue(client, 'pdvname', '') || undefined,
+            paymentTerm: getClientValue(client, 'paymentTerm', '') || undefined,
+            customerClassDistTwo: getClientValue(client, 'customerClassDistTwo', '') || undefined
+          }
+        }));
+
+        // Llamar a la API para crear clientes en lote
+        const apiResponse = await api.admin.clients.bulkCreate(clientsForAPI);
+        
+        if (apiResponse.success) {
+          const response = apiResponse.data as ClientBulkCreateResponse;
+          console.log('✅ Clientes creados exitosamente:', response);
+          
+          // Mostrar resumen del resultado
+          if (response.results.errorCount > 0) {
+            const errorMsg = `Se procesaron ${response.results.totalProcessed} clientes. ${response.results.successCount} exitosos, ${response.results.errorCount} con errores.`;
+            setError(errorMsg);
+          }
+          
+          setUploadedData(result.data);
+          setIsProcessing(false);
+        } else {
+          throw new Error(apiResponse.message || 'Error al crear clientes');
+        }
+      } catch (error) {
+        console.error('❌ Error al procesar clientes:', error);
         setIsProcessing(false);
-        onNext({ uploadedClients: result.data });
-      }, 2000);
+        
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido al procesar los datos';
+        setError(`Error del servidor: ${errorMessage}`);
+      }
     } else {
-      // Manejar error
+      // Manejar error con mejor UX
       console.error('Error uploading clients:', result.error);
+      setError(result.error || 'Error desconocido al procesar los datos');
     }
   };
 
@@ -158,7 +252,8 @@ export function ClientStep({ onNext, onBack, themeColors, stepData }: ClientStep
     
     const companies = clients.filter(c => c.clientType === 'company').length;
     const individuals = clients.filter(c => c.clientType === 'individual').length;
-    const avgCredit = clients.reduce((sum, client) => sum + client.creditLimit, 0) / clients.length;
+    const totalCredit = clients.reduce((sum, client) => sum + getCreditLimit(client), 0);
+    const avgCredit = clients.length > 0 ? totalCredit / clients.length : 0;
     
     return {
       totalClients: clients.length,
@@ -174,20 +269,26 @@ export function ClientStep({ onNext, onBack, themeColors, stepData }: ClientStep
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h3 className="text-xl font-semibold" style={{ color: themeColors.text.primary }}>
-            Clientes Cargados
-          </h3>
+          <div>
+            <h3 className="text-xl font-semibold" style={{ color: themeColors.text.primary }}>
+              Clientes Procesados Correctamente
+            </h3>
+            <p className="text-sm mt-1" style={{ color: themeColors.text.secondary }}>
+              Revisa los datos importados y confirma si son correctos
+            </p>
+          </div>
           <motion.button
             onClick={() => setUploadedData([])}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="px-4 py-2 rounded-lg"
+            className="px-4 py-2 rounded-lg flex items-center gap-2"
             style={{ 
               backgroundColor: `${themeColors.accent}20`,
-              color: themeColors.accent 
+              color: themeColors.accent,
+              border: `1px solid ${themeColors.accent}30`
             }}
           >
-            Cargar Otros
+            🔄 Cargar Otros Datos
           </motion.button>
         </div>
 
@@ -286,7 +387,7 @@ export function ClientStep({ onNext, onBack, themeColors, stepData }: ClientStep
                         <Users className="w-4 h-4" style={{ color: themeColors.accent }} />
                       )}
                       <h5 className="font-semibold" style={{ color: themeColors.text.primary }}>
-                        {client.name}
+                        {getClientName(client)}
                       </h5>
                       <span 
                         className="px-2 py-1 rounded text-xs font-medium"
@@ -302,17 +403,17 @@ export function ClientStep({ onNext, onBack, themeColors, stepData }: ClientStep
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                       <div className="flex items-center gap-2">
                         <Mail className="w-3 h-3" style={{ color: themeColors.text.secondary }} />
-                        <span style={{ color: themeColors.text.secondary }}>{client.email}</span>
+                        <span style={{ color: themeColors.text.secondary }}>{getClientValue(client, 'email', 'Sin email')}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Phone className="w-3 h-3" style={{ color: themeColors.text.secondary }} />
-                        <span style={{ color: themeColors.text.secondary }}>{client.phone}</span>
+                        <span style={{ color: themeColors.text.secondary }}>{getClientValue(client, 'phone', 'Sin teléfono')}</span>
                       </div>
                     </div>
                     
                     <div className="text-xs mt-2" style={{ color: themeColors.text.secondary }}>
-                      <span className="font-medium">Código:</span> {client.code} • 
-                      <span className="font-medium"> Ciudad:</span> {client.city}, {client.country}
+                      <span className="font-medium">Código:</span> {getClientValue(client, 'code', 'Sin código')} • 
+                      <span className="font-medium"> Ciudad:</span> {getClientValue(client, 'city', 'Sin ciudad')}, {getClientValue(client, 'country', 'Sin país')}
                       {client.taxId && (
                         <>
                           <span className="font-medium"> • Tax ID:</span> {client.taxId}
@@ -323,13 +424,13 @@ export function ClientStep({ onNext, onBack, themeColors, stepData }: ClientStep
                   
                   <div className="text-right ml-4">
                     <div className="text-lg font-bold" style={{ color: themeColors.primary }}>
-                      ${client.creditLimit.toLocaleString()}
+                      ${getCreditLimit(client).toLocaleString()}
                     </div>
                     <div className="text-xs" style={{ color: themeColors.text.secondary }}>
                       Límite de Crédito
                     </div>
                     <div className="text-xs mt-1" style={{ color: themeColors.text.secondary }}>
-                      Términos: {client.paymentTerms} días
+                      Términos: {getPaymentTerms(client)}
                     </div>
                   </div>
                 </div>
@@ -338,30 +439,103 @@ export function ClientStep({ onNext, onBack, themeColors, stepData }: ClientStep
           </div>
         </div>
 
-        {/* Botones de navegación */}
-        <div className="flex justify-between pt-6">
-          <motion.button
-            onClick={onBack}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="px-6 py-3 rounded-xl font-medium"
-            style={{
-              backgroundColor: `${themeColors.surface}50`,
-              color: themeColors.text.secondary,
-            }}
-          >
-            Anterior
-          </motion.button>
-          <motion.button
-            onClick={() => onNext({ uploadedClients: uploadedData })}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="px-6 py-3 rounded-xl font-medium text-white"
-            style={{ backgroundColor: themeColors.primary }}
-          >
-            Continuar
-          </motion.button>
-        </div>
+        {/* Confirmación y botones de navegación */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mt-8 p-6 rounded-2xl border"
+          style={{
+            backgroundColor: `${themeColors.primary}05`,
+            borderColor: `${themeColors.primary}30`,
+          }}
+        >
+          <div className="text-center mb-6">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
+                 style={{ backgroundColor: `${themeColors.primary}20` }}>
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.5, type: 'spring' }}
+                className="text-2xl"
+              >
+                ✓
+              </motion.div>
+            </div>
+            <h4 className="text-lg font-semibold mb-2" style={{ color: themeColors.text.primary }}>
+              ¿Confirmar importación de clientes?
+            </h4>
+            <p className="text-sm" style={{ color: themeColors.text.secondary }}>
+              Los datos se han procesado correctamente. Revisa la información anterior y confirma si deseas continuar con estos {uploadedData.length} clientes.
+            </p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row justify-between gap-4">
+            <motion.button
+              onClick={onBack}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="px-6 py-3 rounded-xl font-medium order-2 sm:order-1"
+              style={{
+                backgroundColor: `${themeColors.surface}50`,
+                color: themeColors.text.secondary,
+                border: `2px solid ${themeColors.surface}`,
+              }}
+            >
+              ← Volver Atrás
+            </motion.button>
+            
+            <div className="flex flex-col sm:flex-row gap-3 order-1 sm:order-2">
+              <motion.button
+                onClick={() => setUploadedData([])}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-6 py-3 rounded-xl font-medium"
+                style={{
+                  backgroundColor: `${themeColors.accent}20`,
+                  color: themeColors.accent,
+                  border: `2px solid ${themeColors.accent}30`,
+                }}
+              >
+                🔄 Cargar Otros Datos
+              </motion.button>
+              
+              <motion.button
+                onClick={() => {
+                  setIsConfirming(true);
+                  // Pequeña pausa para dar feedback visual
+                  setTimeout(() => {
+                    onNext({ uploadedClients: uploadedData });
+                  }, 500);
+                }}
+                disabled={isConfirming}
+                whileHover={{ scale: isConfirming ? 1 : 1.05 }}
+                whileTap={{ scale: isConfirming ? 1 : 0.98 }}
+                className="px-8 py-3 rounded-xl font-semibold text-white shadow-lg flex items-center gap-2 min-w-[200px] justify-center"
+                style={{ 
+                  backgroundColor: isConfirming ? `${themeColors.primary}80` : themeColors.primary,
+                  boxShadow: `0 4px 12px ${themeColors.primary}30`,
+                  cursor: isConfirming ? 'wait' : 'pointer'
+                }}
+              >
+                {isConfirming ? (
+                  <>
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+                      className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                    />
+                    Confirmando...
+                  </>
+                ) : (
+                  <>
+                    ✅ Confirmar y Continuar
+                  </>
+                )}
+              </motion.button>
+            </div>
+          </div>
+        </motion.div>
       </div>
     );
   }
@@ -404,6 +578,40 @@ export function ClientStep({ onNext, onBack, themeColors, stepData }: ClientStep
           </motion.button>
         </div>
       </div>
+
+      {/* Mostrar error si existe */}
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 rounded-xl border border-red-200 bg-red-50"
+        >
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 text-red-500">⚠️</div>
+            <div>
+              <h4 className="text-sm font-semibold text-red-800">Error al procesar los datos</h4>
+              <p className="text-sm text-red-700 mt-1">{error}</p>
+              <div className="text-xs text-red-600 mt-2">
+                <strong>Sugerencias:</strong>
+                <ul className="list-disc list-inside mt-1">
+                  <li>Verifica que el JSON sea válido (usa un validador JSON online)</li>
+                  <li>Asegúrate de que sea un array de objetos</li>
+                  <li>Elimina caracteres especiales o espacios extra al final</li>
+                  <li>Descarga el ejemplo y usa su formato exacto</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <motion.button
+            onClick={() => setError(null)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="mt-3 px-3 py-1 bg-red-200 text-red-800 rounded text-sm hover:bg-red-300"
+          >
+            Cerrar
+          </motion.button>
+        </motion.div>
+      )}
 
       {/* Componente de upload */}
       <FileUploadComponent
