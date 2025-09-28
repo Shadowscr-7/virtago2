@@ -6,7 +6,7 @@ import { X, CheckCircle, TrendingUp, Package, List, Percent, Users, ArrowRight, 
 import { useTheme } from '../../../contexts/theme-context';
 import { AdminLayout } from '../admin-layout';
 import { ClientStep, ProductStep, PriceListStep, PriceStep, DiscountStep, ReviewStep } from './steps';
-import { ThemeColors, ClientData, MatchedProduct, PriceList, PriceData } from './shared/types';
+import { ThemeColors, ClientData, MatchedProduct, PriceList, PriceData, DiscountData } from './shared/types';
 
 // Definición de pasos del wizard
 const WIZARD_STEPS = [
@@ -53,6 +53,7 @@ interface WizardData {
   matchedProducts?: MatchedProduct[];
   uploadedPriceLists?: PriceList[];
   uploadedPrices?: PriceData[];
+  uploadedDiscounts?: DiscountData[];
   discounts?: unknown[];
   completed?: boolean;
 }
@@ -121,7 +122,7 @@ export default function SetupWizard() {
       case 'prices':
         return <PriceStep {...commonProps} stepData={{ uploadedPrices: wizardData.uploadedPrices }} />;
       case 'discounts':
-        return <DiscountStep {...commonProps} />;
+        return <DiscountStep {...commonProps} stepData={{ uploadedDiscounts: wizardData.uploadedDiscounts }} />;
       case 'review':
         return <ReviewStep {...commonProps} />;
       default:

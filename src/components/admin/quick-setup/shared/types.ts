@@ -66,6 +66,25 @@ export interface PriceData {
   currency: string;
 }
 
+export interface DiscountData {
+  discountId: string;
+  name: string;
+  description: string;
+  type: 'percentage' | 'fixed_amount' | 'tiered_percentage' | 'progressive_percentage';
+  discountValue: number;
+  currency: string;
+  validFrom: string;
+  validTo?: string;
+  status: 'active' | 'inactive' | 'draft';
+  customerType: 'all' | 'retail' | 'wholesale' | 'vip';
+  channel: 'online' | 'offline' | 'omnichannel' | 'b2b' | 'all';
+  category: string;
+  maxDiscountAmount?: number;
+  minPurchaseAmount?: number;
+  usageLimit?: number;
+  usageLimitPerCustomer?: number;
+}
+
 export interface ThemeColors {
   primary: string;
   secondary: string;

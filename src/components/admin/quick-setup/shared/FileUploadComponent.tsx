@@ -60,9 +60,9 @@ export function FileUploadComponent<T>({
     onUpload({ data: sampleData, success: true });
   };
 
-  const validateJson = (input: string) => {
+  const validateJson = (input: string): { valid: boolean; error?: string; cleaned?: string; parsed?: T[] } => {
     // Limpiar el input de espacios en blanco y caracteres invisibles
-    const cleanedInput = input.trim().replace(/[\u200B-\u200D\uFEFF]/g, '');
+    let cleanedInput = input.trim().replace(/[\u200B-\u200D\uFEFF]/g, '');
     
     // Detectar y reportar problemas comunes
     if (!cleanedInput) {
@@ -74,41 +74,61 @@ export function FileUploadComponent<T>({
       return { valid: false, error: "El JSON debe empezar con '[' (debe ser un array)" };
     }
     
+    // Si no termina con ], buscar el último ] y cortar ahí
     if (!cleanedInput.endsWith(']')) {
-      return { valid: false, error: "El JSON debe terminar con ']' (debe ser un array)" };
-    }
-
-    // Detectar problemas comunes de formato
-    const lines = cleanedInput.split('\n');
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      const lineNumber = i + 1;
-      
-      // Detectar comas faltantes
-      if (line.endsWith('}') && i < lines.length - 1) {
-        const nextLine = lines[i + 1].trim();
-        if (nextLine.startsWith('{') && !line.endsWith(',')) {
-          return { 
-            valid: false, 
-            error: `Falta una coma al final de la línea ${lineNumber}: "${line}"` 
-          };
-        }
-      }
-      
-      // Detectar caracteres extraños después del JSON
-      if (line.endsWith(']') && i < lines.length - 1) {
-        const remainingLines = lines.slice(i + 1);
-        const nonEmptyLines = remainingLines.filter(l => l.trim().length > 0);
-        if (nonEmptyLines.length > 0) {
-          return { 
-            valid: false, 
-            error: `Hay contenido adicional después del JSON válido en la línea ${i + 2}: "${nonEmptyLines[0]}"` 
-          };
-        }
+      const lastBracketIndex = cleanedInput.lastIndexOf(']');
+      if (lastBracketIndex !== -1) {
+        cleanedInput = cleanedInput.substring(0, lastBracketIndex + 1);
+      } else {
+        return { valid: false, error: "El JSON debe terminar con ']' (debe ser un array)" };
       }
     }
 
-    return { valid: true, cleaned: cleanedInput };
+    // Para JSONs grandes, omitir validaciones línea por línea que pueden ser problemáticas
+    // y confiar en el parseo directo de JSON.parse()
+
+    // Intentar parsear el JSON para verificar si es válido
+    try {
+      const parsed = JSON.parse(cleanedInput);
+      if (!Array.isArray(parsed)) {
+        return { 
+          valid: false, 
+          error: "El JSON debe ser un array de objetos" 
+        };
+      }
+      
+      // Verificar que el array no esté vacío
+      if (parsed.length === 0) {
+        return { 
+          valid: false, 
+          error: "El JSON no puede estar vacío" 
+        };
+      }
+      
+      return { valid: true, cleaned: cleanedInput, parsed };
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Formato inválido';
+      
+      // Intentar dar un mensaje más útil basado en el tipo de error
+      if (errorMsg.includes('Unexpected token')) {
+        return { 
+          valid: false, 
+          error: `Error de formato JSON: Carácter inesperado. Verifica que no haya comas extras, llaves sin cerrar, o comillas mal formateadas.` 
+        };
+      }
+      
+      if (errorMsg.includes('position')) {
+        return { 
+          valid: false, 
+          error: `Error de sintaxis JSON: ${errorMsg}. Revisa el formato cerca de esa posición.` 
+        };
+      }
+      
+      return { 
+        valid: false, 
+        error: `Error de sintaxis JSON: ${errorMsg}` 
+      };
+    }
   };
 
   const handleJsonSubmit = () => {
@@ -120,6 +140,12 @@ export function FileUploadComponent<T>({
         success: false, 
         error: validation.error 
       });
+      return;
+    }
+
+    // Si ya tenemos el JSON parseado de la validación, usarlo directamente
+    if (validation.parsed && Array.isArray(validation.parsed)) {
+      onUpload({ data: validation.parsed, success: true });
       return;
     }
 
