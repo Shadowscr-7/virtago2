@@ -21,6 +21,7 @@ import { useTheme } from "@/contexts/theme-context";
 import { StyledSelect } from "@/components/ui/styled-select";
 import { api, ApiProductData } from "@/api";
 import { showToast } from "@/store/toast-helpers";
+import { ProductImportModal } from "@/components/admin/products/ProductImportModal";
 
 export default function ProductsAdminPage() {
   const router = useRouter();
@@ -40,6 +41,7 @@ export default function ProductsAdminPage() {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [categoryFilter, setCategoryFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [showImportModal, setShowImportModal] = useState(false);
 
   console.log('[PRODUCTOS PAGE] 🔍 Usuario completo:', JSON.stringify(user, null, 2));
 
@@ -164,6 +166,15 @@ export default function ProductsAdminPage() {
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleImportProducts = () => {
+    setShowImportModal(true);
+  };
+
+  const handleImportSuccess = () => {
+    // Recargar productos después de importar
+    loadProducts();
   };
 
   // Mostrar loading mientras se carga el usuario
@@ -353,6 +364,7 @@ export default function ProductsAdminPage() {
             <motion.button
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
+              onClick={handleImportProducts}
               className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all backdrop-blur-sm border font-medium"
               style={{
                 backgroundColor: themeColors.secondary + "20",
@@ -707,6 +719,13 @@ export default function ProductsAdminPage() {
           )}
         </motion.div>
       </div>
+
+      {/* Modal de Importación */}
+      <ProductImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={handleImportSuccess}
+      />
     </AdminLayout>
   );
 }
