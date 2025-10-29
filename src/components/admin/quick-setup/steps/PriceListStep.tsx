@@ -86,85 +86,133 @@ export function PriceListStep({ onNext, onBack, themeColors, stepData }: PriceLi
   const [uploadedData, setUploadedData] = useState<PriceList[]>(
     Array.isArray(stepData?.uploadedPriceLists) ? stepData.uploadedPriceLists : []
   );
+  const [uploadMethod, setUploadMethod] = useState<'file' | 'json' | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
+  // 🆕 Callback para cuando se selecciona un archivo
+  const handleFileSelect = (file: File) => {
+    console.log('📁 Archivo seleccionado:', file.name);
+    setUploadedFile(file);
+  };
+
+  // 🔄 Función para SOLO CARGAR los datos (NO llamar API todavía)
   const handleUpload = async (result: UploadResult<PriceList>) => {
     if (result.success) {
-      setIsProcessing(true);
+      // Validar que solo se use UN método de carga
+      const currentMethod = method;
       
-      try {
-        console.log('🔍 Procesando listas de precios con API...');
-        
-        // Convertir datos de PriceList a PriceListBulkData para el API
-        const priceListsForAPI: PriceListBulkData[] = result.data.map((list, index) => ({
-          price_list_id: list.id || `PL_${Date.now()}_${index}`,
-          name: list.name,
-          description: list.description,
-          currency: "USD", // Default currency
-          country: "Colombia", // Default country
-          customer_type: "retail", // Default customer type
-          channel: "online", // Default channel
-          start_date: new Date().toISOString(),
-          status: "active",
-          default: false,
-          priority: index + 1,
-          applies_to: "all",
-          discount_type: "percentage",
-          minimum_quantity: 1,
-          maximum_quantity: 1000,
-          tags: ["imported"],
-          notes: `Lista importada: ${list.name}`
-        }));
-
-        // 🆕 LLAMAR AL API para procesar
-        const apiResponse = await api.admin.priceLists.bulkCreate(priceListsForAPI);
-        
-        if (apiResponse.success) {
-          console.log('✅ API procesó exitosamente las listas de precios');
-          
-          // Convertir respuesta del API de vuelta a formato PriceList para el wizard
-          const processedData: PriceList[] = (apiResponse.data.results.priceLists || priceListsForAPI).map((apiList, index) => ({
-            id: apiList.price_list_id,
-            name: apiList.name,
-            description: apiList.description || '',
-            discountPercentage: 10, // Default discount
-            products: result.data[index]?.products || []
-          }));
-          
-          setUploadedData(processedData);
-          setIsProcessing(false);
-          
-          // Mostrar los datos para revisión (no pasar automáticamente)
-          // onNext({ uploadedPriceLists: processedData });
-          
-        } else {
-          console.error('⚠️ API reportó errores:', apiResponse.message);
-          
-          // En caso de error, mostrar datos originales para revisión
-          const validatedData = result.data.map((list, index) => ({
-            ...list,
-            id: list.id || `generated_id_${Date.now()}_${index}`,
-            products: Array.isArray(list.products) ? list.products : []
-          }));
-          
-          setUploadedData(validatedData);
-          setIsProcessing(false);
-        }
-        
-      } catch (error) {
-        console.error('❌ Error llamando al API:', error);
-        
-        // Fallback: procesar localmente si falla el API
-        const validatedData = result.data.map((list, index) => ({
-          ...list,
-          id: list.id || `generated_id_${Date.now()}_${index}`,
-          products: Array.isArray(list.products) ? list.products : []
-        }));
-        
-        setUploadedData(validatedData);
-        setIsProcessing(false);
+      if (uploadMethod && uploadMethod !== currentMethod) {
+        alert(`Ya has cargado datos mediante ${uploadMethod === 'file' ? 'archivo' : 'JSON'}. Por favor, usa el mismo método o recarga la página.`);
+        return;
       }
+
+      setUploadMethod(currentMethod);
+      
+      // Solo validar y mostrar los datos (SIN llamar al API)
+      console.log('� Cargando listas de precios para previsualización...');
+      
+      const validatedData = result.data.map((list, index) => ({
+        ...list,
+        id: list.id || `PL_${Date.now()}_${index}`,
+        products: Array.isArray(list.products) ? list.products : []
+      }));
+      
+      setUploadedData(validatedData);
+      console.log(`✅ ${validatedData.length} listas de precios cargadas para revisión`);
     } else {
       console.error('Error uploading price lists:', result.error);
+      alert(`Error al cargar listas de precios: ${result.error || 'Error desconocido'}`);
+    }
+  };
+
+  // 🆕 Función para transformar datos de PriceList a formato API (PriceListBulkData)
+  const transformToAPIFormat = (priceLists: PriceList[]): PriceListBulkData[] => {
+    return priceLists.map((list, index) => ({
+      price_list_id: list.id || `PL_${Date.now()}_${index}`,
+      name: list.name,
+      description: list.description,
+      currency: "USD", // Default currency
+      country: "Colombia", // Default country
+      customer_type: "retail", // Default customer type
+      channel: "online", // Default channel
+      start_date: new Date().toISOString(),
+      status: "active",
+      default: false,
+      priority: index + 1,
+      applies_to: "all",
+      discount_type: "percentage",
+      minimum_quantity: 1,
+      maximum_quantity: 1000,
+      tags: ["imported"],
+      notes: `Lista importada: ${list.name}`
+    }));
+  };
+
+  // 🆕 Función para ENVIAR al backend cuando se confirma
+  const handleConfirmAndContinue = async () => {
+    if (uploadedData.length === 0) {
+      alert('No hay listas de precios cargadas');
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      console.log('🚀 Enviando listas de precios al backend...');
+      
+      let apiResponse;
+
+      // Determinar si se usó archivo o JSON
+      if (uploadMethod === 'file' && uploadedFile) {
+        // 📁 ARCHIVO: Enviar como FormData
+        console.log(`📁 Enviando archivo: ${uploadedFile.name}`);
+        
+        const formData = new FormData();
+        formData.append('file', uploadedFile);
+        // Agregar metadatos adicionales si es necesario
+        formData.append('importType', 'priceLists');
+        
+        apiResponse = await api.admin.priceLists.bulkCreate(formData);
+        
+      } else {
+        // 📋 JSON: Enviar como array de objetos
+        console.log(`📋 Enviando ${uploadedData.length} listas de precios como JSON`);
+        
+        // Transformar datos al formato de API
+        const priceListsForAPI = transformToAPIFormat(uploadedData);
+        
+        apiResponse = await api.admin.priceLists.bulkCreate(priceListsForAPI);
+      }
+      
+      if (apiResponse.success) {
+        console.log('✅ Listas de precios insertadas/actualizadas exitosamente en la base de datos');
+        
+        // Convertir respuesta del API de vuelta a formato PriceList para el wizard
+        const processedData: PriceList[] = uploadedData.map((list) => ({
+          id: list.id,
+          name: list.name,
+          description: list.description || '',
+          discountPercentage: list.discountPercentage || 10,
+          products: list.products || []
+        }));
+        
+        setIsProcessing(false);
+        
+        // Pasar al siguiente paso con los datos procesados
+        onNext({ uploadedPriceLists: processedData });
+        
+      } else {
+        console.error('⚠️ API reportó errores:', apiResponse.message);
+        setIsProcessing(false);
+        alert(`Error del API: ${apiResponse.message || 'Error desconocido'}`);
+      }
+      
+    } catch (error) {
+      console.error('❌ Error enviando listas de precios al backend:', error);
+      setIsProcessing(false);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert(`Error al enviar listas de precios: ${errorMessage}`);
     }
   };
 
@@ -308,13 +356,24 @@ export function PriceListStep({ onNext, onBack, themeColors, stepData }: PriceLi
             Anterior
           </motion.button>
           <motion.button
-            onClick={() => onNext({ uploadedPriceLists: uploadedData })}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="px-6 py-3 rounded-xl font-medium text-white"
-            style={{ backgroundColor: themeColors.primary }}
+            onClick={handleConfirmAndContinue}
+            disabled={isProcessing}
+            whileHover={{ scale: isProcessing ? 1 : 1.02 }}
+            whileTap={{ scale: isProcessing ? 1 : 0.98 }}
+            className="px-6 py-3 rounded-xl font-medium text-white flex items-center gap-2"
+            style={{ 
+              backgroundColor: isProcessing ? `${themeColors.primary}80` : themeColors.primary,
+              cursor: isProcessing ? 'not-allowed' : 'pointer'
+            }}
           >
-            Continuar
+            {isProcessing ? (
+              <>
+                <span className="animate-spin">⏳</span>
+                Enviando a BD...
+              </>
+            ) : (
+              'Confirmar y Continuar'
+            )}
           </motion.button>
         </div>
       </div>
@@ -364,6 +423,7 @@ export function PriceListStep({ onNext, onBack, themeColors, stepData }: PriceLi
       <FileUploadComponent
         method={method}
         onUpload={handleUpload}
+        onFileSelect={handleFileSelect}
         onBack={onBack}
         themeColors={themeColors}
         sampleData={samplePriceLists}

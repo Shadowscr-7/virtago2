@@ -27,7 +27,7 @@ export function ClientPersonalInfo({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl border border-white/30 p-6 shadow-xl"
+      className="bg-white/70 dark:bg-slate-800/70 rounded-2xl border border-white/30 p-6 shadow-xl"
     >
       <div className="flex items-center gap-3 mb-6">
         <div className="p-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl border border-purple-500/30">

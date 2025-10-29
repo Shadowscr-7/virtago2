@@ -35,27 +35,27 @@ export function ClientHeader({
           <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors" />
         </Link>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-xl border border-purple-500/30 group-hover:from-purple-500/30 group-hover:to-blue-500/30 transition-all duration-200">
+                    <h1 className="text-4xl font-bold flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center shadow-lg">
               <User className="w-8 h-8 text-purple-600" />
             </div>
             <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
               {clientName}
             </span>
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300 mt-2 flex items-center gap-2">
+          <div className="text-lg text-gray-600 dark:text-gray-300 mt-2 flex items-center gap-2">
             {isEditing ? (
               <>
-                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-                Editando información del cliente
+                <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse inline-block"></span>
+                <span>Editando información del cliente</span>
               </>
             ) : (
               <>
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                Información del cliente
+                <span className="w-2 h-2 bg-green-500 rounded-full inline-block"></span>
+                <span>Información del cliente</span>
               </>
             )}
-          </p>
+          </div>
         </div>
       </div>
 

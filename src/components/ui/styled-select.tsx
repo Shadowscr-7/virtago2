@@ -83,7 +83,7 @@ export function StyledSelect({
         </label>
       )}
 
-      <div className="relative" ref={selectRef}>
+      <div className="relative z-[10000]" ref={selectRef}>
         {/* Trigger Button */}
         <motion.button
           type="button"
@@ -94,7 +94,7 @@ export function StyledSelect({
           className={`
             w-full h-full px-4 py-0 bg-white/80 dark:bg-slate-700/80 border-2 border-white/40 dark:border-slate-600/40 
             rounded-2xl text-left transition-all duration-300 backdrop-blur-lg shadow-lg shadow-purple-500/5
-            flex items-center justify-between min-h-[3.5rem]
+            flex items-center justify-between min-h-[3.5rem] relative z-[10001]
             ${
               disabled
                 ? "cursor-not-allowed opacity-60 bg-gray-200/60 dark:bg-gray-600/60"
@@ -133,7 +133,8 @@ export function StyledSelect({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="absolute z-[9999] w-full mt-2 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/40 dark:border-slate-600/40 rounded-2xl shadow-2xl shadow-purple-500/10 overflow-hidden enhanced-select-dropdown"
+              className="absolute z-[10002] w-full mt-2 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl border border-white/40 dark:border-slate-600/40 rounded-2xl shadow-2xl shadow-purple-500/10 overflow-hidden enhanced-select-dropdown"
+              style={{ position: 'absolute', zIndex: 10002 }}
             >
               {/* Search Input */}
               {options.length > 5 && (

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, TrendingUp, Package, List, Percent, Users, ArrowRight, ArrowLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useTheme } from '../../../contexts/theme-context';
 import { AdminLayout } from '../admin-layout';
 import { ClientStep, ProductStep, PriceListStep, PriceStep, DiscountStep, ReviewStep } from './steps';
@@ -59,10 +60,10 @@ interface WizardData {
 }
 
 export default function SetupWizard() {
+  const router = useRouter();
   const { themeColors: contextThemeColors } = useTheme();
   const [currentStep, setCurrentStep] = useState(0);
   const [wizardData, setWizardData] = useState<WizardData>({});
-  const [isVisible, setIsVisible] = useState(true);
 
   const themeColors: ThemeColors = {
     primary: contextThemeColors.primary,
@@ -83,8 +84,9 @@ export default function SetupWizard() {
     if (currentStep < WIZARD_STEPS.length - 1) {
       setCurrentStep(prev => prev + 1);
     } else if (stepData && (stepData as { completed?: boolean }).completed) {
-      // Wizard completado
-      handleClose();
+      // ✅ Wizard completado - Redirigir al dashboard
+      console.log('✅ Wizard completado - Redirigiendo al dashboard...');
+      router.push('/admin');
     }
   };
 
@@ -95,7 +97,8 @@ export default function SetupWizard() {
   };
 
   const handleClose = () => {
-    setIsVisible(false);
+    console.log('❌ Wizard cerrado manualmente - Redirigiendo al dashboard...');
+    router.push('/admin');
   };
 
   const handleStepClick = (stepIndex: number) => {
@@ -129,10 +132,6 @@ export default function SetupWizard() {
         return null;
     }
   };
-
-  if (!isVisible) {
-    return null;
-  }
 
   return (
     <AdminLayout>

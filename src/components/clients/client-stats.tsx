@@ -49,7 +49,7 @@ export function ClientStats({ clientData }: ClientStatsProps) {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.4 }}
-      className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl border border-white/30 p-6 shadow-xl"
+      className="bg-white/70 dark:bg-slate-800/70 rounded-2xl border border-white/30 p-6 shadow-xl"
     >
       <div className="flex items-center gap-3 mb-6">
         <div className="p-3 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-xl border border-indigo-500/30">

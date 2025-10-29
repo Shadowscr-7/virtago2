@@ -98,34 +98,77 @@ export function DiscountStep({ onNext, onBack, themeColors, stepData }: Discount
   const [uploadedData, setUploadedData] = useState<DiscountData[]>(stepData?.uploadedDiscounts || []);
   const [apiResponse, setApiResponse] = useState<DiscountBulkCreateResponse | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  
+  // 🆕 Estados para manejo de archivos y métodos
+  const [uploadMethod, setUploadMethod] = useState<UploadMethod | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
 
   // Función para convertir datos del wizard al formato de API
   const convertToApiFormat = (discounts: DiscountData[]): DiscountBulkData[] => {
-    return discounts.map((discount: DiscountData) => ({
-      discount_id: discount.discountId,
-      name: discount.name,
-      description: discount.description,
-      type: discount.type,
-      discount_value: discount.discountValue,
-      currency: discount.currency,
-      valid_from: discount.validFrom,
-      valid_to: discount.validTo,
-      status: discount.status || 'active',
-      priority: 1,
-      is_cumulative: false,
-      max_discount_amount: discount.maxDiscountAmount,
-      min_purchase_amount: discount.minPurchaseAmount,
-      usage_limit: discount.usageLimit,
-      usage_limit_per_customer: discount.usageLimitPerCustomer,
-      customer_type: discount.customerType,
-      channel: discount.channel,
-      region: 'colombia',
-      category: discount.category,
-      tags: [discount.type, discount.category, discount.customerType],
-      notes: `Descuento ${discount.name} - ${discount.description}`,
-      created_by: 'admin@virtago.shop'
-    }));
+    return discounts.map((discount: DiscountData) => {
+      // Extraer todos los campos del descuento original
+      const originalData = discount as unknown as Record<string, unknown>;
+      
+      // Construir el objeto base con campos requeridos
+      const apiDiscount: Record<string, unknown> = {
+        discount_id: discount.discountId || originalData.discount_id,
+        name: discount.name,
+        description: discount.description,
+        type: discount.type || originalData.discount_type,
+        discount_value: discount.discountValue !== undefined ? discount.discountValue : originalData.discount_value,
+        currency: discount.currency,
+        valid_from: discount.validFrom || originalData.start_date,
+        valid_to: discount.validTo || originalData.end_date,
+        status: discount.status || (originalData.is_active ? 'active' : 'inactive'),
+        priority: 1,
+        is_cumulative: false,
+        max_discount_amount: discount.maxDiscountAmount || originalData.max_discount_amount,
+        min_purchase_amount: discount.minPurchaseAmount || originalData.min_purchase_amount,
+        usage_limit: discount.usageLimit || originalData.usage_limit,
+        usage_limit_per_customer: discount.usageLimitPerCustomer || originalData.usage_limit_per_customer,
+        customer_type: discount.customerType,
+        channel: discount.channel,
+        region: 'colombia',
+        category: discount.category,
+        tags: [discount.type, discount.category, discount.customerType].filter(Boolean),
+        notes: `Descuento ${discount.name} - ${discount.description}`,
+        created_by: 'admin@virtago.shop'
+      };
+
+      // 🆕 CRÍTICO: Preservar campos complejos del JSON original
+      // Estos campos contienen información estructurada que el backend necesita
+      if (originalData.conditions) {
+        apiDiscount.conditions = originalData.conditions;
+      }
+      
+      if (originalData.applicable_to) {
+        apiDiscount.applicable_to = originalData.applicable_to;
+      }
+      
+      if (originalData.customFields) {
+        apiDiscount.customFields = originalData.customFields;
+      }
+
+      // Preservar campos del backend en formato snake_case
+      if (originalData.start_date) {
+        apiDiscount.start_date = originalData.start_date;
+      }
+      
+      if (originalData.end_date) {
+        apiDiscount.end_date = originalData.end_date;
+      }
+      
+      if (originalData.discount_type) {
+        apiDiscount.discount_type = originalData.discount_type;
+      }
+      
+      if (originalData.is_active !== undefined) {
+        apiDiscount.is_active = originalData.is_active;
+      }
+
+      return apiDiscount as unknown as DiscountBulkData;
+    });
   };
 
   // Función para normalizar datos de API a formato wizard
@@ -210,9 +253,57 @@ export function DiscountStep({ onNext, onBack, themeColors, stepData }: Discount
       return;
     }
 
+    // Validar que solo se use UN método de carga
+    const currentMethod = method;
+    
+    if (uploadMethod && uploadMethod !== currentMethod) {
+      alert(`Ya has cargado datos mediante ${uploadMethod === 'file' ? 'archivo' : 'JSON'}. Por favor, usa el mismo método o recarga la página.`);
+      return;
+    }
+
+    setUploadMethod(currentMethod);
+
     try {
-      // Normalizar los datos independientemente del formato
-      const normalizedData = result.data.map(normalizeDiscountData);
+      // 🆕 PRESERVAR JSON ORIGINAL + NORMALIZAR para visualización
+      // Normalizar para la UI pero mantener campos originales
+      const normalizedData = result.data.map((rawDiscount: Record<string, unknown>) => {
+        const normalized = normalizeDiscountData(rawDiscount);
+        
+        // 🔥 CRÍTICO: Agregar campos complejos del JSON original al objeto normalizado
+        const enriched = normalized as unknown as Record<string, unknown>;
+        
+        // Preservar campos complejos exactamente como vienen del JSON
+        if (rawDiscount.conditions) {
+          enriched.conditions = rawDiscount.conditions;
+        }
+        if (rawDiscount.applicable_to) {
+          enriched.applicable_to = rawDiscount.applicable_to;
+        }
+        if (rawDiscount.customFields) {
+          enriched.customFields = rawDiscount.customFields;
+        }
+        
+        // Preservar también campos del backend en snake_case
+        if (rawDiscount.start_date) enriched.start_date = rawDiscount.start_date;
+        if (rawDiscount.end_date) enriched.end_date = rawDiscount.end_date;
+        if (rawDiscount.discount_type) enriched.discount_type = rawDiscount.discount_type;
+        if (rawDiscount.discount_value !== undefined) enriched.discount_value = rawDiscount.discount_value;
+        if (rawDiscount.is_active !== undefined) enriched.is_active = rawDiscount.is_active;
+        if (rawDiscount.max_discount_amount !== undefined) enriched.max_discount_amount = rawDiscount.max_discount_amount;
+        if (rawDiscount.min_purchase_amount !== undefined) enriched.min_purchase_amount = rawDiscount.min_purchase_amount;
+        if (rawDiscount.usage_limit !== undefined) enriched.usage_limit = rawDiscount.usage_limit;
+        if (rawDiscount.usage_limit_per_customer !== undefined) enriched.usage_limit_per_customer = rawDiscount.usage_limit_per_customer;
+        
+        return enriched as unknown as DiscountData;
+      });
+      
+      console.log('🔍 [CARGA] JSON Original (primer descuento):', result.data[0]);
+      console.log('🔍 [CARGA] Datos Enriquecidos (primer descuento):', normalizedData[0]);
+      console.log('🔍 [CARGA] Campos preservados:', {
+        conditions: !!(normalizedData[0] as unknown as Record<string, unknown>).conditions,
+        applicable_to: !!(normalizedData[0] as unknown as Record<string, unknown>).applicable_to,
+        customFields: !!(normalizedData[0] as unknown as Record<string, unknown>).customFields
+      });
       
       // Validar que los datos normalizados son válidos
       const validDiscounts = normalizedData.filter(discount => 
@@ -231,11 +322,9 @@ export function DiscountStep({ onNext, onBack, themeColors, stepData }: Discount
         alert(`⚠️ Se procesaron ${validDiscounts.length} de ${normalizedData.length} descuentos.\n\nAlgunos descuentos tenían datos incompletos y fueron omitidos.`);
       }
       
-      // Cargar los datos y procesar inmediatamente (como en otros pasos del wizard)
+      // 🎯 SOLO CARGAR DATOS - NO LLAMAR API TODAVÍA
+      console.log('✅ Datos cargados correctamente. Esperando confirmación del usuario...');
       setUploadedData(validDiscounts);
-      
-      // Procesar inmediatamente cuando se suben los datos
-      await processDiscounts(validDiscounts);
       
     } catch (error) {
       console.error('Error normalizing discount data:', error);
@@ -243,44 +332,85 @@ export function DiscountStep({ onNext, onBack, themeColors, stepData }: Discount
     }
   };
 
-  const processDiscounts = async (discountsToProcess?: DiscountData[]) => {
-    const dataToProcess = discountsToProcess || uploadedData;
-    
-    if (dataToProcess.length === 0) {
-      alert('❌ No hay descuentos para procesar. Sube primero un archivo JSON válido.');
+  // 🆕 Callback para guardar la referencia del archivo
+  const handleFileSelect = (file: File) => {
+    setUploadedFile(file);
+  };
+
+  // 🆕 Función para CONFIRMAR y enviar al backend
+  const handleConfirmAndContinue = async () => {
+    if (uploadedData.length === 0) {
+      alert('❌ No hay descuentos para procesar. Sube primero un archivo válido.');
       return;
     }
 
     setIsProcessing(true);
+    
     try {
-      // Convertir datos al formato de API
-      const apiData = convertToApiFormat(dataToProcess);
+      console.log('🚀 Enviando descuentos al backend...');
       
-      console.log('Sending discount data to API:', apiData);
+      let apiData: DiscountBulkData[] | FormData;
+
+      // Determinar si se usó archivo o JSON
+      if (uploadMethod === 'file' && uploadedFile) {
+        // 📁 ARCHIVO: Enviar como FormData
+        console.log(`📁 Enviando archivo: ${uploadedFile.name}`);
+        
+        const formData = new FormData();
+        formData.append('file', uploadedFile);
+        formData.append('importType', 'discounts');
+        
+        apiData = formData;
+      } else {
+        // 📋 JSON: Convertir datos al formato de API
+        console.log(`📋 Enviando ${uploadedData.length} descuentos como JSON`);
+        console.log('📄 Datos originales (primeros 2):', uploadedData.slice(0, 2));
+        
+        apiData = convertToApiFormat(uploadedData);
+        
+        console.log('📤 Datos convertidos para API (primeros 2):', apiData.slice(0, 2));
+        console.log('🔍 Verificando campos críticos del primer descuento:');
+        console.log('  - conditions:', apiData[0]?.conditions);
+        console.log('  - applicable_to:', apiData[0]?.applicable_to);
+        console.log('  - customFields:', apiData[0]?.customFields);
+      }
       
       // Llamar a la API real
+      console.log('📤 Tipo de dato enviado:', apiData instanceof FormData ? 'FormData' : 'JSON Array');
       const response = await api.admin.discounts.bulkCreate(apiData);
       
-      console.log('API Response:', response);
+      console.log('📥 Respuesta completa del backend:', response);
+      console.log('📊 Status:', response.success);
+      console.log('📋 Data:', response.data);
       
       if (response.success && response.data?.success) {
+        console.log('✅ Descuentos insertados/actualizados exitosamente en la base de datos');
         setApiResponse(response.data);
         setShowConfirmation(true);
       } else {
+        console.warn('⚠️ Respuesta no exitosa del backend:', {
+          responseSuccess: response.success,
+          dataSuccess: response.data?.success,
+          message: response.data?.message || response.message
+        });
         throw new Error(response.data?.message || response.message || 'Error procesando descuentos');
       }
     } catch (error) {
-      console.error('Error processing discounts:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-      alert(`❌ Error procesando descuentos: ${errorMessage}\n\n💡 Continuando con datos locales para el siguiente paso.`);
-      // En caso de error de API, continuar al siguiente paso con los datos locales
-      onNext({ uploadedDiscounts: dataToProcess });
-    } finally {
+      console.error('❌ Error enviando descuentos al backend:', error);
+      console.error('❌ Detalles del error:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       setIsProcessing(false);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert(`Error al enviar descuentos: ${errorMessage}\n\nContinuando con datos locales...`);
+      
+      // En caso de error, continuar con los datos locales
+      onNext({ uploadedDiscounts: uploadedData });
     }
   };
-
-
 
   // Pantalla de confirmación después del procesamiento exitoso
   if (showConfirmation && apiResponse) {
@@ -506,8 +636,197 @@ export function DiscountStep({ onNext, onBack, themeColors, stepData }: Discount
     );
   }
 
+  // 🆕 Vista de preview cuando hay datos cargados (OCULTA el formulario de carga)
+  if (uploadedData.length > 0 && !isProcessing && !showConfirmation) {
+    return (
+      <div className="space-y-6">
+        {/* Header con título y botón para cargar otros */}
+        <div className="flex items-center justify-between">
+          <h3 className="text-xl font-semibold" style={{ color: themeColors.text.primary }}>
+            Descuentos Cargados - Revisión
+          </h3>
+          <motion.button
+            onClick={() => {
+              setUploadedData([]);
+              setUploadMethod(null);
+              setUploadedFile(null);
+            }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-4 py-2 rounded-lg"
+            style={{ 
+              backgroundColor: `${themeColors.accent}20`,
+              color: themeColors.accent 
+            }}
+          >
+            Cargar Otros
+          </motion.button>
+        </div>
 
+        {/* Preview de descuentos cargados */}
+        <div 
+          className="p-6 rounded-xl"
+          style={{ backgroundColor: `${themeColors.surface}20`, border: `1px solid ${themeColors.primary}30` }}
+        >
+          <h4 className="text-lg font-semibold mb-4" style={{ color: themeColors.text.primary }}>
+            📋 Descuentos Importados ({uploadedData.length})
+          </h4>
+          
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {uploadedData.slice(0, 10).map((discount, index) => (
+              <motion.div
+                key={discount.discountId || index}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className="p-4 rounded-lg border"
+                style={{
+                  backgroundColor: `${themeColors.surface}50`,
+                  borderColor: `${themeColors.secondary}30`
+                }}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="font-medium text-sm mb-1" style={{ color: themeColors.text.primary }}>
+                      {discount.name}
+                    </div>
+                    <div className="text-xs mb-2" style={{ color: themeColors.text.secondary }}>
+                      {discount.description || 'Sin descripción'}
+                    </div>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <span 
+                        className="px-2 py-1 rounded"
+                        style={{ backgroundColor: `${themeColors.primary}20`, color: themeColors.primary }}
+                      >
+                        ID: {discount.discountId}
+                      </span>
+                      <span 
+                        className="px-2 py-1 rounded"
+                        style={{ backgroundColor: `${themeColors.secondary}20`, color: themeColors.secondary }}
+                      >
+                        Tipo: {discount.type}
+                      </span>
+                      {discount.status && (
+                        <span 
+                          className="px-2 py-1 rounded"
+                          style={{ 
+                            backgroundColor: discount.status === 'active' ? '#10b98120' : '#f59e0b20',
+                            color: discount.status === 'active' ? '#10b981' : '#f59e0b'
+                          }}
+                        >
+                          {discount.status === 'active' ? 'Activo' : discount.status}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-right ml-4">
+                    <div className="font-bold text-lg" style={{ color: themeColors.primary }}>
+                      {discount.type === 'percentage' 
+                        ? `${discount.discountValue}%` 
+                        : `${discount.currency} ${discount.discountValue}`
+                      }
+                    </div>
+                    {discount.minPurchaseAmount && (
+                      <div className="text-xs" style={{ color: themeColors.text.secondary }}>
+                        Min: {discount.currency} {discount.minPurchaseAmount}
+                      </div>
+                    )}
+                    {discount.maxDiscountAmount && (
+                      <div className="text-xs" style={{ color: themeColors.text.secondary }}>
+                        Max: {discount.currency} {discount.maxDiscountAmount}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Información adicional */}
+                <div className="mt-3 pt-3 border-t flex flex-wrap gap-3 text-xs" style={{ borderColor: `${themeColors.secondary}20` }}>
+                  {discount.customerType && (
+                    <div style={{ color: themeColors.text.secondary }}>
+                      <span className="font-medium">Cliente:</span> {discount.customerType}
+                    </div>
+                  )}
+                  {discount.channel && (
+                    <div style={{ color: themeColors.text.secondary }}>
+                      <span className="font-medium">Canal:</span> {discount.channel}
+                    </div>
+                  )}
+                  {discount.validFrom && (
+                    <div style={{ color: themeColors.text.secondary }}>
+                      <span className="font-medium">Válido desde:</span> {new Date(discount.validFrom).toLocaleDateString()}
+                    </div>
+                  )}
+                  {discount.validTo && (
+                    <div style={{ color: themeColors.text.secondary }}>
+                      <span className="font-medium">Hasta:</span> {new Date(discount.validTo).toLocaleDateString()}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+            
+            {uploadedData.length > 10 && (
+              <div className="text-center py-2">
+                <span className="text-sm" style={{ color: themeColors.text.secondary }}>
+                  ... y {uploadedData.length - 10} descuentos más
+                </span>
+              </div>
+            )}
+          </div>
 
+          {/* Resumen */}
+          <div 
+            className="mt-4 pt-4 border-t flex justify-between items-center"
+            style={{ borderColor: `${themeColors.secondary}20` }}
+          >
+            <div className="text-sm" style={{ color: themeColors.text.secondary }}>
+              <span className="font-medium">Total de descuentos:</span> {uploadedData.length}
+            </div>
+            <div className="text-sm" style={{ color: themeColors.text.secondary }}>
+              <span className="font-medium">Método:</span> {uploadMethod === 'file' ? 'Archivo' : 'JSON'}
+            </div>
+          </div>
+        </div>
+
+        {/* Botones de navegación */}
+        <div className="flex justify-between pt-6">
+          <motion.button
+            onClick={onBack}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="px-6 py-3 rounded-xl font-medium"
+            style={{
+              backgroundColor: `${themeColors.surface}50`,
+              color: themeColors.text.primary,
+              border: `1px solid ${themeColors.primary}30`
+            }}
+          >
+            Anterior
+          </motion.button>
+          
+          <motion.button
+            onClick={handleConfirmAndContinue}
+            disabled={isProcessing}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="px-8 py-3 rounded-xl font-medium text-white shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ backgroundColor: themeColors.primary }}
+          >
+            {isProcessing ? (
+              <span className="flex items-center gap-2">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Procesando...
+              </span>
+            ) : (
+              <span>Confirmar y Continuar</span>
+            )}
+          </motion.button>
+        </div>
+      </div>
+    );
+  }
+
+  // Vista de carga inicial (formulario)
   return (
     <div className="space-y-6">
       {/* Selector de método */}
@@ -583,6 +902,7 @@ export function DiscountStep({ onNext, onBack, themeColors, stepData }: Discount
       <FileUploadComponent
         method={method}
         onUpload={handleUpload}
+        onFileSelect={handleFileSelect}
         onBack={onBack}
         themeColors={themeColors}
         sampleData={sampleDiscounts as unknown as Record<string, unknown>[]}

@@ -199,6 +199,7 @@ export const useAuthStore = create<AuthState>()(
           console.log("🔵 Token recibido:", response.data.token);
           console.log("🔵 User recibido:", response.data.user);
           console.log("🔵 Role del user:", response.data.user.role);
+          console.log("🔵 distributorCode del user:", response.data.user.distributorCode);
 
           const { token, user } = response.data;
 
@@ -226,6 +227,10 @@ export const useAuthStore = create<AuthState>()(
               price: 0, // No viene en la respuesta, poner default
               currency: 'USD',
               billingCycle: 'monthly',
+            } : undefined,
+            // Mapear distributorCode (el único campo que viene en la respuesta de login)
+            distributorInfo: user.distributorCode ? {
+              distributorCode: user.distributorCode,
             } : undefined,
           };
 

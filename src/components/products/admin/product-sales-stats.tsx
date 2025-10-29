@@ -102,7 +102,7 @@ export function ProductSalesStats({ productData }: ProductSalesStatsProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5 }}
-      className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl border border-white/30 shadow-xl p-6"
+      className="bg-white/70 dark:bg-slate-800/70 rounded-2xl border border-white/30 shadow-xl p-6"
     >
       <div className="flex items-center gap-3 mb-6">
         <div className="p-3 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-xl">

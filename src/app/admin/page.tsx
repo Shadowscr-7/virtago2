@@ -15,7 +15,7 @@ import {
   Activity,
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/admin-layout";
-import { useAuthStore } from "@/store/auth";
+import { useAuthStore } from "@/store/auth"; // ✅ Ya está correcto
 import { useTheme } from "@/contexts/theme-context";
 import Link from "next/link";
 
@@ -23,12 +23,35 @@ export default function AdminDashboard() {
   const { user } = useAuthStore();
   const { themeColors } = useTheme();
 
-  // Debug logs
-  console.log('🔍 Admin Dashboard - User data:', user);
-  console.log('🔍 Admin Dashboard - user.role:', user?.role);
-  console.log('🔍 Admin Dashboard - user.userType:', user?.userType);
+  // 🔍 DEBUG COMPLETO
+  console.log('====================================');
+  console.log('🔍 [ADMIN DASHBOARD] USUARIO COMPLETO:');
+  console.log(JSON.stringify(user, null, 2));
+  console.log('====================================');
+  console.log('🔍 [ADMIN DASHBOARD] user existe?', !!user);
+  console.log('🔍 [ADMIN DASHBOARD] user.role:', user?.role);
+  console.log('🔍 [ADMIN DASHBOARD] user.userType:', user?.userType);
+  console.log('🔍 [ADMIN DASHBOARD] typeof user.role:', typeof user?.role);
 
-  if (!user || (user.role !== "distributor" && user.role !== "admin" && user.userType !== "distributor")) {
+  // ✅ Verificar si el usuario tiene permiso de acceso
+  const hasAccess = user && (
+    user.role === "distributor" || 
+    user.role === "admin" || 
+    user.userType === "distributor"
+  );
+
+  console.log('🔍 [ADMIN DASHBOARD] hasAccess:', hasAccess);
+  console.log('🔍 [ADMIN DASHBOARD] Verificación detallada:', {
+    userExists: !!user,
+    roleIsDistributor: user?.role === "distributor",
+    roleIsAdmin: user?.role === "admin",
+    userTypeIsDistributor: user?.userType === "distributor",
+    roleValue: user?.role,
+    userTypeValue: user?.userType
+  });
+  console.log('====================================');
+
+  if (!hasAccess) {
     return (
       <div 
         className="min-h-screen flex items-center justify-center backdrop-blur-xl"

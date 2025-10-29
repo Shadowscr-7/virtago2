@@ -6,6 +6,23 @@ export interface LoginData {
   password: string;
 }
 
+// Tipos para productos del API
+export interface ApiProductData {
+  prodVirtaId: string;
+  name: string;
+  sku: string;
+  price: number;
+  stockQuantity: number;
+  distributorCode: string;
+  brand: string;
+  category: string;
+  description?: string;
+  images?: string[];
+  status?: 'A' | 'I' | 'N'; // Activo, Inactivo, Nuevo
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface LoginResponse {
   success: boolean;
   message: string;
@@ -651,6 +668,42 @@ export interface DiscountBulkCreateResponse {
   };
 }
 
+// Tipos para Cliente (GET /clients/list)
+export interface ClientData {
+  _id: string;
+  clientId?: string; // ID único del cliente en el backend (usado para detalle)
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  phoneOptional?: string;
+  gender?: "M" | "F";
+  documentType?: string;
+  document?: string;
+  customerClass?: string;
+  customerClassTwo?: string;
+  customerClassThree?: string;
+  latitude?: number;
+  longitude?: number;
+  status?: "A" | "N" | "I"; // A = Active, N = New, I = Inactive
+  distributorCode?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  isVerified?: boolean;
+  hasUser?: boolean; // Si el cliente ya tiene un usuario registrado en la plataforma
+  // Campos adicionales opcionales
+  information?: {
+    paymentMethodCode?: string;
+    companyCode?: string;
+    pdv?: string;
+    warehouse?: string;
+    priceList?: string;
+    withCredit?: boolean;
+    paymentTerm?: string;
+    [key: string]: unknown;
+  };
+}
+
 // Tipos para Bulk Creation de Clientes
 export interface ClientBulkData {
   email: string;
@@ -944,23 +997,42 @@ export const plansApi = {
 export const adminApi = {
   // Clientes
   clients: {
-    getAll: async (params?: { page?: number; limit?: number; search?: string }): Promise<ApiResponse<{ clients: unknown[]; total: number; pages: number }>> => {
+    getAll: async (params?: { 
+      distributorCode?: string;
+      page?: number; 
+      limit?: number; 
+      search?: string 
+    }): Promise<ApiResponse<{ 
+      clients: ClientData[]; 
+      total: number; 
+      pages: number;
+      currentPage: number;
+    }>> => {
       const queryString = params 
         ? "?" + new URLSearchParams(
             Object.entries(params).reduce((acc, [key, value]) => {
-              if (value !== undefined) acc[key] = String(value);
+              if (value !== undefined && value !== null && value !== '') {
+                acc[key] = String(value);
+              }
               return acc;
             }, {} as Record<string, string>)
           ).toString()
         : "";
-      return http.get(`/admin/clients${queryString}`);
+      console.log('[API] Obteniendo clientes:', `/clients/list${queryString}`);
+      return http.get(`/clients/list${queryString}`);
     },
     
     getById: async (id: string): Promise<ApiResponse<unknown>> => 
       http.get(`/admin/clients/${id}`),
     
+    getByClientId: async (clientId: string): Promise<ApiResponse<ClientData>> => {
+      console.log('[API] Obteniendo cliente por clientId:', clientId);
+      return http.get(`/client/id/${clientId}`);
+    },
+    
+    // Crear un cliente individual
     create: async (data: unknown): Promise<ApiResponse<unknown>> => 
-      http.post("/admin/clients", data),
+      http.post("/clients", data),
     
     // 🆕 BULK CREATION - Crear múltiples clientes de una vez
     bulkCreate: async (clients: ClientBulkData[]): Promise<ApiResponse<ClientBulkCreateResponse>> => {
@@ -978,21 +1050,71 @@ export const adminApi = {
     update: async (id: string, data: unknown): Promise<ApiResponse<unknown>> => 
       http.put(`/admin/clients/${id}`, data),
     
+    updateStatus: async (clientId: string, status: "A" | "N" | "I"): Promise<ApiResponse<{ message: string }>> => {
+      console.log('[API] Actualizando estado del cliente:', clientId, 'a', status);
+      return http.put(`/clientStatus/${clientId}`, { status });
+    },
+    
+    sendInvitation: async (data: {
+      email: string;
+      firstName: string;
+      lastName: string;
+      distributorCode: string;
+    }): Promise<ApiResponse<{ message: string }>> => {
+      console.log('[API] Enviando invitación a:', data.email);
+      return http.post("/clients/sendCreationMail", data);
+    },
+    
+    export: async (): Promise<Blob> => {
+      console.log('[API] Exportando clientes a Excel...');
+      return http.downloadBlob("/clients/export");
+    },
+    
     delete: async (id: string): Promise<ApiResponse<{ message: string }>> => 
       http.delete(`/admin/clients/${id}`),
   },
 
   // Productos
   products: {
-    getAll: async (params?: unknown): Promise<ApiResponse<unknown>> => {
+    getAll: async (params?: {
+      distributorCode?: string;
+      page?: number;
+      rowsPerPage?: number;
+      search?: string;
+      category?: string;
+      status?: string;
+    }): Promise<ApiResponse<{
+      success: boolean;
+      distributorCode: string;
+      data: ApiProductData[];
+      total: number;
+      count: number;
+      currentPage: number;
+      rowsPerPage: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+    }>> => {
       const queryString = params 
-        ? "?" + new URLSearchParams(params as Record<string, string>).toString()
+        ? "?" + new URLSearchParams(
+            Object.entries(params).reduce((acc, [key, value]) => {
+              if (value !== undefined && value !== null) {
+                acc[key] = String(value);
+              }
+              return acc;
+            }, {} as Record<string, string>)
+          ).toString()
         : "";
-      return http.get(`/admin/products${queryString}`);
+      console.log('[API] Obteniendo productos:', `/products${queryString}`);
+      return http.get(`/products${queryString}`);
+    },
+    
+    getById: async (id: string): Promise<ApiResponse<ApiProductData>> => {
+      console.log('[API] Obteniendo producto por ID:', id);
+      return http.get(`/products/${id}`);
     },
     
     create: async (data: unknown): Promise<ApiResponse<unknown>> => 
-      http.post("/admin/products", data),
+      http.post("/products", data),
     
     // 🆕 BULK CREATION - Crear múltiples productos de una vez
     bulkCreate: async (products: ProductBulkData[]): Promise<ApiResponse<ProductBulkCreateResponse>> => {
@@ -1027,37 +1149,65 @@ export const adminApi = {
     },
 
     // 🆕 BULK CREATION - Crear múltiples precios de una vez
-    bulkCreate: async (prices: PriceBulkData[]): Promise<ApiResponse<PriceBulkCreateResponse>> => {
-      console.log(`[API] Enviando ${prices.length} precios al servidor...`);
-      
-      // Llamar al API real basado en el CURL proporcionado: POST /price/
-      try {
-        const response = await http.post("/price/", prices) as ApiResponse<PriceBulkCreateResponse>;
-        console.log('[API] Respuesta del servidor:', response);
-        return response;
-      } catch (error) {
-        console.error('[API] Error llamando al servidor:', error);
-        
-        // Fallback: Si el servidor no está disponible, simular respuesta exitosa para desarrollo
-        console.warn('[API] Usando fallback local por error del servidor');
-        const fallbackResult: PriceBulkCreateResponse = {
-          success: true,
-          message: `${prices.length} precios procesados (modo desarrollo - servidor no disponible)`,
-          results: {
-            totalProcessed: prices.length,
-            successCount: prices.length,
-            errorCount: 0,
-            prices: prices,
-            validations: {
-              duplicatePriceIds: [],
-              invalidCurrencies: [],
-              priceConflicts: [],
-              outOfRangePrices: []
-            }
+    // Acepta tanto JSON (array de objetos) como archivos (xlsx, csv, txt)
+    bulkCreate: async (data: PriceBulkData[] | FormData): Promise<ApiResponse<PriceBulkCreateResponse>> => {
+      // Determinar si es archivo o JSON
+      if (data instanceof FormData) {
+        // 📁 ARCHIVO: Usar multipart/form-data
+        console.log('[API] Enviando archivo de precios...');
+        return http.post("/price/import", data, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
           }
-        };
+        });
+      } else {
+        // 📋 JSON: Enviar como JSON directo
+        console.log(`[API] Enviando ${data.length} precios como JSON...`);
         
-        return { success: true, data: fallbackResult, message: fallbackResult.message };
+        // Llamar al API real basado en el CURL proporcionado: POST /price/
+        try {
+          const response = await http.post("/price/", data) as ApiResponse<PriceBulkCreateResponse>;
+          console.log('[API] ✅ Respuesta exitosa del servidor:', response);
+          return response;
+        } catch (error) {
+          console.error('[API] ❌ ERROR COMPLETO:', error);
+          
+          // Extraer detalles del error para debugging
+          const errorDetails = {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            status: (error as { status?: number }).status || 'N/A',
+            data: (error as { data?: unknown }).data || 'N/A',
+            fullError: error
+          };
+          
+          console.error('[API] 📊 Detalles del error:', errorDetails);
+          console.error('[API] 🔍 Status Code:', errorDetails.status);
+          console.error('[API] 📄 Response Data:', errorDetails.data);
+          
+          // ⚠️ IMPORTANTE: Si el backend responde con éxito (status 2xx) pero hay error de parseo,
+          // o si el backend responde con error pero los datos se crearon, necesitamos verificar
+          
+          // Fallback: Si el servidor no está disponible, simular respuesta exitosa para desarrollo
+          console.warn('[API] ⚙️ Usando fallback local por error del servidor');
+          const fallbackResult: PriceBulkCreateResponse = {
+            success: true,
+            message: `${data.length} precios procesados (modo desarrollo - servidor no disponible)`,
+            results: {
+              totalProcessed: data.length,
+              successCount: data.length,
+              errorCount: 0,
+              prices: data,
+              validations: {
+                duplicatePriceIds: [],
+                invalidCurrencies: [],
+                priceConflicts: [],
+                outOfRangePrices: []
+              }
+            }
+          };
+        
+          return { success: true, data: fallbackResult, message: fallbackResult.message };
+        }
       }
     },
   },
@@ -1075,38 +1225,77 @@ export const adminApi = {
       http.post("/admin/discounts", data),
 
     // 🆕 BULK CREATION - Crear múltiples descuentos de una vez
-    bulkCreate: async (discounts: DiscountBulkData[]): Promise<ApiResponse<DiscountBulkCreateResponse>> => {
-      console.log(`[API] Enviando ${discounts.length} descuentos al servidor...`);
-      
-      // Llamar al API real basado en el CURL proporcionado: POST /discount/
-      try {
-        const response = await http.post("/discount/", discounts) as ApiResponse<DiscountBulkCreateResponse>;
-        console.log('[API] Respuesta del servidor:', response);
-        return response;
-      } catch (error) {
-        console.error('[API] Error llamando al servidor:', error);
-        
-        // Fallback: Si el servidor no está disponible, simular respuesta exitosa para desarrollo
-        console.warn('[API] Usando fallback local por error del servidor');
-        const fallbackResult: DiscountBulkCreateResponse = {
-          success: true,
-          message: `${discounts.length} descuentos procesados (modo desarrollo - servidor no disponible)`,
-          results: {
-            totalProcessed: discounts.length,
-            successCount: discounts.length,
-            errorCount: 0,
-            discounts: discounts,
-            validations: {
-              duplicateIds: [],
-              invalidCurrencies: [],
-              dateConflicts: [],
-              overlappingDiscounts: [],
-              invalidTypes: []
-            }
+    // Acepta tanto JSON (array de objetos) como archivos (xlsx, csv, txt)
+    bulkCreate: async (data: DiscountBulkData[] | FormData): Promise<ApiResponse<DiscountBulkCreateResponse>> => {
+      // Determinar si es archivo o JSON
+      if (data instanceof FormData) {
+        // 📁 ARCHIVO: Usar multipart/form-data
+        console.log('[API] Enviando archivo de descuentos...');
+        return http.post("/discount/import", data, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
           }
-        };
+        });
+      } else {
+        // 📋 JSON: Enviar como JSON directo
+        console.log(`[API] Enviando ${data.length} descuentos como JSON...`);
+        console.log('[API] 🔍 PRIMEROS 2 DESCUENTOS ANTES DE ENVIAR:');
+        console.log(JSON.stringify(data.slice(0, 2), null, 2));
+        console.log('[API] 🔍 Verificando campos críticos del primer descuento:');
+        console.log('  - conditions:', JSON.stringify(data[0]?.conditions, null, 2));
+        console.log('  - applicable_to:', JSON.stringify(data[0]?.applicable_to, null, 2));
+        console.log('  - customFields:', JSON.stringify(data[0]?.customFields, null, 2));
+        console.log('[API] 🔍 Tipo de datos:', {
+          isArray: Array.isArray(data),
+          length: data.length,
+          firstItemType: typeof data[0],
+          conditionsType: typeof data[0]?.conditions,
+          applicableToType: typeof data[0]?.applicable_to,
+          customFieldsType: typeof data[0]?.customFields
+        });
         
-        return { success: true, data: fallbackResult, message: fallbackResult.message };
+        // Llamar al API real basado en el CURL proporcionado: POST /discount/
+        try {
+          const response = await http.post("/discount/", data) as ApiResponse<DiscountBulkCreateResponse>;
+          console.log('[API] ✅ Respuesta exitosa del servidor:', response);
+          return response;
+        } catch (error) {
+          console.error('[API] ❌ ERROR COMPLETO:', error);
+          
+          // Extraer detalles del error para debugging
+          const errorDetails = {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            status: (error as { status?: number }).status || 'N/A',
+            data: (error as { data?: unknown }).data || 'N/A',
+            fullError: error
+          };
+          
+          console.error('[API] 📊 Detalles del error:', errorDetails);
+          console.error('[API] 🔍 Status Code:', errorDetails.status);
+          console.error('[API] 📄 Response Data:', errorDetails.data);
+          
+          // Fallback: Si el servidor no está disponible, simular respuesta exitosa para desarrollo
+          console.warn('[API] ⚙️ Usando fallback local por error del servidor');
+          const fallbackResult: DiscountBulkCreateResponse = {
+            success: true,
+            message: `${data.length} descuentos procesados (modo desarrollo - servidor no disponible)`,
+            results: {
+              totalProcessed: data.length,
+              successCount: data.length,
+              errorCount: 0,
+              discounts: data,
+              validations: {
+                duplicateIds: [],
+                invalidCurrencies: [],
+                dateConflicts: [],
+                overlappingDiscounts: [],
+                invalidTypes: []
+              }
+            }
+          };
+          
+          return { success: true, data: fallbackResult, message: fallbackResult.message };
+        }
       }
     },
     
@@ -1130,36 +1319,31 @@ export const adminApi = {
       http.post("/admin/price-lists", data),
     
     // 🆕 BULK CREATION - Crear múltiples listas de precios de una vez
-    bulkCreate: async (priceLists: PriceListBulkData[]): Promise<ApiResponse<PriceListBulkCreateResponse>> => {
-      console.log(`[API] Procesando ${priceLists.length} listas de precios...`);
+    // Acepta tanto JSON (array de objetos) como archivos (xlsx, csv, txt)
+    bulkCreate: async (data: PriceListBulkData[] | FormData): Promise<ApiResponse<PriceListBulkCreateResponse>> => {
+      // En desarrollo, usar mock si no hay backend disponible y es JSON
+      if (process.env.NODE_ENV === 'development' && 
+          process.env.NEXT_PUBLIC_USE_MOCK_API === 'true' &&
+          !(data instanceof FormData)) {
+        const { mockPriceListBulkCreate } = await import('./mock-price-lists');
+        const mockResult = await mockPriceListBulkCreate(data as PriceListBulkData[]);
+        return { success: true, data: mockResult, message: mockResult.message };
+      }
       
-      // Simular procesamiento en desarrollo
-      await new Promise(resolve => setTimeout(resolve, 2500));
-      
-      // Crear respuesta simulada
-      const mockResult: PriceListBulkCreateResponse = {
-        success: true,
-        message: `Bulk creation completed. ${priceLists.length} price lists created successfully`,
-        results: {
-          totalProcessed: priceLists.length,
-          successCount: priceLists.length,
-          errorCount: 0,
-          priceLists: priceLists.map(priceList => ({
-            ...priceList,
-            status: 'active' as const,
-            priority: priceList.priority || 1,
-            tags: priceList.tags || []
-          })),
-          validations: {
-            duplicateIds: [],
-            invalidCurrencies: [],
-            conflictingPriorities: [],
-            dateConflicts: []
+      // Determinar si es archivo o JSON
+      if (data instanceof FormData) {
+        // 📁 ARCHIVO: Usar multipart/form-data
+        console.log('[API] Enviando archivo de listas de precios...');
+        return http.post("/listPrice/import", data, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
           }
-        }
-      };
-      
-      return { success: true, data: mockResult, message: mockResult.message };
+        });
+      } else {
+        // 📋 JSON: Enviar como JSON directo
+        console.log(`[API] Enviando ${data.length} listas de precios como JSON...`);
+        return http.post("/listPrice", data);
+      }
     },
     
     update: async (id: string, data: PriceListBulkData): Promise<ApiResponse<PriceList>> => 

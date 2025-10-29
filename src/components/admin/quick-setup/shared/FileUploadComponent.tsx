@@ -6,6 +6,7 @@ import { ThemeColors, UploadMethod, UploadResult } from '../shared/types';
 interface FileUploadProps<T> {
   method: UploadMethod;
   onUpload: (result: UploadResult<T>) => void;
+  onFileSelect?: (file: File) => void; // Callback para cuando se selecciona un archivo
   onBack: () => void;
   themeColors: ThemeColors;
   sampleData: T[];
@@ -18,6 +19,7 @@ interface FileUploadProps<T> {
 export function FileUploadComponent<T>({
   method,
   onUpload,
+  onFileSelect,
   onBack,
   themeColors,
   sampleData,
@@ -56,7 +58,14 @@ export function FileUploadComponent<T>({
 
   const handleFile = (file: File) => {
     setUploadedFile(file);
-    // Por ahora usar datos de ejemplo, luego implementar parser real
+    
+    // Notificar al componente padre que se seleccionó un archivo
+    if (onFileSelect) {
+      onFileSelect(file);
+    }
+    
+    // Por ahora usar datos de ejemplo para la vista previa
+    // En el futuro, aquí se puede implementar un parser real
     onUpload({ data: sampleData, success: true });
   };
 
@@ -540,7 +549,7 @@ Ejemplo:
                 color: jsonInput.trim() ? 'white' : themeColors.text.secondary,
               }}
             >
-              Procesar JSON
+              Cargar Datos
             </motion.button>
           </div>
         </div>

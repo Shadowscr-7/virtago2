@@ -48,108 +48,133 @@ const getPaymentTerms = (client: ClientData): string => {
   return 'No especificado';
 };
 
-// Datos de ejemplo para clientes
+// Datos de ejemplo para clientes (formato compatible con la API)
 const sampleClients: ClientData[] = [
   {
+    email: "juan.perez@tiendacentral.com",
+    firstName: "Juan Carlos",
+    lastName: "Pérez Mendoza",
+    name: "Juan Carlos Pérez Mendoza", // Para display
+    gender: "M",
+    phone: "+51987654321",
+    phoneOptional: "+51912345678",
+    documentType: "DNI",
+    document: "12345678",
+    customerClass: "A",
+    customerClassTwo: "VIP",
+    customerClassThree: "Premium",
+    customerClassDist: "Nacional",
+    customerClassDistTwo: "Mayorista",
+    latitude: -12.0464,
+    longitude: -77.0428,
+    status: "A",
+    paymentMethodCode: "CASH",
+    companyCode: "COMP001",
+    salesmanName: "Carlos Alberto Vendedor",
+    visitDay: "Lunes",
+    pdv: "PDV001",
+    deliveryDay: "Martes",
+    warehouse: "ALMACEN_LIMA_CENTRO",
+    frequency: "Semanal",
+    priceList: "LISTA_PREMIUM",
+    routeName: "Ruta Lima Centro",
+    withCredit: true,
+    distributorName: "Distribuidor Lima Central",
+    sellerId: "SELL001",
+    routeId: "ROUTE001",
     code: "CLI001",
-    name: "TechStore Solutions",
-    email: "ventas@techstore.com",
-    phone: "+1-555-0123",
-    address: "123 Tech Avenue",
-    city: "San Francisco",
-    country: "USA",
-    clientType: "company",
-    taxId: "12-3456789",
+    pdvname: "Tienda Central Lima",
+    paymentTerm: "30 días",
+    distributorCodes: ["DIST01", "DIST05"],
     creditLimit: 50000,
-    paymentTerms: 30
+    clientType: "company",
+    city: "Lima",
+    country: "Perú",
+    taxId: "20123456789"
   },
   {
-    code: "CLI002", 
-    name: "GameHub Distribution",
-    email: "orders@gamehub.com",
-    phone: "+1-555-0456",
-    address: "456 Gaming Street",
-    city: "Los Angeles",
-    country: "USA",
-    clientType: "company",
-    taxId: "98-7654321",
+    email: "maria.garcia@supermercadosur.com",
+    firstName: "María Elena",
+    lastName: "García Rodríguez",
+    name: "María Elena García Rodríguez",
+    gender: "F",
+    phone: "+51987654322",
+    phoneOptional: "+51987654399",
+    documentType: "RUC",
+    document: "20123456789",
+    customerClass: "B",
+    customerClassTwo: "Corporativo",
+    customerClassThree: "Mayorista",
+    customerClassDist: "Regional",
+    customerClassDistTwo: "Cadena",
+    latitude: -12.1234,
+    longitude: -77.0567,
+    status: "A",
+    paymentMethodCode: "CREDIT_CARD",
+    companyCode: "COMP002",
+    salesmanName: "Ana Patricia Vendedora",
+    visitDay: "Miércoles",
+    pdv: "PDV002",
+    deliveryDay: "Jueves",
+    warehouse: "ALMACEN_SUR_LIMA",
+    frequency: "Quincenal",
+    priceList: "LISTA_CORPORATIVA",
+    routeName: "Ruta Sur Lima",
+    withCredit: true,
+    distributorName: "Distribuidor Sur Lima",
+    sellerId: "SELL002",
+    routeId: "ROUTE002",
+    code: "CLI002",
+    pdvname: "Supermercado Sur Plaza",
+    paymentTerm: "45 días",
+    distributorCodes: ["DIST02", "DIST03", "DIST07"],
     creditLimit: 75000,
-    paymentTerms: 15
+    clientType: "company",
+    city: "Lima",
+    country: "Perú",
+    taxId: "20987654321"
   },
   {
+    email: "pedro.rodriguez@minimarket.com",
+    firstName: "Pedro Antonio",
+    lastName: "Rodríguez Silva",
+    name: "Pedro Antonio Rodríguez Silva",
+    gender: "M",
+    phone: "+51987654323",
+    phoneOptional: "+51912345680",
+    documentType: "DNI",
+    document: "87654321",
+    customerClass: "C",
+    customerClassTwo: "Estándar",
+    customerClassThree: "Minorista",
+    customerClassDist: "Local",
+    customerClassDistTwo: "Independiente",
+    latitude: -11.9854,
+    longitude: -77.0621,
+    status: "A",
+    paymentMethodCode: "CASH",
+    companyCode: "COMP003",
+    salesmanName: "Luis Fernando Comercial",
+    visitDay: "Viernes",
+    pdv: "PDV003",
+    deliveryDay: "Sábado",
+    warehouse: "ALMACEN_NORTE_LIMA",
+    frequency: "Mensual",
+    priceList: "LISTA_ESTANDAR",
+    routeName: "Ruta Norte Lima",
+    withCredit: false,
+    distributorName: "Distribuidor Norte",
+    sellerId: "SELL003",
+    routeId: "ROUTE003",
     code: "CLI003",
-    name: "Juan Carlos Pérez",
-    email: "juan.perez@email.com",
-    phone: "+52-555-0789",
-    address: "Av. Reforma 789",
-    city: "Ciudad de México",
-    country: "México",
+    pdvname: "MiniMarket Noroeste",
+    paymentTerm: "Contado",
+    distributorCodes: ["DIST01"],
+    creditLimit: 15000,
     clientType: "individual",
-    creditLimit: 5000,
-    paymentTerms: 0
-  },
-  {
-    code: "CLI004",
-    name: "Electronics Plus Inc",
-    email: "purchasing@electronicsplus.com",
-    phone: "+1-555-1234",
-    address: "789 Commerce Blvd",
-    city: "Miami",
-    country: "USA",
-    clientType: "company",
-    taxId: "55-9988776",
-    creditLimit: 100000,
-    paymentTerms: 45
-  },
-  {
-    code: "CLI005",
-    name: "María González",
-    email: "maria.gonzalez@gmail.com",
-    phone: "+34-666-555-444",
-    address: "Calle Mayor 123",
-    city: "Madrid",
-    country: "España",
-    clientType: "individual",
-    creditLimit: 3000,
-    paymentTerms: 0
-  },
-  {
-    code: "CLI006",
-    name: "Digital World Corp",
-    email: "info@digitalworld.com",
-    phone: "+44-20-7946-0958",
-    address: "10 Oxford Street",
-    city: "London",
-    country: "Reino Unido",
-    clientType: "company",
-    taxId: "GB-123456789",
-    creditLimit: 80000,
-    paymentTerms: 30
-  },
-  {
-    code: "CLI007",
-    name: "Roberto Silva",
-    email: "roberto.silva@outlook.com",
-    phone: "+55-11-98765-4321",
-    address: "Rua Paulista 456",
-    city: "São Paulo",
-    country: "Brasil",
-    clientType: "individual",
-    creditLimit: 8000,
-    paymentTerms: 7
-  },
-  {
-    code: "CLI008",
-    name: "TechMart Wholesale",
-    email: "wholesale@techmart.com",
-    phone: "+1-555-9999",
-    address: "1500 Business Park Dr",
-    city: "Austin",
-    country: "USA",
-    clientType: "company",
-    taxId: "77-5544332",
-    creditLimit: 150000,
-    paymentTerms: 60
+    city: "Lima",
+    country: "Perú",
+    taxId: "10876543211"
   }
 ];
 
@@ -165,85 +190,193 @@ export function ClientStep({ onNext, onBack, themeColors, stepData }: ClientStep
   const [uploadedData, setUploadedData] = useState<ClientData[]>(
     Array.isArray(stepData?.uploadedClients) ? stepData.uploadedClients : []
   );
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploadMethod, setUploadMethod] = useState<'file' | 'json' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
 
+  // Función para manejar la carga de datos (sin llamar a la API todavía)
   const handleUpload = async (result: UploadResult<ClientData>) => {
     if (result.success) {
-      setError(null); // Limpiar errores previos
-      setIsProcessing(true);
+      setError(null);
+      setUploadedData(result.data);
       
-      try {
-        // Transformar los datos al formato esperado por la API
-        const clientsForAPI: ClientBulkData[] = result.data.map(client => ({
-          email: getClientValue(client, 'email', ''),
-          firstName: getClientValue(client, 'firstName', '') || getClientValue(client, 'name', ''),
-          lastName: getClientValue(client, 'lastName', ''),
-          phone: getClientValue(client, 'phone', ''),
-          phoneOptional: getClientValue(client, 'phoneOptional', '') || undefined,
-          gender: (getClientValue(client, 'gender', '') as "M" | "F") || undefined,
-          documentType: getClientValue(client, 'documentType', '') || undefined,
-          document: getClientValue(client, 'document', '') || undefined,
-          customerClass: getClientValue(client, 'customerClass', '') || undefined,
-          customerClassTwo: getClientValue(client, 'customerClassTwo', '') || undefined,
-          customerClassThree: getClientValue(client, 'customerClassThree', '') || undefined,
-          customerClassDist: getClientValue(client, 'customerClassDist', '') || undefined,
-          customerClassDistTwo: getClientValue(client, 'customerClassDistTwo', '') || undefined,
-          latitude: typeof client.latitude === 'number' ? client.latitude : undefined,
-          longitude: typeof client.longitude === 'number' ? client.longitude : undefined,
-          status: (getClientValue(client, 'status', 'A') as "A" | "N" | "I") || "A",
-          distributorCodes: Array.isArray(client.distributorCodes) ? client.distributorCodes : undefined,
-          information: {
-            paymentMethodCode: getClientValue(client, 'paymentMethodCode', '') || undefined,
-            companyCode: getClientValue(client, 'companyCode', '') || undefined,
-            salesmanName: getClientValue(client, 'salesmanName', '') || undefined,
-            visitDay: getClientValue(client, 'visitDay', '') || undefined,
-            pdv: getClientValue(client, 'pdv', '') || undefined,
-            deliveryDay: getClientValue(client, 'deliveryDay', '') || undefined,
-            warehouse: getClientValue(client, 'warehouse', '') || undefined,
-            frequency: getClientValue(client, 'frequency', '') || undefined,
-            priceList: getClientValue(client, 'priceList', '') || undefined,
-            routeName: getClientValue(client, 'routeName', '') || undefined,
-            withCredit: typeof client.withCredit === 'boolean' ? client.withCredit : undefined,
-            distributorName: getClientValue(client, 'distributorName', '') || undefined,
-            sellerId: getClientValue(client, 'sellerId', '') || undefined,
-            routeId: getClientValue(client, 'routeId', '') || undefined,
-            clientCode: getClientValue(client, 'code', '') || getClientValue(client, 'clientCode', '') || undefined,
-            pdvname: getClientValue(client, 'pdvname', '') || undefined,
-            paymentTerm: getClientValue(client, 'paymentTerm', '') || undefined,
-            customerClassDistTwo: getClientValue(client, 'customerClassDistTwo', '') || undefined
-          }
-        }));
+      // Guardar el método usado (file o json)
+      if (method === 'file') {
+        setUploadMethod('file');
+      } else {
+        setUploadMethod('json');
+      }
+    } else {
+      setError(result.error || 'Error desconocido al procesar los datos');
+    }
+  };
 
-        // Llamar a la API para crear clientes en lote
+  // Función para manejar la carga de archivos
+  const handleFileUpload = (file: File) => {
+    setUploadedFile(file);
+    setUploadMethod('file');
+  };
+
+  // Función para transformar datos al formato de la API
+  const transformToAPIFormat = (clients: ClientData[]): ClientBulkData[] => {
+    return clients.map(client => ({
+      email: getClientValue(client, 'email', ''),
+      firstName: getClientValue(client, 'firstName', '') || getClientValue(client, 'name', ''),
+      lastName: getClientValue(client, 'lastName', ''),
+      phone: getClientValue(client, 'phone', ''),
+      phoneOptional: getClientValue(client, 'phoneOptional', '') || undefined,
+      gender: (getClientValue(client, 'gender', '') as "M" | "F") || undefined,
+      documentType: getClientValue(client, 'documentType', '') || undefined,
+      document: getClientValue(client, 'document', '') || undefined,
+      customerClass: getClientValue(client, 'customerClass', '') || undefined,
+      customerClassTwo: getClientValue(client, 'customerClassTwo', '') || undefined,
+      customerClassThree: getClientValue(client, 'customerClassThree', '') || undefined,
+      customerClassDist: getClientValue(client, 'customerClassDist', '') || undefined,
+      customerClassDistTwo: getClientValue(client, 'customerClassDistTwo', '') || undefined,
+      latitude: typeof client.latitude === 'number' ? client.latitude : undefined,
+      longitude: typeof client.longitude === 'number' ? client.longitude : undefined,
+      status: (getClientValue(client, 'status', 'A') as "A" | "N" | "I") || "A",
+      distributorCodes: Array.isArray(client.distributorCodes) ? client.distributorCodes : undefined,
+      information: {
+        paymentMethodCode: getClientValue(client, 'paymentMethodCode', '') || undefined,
+        companyCode: getClientValue(client, 'companyCode', '') || undefined,
+        salesmanName: getClientValue(client, 'salesmanName', '') || undefined,
+        visitDay: getClientValue(client, 'visitDay', '') || undefined,
+        pdv: getClientValue(client, 'pdv', '') || undefined,
+        deliveryDay: getClientValue(client, 'deliveryDay', '') || undefined,
+        warehouse: getClientValue(client, 'warehouse', '') || undefined,
+        frequency: getClientValue(client, 'frequency', '') || undefined,
+        priceList: getClientValue(client, 'priceList', '') || undefined,
+        routeName: getClientValue(client, 'routeName', '') || undefined,
+        withCredit: typeof client.withCredit === 'boolean' ? client.withCredit : undefined,
+        distributorName: getClientValue(client, 'distributorName', '') || undefined,
+        sellerId: getClientValue(client, 'sellerId', '') || undefined,
+        routeId: getClientValue(client, 'routeId', '') || undefined,
+        clientCode: getClientValue(client, 'code', '') || getClientValue(client, 'clientCode', '') || undefined,
+        pdvname: getClientValue(client, 'pdvname', '') || undefined,
+        paymentTerm: getClientValue(client, 'paymentTerm', '') || undefined,
+        customerClassDistTwo: getClientValue(client, 'customerClassDistTwo', '') || undefined
+      }
+    }));
+  };
+
+  // Función para confirmar y enviar a la API
+  const handleConfirmAndContinue = async () => {
+    if (uploadedData.length === 0) {
+      setError('No hay datos para procesar');
+      return;
+    }
+
+    setIsConfirming(true);
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      // Verificar qué método se usó para subir los datos
+      if (uploadMethod === 'json') {
+        // Método 1: JSON - Usar POST /api/clients/
+        console.log('📤 Enviando clientes vía JSON (POST /api/clients/)...');
+        console.log('📊 Total de clientes a enviar:', uploadedData.length);
+        
+        const clientsForAPI = transformToAPIFormat(uploadedData);
+        console.log('📋 Datos transformados:', clientsForAPI.slice(0, 2)); // Mostrar primeros 2 para debug
+        
         const apiResponse = await api.admin.clients.bulkCreate(clientsForAPI);
+        console.log('📥 Respuesta de la API:', apiResponse);
         
         if (apiResponse.success) {
           const response = apiResponse.data as ClientBulkCreateResponse;
           console.log('✅ Clientes creados exitosamente:', response);
           
-          // Mostrar resumen del resultado
+          // Mostrar resumen si hay errores
           if (response.results.errorCount > 0) {
-            const errorMsg = `Se procesaron ${response.results.totalProcessed} clientes. ${response.results.successCount} exitosos, ${response.results.errorCount} con errores.`;
+            const errorMsg = `⚠️ Se procesaron ${response.results.totalProcessed} clientes. ${response.results.successCount} exitosos, ${response.results.errorCount} con errores.`;
             setError(errorMsg);
+            
+            // Aún así continuar si hubo algunos exitosos
+            if (response.results.successCount > 0) {
+              setTimeout(() => {
+                onNext({ uploadedClients: uploadedData });
+              }, 2000);
+            } else {
+              setIsConfirming(false);
+              setIsProcessing(false);
+            }
+          } else {
+            // Todo exitoso
+            setTimeout(() => {
+              onNext({ uploadedClients: uploadedData });
+            }, 1000);
           }
-          
-          setUploadedData(result.data);
-          setIsProcessing(false);
         } else {
           throw new Error(apiResponse.message || 'Error al crear clientes');
         }
-      } catch (error) {
-        console.error('❌ Error al procesar clientes:', error);
-        setIsProcessing(false);
+      } else if (uploadMethod === 'file' && uploadedFile) {
+        // Método 2: Archivo - Usar POST /api/clients/import
+        console.log('📁 Enviando clientes vía archivo (POST /api/clients/import)...');
         
-        const errorMessage = error instanceof Error ? error.message : 'Error desconocido al procesar los datos';
-        setError(`Error del servidor: ${errorMessage}`);
+        const formData = new FormData();
+        formData.append('file', uploadedFile);
+        
+        // Llamar al endpoint de importación (necesitamos agregarlo al API)
+        const response = await fetch('/api/clients/import', {
+          method: 'POST',
+          body: formData,
+          headers: {
+            // No agregar Content-Type, el navegador lo establecerá automáticamente con boundary
+          }
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: 'Error desconocido' }));
+          throw new Error(errorData.message || `Error HTTP: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log('✅ Clientes importados exitosamente:', result);
+        
+        // Mostrar resumen
+        if (result.details?.errorCount > 0) {
+          const errorMsg = `⚠️ Se procesaron ${result.details.totalProcessed} clientes. ${result.details.savedCount} guardados, ${result.details.errorCount} con errores.`;
+          setError(errorMsg);
+        }
+        
+        // Continuar al siguiente paso
+        setTimeout(() => {
+          onNext({ uploadedClients: uploadedData });
+        }, 1000);
+      } else {
+        throw new Error('Método de carga no válido');
       }
-    } else {
-      // Manejar error con mejor UX
-      console.error('Error uploading clients:', result.error);
-      setError(result.error || 'Error desconocido al procesar los datos');
+    } catch (error) {
+      console.error('❌ Error al confirmar clientes:', error);
+      
+      // Determinar el tipo de error y mostrar mensaje apropiado
+      let errorMessage = 'Error desconocido';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        
+        // Detectar errores comunes
+        if (errorMessage.includes('Network Error') || errorMessage.includes('ERR_CONNECTION_REFUSED')) {
+          errorMessage = '🔴 No se puede conectar con el servidor. Verifica que el backend esté corriendo en http://localhost:3001';
+        } else if (errorMessage.includes('timeout')) {
+          errorMessage = '⏱️ La solicitud tardó demasiado. El servidor puede estar sobrecargado o no responde.';
+        } else if (errorMessage.includes('401')) {
+          errorMessage = '🔒 No estás autenticado. Por favor inicia sesión nuevamente.';
+        } else if (errorMessage.includes('403')) {
+          errorMessage = '🚫 No tienes permisos para realizar esta acción.';
+        } else if (errorMessage.includes('404')) {
+          errorMessage = '❓ El endpoint /api/clients/ no existe en el servidor. Contacta al administrador.';
+        } else if (errorMessage.includes('500')) {
+          errorMessage = '💥 Error interno del servidor. Revisa los logs del backend.';
+        }
+      }
+      
+      setError(`❌ ${errorMessage}`);
+      setIsConfirming(false);
+      setIsProcessing(false);
     }
   };
 
@@ -501,31 +634,25 @@ export function ClientStep({ onNext, onBack, themeColors, stepData }: ClientStep
               </motion.button>
               
               <motion.button
-                onClick={() => {
-                  setIsConfirming(true);
-                  // Pequeña pausa para dar feedback visual
-                  setTimeout(() => {
-                    onNext({ uploadedClients: uploadedData });
-                  }, 500);
-                }}
-                disabled={isConfirming}
-                whileHover={{ scale: isConfirming ? 1 : 1.05 }}
-                whileTap={{ scale: isConfirming ? 1 : 0.98 }}
+                onClick={handleConfirmAndContinue}
+                disabled={isConfirming || isProcessing}
+                whileHover={{ scale: (isConfirming || isProcessing) ? 1 : 1.05 }}
+                whileTap={{ scale: (isConfirming || isProcessing) ? 1 : 0.98 }}
                 className="px-8 py-3 rounded-xl font-semibold text-white shadow-lg flex items-center gap-2 min-w-[200px] justify-center"
                 style={{ 
-                  backgroundColor: isConfirming ? `${themeColors.primary}80` : themeColors.primary,
+                  backgroundColor: (isConfirming || isProcessing) ? `${themeColors.primary}80` : themeColors.primary,
                   boxShadow: `0 4px 12px ${themeColors.primary}30`,
-                  cursor: isConfirming ? 'wait' : 'pointer'
+                  cursor: (isConfirming || isProcessing) ? 'wait' : 'pointer'
                 }}
               >
-                {isConfirming ? (
+                {(isConfirming || isProcessing) ? (
                   <>
                     <motion.div
                       animate={{ rotate: 360 }}
                       transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
                       className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
                     />
-                    Confirmando...
+                    {uploadMethod === 'json' ? 'Enviando JSON...' : 'Importando archivo...'}
                   </>
                 ) : (
                   <>
@@ -549,35 +676,72 @@ export function ClientStep({ onNext, onBack, themeColors, stepData }: ClientStep
           style={{ backgroundColor: `${themeColors.surface}50` }}
         >
           <motion.button
-            onClick={() => setMethod("file")}
+            onClick={() => {
+              // Solo permitir cambio si no hay datos cargados
+              if (uploadedData.length === 0 || uploadMethod === null) {
+                setMethod("file");
+              }
+            }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            disabled={uploadMethod === 'json' && uploadedData.length > 0}
             className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${
               method === "file" ? "" : "opacity-70"
             }`}
             style={{
               backgroundColor: method === "file" ? themeColors.primary : "transparent",
               color: method === "file" ? "white" : themeColors.text.primary,
+              cursor: (uploadMethod === 'json' && uploadedData.length > 0) ? 'not-allowed' : 'pointer',
+              opacity: (uploadMethod === 'json' && uploadedData.length > 0) ? 0.5 : 1
             }}
           >
-            Subir Archivo
+            📁 Subir Archivo
           </motion.button>
           <motion.button
-            onClick={() => setMethod("json")}
+            onClick={() => {
+              // Solo permitir cambio si no hay datos cargados
+              if (uploadedData.length === 0 || uploadMethod === null) {
+                setMethod("json");
+              }
+            }}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
+            disabled={uploadMethod === 'file' && uploadedData.length > 0}
             className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${
               method === "json" ? "" : "opacity-70"
             }`}
             style={{
               backgroundColor: method === "json" ? themeColors.primary : "transparent",
               color: method === "json" ? "white" : themeColors.text.primary,
+              cursor: (uploadMethod === 'file' && uploadedData.length > 0) ? 'not-allowed' : 'pointer',
+              opacity: (uploadMethod === 'file' && uploadedData.length > 0) ? 0.5 : 1
             }}
           >
-            Importar JSON
+            📋 Importar JSON
           </motion.button>
         </div>
       </div>
+
+      {/* Mensaje informativo si ya se cargó un método */}
+      {uploadedData.length > 0 && uploadMethod && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 rounded-xl border"
+          style={{
+            backgroundColor: `${themeColors.primary}10`,
+            borderColor: `${themeColors.primary}30`
+          }}
+        >
+          <div className="flex items-center gap-2 text-sm">
+            <div className="w-5 h-5">ℹ️</div>
+            <div style={{ color: themeColors.text.primary }}>
+              <strong>Método seleccionado:</strong> {uploadMethod === 'file' ? 'Archivo Excel/CSV' : 'JSON'}. 
+              {' '}Solo puedes usar un método por vez. Para cambiar, primero elimina los datos cargados.
+            </div>
+          </div>
+        </motion.div>
+      )}
 
       {/* Mostrar error si existe */}
       {error && (
@@ -617,6 +781,7 @@ export function ClientStep({ onNext, onBack, themeColors, stepData }: ClientStep
       <FileUploadComponent
         method={method}
         onUpload={handleUpload}
+        onFileSelect={handleFileUpload}
         onBack={onBack}
         themeColors={themeColors}
         sampleData={sampleClients}

@@ -30,7 +30,7 @@ export function ClientCommercialInfo({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
-      className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl border border-white/30 p-6 shadow-xl"
+      className="bg-white/70 dark:bg-slate-800/70 rounded-2xl border border-white/30 p-6 shadow-xl overflow-visible"
     >
       <div className="flex items-center gap-3 mb-6">
         <div className="p-3 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl border border-green-500/30">
@@ -105,7 +105,7 @@ export function ClientCommercialInfo({
           <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
             Moneda
           </label>
-          <div className="relative h-14">
+          <div className="relative h-14 z-10">
             <StyledSelect
               value={clientData.currencyCode}
               onChange={(value) => onInputChange("currencyCode", value)}

@@ -11,6 +11,35 @@ import { ClientStatusPanel } from "@/components/clients/client-status-panel";
 import { ClientStats } from "@/components/clients/client-stats";
 import { ClientLocationMap } from "@/components/clients/client-location-map";
 import { UnsavedChangesNotification } from "@/components/clients/unsaved-changes-notification";
+import { api } from "@/api";
+import { Loader2 } from "lucide-react";
+
+// Interface para la respuesta de la API
+interface ApiClientResponse {
+  id: string;
+  clientId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  gender?: string;
+  phone?: string;
+  phoneOptional?: string;
+  documentType?: string;
+  document?: string;
+  customerClass?: string;
+  customerClassTwo?: string;
+  customerClassThree?: string;
+  customerClassDist?: string;
+  customerClassDistTwo?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  information?: Record<string, unknown>;
+  distributorCodes?: string[];
+  createdAt?: string;
+  status?: string;
+  updatedAt?: string;
+  hasUser?: boolean;
+}
 
 // Datos de ejemplo - en producción vendría del servidor
 const mockClientData = {
@@ -97,12 +126,98 @@ export default function ClientDetail({
   const [clientData, setClientData] = useState<ClientData>(mockClientData);
   const [hasChanges, setHasChanges] = useState(false);
   const [originalData, setOriginalData] = useState<ClientData>(mockClientData);
+  const [isLoading, setIsLoading] = useState(true);
+  const [clientId, setClientId] = useState<string>("");
 
-  // Efecto para obtener el ID del cliente
+  // Efecto para obtener el clientId y cargar sus datos
   useEffect(() => {
-    params.then((resolvedParams) => {
-      console.log("Client ID:", resolvedParams.id);
-    });
+    const loadClientData = async () => {
+      try {
+        const resolvedParams = await params;
+        const clientIdParam = resolvedParams.id;
+        setClientId(clientIdParam);
+        
+        console.log("[CLIENT DETAIL] 🔍 Cargando datos del cliente por clientId:", clientIdParam);
+        setIsLoading(true);
+
+        const response = await api.admin.clients.getByClientId(clientIdParam);
+        
+        console.log("[CLIENT DETAIL] 📦 Respuesta completa de la API:", response);
+        console.log("[CLIENT DETAIL] 📦 response.success:", response.success);
+        console.log("[CLIENT DETAIL] 📦 response.data:", response.data);
+        console.log("[CLIENT DETAIL] 📦 Tipo de response.data:", typeof response.data);
+
+        if (response.success && response.data) {
+          // El http-client envuelve la respuesta, y el backend también devuelve { success, data }
+          // Entonces response.data = { success: true, data: { cliente... } }
+          const backendResponse = response.data as { success?: boolean; data?: ApiClientResponse };
+          const apiData = (backendResponse.data || backendResponse) as unknown as ApiClientResponse;
+          
+          console.log("[CLIENT DETAIL] 📋 apiData completo:", apiData);
+          console.log("[CLIENT DETAIL] 📋 apiData.firstName:", apiData.firstName);
+          console.log("[CLIENT DETAIL] 📋 apiData.lastName:", apiData.lastName);
+          console.log("[CLIENT DETAIL] 📋 Datos recibidos:", {
+            id: apiData.id,
+            clientId: apiData.clientId,
+            email: apiData.email,
+            firstName: apiData.firstName,
+            lastName: apiData.lastName,
+            status: apiData.status,
+            hasUser: apiData.hasUser
+          });
+          
+          // Mapear los datos de la API al formato que espera el componente
+          const mappedData: ClientData = {
+            id: apiData.id || apiData.clientId,
+            name: `${apiData.firstName} ${apiData.lastName}`,
+            businessName: `${apiData.firstName} ${apiData.lastName}`,
+            rut: apiData.document || "",
+            rutCode: apiData.document || "",
+            phone: apiData.phone || "",
+            phoneSecond: apiData.phoneOptional || "",
+            email: apiData.email,
+            taxStatus: apiData.customerClass || "Contribuyente",
+            paymentTerm: parseInt((apiData.information?.paymentTerm as string) || "30"),
+            creditLimit: (apiData.information?.withCredit as boolean) ? 500000 : 0,
+            currencyCode: "UYU",
+            paymentMethodCode: (apiData.information?.paymentMethodCode as string) || "TRANSFERENCIA",
+            contactName: `${apiData.firstName} ${apiData.lastName}`,
+            contactPhone: apiData.phone || "",
+            contactEmail: apiData.email,
+            fiscalName: (apiData.information?.fiscalName as string) || `${apiData.firstName} ${apiData.lastName}`,
+            city: (apiData.information?.city as string) || "",
+            district: "",
+            neighborhood: (apiData.information?.neighborhood as string) || "",
+            address: (apiData.information?.address as string) || "",
+            postalCode: (apiData.information?.postalCode as string) || "",
+            country: (apiData.information?.country as string) || "Uruguay",
+            isActive: apiData.status === "A",
+            isBlocked: apiData.status === "I",
+            isVip: false,
+            hasDebt: apiData.hasUser || false,
+            observations: (apiData.information?.observations as string) || "",
+            registrationDate: apiData.createdAt ? new Date(apiData.createdAt).toISOString().split('T')[0] : "",
+            lastPurchase: apiData.updatedAt ? new Date(apiData.updatedAt).toISOString().split('T')[0] : "",
+            totalPurchases: 0,
+            latitude: apiData.latitude || -34.9051,
+            longitude: apiData.longitude || -56.1915,
+          };
+
+          console.log("[CLIENT DETAIL] ✅ Datos mapeados:", mappedData);
+          
+          setClientData(mappedData);
+          setOriginalData(mappedData);
+        } else {
+          console.error("[CLIENT DETAIL] ❌ Error en la respuesta:", response);
+        }
+      } catch (error) {
+        console.error("[CLIENT DETAIL] ❌ Error al cargar datos:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadClientData();
   }, [params]);
 
   // Efecto para detectar cambios
@@ -124,19 +239,55 @@ export default function ClientDetail({
     }));
   };
 
-  const handleSave = () => {
-    console.log("Guardando cambios:", clientData);
-    setOriginalData(clientData);
-    setHasChanges(false);
-    setIsEditing(false);
+  const handleSave = async () => {
+    if (!clientId) {
+      console.error("[CLIENT DETAIL] ❌ No hay clientId");
+      alert("Error: No se puede guardar sin ID de cliente");
+      return;
+    }
 
-    // Aquí iría la llamada a la API para guardar los datos
-    // try {
-    //   await updateClient(params.id, clientData)
-    //   toast.success('Cliente actualizado correctamente')
-    // } catch (error) {
-    //   toast.error('Error al actualizar el cliente')
-    // }
+    console.log("[CLIENT DETAIL] 💾 Guardando cambios:", clientData);
+    
+    try {
+      // Mapear los datos del componente al formato de la API
+      const updateData = {
+        firstName: clientData.name.split(' ')[0],
+        lastName: clientData.name.split(' ').slice(1).join(' ') || clientData.name.split(' ')[0],
+        email: clientData.email,
+        phone: clientData.phone,
+        phoneOptional: clientData.phoneSecond,
+        document: clientData.rut,
+        documentType: clientData.rut ? "RUT" : "CI",
+        status: clientData.isActive ? "A" : clientData.isBlocked ? "I" : "N",
+        latitude: clientData.latitude,
+        longitude: clientData.longitude,
+        information: {
+          paymentMethodCode: clientData.paymentMethodCode,
+          paymentTerm: clientData.paymentTerm.toString(),
+          withCredit: clientData.creditLimit > 0,
+        }
+      };
+
+      console.log("[CLIENT DETAIL] 📤 Enviando a API con clientId:", clientId);
+      console.log("[CLIENT DETAIL] 📤 Datos:", updateData);
+      
+      // Usar el clientId para actualizar
+      const response = await api.admin.clients.update(clientId, updateData);
+      
+      if (response.success) {
+        console.log("[CLIENT DETAIL] ✅ Cliente actualizado correctamente");
+        setOriginalData(clientData);
+        setHasChanges(false);
+        setIsEditing(false);
+        alert("Cliente actualizado correctamente");
+      } else {
+        console.error("[CLIENT DETAIL] ❌ Error en la respuesta:", response);
+        alert("Error al actualizar el cliente");
+      }
+    } catch (error) {
+      console.error("[CLIENT DETAIL] ❌ Error al guardar:", error);
+      alert("Error al actualizar el cliente");
+    }
   };
 
   const handleCancel = () => {
@@ -158,19 +309,32 @@ export default function ClientDetail({
     <AdminLayout>
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-6">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <ClientHeader
-            clientName={clientData.name}
-            isEditing={isEditing}
-            hasChanges={hasChanges}
-            onEdit={handleEdit}
-            onSave={handleSave}
-            onCancel={handleCancel}
-          />
+          {/* Loading State */}
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+              <Loader2 className="w-12 h-12 animate-spin text-purple-600" />
+              <p className="text-lg text-gray-600 dark:text-gray-400">
+                Cargando datos del cliente...
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-500">
+                Client ID: {clientId}
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Header */}
+              <ClientHeader
+                clientName={clientData.name}
+                isEditing={isEditing}
+                hasChanges={hasChanges}
+                onEdit={handleEdit}
+                onSave={handleSave}
+                onCancel={handleCancel}
+              />
 
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
             {/* Columna Principal - Formulario */}
-            <div className="xl:col-span-2 space-y-8">
+            <div className="xl:col-span-2 space-y-8 overflow-visible">
               {/* Información Personal */}
               <ClientPersonalInfo
                 clientData={{
@@ -256,12 +420,14 @@ export default function ClientDetail({
             </div>
           </div>
 
-          {/* Notificación de cambios no guardados */}
-          <UnsavedChangesNotification
-            hasChanges={hasChanges}
-            onSave={handleSave}
-            onDiscard={handleDiscard}
-          />
+              {/* Notificación de cambios no guardados */}
+              <UnsavedChangesNotification
+                hasChanges={hasChanges}
+                onSave={handleSave}
+                onDiscard={handleDiscard}
+              />
+            </>
+          )}
         </div>
       </div>
     </AdminLayout>

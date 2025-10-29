@@ -58,12 +58,21 @@ export interface PriceListProduct {
 }
 
 export interface PriceData {
-  productCode: string;
-  productName: string;
-  basePrice: number;
-  cost: number;
-  margin: number;
-  currency: string;
+  // Formato wizard (legacy)
+  productCode?: string;
+  productName?: string;
+  basePrice?: number;
+  cost?: number;
+  margin?: number;
+  currency?: string;
+  
+  // Formato backend API
+  name?: string;
+  price_id?: string;
+  price_list_id?: string;
+  product_id?: string;
+  amount?: number;
+  customFields?: Record<string, unknown>;
 }
 
 export interface DiscountData {

@@ -35,7 +35,7 @@ export function ClientLocationMap({ clientData }: ClientLocationMapProps) {
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.5 }}
-      className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl border border-white/30 p-6 shadow-xl"
+      className="bg-white/70 dark:bg-slate-800/70 rounded-2xl border border-white/30 p-6 shadow-xl"
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">

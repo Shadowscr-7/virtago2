@@ -3,34 +3,10 @@
  * Simula el comportamiento del API real para bulk creation de listas de precios
  */
 
-// Definir tipos localmente para evitar importación circular
-interface PriceListBulkData {
-  id: string;
-  name: string;
-  description?: string;
-  startDate: string;
-  endDate?: string;
-  status: 'active' | 'inactive' | 'draft';
-  currency: string;
-  priceType: 'regular' | 'promotional' | 'seasonal';
-  customerSegments: string[];
-  channels: string[];
-  regions: string[];
-  priority: number;
-  margin?: number;
-  discountRules?: {
-    type: 'percentage' | 'fixed';
-    value: number;
-    conditions?: string[];
-  }[];
-  taxIncluded: boolean;
-  taxRate?: number;
-  customFields?: Record<string, unknown>;
-  tags: string[];
-  notes?: string;
-}
+import type { PriceListBulkData, PriceListBulkCreateResponse } from './index';
 
-interface PriceListBulkCreateResponse {
+// Tipos auxiliares para el mock
+interface PriceListBulkCreateResponseAux {
   success: boolean;
   message: string;
   results: {

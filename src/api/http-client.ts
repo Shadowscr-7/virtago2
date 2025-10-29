@@ -60,6 +60,22 @@ httpClient.interceptors.request.use(
       data: config.data,
     });
     
+    // 🔍 LOG ADICIONAL: Si es POST /discount/ con array, mostrar detalles
+    if (config.url === '/discount/' && config.method?.toUpperCase() === 'POST' && Array.isArray(config.data)) {
+      console.log('🔍 [HTTP-CLIENT] Interceptor - Enviando array de descuentos');
+      console.log('🔍 [HTTP-CLIENT] Content-Type:', config.headers?.['Content-Type']);
+      console.log('🔍 [HTTP-CLIENT] Primer descuento (campos críticos):');
+      const firstDiscount = config.data[0];
+      if (firstDiscount) {
+        console.log('  - conditions:', firstDiscount.conditions);
+        console.log('  - applicable_to:', firstDiscount.applicable_to);
+        console.log('  - customFields:', firstDiscount.customFields);
+        console.log('  - conditions TYPE:', typeof firstDiscount.conditions);
+        console.log('  - applicable_to TYPE:', typeof firstDiscount.applicable_to);
+        console.log('  - customFields TYPE:', typeof firstDiscount.customFields);
+      }
+    }
+    
     return config;
   },
   (error: unknown) => {
@@ -86,13 +102,28 @@ httpClient.interceptors.response.use(
     }
     
     const originalRequest = error.config;
+    const status = error.response?.status;
+    const url = error.config?.url;
     
-    console.error('❌ API Response Error:', {
-      status: error.response?.status,
-      url: error.config?.url,
-      message: error.message,
-      data: error.response?.data,
-    });
+    // Solo mostrar errores críticos en la consola
+    // Errores 4xx y 5xx que no sean manejados por el código
+    const isCriticalError = status && (status >= 400);
+    
+    if (isCriticalError) {
+      console.error('❌ API Response Error:', {
+        status,
+        url,
+        message: error.message,
+        data: error.response?.data,
+      });
+    } else {
+      // Para otros casos, solo log de debug
+      console.debug('ℹ️ API Request Info:', {
+        status,
+        url,
+        message: error.message,
+      });
+    }
     
     // Si el error es 401 (Unauthorized) y no es un retry
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
@@ -270,6 +301,19 @@ class HttpClient {
         status: response.status,
         success: true,
       };
+    } catch (error: unknown) {
+      throw this.handleError(error);
+    }
+  }
+  
+  // Download file as blob
+  async downloadBlob(url: string, config?: AxiosRequestConfig): Promise<Blob> {
+    try {
+      const response = await this.client.get(url, {
+        ...config,
+        responseType: 'blob',
+      });
+      return response.data;
     } catch (error: unknown) {
       throw this.handleError(error);
     }

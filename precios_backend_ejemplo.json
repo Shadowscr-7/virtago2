@@ -1,0 +1,242 @@
+[
+  {
+    "name": "Laptop Gaming RGB Ultra - Lista Premium",
+    "price_id": "PRC001",
+    "price_list_id": "LST001",
+    "product_id": "LAP001",
+    "amount": 1199.99,
+    "currency": "USD",
+    "customFields": {
+      "season": "winter",
+      "promotion": false
+    }
+  },
+  {
+    "name": "Monitor Curvo 27 pulgadas - Lista Premium",
+    "price_id": "PRC002",
+    "price_list_id": "LST001",
+    "product_id": "MON002",
+    "amount": 379.99,
+    "currency": "USD",
+    "customFields": {
+      "season": "winter",
+      "promotion": true
+    }
+  },
+  {
+    "name": "Teclado Mecánico RGB - Lista Premium",
+    "price_id": "PRC003",
+    "price_list_id": "LST001",
+    "product_id": "TEC003",
+    "amount": 84.99,
+    "currency": "USD",
+    "customFields": {
+      "season": "all",
+      "promotion": false
+    }
+  },
+  {
+    "name": "Mouse Inalámbrico Precisión - Lista Premium",
+    "price_id": "PRC004",
+    "price_list_id": "LST001",
+    "product_id": "RAT004",
+    "amount": 54.99,
+    "currency": "USD",
+    "customFields": {
+      "season": "all",
+      "promotion": true
+    }
+  },
+  {
+    "name": "Auriculares Gaming 7.1 - Lista Premium",
+    "price_id": "PRC005",
+    "price_list_id": "LST001",
+    "product_id": "AUD005",
+    "amount": 74.99,
+    "currency": "USD",
+    "customFields": {
+      "season": "summer",
+      "promotion": false
+    }
+  },
+  {
+    "name": "Cámara Web HD 1080p - Lista Premium",
+    "price_id": "PRC006",
+    "price_list_id": "LST001",
+    "product_id": "CAM006",
+    "amount": 44.99,
+    "currency": "USD",
+    "customFields": {
+      "season": "all",
+      "promotion": true
+    }
+  },
+  {
+    "name": "Disco SSD NVMe 1TB - Lista Premium",
+    "price_id": "PRC007",
+    "price_list_id": "LST001",
+    "product_id": "SSD007",
+    "amount": 119.99,
+    "currency": "USD",
+    "customFields": {
+      "season": "all",
+      "promotion": false
+    }
+  },
+  {
+    "name": "Memoria RAM DDR4 32GB - Lista Premium",
+    "price_id": "PRC008",
+    "price_list_id": "LST001",
+    "product_id": "RAM008",
+    "amount": 174.99,
+    "currency": "USD",
+    "customFields": {
+      "season": "all",
+      "promotion": true
+    }
+  },
+  {
+    "name": "Tarjeta Gráfica RTX Super - Lista Premium",
+    "price_id": "PRC009",
+    "price_list_id": "LST001",
+    "product_id": "GPU009",
+    "amount": 849.99,
+    "currency": "USD",
+    "customFields": {
+      "season": "winter",
+      "promotion": false
+    }
+  },
+  {
+    "name": "Silla Gaming Ergonómica - Lista Premium",
+    "price_id": "PRC010",
+    "price_list_id": "LST001",
+    "product_id": "CHR010",
+    "amount": 279.99,
+    "currency": "USD",
+    "customFields": {
+      "season": "all",
+      "promotion": true
+    }
+  },
+  {
+    "name": "Micrófono Condensador USB - Lista Premium",
+    "price_id": "PRC011",
+    "price_list_id": "LST001",
+    "product_id": "MIC011",
+    "amount": 139.99,
+    "currency": "USD",
+    "customFields": {
+      "season": "all",
+      "promotion": false
+    }
+  },
+  {
+    "name": "Sistema Refrigeración Líquida - Lista Premium",
+    "price_id": "PRC012",
+    "price_list_id": "LST001",
+    "product_id": "COO012",
+    "amount": 109.99,
+    "currency": "USD",
+    "customFields": {
+      "season": "summer",
+      "promotion": true
+    }
+  },
+  {
+    "name": "Cable HDMI 4K Premium - Lista Premium",
+    "price_id": "PRC013",
+    "price_list_id": "LST001",
+    "product_id": "CAB013",
+    "amount": 22.99,
+    "currency": "USD",
+    "customFields": {
+      "season": "all",
+      "promotion": false
+    }
+  },
+  {
+    "name": "Hub USB-C Multipuerto - Lista Premium",
+    "price_id": "PRC014",
+    "price_list_id": "LST001",
+    "product_id": "HUB014",
+    "amount": 64.99,
+    "currency": "USD",
+    "customFields": {
+      "season": "all",
+      "promotion": true
+    }
+  },
+  {
+    "name": "Mousepad Gaming XXL - Lista Premium",
+    "price_id": "PRC015",
+    "price_list_id": "LST001",
+    "product_id": "PAD015",
+    "amount": 32.99,
+    "currency": "USD",
+    "customFields": {
+      "season": "all",
+      "promotion": false
+    }
+  },
+  {
+    "name": "Router Gaming Dual Band - Lista Premium",
+    "price_id": "PRC016",
+    "price_list_id": "LST001",
+    "product_id": "ROU016",
+    "amount": 159.99,
+    "currency": "USD",
+    "customFields": {
+      "season": "all",
+      "promotion": true
+    }
+  },
+  {
+    "name": "UPS 1500VA Protección - Lista Premium",
+    "price_id": "PRC017",
+    "price_list_id": "LST001",
+    "product_id": "UPS017",
+    "amount": 199.99,
+    "currency": "USD",
+    "customFields": {
+      "season": "all",
+      "promotion": false
+    }
+  },
+  {
+    "name": "Switch Ethernet Gigabit - Lista Premium",
+    "price_id": "PRC018",
+    "price_list_id": "LST001",
+    "product_id": "SWT018",
+    "amount": 89.99,
+    "currency": "USD",
+    "customFields": {
+      "season": "all",
+      "promotion": true
+    }
+  },
+  {
+    "name": "Lámpara LED Escritorio - Lista Premium",
+    "price_id": "PRC019",
+    "price_list_id": "LST001",
+    "product_id": "LAM019",
+    "amount": 39.99,
+    "currency": "USD",
+    "customFields": {
+      "season": "all",
+      "promotion": false
+    }
+  },
+  {
+    "name": "Soporte Monitor Ajustable - Lista Premium",
+    "price_id": "PRC020",
+    "price_list_id": "LST001",
+    "product_id": "SOP020",
+    "amount": 54.99,
+    "currency": "USD",
+    "customFields": {
+      "season": "all",
+      "promotion": true
+    }
+  }
+]

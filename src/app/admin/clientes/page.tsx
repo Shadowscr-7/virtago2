@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import {
@@ -16,102 +16,54 @@ import {
   ChevronRight,
   AlertTriangle,
   Check,
+  Loader2,
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/admin-layout";
-import { useAuthStore } from "@/lib/auth-store";
+import { useAuthStore } from "@/store/auth"; // ✅ Usar el store correcto
 import { useTheme } from "@/contexts/theme-context";
 import { StyledSelect } from "@/components/ui/styled-select";
+import { api, ClientData } from "@/api";
+import { showToast } from "@/store/toast-helpers";
+import { ClientImportModal } from "@/components/admin/clients/ClientImportModal";
 
-// Datos de ejemplo - después esto vendrá del servidor
-const mockClients = [
-  {
-    id: 1,
-    nombre: "Juan Carlos Pérez",
-    tipoDocumento: "CI",
-    documento: "12345678",
-    email: "juan.perez@empresa.com",
-    telefono: "+598 99 123 456",
-    pedidos: 15,
-    estado: true,
-    verificado: true,
-    fechaRegistro: "2024-01-15",
-  },
-  {
-    id: 2,
-    nombre: "María González Rodríguez",
-    tipoDocumento: "RUT",
-    documento: "210123456789",
-    email: "maria.gonzalez@comercial.com",
-    telefono: "+598 98 765 432",
-    pedidos: 8,
-    estado: true,
-    verificado: false,
-    fechaRegistro: "2024-02-10",
-  },
-  {
-    id: 3,
-    nombre: "Carlos Alberto Silva",
-    tipoDocumento: "CI",
-    documento: "87654321",
-    email: "carlos.silva@negocio.com",
-    telefono: "+598 97 111 222",
-    pedidos: 23,
-    estado: false,
-    verificado: true,
-    fechaRegistro: "2023-12-05",
-  },
-  {
-    id: 4,
-    nombre: "Ana Laura Martínez",
-    tipoDocumento: "CI",
-    documento: "11223344",
-    email: "ana.martinez@tienda.com",
-    telefono: "+598 96 333 444",
-    pedidos: 4,
-    estado: true,
-    verificado: true,
-    fechaRegistro: "2024-03-20",
-  },
-  {
-    id: 5,
-    nombre: "Roberto Daniel Fernández",
-    tipoDocumento: "RUT",
-    documento: "210987654321",
-    email: "roberto.fernandez@comercio.com",
-    telefono: "+598 95 555 666",
-    pedidos: 12,
-    estado: true,
-    verificado: false,
-    fechaRegistro: "2024-01-30",
-  },
-];
+// Datos de ejemplo eliminados - ahora usa API real
+// Using ClientData interface from API instead of local Client interface
 
-interface Client {
-  id: number;
-  nombre: string;
-  tipoDocumento: string;
-  documento: string;
-  email: string;
-  telefono: string;
-  pedidos: number;
-  estado: boolean;
-  verificado: boolean;
-  fechaRegistro: string;
-}
-
-export default function ClientsPage() {
+export default function ClientesPage() {
   const { user } = useAuthStore();
   const { themeColors } = useTheme();
   const router = useRouter();
+  
+  // Estados para datos de la API
+  const [clients, setClients] = useState<ClientData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [totalClients, setTotalClients] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  
+  // Estados para UI
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedClients, setSelectedClients] = useState<number[]>([]);
+  const [searchInput, setSearchInput] = useState(""); // Para el input con debounce
+  const [selectedClients, setSelectedClients] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(10); // Mostrar 10 por página por defecto
   const [showConfirmDialog, setShowConfirmDialog] = useState<{
     show: boolean;
-    clientId: number;
+    clientId: string;
     currentState: boolean;
-  }>({ show: false, clientId: 0, currentState: false });
+  }>({ show: false, clientId: "", currentState: false });
+  
+  const [showInviteDialog, setShowInviteDialog] = useState<{
+    show: boolean;
+    clientId: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+  }>({ show: false, clientId: "", email: "", firstName: "", lastName: "" });
+  
+  const [isSendingInvitation, setIsSendingInvitation] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [showBulkInviteDialog, setShowBulkInviteDialog] = useState(false);
+  const [isSendingBulkInvitations, setIsSendingBulkInvitations] = useState(false);
 
   // Función para obtener colores del tema
   const getClientColor = (index: number) => {
@@ -119,7 +71,151 @@ export default function ClientsPage() {
     return colors[index % colors.length];
   };
 
-  if (!user || user.role !== "distribuidor") {
+  // 🐛 DEBUG: Ver estructura completa del usuario
+  console.log('[CLIENTES] 🔍 Usuario completo:', JSON.stringify(user, null, 2));
+  console.log('[CLIENTES] 🔍 distributorInfo:', user?.distributorInfo);
+  console.log('[CLIENTES] 🔍 distributorCode:', user?.distributorInfo?.distributorCode);
+
+  // ✅ Verificar acceso (distributor o admin)
+  const hasAccess = user && (
+    user.role === "distributor" || 
+    user.role === "admin" || 
+    user.userType === "distributor"
+  );
+
+  // 🔄 Función para cargar clientes desde la API
+  const loadClients = useCallback(async () => {
+    console.log('[CLIENTES] 🔄 Ejecutando loadClients...');
+    console.log('[CLIENTES] 🔍 user:', user);
+    console.log('[CLIENTES] 🔍 user?.distributorInfo:', user?.distributorInfo);
+    console.log('[CLIENTES] 🔍 distributorCode:', user?.distributorInfo?.distributorCode);
+    
+    // 🔧 TEMPORAL: Usar distributorCode hardcodeado para testing
+    const distributorCode = user?.distributorInfo?.distributorCode || 'Dist01';
+    
+    if (!user) {
+      console.warn('[CLIENTES] ❌ No hay usuario logueado');
+      setIsLoading(false);
+      return;
+    }
+    
+    console.log('[CLIENTES] ⚠️ Usando distributorCode:', distributorCode, '(hardcodeado para testing)');
+
+    setIsLoading(true);
+    try {
+      console.log('[CLIENTES] Cargando clientes...', {
+        distributorCode: distributorCode,
+        page: currentPage,
+        limit: itemsPerPage,
+        search: searchQuery
+      });
+
+      const response = await api.admin.clients.getAll({
+        distributorCode: distributorCode,
+        page: currentPage,
+        limit: itemsPerPage,
+        search: searchQuery || undefined
+      });
+
+      console.log('[CLIENTES] Respuesta de la API:', response);
+
+      if (response.success && response.data) {
+        // El backend devuelve: { success, message, data: [...], pagination: {...} }
+        // Pero viene envuelto en ApiResponse, así que tenemos que extraer correctamente
+        
+        console.log('[CLIENTES] 🔍 Estructura de response:', {
+          hasData: !!response.data,
+          dataType: typeof response.data,
+          isArray: Array.isArray(response.data),
+          dataKeys: response.data ? Object.keys(response.data) : []
+        });
+        
+        // Extraer los datos correctamente
+        let clientsArray: ClientData[] = [];
+        let paginationInfo: { totalItems: number; totalPages: number } = { totalItems: 0, totalPages: 1 };
+        
+        // El response.data puede ser el objeto completo de la respuesta del backend
+        const backendResponse = response.data as unknown as {
+          data?: ClientData[];
+          clients?: ClientData[];
+          pagination?: {
+            totalItems?: number;
+            totalPages?: number;
+          };
+          total?: number;
+          pages?: number;
+        };
+        
+        // Intentar diferentes estructuras posibles
+        if (Array.isArray(response.data)) {
+          clientsArray = response.data;
+        } else if (backendResponse.data && Array.isArray(backendResponse.data)) {
+          clientsArray = backendResponse.data;
+          if (backendResponse.pagination) {
+            paginationInfo = {
+              totalItems: backendResponse.pagination.totalItems || clientsArray.length,
+              totalPages: backendResponse.pagination.totalPages || 1
+            };
+          }
+        } else if (backendResponse.clients && Array.isArray(backendResponse.clients)) {
+          clientsArray = backendResponse.clients;
+          paginationInfo = {
+            totalItems: backendResponse.total || backendResponse.clients.length,
+            totalPages: backendResponse.pages || 1
+          };
+        }
+        
+        console.log('[CLIENTES] 🔍 Clientes extraídos:', clientsArray.length);
+        
+        // Mapear clientId a _id para compatibilidad con el frontend
+        const mappedClients: ClientData[] = clientsArray.map(client => {
+          const clientRecord = client as unknown as Record<string, unknown>;
+          const originalClientId = clientRecord.clientId as string;
+          return {
+            ...client,
+            _id: originalClientId || client._id,
+            clientId: originalClientId // Preservar el clientId original para usarlo en detalle
+          };
+        });
+        
+        setClients(mappedClients);
+        setTotalClients(paginationInfo.totalItems || mappedClients.length);
+        setTotalPages(paginationInfo.totalPages || 1);
+        console.log(`[CLIENTES] ✅ ${mappedClients.length} clientes cargados de ${paginationInfo.totalItems} totales`);
+      } else {
+        console.error('[CLIENTES] Respuesta no exitosa:', response);
+        setClients([]);
+        setTotalClients(0);
+        setTotalPages(1);
+      }
+    } catch (error) {
+      console.error('[CLIENTES] Error cargando clientes:', error);
+      setClients([]);
+      setTotalClients(0);
+      setTotalPages(1);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user, currentPage, itemsPerPage, searchQuery]);
+
+  // 🔄 Cargar clientes al montar y cuando cambien los parámetros
+  useEffect(() => {
+    if (hasAccess) {
+      loadClients();
+    }
+  }, [hasAccess, loadClients]);
+
+  // 🔄 Debounce para el input de búsqueda
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setSearchQuery(searchInput);
+      setCurrentPage(1); // Resetear a página 1 al buscar
+    }, 500); // 500ms de debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [searchInput]);
+
+  if (!hasAccess) {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center h-full">
@@ -155,75 +251,301 @@ export default function ClientsPage() {
     );
   }
 
-  // Filtrar clientes basado en la búsqueda
-  const filteredClients = mockClients.filter(
-    (client) =>
-      client.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.documento.includes(searchQuery) ||
-      client.telefono.includes(searchQuery),
-  );
+  // ✅ Los clientes ya vienen filtrados del servidor
+  const currentClients = clients;
 
-  // Paginación
-  const totalPages = Math.ceil(filteredClients.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentClients = filteredClients.slice(startIndex, endIndex);
-
-  const handleSelectClient = (clientId: number) => {
-    setSelectedClients((prev) =>
-      prev.includes(clientId)
+  const handleSelectClient = (clientId: string) => {
+    console.log('[CLIENTES] 📌 Click en checkbox:', clientId);
+    console.log('[CLIENTES] 📌 Seleccionados antes:', selectedClients);
+    setSelectedClients((prev) => {
+      const newSelection = prev.includes(clientId)
         ? prev.filter((id) => id !== clientId)
-        : [...prev, clientId],
-    );
-  };
-
-  const handleSelectAll = () => {
-    if (selectedClients.length === currentClients.length) {
-      setSelectedClients([]);
-    } else {
-      setSelectedClients(currentClients.map((client) => client.id));
-    }
-  };
-
-  const handleToggleStatus = (clientId: number, currentState: boolean) => {
-    setShowConfirmDialog({
-      show: true,
-      clientId,
-      currentState,
+        : [...prev, clientId];
+      console.log('[CLIENTES] 📌 Seleccionados después:', newSelection);
+      return newSelection;
     });
   };
 
-  const confirmStatusChange = () => {
-    // Aquí iría la lógica para cambiar el estado del cliente
-    console.log(`Cambiando estado del cliente ${showConfirmDialog.clientId}`);
-    setShowConfirmDialog({ show: false, clientId: 0, currentState: false });
-  };
-
-  const handleDownloadTemplate = () => {
-    console.log("Descargando plantilla Excel...");
-  };
-
-  const handleImportClients = () => {
-    console.log("Abriendo selector de archivo...");
-  };
-
-  const handleSendInvitations = () => {
-    if (selectedClients.length > 0) {
-      console.log(
-        `Enviando invitaciones a ${selectedClients.length} clientes seleccionados`,
-      );
+  const handleSelectAll = () => {
+    console.log('[CLIENTES] 📌 Click en seleccionar todos');
+    console.log('[CLIENTES] 📌 Clientes actuales:', currentClients.length);
+    console.log('[CLIENTES] 📌 Seleccionados:', selectedClients.length);
+    
+    if (selectedClients.length === currentClients.length && currentClients.length > 0) {
+      console.log('[CLIENTES] 📌 Deseleccionando todos');
+      setSelectedClients([]);
     } else {
-      console.log("Enviando invitaciones a todos los clientes");
+      const allIds = currentClients.map((client) => client._id);
+      console.log('[CLIENTES] 📌 Seleccionando todos:', allIds);
+      setSelectedClients(allIds);
     }
   };
 
-  const handleViewClient = (clientId: number) => {
+  const handleToggleStatus = (clientId: string, currentState: "A" | "N" | "I") => {
+    setShowConfirmDialog({
+      show: true,
+      clientId,
+      currentState: currentState === 'A', // Convert to boolean for dialog
+    });
+  };
+
+  const handleInviteUser = (client: ClientData) => {
+    // Solo mostrar el diálogo si el cliente NO tiene usuario
+    if (client.hasUser) {
+      console.log('[CLIENTES] ℹ️ Cliente ya tiene usuario:', client._id);
+      return;
+    }
+
+    setShowInviteDialog({
+      show: true,
+      clientId: client._id,
+      email: client.email || "",
+      firstName: client.firstName || "",
+      lastName: client.lastName || "",
+    });
+  };
+
+  const confirmInvitation = async () => {
+    const { email, firstName, lastName } = showInviteDialog;
+    
+    if (!email || !firstName || !lastName) {
+      showToast({
+        title: "Datos incompletos",
+        description: "Faltan datos del cliente para enviar la invitación",
+        type: "error"
+      });
+      return;
+    }
+
+    console.log(`[CLIENTES] 📧 Enviando invitación a ${email}`);
+    setIsSendingInvitation(true);
+    
+    try {
+      const response = await api.admin.clients.sendInvitation({
+        email,
+        firstName,
+        lastName,
+        distributorCode: user?.distributorInfo?.distributorCode || "Dist01", // Usar el distributorCode del usuario actual
+      });
+      
+      if (response.success) {
+        console.log(`[CLIENTES] ✅ Invitación enviada correctamente`);
+        
+        showToast({
+          title: "Invitación enviada",
+          description: `Se ha enviado la invitación a ${email} correctamente`,
+          type: "success"
+        });
+        
+        // Cerrar el diálogo
+        setShowInviteDialog({ show: false, clientId: "", email: "", firstName: "", lastName: "" });
+      } else {
+        console.error('[CLIENTES] ❌ Error en la respuesta:', response);
+        showToast({
+          title: "Error al enviar invitación",
+          description: response.message || "No se pudo enviar la invitación",
+          type: "error"
+        });
+      }
+    } catch (error) {
+      console.error('[CLIENTES] ❌ Error al enviar invitación:', error);
+      showToast({
+        title: "Error al enviar invitación",
+        description: error instanceof Error ? error.message : "Ocurrió un error inesperado",
+        type: "error"
+      });
+    } finally {
+      setIsSendingInvitation(false);
+    }
+  };
+
+  const confirmStatusChange = async () => {
+    const clientId = showConfirmDialog.clientId;
+    const currentStatus = showConfirmDialog.currentState; // true = "A" (Activo), false = otros
+    
+    // Determinar el nuevo estado (toggle entre Activo e Inactivo)
+    const newStatus: "A" | "I" = currentStatus ? "I" : "A";
+    
+    console.log(`[CLIENTES] 🔄 Cambiando estado del cliente ${clientId} a ${newStatus}`);
+    
+    try {
+      const response = await api.admin.clients.updateStatus(clientId, newStatus);
+      
+      if (response.success) {
+        console.log(`[CLIENTES] ✅ Estado actualizado correctamente`);
+        
+        // Actualizar el estado local del cliente en la lista
+        setClients(prevClients =>
+          prevClients.map(client =>
+            client._id === clientId
+              ? { ...client, status: newStatus }
+              : client
+          )
+        );
+        
+        showToast({
+          title: "Estado actualizado",
+          description: `Cliente ${newStatus === "A" ? "activado" : "desactivado"} correctamente`,
+          type: "success"
+        });
+      } else {
+        console.error('[CLIENTES] ❌ Error en la respuesta:', response);
+        showToast({
+          title: "Error al cambiar estado",
+          description: response.message || "No se pudo cambiar el estado del cliente",
+          type: "error"
+        });
+      }
+    } catch (error) {
+      console.error('[CLIENTES] ❌ Error al cambiar estado:', error);
+      showToast({
+        title: "Error al cambiar estado",
+        description: error instanceof Error ? error.message : "Ocurrió un error inesperado",
+        type: "error"
+      });
+    } finally {
+      // Cerrar el diálogo
+      setShowConfirmDialog({ show: false, clientId: "", currentState: false });
+    }
+  };
+
+  const handleDownloadTemplate = async () => {
+    console.log("[CLIENTES] 📥 Descargando Excel de clientes...");
+    
+    try {
+      const blob = await api.admin.clients.export();
+      
+      // Crear URL del blob y descargar
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `clientes_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      showToast({
+        title: "Exportación exitosa",
+        description: "El archivo Excel se ha descargado correctamente",
+        type: "success"
+      });
+      
+      console.log("[CLIENTES] ✅ Excel descargado correctamente");
+    } catch (error) {
+      console.error("[CLIENTES] ❌ Error al descargar Excel:", error);
+      showToast({
+        title: "Error al exportar",
+        description: error instanceof Error ? error.message : "No se pudo descargar el archivo",
+        type: "error"
+      });
+    }
+  };
+
+  const handleImportClients = () => {
+    console.log("[CLIENTES] 📂 Abriendo modal de importación...");
+    setShowImportModal(true);
+  };
+
+  const handleSendInvitations = () => {
+    console.log("[CLIENTES] 📧 Abriendo diálogo de invitaciones masivas...");
+    setShowBulkInviteDialog(true);
+  };
+
+  const confirmBulkInvitations = async () => {
+    const clientsToInvite = selectedClients.length > 0 
+      ? clients.filter(c => selectedClients.includes(c._id))
+      : clients;
+
+    const clientsWithoutUser = clientsToInvite.filter(c => !c.hasUser);
+
+    if (clientsWithoutUser.length === 0) {
+      showToast({
+        title: "Sin clientes para invitar",
+        description: "Todos los clientes seleccionados ya tienen usuario",
+        type: "info"
+      });
+      setShowBulkInviteDialog(false);
+      return;
+    }
+
+    console.log(`[CLIENTES] 📧 Enviando ${clientsWithoutUser.length} invitaciones...`);
+    setIsSendingBulkInvitations(true);
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    try {
+      // Enviar invitaciones una por una
+      for (const client of clientsWithoutUser) {
+        try {
+          const response = await api.admin.clients.sendInvitation({
+            email: client.email,
+            firstName: client.firstName,
+            lastName: client.lastName,
+            distributorCode: user?.distributorInfo?.distributorCode || "Dist01",
+          });
+
+          if (response.success) {
+            successCount++;
+            console.log(`[CLIENTES] ✅ Invitación enviada a ${client.email}`);
+          } else {
+            errorCount++;
+            console.error(`[CLIENTES] ❌ Error al enviar a ${client.email}:`, response.message);
+          }
+        } catch (error) {
+          errorCount++;
+          console.error(`[CLIENTES] ❌ Error al enviar a ${client.email}:`, error);
+        }
+      }
+
+      // Mostrar resultado
+      if (errorCount === 0) {
+        showToast({
+          title: "Invitaciones enviadas",
+          description: `Se enviaron ${successCount} invitaciones correctamente`,
+          type: "success"
+        });
+      } else if (successCount > 0) {
+        showToast({
+          title: "Invitaciones parciales",
+          description: `${successCount} enviadas, ${errorCount} fallidas`,
+          type: "warning"
+        });
+      } else {
+        showToast({
+          title: "Error al enviar invitaciones",
+          description: "No se pudo enviar ninguna invitación",
+          type: "error"
+        });
+      }
+
+      // Limpiar selección
+      setSelectedClients([]);
+    } catch (error) {
+      console.error("[CLIENTES] ❌ Error general:", error);
+      showToast({
+        title: "Error al enviar invitaciones",
+        description: error instanceof Error ? error.message : "Ocurrió un error inesperado",
+        type: "error"
+      });
+    } finally {
+      setIsSendingBulkInvitations(false);
+      setShowBulkInviteDialog(false);
+    }
+  };
+
+  const handleViewClient = (clientId: string) => {
     router.push(`/admin/clientes/${clientId}`);
   };
 
-  const handleEditClient = (clientId: number) => {
+  const handleEditClient = (clientId: string) => {
     router.push(`/admin/clientes/${clientId}?mode=edit`);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -255,7 +577,7 @@ export default function ClientsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-col lg:flex-row gap-4 p-6 backdrop-blur-xl rounded-2xl border shadow-lg"
+          className="flex flex-col lg:flex-row gap-4 p-6 rounded-2xl border shadow-lg"
           style={{
             backgroundColor: themeColors.surface + "70",
             borderColor: themeColors.primary + "30"
@@ -270,8 +592,8 @@ export default function ClientsPage() {
             <input
               type="text"
               placeholder="Buscar por nombre, email, documento o teléfono..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all placeholder-gray-400 backdrop-blur-sm"
               style={{
                 backgroundColor: themeColors.surface + "60",
@@ -286,18 +608,35 @@ export default function ClientsPage() {
           <div className="w-full lg:w-48">
             <StyledSelect
               value={itemsPerPage.toString()}
-              onChange={(value) => setItemsPerPage(Number(value))}
+              onChange={(value) => {
+                setItemsPerPage(Number(value));
+                setCurrentPage(1); // Reset a página 1 al cambiar tamaño
+              }}
               options={[
-                { value: "5", label: "5 filas" },
                 { value: "10", label: "10 filas" },
-                { value: "25", label: "25 filas" },
+                { value: "20", label: "20 filas" },
                 { value: "50", label: "50 filas" },
+                { value: "100", label: "100 filas" },
               ]}
             />
           </div>
 
           {/* Acciones */}
           <div className="flex gap-3">
+            <motion.button
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => router.push('/admin/clientes/nuevo')}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all backdrop-blur-sm border font-medium text-white"
+              style={{
+                background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`,
+                borderColor: themeColors.primary + "40"
+              }}
+            >
+              <User className="w-4 h-4" />
+              <span className="hidden sm:inline">Crear Cliente</span>
+            </motion.button>
+
             <motion.button
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
@@ -310,7 +649,7 @@ export default function ClientsPage() {
               }}
             >
               <Download className="w-4 h-4" />
-              <span className="hidden sm:inline">Plantilla</span>
+              <span className="hidden sm:inline">Exportar Excel</span>
             </motion.button>
 
             <motion.button
@@ -355,7 +694,7 @@ export default function ClientsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="backdrop-blur-xl rounded-2xl border overflow-hidden shadow-xl"
+          className="rounded-2xl border overflow-hidden shadow-xl"
           style={{
             backgroundColor: themeColors.surface + "70",
             borderColor: themeColors.primary + "30"
@@ -383,13 +722,21 @@ export default function ClientsPage() {
                           className="sr-only peer"
                         />
                         <div 
-                          className="relative w-5 h-5 border-2 rounded-md transition-all duration-200"
+                          className="relative w-5 h-5 border-2 rounded-md transition-all duration-200 peer-checked:bg-purple-600 peer-checked:border-purple-600"
                           style={{
-                            backgroundColor: themeColors.surface + "50",
-                            borderColor: themeColors.primary + "60"
+                            backgroundColor: (selectedClients.length === currentClients.length && currentClients.length > 0) 
+                              ? themeColors.primary 
+                              : themeColors.surface + "50",
+                            borderColor: (selectedClients.length === currentClients.length && currentClients.length > 0)
+                              ? themeColors.primary
+                              : themeColors.primary + "60"
                           }}
                         >
-                          <Check className="absolute inset-0 w-3 h-3 m-auto text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" />
+                          <Check className="absolute inset-0 w-3 h-3 m-auto text-white transition-opacity duration-200" 
+                            style={{ 
+                              opacity: (selectedClients.length === currentClients.length && currentClients.length > 0) ? 1 : 0 
+                            }} 
+                          />
                         </div>
                       </label>
                     </div>
@@ -445,11 +792,52 @@ export default function ClientsPage() {
                   borderColor: themeColors.primary + "30"
                 } as React.CSSProperties}
               >
-                {currentClients.map((client, index) => {
+                {/* Loading state */}
+                {isLoading && (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center">
+                      <div className="flex flex-col items-center justify-center gap-4">
+                        <Loader2 
+                          className="w-8 h-8 animate-spin" 
+                          style={{ color: themeColors.primary }} 
+                        />
+                        <p style={{ color: themeColors.text.secondary }}>
+                          Cargando clientes...
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+
+                {/* Empty state */}
+                {!isLoading && currentClients.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center">
+                      <div className="flex flex-col items-center justify-center gap-4">
+                        <User 
+                          className="w-12 h-12" 
+                          style={{ color: themeColors.text.secondary + "50" }} 
+                        />
+                        <p style={{ color: themeColors.text.secondary }}>
+                          {searchQuery ? 
+                            `No se encontraron clientes con "${searchQuery}"` : 
+                            'No hay clientes registrados aún'}
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+
+                {/* Clientes list */}
+                {!isLoading && currentClients.map((client, index) => {
                   const clientColor = getClientColor(index);
+                  const fullName = `${client.firstName} ${client.lastName}`.trim();
+                  const initials = `${client.firstName?.[0] || ''}${client.lastName?.[0] || ''}`.toUpperCase();
+                  const createdDate = client.createdAt ? new Date(client.createdAt).toLocaleDateString() : 'N/A';
+                  
                   return (
                     <motion.tr
-                      key={client.id}
+                      key={client._id}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.1 }}
@@ -466,22 +854,31 @@ export default function ClientsPage() {
                         target.style.background = "transparent";
                       }}
                     >
-                      <td className="px-6 py-5">
+                                            <td className="px-6 py-5">
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
                             type="checkbox"
-                            checked={selectedClients.includes(client.id)}
-                            onChange={() => handleSelectClient(client.id)}
+                            checked={selectedClients.includes(client._id)}
+                            onChange={() => handleSelectClient(client._id)}
                             className="sr-only peer"
                           />
                           <div 
-                            className="relative w-5 h-5 border-2 rounded-md transition-all duration-200"
+                            className="relative w-5 h-5 border-2 rounded-md transition-all duration-200 peer-checked:bg-purple-600 peer-checked:border-purple-600"
                             style={{
-                              backgroundColor: themeColors.surface + "50",
-                              borderColor: themeColors.primary + "60"
+                              backgroundColor: selectedClients.includes(client._id)
+                                ? themeColors.primary
+                                : themeColors.surface + "50",
+                              borderColor: selectedClients.includes(client._id)
+                                ? themeColors.primary
+                                : themeColors.primary + "60"
                             }}
                           >
-                            <Check className="absolute inset-0 w-3 h-3 m-auto text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" />
+                            <Check 
+                              className="absolute inset-0 w-3 h-3 m-auto text-white transition-opacity duration-200" 
+                              style={{ 
+                                opacity: selectedClients.includes(client._id) ? 1 : 0 
+                              }}
+                            />
                           </div>
                         </label>
                       </td>
@@ -494,18 +891,14 @@ export default function ClientsPage() {
                               background: `linear-gradient(45deg, ${clientColor}, ${clientColor}90)`
                             }}
                           >
-                            {client.nombre
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")
-                              .substring(0, 2)}
+                            {initials}
                           </motion.div>
                           <div>
                             <div 
                               className="font-semibold text-sm"
                               style={{ color: themeColors.text.primary }}
                             >
-                              {client.nombre}
+                              {fullName}
                             </div>
                             <div 
                               className="text-xs px-2 py-1 rounded-full inline-block mt-1"
@@ -514,10 +907,7 @@ export default function ClientsPage() {
                                 color: themeColors.text.secondary
                               }}
                             >
-                              Desde{" "}
-                              {new Date(
-                                client.fechaRegistro,
-                              ).toLocaleDateString()}
+                              Desde {createdDate}
                             </div>
                           </div>
                         </div>
@@ -531,13 +921,13 @@ export default function ClientsPage() {
                               color: themeColors.text.primary
                             }}
                           >
-                            {client.tipoDocumento}
+                            {client.documentType || 'CI'}
                           </div>
                           <div 
                             className="text-sm font-mono"
                             style={{ color: themeColors.text.secondary }}
                           >
-                            {client.documento}
+                            {client.document || 'N/A'}
                           </div>
                         </div>
                       </td>
@@ -553,7 +943,7 @@ export default function ClientsPage() {
                             className="text-sm"
                             style={{ color: themeColors.text.secondary }}
                           >
-                            {client.telefono}
+                            {client.phone || client.phoneOptional || 'N/A'}
                           </div>
                         </div>
                       </td>
@@ -565,55 +955,58 @@ export default function ClientsPage() {
                               backgroundImage: `linear-gradient(to right, ${clientColor}, ${clientColor}90)`
                             }}
                           >
-                            {client.pedidos}
+                            0
                           </div>
-                          <div 
-                            className="text-xs px-2 py-1 rounded-full"
-                            style={{
-                              backgroundColor: themeColors.surface + "50",
-                              color: themeColors.text.secondary
-                            }}
+                          <span 
+                            className="text-xs font-medium"
+                            style={{ color: themeColors.text.secondary }}
                           >
                             órdenes
-                          </div>
+                          </span>
                         </div>
                       </td>
+                      {/* Estado */}
                       <td className="px-6 py-5">
                         <motion.button
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                           onClick={() =>
-                            handleToggleStatus(client.id, client.estado)
+                            handleToggleStatus(client._id, client.status || 'N')
                           }
                           className="inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold transition-all backdrop-blur-sm border"
                           style={{
-                            backgroundColor: client.estado 
+                            backgroundColor: client.status === 'A' 
                               ? themeColors.accent + "20" 
-                              : themeColors.primary + "20",
-                            color: client.estado 
-                              ? themeColors.text.primary 
-                              : themeColors.text.primary,
-                            borderColor: client.estado 
+                              : client.status === 'I'
+                              ? themeColors.primary + "20"
+                              : themeColors.secondary + "20",
+                            color: themeColors.text.primary,
+                            borderColor: client.status === 'A' 
                               ? themeColors.accent + "40" 
-                              : themeColors.primary + "40"
+                              : client.status === 'I'
+                              ? themeColors.primary + "40"
+                              : themeColors.secondary + "40"
                           }}
                         >
-                          {client.estado ? "Activo" : "Inactivo"}
+                          {client.status === 'A' ? "Activo" : client.status === 'I' ? "Inactivo" : "Nuevo"}
                         </motion.button>
                       </td>
+                      {/* Verificado / Usuario */}
                       <td className="px-6 py-5">
                         <div className="flex items-center justify-center">
                           <motion.div
-                            whileHover={{ scale: 1.1 }}
+                            whileHover={{ scale: client.isVerified || client.hasUser ? 1.05 : 1.1 }}
                             className="relative"
                           >
-                            {client.verificado ? (
+                            {client.isVerified ? (
+                              // Cliente verificado
                               <div 
                                 className="relative p-2 rounded-xl border"
                                 style={{
                                   backgroundColor: themeColors.accent + "20",
                                   borderColor: themeColors.accent + "40"
                                 }}
+                                title="Cliente verificado"
                               >
                                 <UserCheck 
                                   className="w-6 h-6"
@@ -628,29 +1021,59 @@ export default function ClientsPage() {
                                   <Check className="w-2.5 h-2.5 text-white" />
                                 </div>
                               </div>
-                            ) : (
+                            ) : client.hasUser ? (
+                              // Cliente tiene usuario (no clickeable)
                               <div 
-                                className="p-2 rounded-xl border"
+                                className="relative p-2 rounded-xl border"
                                 style={{
-                                  backgroundColor: themeColors.surface + "50",
-                                  borderColor: themeColors.primary + "30"
+                                  backgroundColor: "#10b981" + "20",
+                                  borderColor: "#10b981" + "40"
                                 }}
+                                title="Cliente ya tiene usuario en la plataforma"
                               >
                                 <User 
                                   className="w-6 h-6"
-                                  style={{ color: themeColors.text.secondary }}
+                                  style={{ color: "#10b981" }}
                                 />
+                                <div 
+                                  className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center shadow-lg"
+                                  style={{
+                                    backgroundColor: "#10b981"
+                                  }}
+                                >
+                                  <Check className="w-2.5 h-2.5 text-white" />
+                                </div>
                               </div>
+                            ) : (
+                              // Cliente sin usuario (clickeable para enviar invitación)
+                              <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => handleInviteUser(client)}
+                                className="p-2 rounded-xl border transition-all"
+                                style={{
+                                  backgroundColor: themeColors.primary + "20",
+                                  borderColor: themeColors.primary + "40",
+                                  cursor: "pointer"
+                                }}
+                                title="Enviar invitación a la plataforma"
+                              >
+                                <User 
+                                  className="w-6 h-6"
+                                  style={{ color: themeColors.primary }}
+                                />
+                              </motion.button>
                             )}
                           </motion.div>
                         </div>
                       </td>
+                      {/* Acciones */}
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-2">
                           <motion.button
                             whileHover={{ scale: 1.1, y: -2 }}
                             whileTap={{ scale: 0.9 }}
-                            onClick={() => handleViewClient(client.id)}
+                            onClick={() => handleViewClient(client.clientId || client._id)}
                             className="p-3 rounded-xl transition-all backdrop-blur-sm border"
                             style={{
                               backgroundColor: themeColors.secondary + "20",
@@ -663,7 +1086,7 @@ export default function ClientsPage() {
                           <motion.button
                             whileHover={{ scale: 1.1, y: -2 }}
                             whileTap={{ scale: 0.9 }}
-                            onClick={() => handleEditClient(client.id)}
+                            onClick={() => handleEditClient(client.clientId || client._id)}
                             className="p-3 rounded-xl transition-all backdrop-blur-sm border"
                             style={{
                               backgroundColor: themeColors.primary + "20",
@@ -703,21 +1126,21 @@ export default function ClientsPage() {
                   className="font-semibold"
                   style={{ color: themeColors.primary }}
                 >
-                  {startIndex + 1}
+                  {clients.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}
                 </span>{" "}
                 a{" "}
                 <span 
                   className="font-semibold"
                   style={{ color: themeColors.primary }}
                 >
-                  {Math.min(endIndex, filteredClients.length)}
+                  {Math.min(currentPage * itemsPerPage, totalClients)}
                 </span>{" "}
                 de{" "}
                 <span 
                   className="font-semibold"
                   style={{ color: themeColors.primary }}
                 >
-                  {filteredClients.length}
+                  {totalClients}
                 </span>{" "}
                 clientes
               </div>
@@ -726,7 +1149,7 @@ export default function ClientsPage() {
                 <motion.button
                   whileHover={{ scale: 1.05, x: -2 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
                   className="p-3 rounded-xl border disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm"
                   style={{
@@ -747,7 +1170,7 @@ export default function ClientsPage() {
                         key={pageNum}
                         whileHover={{ scale: 1.05, y: -2 }}
                         whileTap={{ scale: 0.95 }}
-                        onClick={() => setCurrentPage(pageNum)}
+                        onClick={() => handlePageChange(pageNum)}
                         className="w-10 h-10 rounded-xl text-sm font-semibold transition-all backdrop-blur-sm border"
                         style={{
                           backgroundColor: isActive 
@@ -774,7 +1197,7 @@ export default function ClientsPage() {
                   whileHover={{ scale: 1.05, x: 2 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() =>
-                    setCurrentPage(Math.min(totalPages, currentPage + 1))
+                    handlePageChange(Math.min(totalPages, currentPage + 1))
                   }
                   disabled={currentPage === totalPages}
                   className="p-3 rounded-xl border disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm"
@@ -791,7 +1214,7 @@ export default function ClientsPage() {
           </div>
         </motion.div>
 
-        {/* Modal de Confirmación */}
+        {/* Modal de Confirmación - Cambio de Estado */}
         {showConfirmDialog.show && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -852,7 +1275,7 @@ export default function ClientsPage() {
                   onClick={() =>
                     setShowConfirmDialog({
                       show: false,
-                      clientId: 0,
+                      clientId: "",
                       currentState: false,
                     })
                   }
@@ -879,6 +1302,261 @@ export default function ClientsPage() {
             </motion.div>
           </motion.div>
         )}
+
+        {/* Modal de Confirmación - Invitación a la Plataforma */}
+        {showInviteDialog.show && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="rounded-2xl p-6 max-w-md w-full border"
+              style={{
+                backgroundColor: themeColors.surface + "95",
+                borderColor: themeColors.primary + "30"
+              }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div 
+                  className="w-12 h-12 rounded-full flex items-center justify-center"
+                  style={{
+                    backgroundColor: themeColors.primary + "20"
+                  }}
+                >
+                  <Mail 
+                    className="w-6 h-6"
+                    style={{ color: themeColors.primary }}
+                  />
+                </div>
+                <div>
+                  <h3 
+                    className="text-lg font-semibold"
+                    style={{ color: themeColors.text.primary }}
+                  >
+                    Enviar Invitación
+                  </h3>
+                  <p 
+                    className="text-sm"
+                    style={{ color: themeColors.text.secondary }}
+                  >
+                    El cliente recibirá un email de invitación
+                  </p>
+                </div>
+              </div>
+
+              <div 
+                className="mb-6 space-y-2 p-4 rounded-lg"
+                style={{
+                  backgroundColor: themeColors.surface + "30",
+                }}
+              >
+                <p 
+                  className="text-sm"
+                  style={{ color: themeColors.text.secondary }}
+                >
+                  <span className="font-semibold" style={{ color: themeColors.text.primary }}>Cliente:</span>{" "}
+                  {showInviteDialog.firstName} {showInviteDialog.lastName}
+                </p>
+                <p 
+                  className="text-sm"
+                  style={{ color: themeColors.text.secondary }}
+                >
+                  <span className="font-semibold" style={{ color: themeColors.text.primary }}>Email:</span>{" "}
+                  {showInviteDialog.email}
+                </p>
+              </div>
+
+              <p 
+                className="mb-6 text-sm"
+                style={{ color: themeColors.text.secondary }}
+              >
+                ¿Estás seguro que deseas enviar una invitación a la plataforma a este cliente?
+              </p>
+
+              <div className="flex gap-3 justify-end">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() =>
+                    setShowInviteDialog({
+                      show: false,
+                      clientId: "",
+                      email: "",
+                      firstName: "",
+                      lastName: "",
+                    })
+                  }
+                  className="px-4 py-2 rounded-lg transition-all"
+                  style={{
+                    color: themeColors.text.secondary,
+                    backgroundColor: themeColors.surface + "50"
+                  }}
+                >
+                  Cancelar
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={confirmInvitation}
+                  disabled={isSendingInvitation}
+                  className="px-4 py-2 text-white rounded-lg transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`
+                  }}
+                >
+                  {isSendingInvitation ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Enviando...
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="w-4 h-4" />
+                      Enviar Invitación
+                    </>
+                  )}
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* Diálogo de Confirmación - Invitaciones Masivas */}
+        {showBulkInviteDialog && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="rounded-2xl p-6 max-w-md w-full border"
+              style={{
+                backgroundColor: themeColors.surface + "95",
+                borderColor: themeColors.primary + "30"
+              }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div 
+                  className="w-12 h-12 rounded-full flex items-center justify-center"
+                  style={{
+                    backgroundColor: themeColors.primary + "20"
+                  }}
+                >
+                  <Mail 
+                    className="w-6 h-6"
+                    style={{ color: themeColors.primary }}
+                  />
+                </div>
+                <div>
+                  <h3 
+                    className="text-lg font-semibold"
+                    style={{ color: themeColors.text.primary }}
+                  >
+                    Enviar Invitaciones
+                  </h3>
+                  <p 
+                    className="text-sm"
+                    style={{ color: themeColors.text.secondary }}
+                  >
+                    {selectedClients.length > 0 
+                      ? `${selectedClients.length} cliente(s) seleccionado(s)`
+                      : "Todos los clientes"}
+                  </p>
+                </div>
+              </div>
+
+              <div 
+                className="mb-6 p-4 rounded-lg"
+                style={{
+                  backgroundColor: themeColors.surface + "30",
+                }}
+              >
+                <p 
+                  className="text-sm mb-2"
+                  style={{ color: themeColors.text.secondary }}
+                >
+                  {selectedClients.length > 0 ? (
+                    <>
+                      Se enviará una invitación por email a los <span className="font-semibold" style={{ color: themeColors.text.primary }}>{selectedClients.length} clientes seleccionados</span> que no tengan usuario aún.
+                    </>
+                  ) : (
+                    <>
+                      Se enviará una invitación por email a <span className="font-semibold" style={{ color: themeColors.text.primary }}>todos los clientes</span> que no tengan usuario aún.
+                    </>
+                  )}
+                </p>
+                <p 
+                  className="text-xs mt-2"
+                  style={{ color: themeColors.text.secondary }}
+                >
+                  ℹ️ Solo se enviarán invitaciones a clientes sin usuario registrado
+                </p>
+              </div>
+
+              <p 
+                className="mb-6 text-sm"
+                style={{ color: themeColors.text.secondary }}
+              >
+                ¿Estás seguro que deseas enviar estas invitaciones?
+              </p>
+
+              <div className="flex gap-3 justify-end">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowBulkInviteDialog(false)}
+                  disabled={isSendingBulkInvitations}
+                  className="px-4 py-2 rounded-lg transition-all"
+                  style={{
+                    color: themeColors.text.secondary,
+                    backgroundColor: themeColors.surface + "50"
+                  }}
+                >
+                  Cancelar
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={confirmBulkInvitations}
+                  disabled={isSendingBulkInvitations}
+                  className="px-4 py-2 text-white rounded-lg transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{
+                    background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`
+                  }}
+                >
+                  {isSendingBulkInvitations ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Enviando...
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="w-4 h-4" />
+                      Enviar Invitaciones
+                    </>
+                  )}
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {/* Modal de Importación */}
+        <ClientImportModal
+          isOpen={showImportModal}
+          onClose={() => setShowImportModal(false)}
+          onSuccess={() => {
+            // Recargar la lista de clientes después de importar
+            loadClients();
+          }}
+        />
       </div>
     </AdminLayout>
   );

@@ -75,71 +75,222 @@ export function PriceStep({ onNext, onBack, themeColors, stepData }: PriceStepPr
   const [method, setMethod] = useState<UploadMethod>("file");
   const [isProcessing, setIsProcessing] = useState(false);
   const [uploadedData, setUploadedData] = useState<PriceData[]>(stepData?.uploadedPrices || []);
+  const [uploadMethod, setUploadMethod] = useState<'file' | 'json' | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [apiResponse, setApiResponse] = useState<PriceBulkCreateResponse | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
-  // Función para convertir datos del wizard al formato de API
-  const convertToApiFormat = (prices: PriceData[]): PriceBulkData[] => {
-    return prices.map(price => ({
-      name: `Precio para ${price.productName}`,
-      priceId: `PRC_${price.productCode}_${Date.now()}`,
-      productSku: price.productCode,
-      productName: price.productName,
-      basePrice: price.basePrice,
-      costPrice: price.cost,
-      currency: price.currency,
-      validFrom: new Date().toISOString(),
-      status: 'active' as const,
-      priceType: 'regular' as const,
-      priority: 1,
-      taxIncluded: true,
-      taxRate: 19,
-      minQuantity: 1,
-      maxQuantity: 1000,
-      customerType: 'all' as const,
-      channel: 'omnichannel' as const,
-      region: 'colombia' as const,
-      margin: price.margin,
-      profitMargin: price.basePrice - price.cost,
-    }));
+  // 🆕 Callback para cuando se selecciona un archivo
+  const handleFileSelect = (file: File) => {
+    console.log('📁 Archivo seleccionado:', file.name);
+    setUploadedFile(file);
   };
 
+  // 🆕 Función para normalizar datos del backend al formato wizard para visualización
+  const normalizeToWizardFormat = (price: PriceData): PriceData => {
+    const rawPrice = price as unknown as Record<string, unknown>;
+    
+    // Si ya tiene el formato wizard completo, retornar tal cual
+    if (price.productCode && price.productName && price.basePrice !== undefined && price.cost !== undefined) {
+      return price;
+    }
+    
+    // 🔥 SOPORTE PARA JSON CON SNAKE_CASE (price_id, product_id, base_price, etc.)
+    const priceId = rawPrice.price_id || price.price_id;
+    const productId = rawPrice.product_id || price.product_id || price.productCode;
+    const basePrice = rawPrice.base_price || rawPrice.sale_price || price.amount || price.basePrice || 0;
+    const costPrice = rawPrice.cost_price || price.cost || 0;
+    const marginPercentage = rawPrice.margin_percentage || price.margin;
+    
+    console.log('🔍 [NORMALIZE] Extrayendo campos:', {
+      priceId,
+      productId,
+      basePrice,
+      costPrice,
+      marginPercentage,
+      rawKeys: Object.keys(rawPrice)
+    });
+    
+    // Calcular margen si no viene en el JSON
+    let calculatedMargin = 0;
+    if (marginPercentage !== undefined) {
+      calculatedMargin = Number(marginPercentage);
+    } else if (Number(costPrice) > 0 && Number(basePrice) > 0) {
+      calculatedMargin = ((Number(basePrice) - Number(costPrice)) / Number(costPrice)) * 100;
+    }
+    
+    return {
+      productCode: String(productId || priceId || 'N/A'),
+      productName: String(rawPrice.product_name || price.name || price.productName || `Producto ${productId || priceId}`),
+      basePrice: Number(basePrice) || 0,
+      cost: Number(costPrice) || 0,
+      margin: Math.round(calculatedMargin * 100) / 100,
+      currency: String(rawPrice.currency || price.currency || 'USD')
+    };
+  };
+
+  // Función para convertir datos del wizard al formato de API del backend
+  const convertToApiFormat = (prices: PriceData[]): PriceBulkData[] => {
+    return prices.map(price => {
+      const rawPrice = price as unknown as Record<string, unknown>;
+      const normalized = normalizeToWizardFormat(price);
+      
+      // Construir objeto base
+      const apiPrice: Record<string, unknown> = {
+        name: normalized.productName || `Precio para ${normalized.productCode}`,
+        priceId: rawPrice.price_id || `PRC_${normalized.productCode}_${Date.now()}`,
+        productSku: normalized.productCode || '',
+        productName: normalized.productName || '',
+        basePrice: normalized.basePrice || 0,
+        costPrice: normalized.cost || 0,
+        currency: normalized.currency || 'USD',
+        validFrom: new Date().toISOString(),
+        status: 'active' as const,
+        priceType: 'regular' as const,
+        priority: 1,
+        taxIncluded: true,
+        taxRate: 19,
+        minQuantity: 1,
+        maxQuantity: 1000,
+        customerType: 'all' as const,
+        channel: 'omnichannel' as const,
+        region: 'colombia' as const,
+        margin: normalized.margin || 0,
+        profitMargin: (normalized.basePrice || 0) - (normalized.cost || 0),
+      };
+      
+      // 🆕 PRESERVAR CAMPOS ORIGINALES del JSON (especialmente campos complejos)
+      // Preservar campos en snake_case del JSON original
+      if (rawPrice.price_id) apiPrice.price_id = rawPrice.price_id;
+      if (rawPrice.product_id) apiPrice.product_id = rawPrice.product_id;
+      if (rawPrice.list_id) apiPrice.list_id = rawPrice.list_id;
+      if (rawPrice.base_price !== undefined) apiPrice.base_price = rawPrice.base_price;
+      if (rawPrice.sale_price !== undefined) apiPrice.sale_price = rawPrice.sale_price;
+      if (rawPrice.cost_price !== undefined) apiPrice.cost_price = rawPrice.cost_price;
+      if (rawPrice.margin_percentage !== undefined) apiPrice.margin_percentage = rawPrice.margin_percentage;
+      if (rawPrice.is_active !== undefined) apiPrice.is_active = rawPrice.is_active;
+      if (rawPrice.customFields) apiPrice.customFields = rawPrice.customFields;
+      
+      return apiPrice as unknown as PriceBulkData;
+    });
+  };
+
+  // 🔄 Función para SOLO CARGAR los datos (NO llamar API todavía)
   const handleUpload = async (result: UploadResult<PriceData>) => {
     if (!result.success) {
       console.error('Error uploading prices:', result.error);
+      alert(`Error al cargar precios: ${result.error || 'Error desconocido'}`);
+      return;
+    }
+
+    // Validar que solo se use UN método de carga
+    const currentMethod = method;
+    
+    if (uploadMethod && uploadMethod !== currentMethod) {
+      alert(`Ya has cargado datos mediante ${uploadMethod === 'file' ? 'archivo' : 'JSON'}. Por favor, usa el mismo método o recarga la página.`);
+      return;
+    }
+
+    setUploadMethod(currentMethod);
+    
+    // 🆕 PRESERVAR JSON ORIGINAL + NORMALIZAR para visualización
+    console.log('📋 Cargando precios para previsualización...');
+    console.log('🔍 [CARGA] Datos originales (primeros 2):', result.data.slice(0, 2));
+    
+    const normalizedData = result.data.map((price: PriceData) => {
+      const rawPrice = price as unknown as Record<string, unknown>;
+      const normalized = normalizeToWizardFormat(price);
+      
+      // 🔥 CRÍTICO: Agregar campos del JSON original al objeto normalizado
+      const enriched = normalized as unknown as Record<string, unknown>;
+      
+      // Preservar TODOS los campos del JSON original
+      Object.keys(rawPrice).forEach(key => {
+        if (!enriched[key]) {
+          enriched[key] = rawPrice[key];
+        }
+      });
+      
+      return enriched as unknown as PriceData;
+    });
+    
+    console.log('🔍 [CARGA] Datos enriquecidos (primeros 2):', normalizedData.slice(0, 2));
+    setUploadedData(normalizedData);
+    console.log(`✅ ${normalizedData.length} precios cargados para revisión`);
+  };
+
+  // 🆕 Función para ENVIAR al backend cuando se confirma
+  const handleConfirmAndContinue = async () => {
+    if (uploadedData.length === 0) {
+      alert('No hay precios cargados');
       return;
     }
 
     setIsProcessing(true);
     
     try {
-      // Convertir datos al formato de API
-      const apiData = convertToApiFormat(result.data);
+      console.log('🚀 Enviando precios al backend...');
+      
+      let apiData: PriceBulkData[] | FormData;
+
+      // Determinar si se usó archivo o JSON
+      if (uploadMethod === 'file' && uploadedFile) {
+        // 📁 ARCHIVO: Enviar como FormData
+        console.log(`📁 Enviando archivo: ${uploadedFile.name}`);
+        
+        const formData = new FormData();
+        formData.append('file', uploadedFile);
+        formData.append('importType', 'prices');
+        
+        apiData = formData;
+      } else {
+        // 📋 JSON: Convertir datos al formato de API
+        console.log(`📋 Enviando ${uploadedData.length} precios como JSON`);
+        apiData = convertToApiFormat(uploadedData);
+      }
       
       // Llamar a la API real
+      console.log('📤 Tipo de dato enviado:', apiData instanceof FormData ? 'FormData' : 'JSON Array');
       const response = await api.admin.prices.bulkCreate(apiData);
       
+      console.log('📥 Respuesta completa del backend:', response);
+      console.log('📊 Status:', response.success);
+      console.log('📋 Data:', response.data);
+      
       if (response.success && response.data?.success) {
+        console.log('✅ Precios insertados/actualizados exitosamente en la base de datos');
         setApiResponse(response.data);
-        setUploadedData(result.data);
         setShowConfirmation(true);
       } else {
+        console.warn('⚠️ Respuesta no exitosa del backend:', {
+          responseSuccess: response.success,
+          dataSuccess: response.data?.success,
+          message: response.data?.message || response.message
+        });
         throw new Error(response.data?.message || response.message || 'Error procesando precios');
       }
     } catch (error) {
-      console.error('Error processing prices:', error);
-      // En caso de error, mostrar datos localmente
-      setUploadedData(result.data);
-    } finally {
+      console.error('❌ Error enviando precios al backend:', error);
+      console.error('❌ Detalles del error:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
       setIsProcessing(false);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      alert(`Error al enviar precios: ${errorMessage}\n\nContinuando con datos locales...`);
+      
+      // En caso de error, continuar con los datos locales
+      onNext({ uploadedPrices: uploadedData });
     }
   };
 
   const calculateStats = (prices: PriceData[]) => {
     if (prices.length === 0) return { avgMargin: 0, totalProducts: 0, avgPrice: 0 };
     
-    const avgMargin = prices.reduce((sum, price) => sum + price.margin, 0) / prices.length;
-    const avgPrice = prices.reduce((sum, price) => sum + price.basePrice, 0) / prices.length;
+    const avgMargin = prices.reduce((sum, price) => sum + (price.margin || 0), 0) / prices.length;
+    const avgPrice = prices.reduce((sum, price) => sum + (price.basePrice || 0), 0) / prices.length;
     
     return {
       avgMargin: Math.round(avgMargin * 100) / 100,
@@ -503,11 +654,11 @@ export function PriceStep({ onNext, onBack, themeColors, stepData }: PriceStepPr
                       <div 
                         className="font-medium px-2 py-1 rounded text-xs"
                         style={{ 
-                          backgroundColor: price.margin > 50 ? `${themeColors.secondary}20` : `${themeColors.accent}20`,
-                          color: price.margin > 50 ? themeColors.secondary : themeColors.accent
+                          backgroundColor: (price.margin || 0) > 50 ? `${themeColors.secondary}20` : `${themeColors.accent}20`,
+                          color: (price.margin || 0) > 50 ? themeColors.secondary : themeColors.accent
                         }}
                       >
-                        {price.margin}%
+                        {price.margin || 0}%
                       </div>
                     </div>
                   </div>
@@ -533,36 +684,24 @@ export function PriceStep({ onNext, onBack, themeColors, stepData }: PriceStepPr
           </motion.button>
           
           <motion.button
-            onClick={async () => {
-              setIsProcessing(true);
-              try {
-                // Convertir datos al formato de API
-                const apiData = convertToApiFormat(uploadedData);
-                
-                // Llamar a la API real
-                const response = await api.admin.prices.bulkCreate(apiData);
-                
-                if (response.success && response.data?.success) {
-                  setApiResponse(response.data);
-                  setShowConfirmation(true);
-                } else {
-                  throw new Error(response.data?.message || response.message || 'Error procesando precios');
-                }
-              } catch (error) {
-                console.error('Error processing prices:', error);
-                // En caso de error, mostrar mensaje pero continuar
-                alert('Error procesando precios. Continuando con datos locales.');
-                onNext({ uploadedPrices: uploadedData });
-              } finally {
-                setIsProcessing(false);
-              }
+            onClick={handleConfirmAndContinue}
+            disabled={isProcessing}
+            whileHover={{ scale: isProcessing ? 1 : 1.02 }}
+            whileTap={{ scale: isProcessing ? 1 : 0.98 }}
+            className="px-6 py-3 rounded-xl font-medium text-white flex items-center gap-2"
+            style={{ 
+              backgroundColor: isProcessing ? `${themeColors.primary}80` : themeColors.primary,
+              cursor: isProcessing ? 'not-allowed' : 'pointer'
             }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="px-6 py-3 rounded-xl font-medium text-white"
-            style={{ backgroundColor: themeColors.primary }}
           >
-            Procesar JSON
+            {isProcessing ? (
+              <>
+                <span className="animate-spin">⏳</span>
+                Enviando a BD...
+              </>
+            ) : (
+              'Confirmar y Continuar'
+            )}
           </motion.button>
         </div>
       </div>
@@ -612,6 +751,7 @@ export function PriceStep({ onNext, onBack, themeColors, stepData }: PriceStepPr
       <FileUploadComponent
         method={method}
         onUpload={handleUpload}
+        onFileSelect={handleFileSelect}
         onBack={onBack}
         themeColors={themeColors}
         sampleData={samplePrices}

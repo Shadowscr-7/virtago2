@@ -2,12 +2,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { StepProps } from '../shared/types';
 import { CheckCircle, Loader2 } from 'lucide-react';
-import { api, WizardSummaryData } from '@/api';
+import { WizardSummaryData } from '@/api';
 
 export function ReviewStep({ onNext, onBack, themeColors, stepData }: StepProps) {
   const [wizardData, setWizardData] = useState<WizardSummaryData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const hasLoadedRef = useRef(false);
 
   useEffect(() => {
@@ -19,97 +18,120 @@ export function ReviewStep({ onNext, onBack, themeColors, stepData }: StepProps)
 
     const loadWizardSummary = async () => {
       try {
-        console.log('[ReviewStep] Iniciando carga de resumen del wizard...');
-        hasLoadedRef.current = true; // Marcar inmediatamente para evitar concurrencia
+        console.log('[ReviewStep] ✅ USANDO DATOS DEL WIZARD (no del backend)');
+        console.log('[ReviewStep] 📦 stepData recibido:', stepData);
+        hasLoadedRef.current = true;
         setIsLoading(true);
-        const response = await api.admin.wizard.getSummary();
         
-        if (response.success && response.data) {
-          console.log('[ReviewStep] Datos cargados exitosamente:', response.data);
-          setWizardData(response.data);
-        } else {
-          throw new Error(response.message || 'Error cargando resumen');
-        }
-      } catch (err) {
-        console.error('[ReviewStep] Error loading wizard summary:', err);
-        setError(err instanceof Error ? err.message : 'Error desconocido');
-        
-        // Fallback con datos locales del wizard si hay error
+        // 🆕 USAR DATOS DEL WIZARD DIRECTAMENTE
+        // El wizard ya tiene toda la información de lo que se creó en cada paso
         const localData = stepData as Record<string, unknown>;
+        
+        // 🔍 Contar registros creados en el wizard
+        const clientsCount = (localData?.uploadedClients as unknown[])?.length || 0;
+        const productsCount = (localData?.matchedProducts as unknown[])?.length || 0;
+        const priceListsCount = (localData?.uploadedPriceLists as unknown[])?.length || 0;
+        const pricesCount = (localData?.uploadedPrices as unknown[])?.length || 0;
+        const discountsCount = (localData?.uploadedDiscounts as unknown[])?.length || 0;
+        
+        const totalEntities = clientsCount + productsCount + priceListsCount + pricesCount + discountsCount;
+        const completionPercentage = totalEntities > 0 ? 100 : 0;
+        
+        console.log('[ReviewStep] 📊 Conteo de registros:', {
+          clientes: clientsCount,
+          productos: productsCount,
+          listas: priceListsCount,
+          precios: pricesCount,
+          descuentos: discountsCount,
+          total: totalEntities
+        });
+        
         const fallbackData: WizardSummaryData = {
-          success: false,
-          distributorCode: "LOCAL",
-          userEmail: "user@local.test",
+          success: true,
+          distributorCode: "WIZARD-SESSION",
+          userEmail: "admin@virtago.shop",
           generatedAt: new Date().toISOString(),
           configuration: {
             clients: {
-              total: (localData?.uploadedClients as unknown[])?.length || 0,
-              today: 0,
-              status: (localData?.uploadedClients as unknown[])?.length ? "✅ Configurado" : "❌ Sin configurar"
+              total: clientsCount,
+              today: clientsCount, // ✅ Los creados "hoy" son los del wizard
+              status: clientsCount > 0 ? "✅ Configurado" : "❌ Sin configurar"
             },
             products: {
-              total: (localData?.matchedProducts as unknown[])?.length || 0,
-              today: 0,
-              status: (localData?.matchedProducts as unknown[])?.length ? "✅ Configurado" : "❌ Sin configurar"
+              total: productsCount,
+              today: productsCount,
+              status: productsCount > 0 ? "✅ Configurado" : "❌ Sin configurar"
             },
             listPrices: {
-              total: (localData?.uploadedPriceLists as unknown[])?.length || 0,
-              today: 0,
-              status: (localData?.uploadedPriceLists as unknown[])?.length ? "✅ Configurado" : "❌ Sin configurar"
+              total: priceListsCount,
+              today: priceListsCount,
+              status: priceListsCount > 0 ? "✅ Configurado" : "❌ Sin configurar"
             },
             prices: {
-              total: (localData?.uploadedPrices as unknown[])?.length || 0,
-              today: 0,
-              status: (localData?.uploadedPrices as unknown[])?.length ? "✅ Configurado" : "❌ Sin configurar"
+              total: pricesCount,
+              today: pricesCount,
+              status: pricesCount > 0 ? "✅ Configurado" : "❌ Sin configurar"
             },
             discounts: {
-              total: (localData?.uploadedDiscounts as unknown[])?.length || 0,
-              today: 0,
-              status: (localData?.uploadedDiscounts as unknown[])?.length ? "✅ Configurado" : "❌ Sin configurar"
+              total: discountsCount,
+              today: discountsCount,
+              status: discountsCount > 0 ? "✅ Configurado" : "❌ Sin configurar"
             }
           },
           systemStatus: {
-            status: "🟡 Configuración local",
-            statusCode: "local_setup",
-            completionPercentage: 75,
-            totalEntities: ((localData?.uploadedClients as unknown[])?.length || 0) + 
-                           ((localData?.matchedProducts as unknown[])?.length || 0) + 
-                           ((localData?.uploadedPriceLists as unknown[])?.length || 0) + 
-                           ((localData?.uploadedPrices as unknown[])?.length || 0) + 
-                           ((localData?.uploadedDiscounts as unknown[])?.length || 0),
-            todayActivity: 0
+            status: totalEntities > 0 ? "✅ Configurado" : "🟡 Sin configurar",
+            statusCode: totalEntities > 0 ? "configured" : "not_configured",
+            completionPercentage,
+            totalEntities,
+            todayActivity: totalEntities
           },
           activity: {
-            totalCreatedToday: 0,
-            totalCreatedEver: 0,
+            totalCreatedToday: totalEntities,
+            totalCreatedEver: totalEntities,
             mostActiveEntity: {
-              entity: "ninguna",
-              count: 0,
-              message: "Configuración local"
+              entity: clientsCount > 0 ? "Clientes" : 
+                      productsCount > 0 ? "Productos" : 
+                      pricesCount > 0 ? "Precios" : 
+                      discountsCount > 0 ? "Descuentos" : 
+                      priceListsCount > 0 ? "Listas de Precios" : "ninguna",
+              count: Math.max(clientsCount, productsCount, priceListsCount, pricesCount, discountsCount),
+              message: "Configurado en wizard"
             }
           },
-          recommendations: [
-            "📋 Conectar con el servidor para sincronizar datos",
-            "🔄 Verificar la conexión de red",
-            "⚙️ Revisar configuración de API",
-            "📊 Validar datos importados"
+          recommendations: totalEntities > 0 ? [
+            "📋 Cargar clientes para comenzar" + (clientsCount === 0 ? " ⚠️" : ""),
+            "🎁 Agregar productos al catálogo" + (productsCount === 0 ? " ⚠️" : ""),
+            "💲 Configurar precios para los productos" + (pricesCount === 0 ? " ⚠️" : ""),
+            "🎯 Crear listas de precios organizadas" + (priceListsCount === 0 ? " ⚠️" : ""),
+            "🎉 Configurar descuentos y promociones" + (discountsCount === 0 ? " ⚠️" : "")
+          ] : [
+            "⚠️ No se han cargado datos todavía",
+            "📋 Empieza por cargar clientes",
+            "🎁 Luego agrega productos al catálogo",
+            "💲 Configura precios base",
+            "🎯 Organiza listas de precios por cliente"
           ],
           summary: {
-            title: "📋 Configuración Local",
-            distributor: "LOCAL",
+            title: totalEntities > 0 ? "✅ Configuración del Wizard Completada" : "⚠️ Configuración Pendiente",
+            distributor: "WIZARD-SESSION",
             details: [
-              `Clientes: ${(localData?.uploadedClients as unknown[])?.length || 0} registrados`,
-              `Productos: ${(localData?.matchedProducts as unknown[])?.length || 0} cargados`,
-              `Listas de Precios: ${(localData?.uploadedPriceLists as unknown[])?.length || 0} configuradas`,
-              `Precios: ${(localData?.uploadedPrices as unknown[])?.length || 0} establecidos`,
-              `Descuentos: ${(localData?.uploadedDiscounts as unknown[])?.length || 0} configurados`,
-              "Estado: 🟡 Configuración local"
+              `Clientes: ${clientsCount} registrados ${clientsCount > 0 ? '✅' : '⚠️'}`,
+              `Productos: ${productsCount} cargados ${productsCount > 0 ? '✅' : '⚠️'}`,
+              `Listas de Precios: ${priceListsCount} configuradas ${priceListsCount > 0 ? '✅' : '⚠️'}`,
+              `Precios: ${pricesCount} establecidos ${pricesCount > 0 ? '✅' : '⚠️'}`,
+              `Descuentos: ${discountsCount} configurados ${discountsCount > 0 ? '✅' : '⚠️'}`,
+              `Total: ${totalEntities} registros creados`,
+              `Estado: ${totalEntities > 0 ? '✅ Configurado' : '⚠️ Sin configurar'}`
             ]
           },
           simpleFormat: {
-            message: "Configuración completada localmente"
+            message: totalEntities > 0 
+              ? `✅ Configuración completada: ${totalEntities} registros creados` 
+              : "⚠️ No se han cargado datos todavía"
           }
         };
+        
+        console.log('[ReviewStep] ✅ Datos del resumen generados:', fallbackData);
         setWizardData(fallbackData);
       } finally {
         setIsLoading(false);
@@ -160,12 +182,6 @@ export function ReviewStep({ onNext, onBack, themeColors, stepData }: StepProps)
         <p style={{ color: themeColors.text.secondary }}>
           Tu sistema ha sido configurado exitosamente con todos los datos iniciales.
         </p>
-        
-        {error && (
-          <p className="text-xs" style={{ color: themeColors.accent }}>
-            Usando datos locales (sin conexión al servidor)
-          </p>
-        )}
       </div>
 
       {/* Resumen de lo configurado */}

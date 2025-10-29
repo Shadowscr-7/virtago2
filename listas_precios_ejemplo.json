@@ -1,45 +1,65 @@
 [
   {
-    "id": "lista_001",
-    "name": "Lista Mayorista",
-    "description": "Precios especiales para clientes mayoristas con descuentos por volumen",
-    "discountPercentage": 15,
+    "price_list_id": "PL001",
+    "name": "Lista Premium Invierno 2025",
+    "description": "Lista especial para clientes premium durante temporada de invierno",
+    "distributorCode": "DIST01",
+    "currency": "USD",
+    "country": "USA",
+    "region": "Norte América",
+    "customer_type": "wholesale",
+    "channel": "online",
+    "start_date": "2025-01-01T00:00:00.000Z",
+    "end_date": "2025-03-31T23:59:59.000Z",
+    "status": "active",
+    "default": true,
+    "priority": 1,
+    "applies_to": "specific_products",
+    "discount_type": "percentage",
+    "minimum_quantity": 50,
+    "maximum_quantity": 5000,
+    "custom_fields": {
+      "season": "winter",
+      "promotion": "early_bird",
+      "payment_terms": "Net 30"
+    },
+    "tags": ["premium", "wholesale", "winter", "2025"],
+    "notes": "Aplicar descuento adicional del 5% si paga en los primeros 10 días",
     "products": [
       {
         "productCode": "LAP001",
         "productName": "Laptop Gaming RGB Ultra",
         "basePrice": 1299.99,
-        "listPrice": 1104.99,
-        "discountPercentage": 15
+        "listPrice": 974.99,
+        "discountPercentage": 25
       },
       {
         "productCode": "MON002",
         "productName": "Monitor Curvo 27 pulgadas",
         "basePrice": 399.99,
-        "listPrice": 339.99,
-        "discountPercentage": 15
-      },
-      {
-        "productCode": "TEC003",
-        "productName": "Teclado Mecánico RGB",
-        "basePrice": 89.99,
-        "listPrice": 76.49,
-        "discountPercentage": 15
-      },
-      {
-        "productCode": "GPU009",
-        "productName": "Tarjeta Gráfica RTX Super",
-        "basePrice": 899.99,
-        "listPrice": 764.99,
-        "discountPercentage": 15
+        "listPrice": 299.99,
+        "discountPercentage": 25
       }
     ]
   },
   {
-    "id": "lista_002",
-    "name": "Lista Minorista",
-    "description": "Precios regulares para clientes finales y pequeños distribuidores",
-    "discountPercentage": 5,
+    "price_list_id": "PL002",
+    "name": "Lista Retail Estándar",
+    "description": "Lista de precios para clientes retail regulares",
+    "currency": "EUR",
+    "country": "España",
+    "region": "Europa",
+    "customer_type": "retail",
+    "channel": "online",
+    "start_date": "2025-01-01T00:00:00.000Z",
+    "status": "active",
+    "default": false,
+    "priority": 2,
+    "applies_to": "all",
+    "discount_type": "fixed",
+    "minimum_quantity": 1,
+    "tags": ["retail", "standard"],
+    "notes": "Lista de precios estándar sin vencimiento",
     "products": [
       {
         "productCode": "LAP001",
@@ -54,28 +74,28 @@
         "basePrice": 89.99,
         "listPrice": 85.49,
         "discountPercentage": 5
-      },
-      {
-        "productCode": "RAT004",
-        "productName": "Mouse Inalámbrico Precisión",
-        "basePrice": 59.99,
-        "listPrice": 56.99,
-        "discountPercentage": 5
-      },
-      {
-        "productCode": "AUD005",
-        "productName": "Auriculares Gaming 7.1",
-        "basePrice": 79.99,
-        "listPrice": 75.99,
-        "discountPercentage": 5
       }
     ]
   },
   {
-    "id": "lista_003",
-    "name": "Lista VIP",
-    "description": "Precios preferenciales para clientes premium y distribuidores exclusivos",
-    "discountPercentage": 25,
+    "price_list_id": "PL003",
+    "name": "Lista Mayorista VIP",
+    "description": "Precios preferenciales para distribuidores exclusivos",
+    "currency": "USD",
+    "country": "Colombia",
+    "customer_type": "wholesale",
+    "channel": "both",
+    "start_date": "2025-01-01T00:00:00.000Z",
+    "end_date": "2025-12-31T23:59:59.000Z",
+    "status": "active",
+    "default": false,
+    "priority": 1,
+    "applies_to": "all",
+    "discount_type": "percentage",
+    "minimum_quantity": 100,
+    "maximum_quantity": 10000,
+    "tags": ["vip", "wholesale", "colombia"],
+    "notes": "Incluye envío gratis para pedidos mayores a $10,000",
     "products": [
       {
         "productCode": "GPU009",
@@ -89,13 +109,6 @@
         "productName": "Memoria RAM DDR4 32GB",
         "basePrice": 189.99,
         "listPrice": 142.49,
-        "discountPercentage": 25
-      },
-      {
-        "productCode": "LAP001",
-        "productName": "Laptop Gaming RGB Ultra",
-        "basePrice": 1299.99,
-        "listPrice": 974.99,
         "discountPercentage": 25
       },
       {

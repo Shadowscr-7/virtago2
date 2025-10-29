@@ -7,7 +7,8 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: "cliente" | "distribuidor";
+  role: "cliente" | "distribuidor" | "client" | "distributor" | "admin"; // ✅ Soporte para español e inglés
+  userType?: "client" | "distributor"; // Campo adicional del backend
   avatar?: string;
   company?: string;
   phone?: string;
@@ -214,14 +215,25 @@ export const useAuthStore = create<AuthStore>()(
 
         // Check test users (password is always "123456" for demo)
         const user = testUsers.find((u) => u.email === email);
+        
+        console.log('🔍 [AUTH STORE - LOGIN] Email buscado:', email);
+        console.log('🔍 [AUTH STORE - LOGIN] Usuario encontrado:', user);
+        console.log('🔍 [AUTH STORE - LOGIN] Rol del usuario:', user?.role);
+        
         if (user && password === "123456") {
+          const loggedInUser = { ...user, lastLogin: new Date().toISOString() };
+          console.log('✅ [AUTH STORE - LOGIN] Usuario logueado:', loggedInUser);
+          console.log('✅ [AUTH STORE - LOGIN] Rol guardado:', loggedInUser.role);
+          
           set({
-            user: { ...user, lastLogin: new Date().toISOString() },
+            user: loggedInUser,
             isAuthenticated: true,
             orders: user.role === "cliente" ? sampleOrders : [],
           });
           return true;
         }
+        
+        console.log('❌ [AUTH STORE - LOGIN] Login fallido');
         return false;
       },
 

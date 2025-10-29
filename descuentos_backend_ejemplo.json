@@ -1,0 +1,185 @@
+[
+  {
+    "name": "Black Friday 30%",
+    "discount_id": "DISC-BF-001",
+    "description": "Descuento especial Black Friday",
+    "discount_type": "percentage",
+    "discount_value": 30,
+    "currency": "USD",
+    "min_purchase_amount": 100,
+    "max_discount_amount": 500,
+    "start_date": "2024-11-24T00:00:00Z",
+    "end_date": "2024-11-30T23:59:59Z",
+    "is_active": true,
+    "usage_limit": 5000,
+    "usage_limit_per_customer": 3,
+    "conditions": {
+      "customer_type": "all",
+      "min_items": 2,
+      "payment_methods": ["credit_card", "paypal"],
+      "exclude_sale_items": true,
+      "regions": ["USA", "Canada"]
+    },
+    "applicable_to": [
+      {
+        "type": "all_products",
+        "value": "*"
+      },
+      {
+        "type": "category",
+        "value": "electronics"
+      }
+    ],
+    "customFields": {
+      "campaign": "Black Friday 2024",
+      "priority": "critical",
+      "banner_url": "https://example.com/banner.jpg",
+      "auto_apply": true
+    }
+  },
+  {
+    "name": "Cyber Monday 40%",
+    "discount_id": "DISC-CM-002",
+    "description": "Descuento especial Cyber Monday",
+    "discount_type": "percentage",
+    "discount_value": 40,
+    "currency": "USD",
+    "min_purchase_amount": 200,
+    "max_discount_amount": 800,
+    "start_date": "2024-11-27T00:00:00Z",
+    "end_date": "2024-11-28T23:59:59Z",
+    "is_active": true,
+    "usage_limit": 3000,
+    "usage_limit_per_customer": 2,
+    "conditions": {
+      "customer_type": "all",
+      "min_items": 1,
+      "payment_methods": ["credit_card", "paypal", "debit_card"],
+      "exclude_sale_items": false,
+      "regions": ["USA", "Canada", "Mexico"]
+    },
+    "applicable_to": [
+      {
+        "type": "category",
+        "value": "electronics"
+      },
+      {
+        "type": "category",
+        "value": "computers"
+      }
+    ],
+    "customFields": {
+      "campaign": "Cyber Monday 2024",
+      "priority": "high",
+      "banner_url": "https://example.com/cyber-monday.jpg",
+      "auto_apply": false
+    }
+  },
+  {
+    "name": "Descuento Estudiantes 15%",
+    "discount_id": "DISC-STU-003",
+    "description": "Descuento especial para estudiantes",
+    "discount_type": "percentage",
+    "discount_value": 15,
+    "currency": "USD",
+    "min_purchase_amount": 50,
+    "max_discount_amount": 150,
+    "start_date": "2024-01-01T00:00:00Z",
+    "end_date": "2024-12-31T23:59:59Z",
+    "is_active": true,
+    "usage_limit": 10000,
+    "usage_limit_per_customer": 5,
+    "conditions": {
+      "customer_type": "student",
+      "min_items": 1,
+      "payment_methods": ["credit_card", "paypal"],
+      "exclude_sale_items": true,
+      "regions": ["USA"]
+    },
+    "applicable_to": [
+      {
+        "type": "category",
+        "value": "books"
+      },
+      {
+        "type": "category",
+        "value": "software"
+      }
+    ],
+    "customFields": {
+      "campaign": "Student Discount 2024",
+      "priority": "medium",
+      "verification_required": true,
+      "auto_apply": false
+    }
+  },
+  {
+    "name": "Envío Gratis",
+    "discount_id": "DISC-SHIP-004",
+    "description": "Envío gratis en compras mayores a $100",
+    "discount_type": "fixed_amount",
+    "discount_value": 0,
+    "currency": "USD",
+    "min_purchase_amount": 100,
+    "max_discount_amount": 50,
+    "start_date": "2024-01-01T00:00:00Z",
+    "end_date": "2024-12-31T23:59:59Z",
+    "is_active": true,
+    "usage_limit": 50000,
+    "usage_limit_per_customer": 999,
+    "conditions": {
+      "customer_type": "all",
+      "min_items": 1,
+      "payment_methods": ["credit_card", "paypal", "debit_card"],
+      "exclude_sale_items": false,
+      "regions": ["USA", "Canada"]
+    },
+    "applicable_to": [
+      {
+        "type": "all_products",
+        "value": "*"
+      }
+    ],
+    "customFields": {
+      "campaign": "Free Shipping 2024",
+      "priority": "low",
+      "auto_apply": true,
+      "shipping_only": true
+    }
+  },
+  {
+    "name": "Descuento Mayorista 25%",
+    "discount_id": "DISC-WHO-005",
+    "description": "Descuento para compras mayoristas",
+    "discount_type": "percentage",
+    "discount_value": 25,
+    "currency": "USD",
+    "min_purchase_amount": 1000,
+    "max_discount_amount": 5000,
+    "start_date": "2024-01-01T00:00:00Z",
+    "end_date": "2024-12-31T23:59:59Z",
+    "is_active": true,
+    "usage_limit": 1000,
+    "usage_limit_per_customer": 10,
+    "conditions": {
+      "customer_type": "wholesale",
+      "min_items": 10,
+      "payment_methods": ["credit_card", "wire_transfer"],
+      "exclude_sale_items": false,
+      "regions": ["USA", "Canada", "Mexico"]
+    },
+    "applicable_to": [
+      {
+        "type": "all_products",
+        "value": "*"
+      }
+    ],
+    "customFields": {
+      "campaign": "Wholesale Program 2024",
+      "priority": "high",
+      "verification_required": true,
+      "auto_apply": false,
+      "requires_approval": true
+    }
+  }
+]
