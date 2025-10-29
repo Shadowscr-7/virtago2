@@ -103,10 +103,11 @@ export default function ProductsAdminPage() {
         
         console.log('[PRODUCTOS] ✅', productsArray.length, 'productos cargados de', total, 'totales');
         
-        showToast({
-          title: "Productos cargados correctamente",
-          type: "success"
-        });
+        // No mostrar toast en cada carga, solo cuando hay error
+        // showToast({
+        //   title: "Productos cargados correctamente",
+        //   type: "success"
+        // });
       } else {
         console.error('[PRODUCTOS] ❌ Error en la respuesta:', response);
         setProducts([]);
@@ -131,10 +132,11 @@ export default function ProductsAdminPage() {
 
   // 🔄 Cargar productos al montar y cuando cambien los parámetros
   useEffect(() => {
-    if (hasAccess) {
+    if (user && hasAccess) {
       loadProducts();
     }
-  }, [hasAccess, loadProducts]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, hasAccess, currentPage, itemsPerPage, searchQuery, categoryFilter, statusFilter]);
 
   // 🔄 Debounce para el input de búsqueda
   useEffect(() => {
@@ -268,7 +270,7 @@ export default function ProductsAdminPage() {
             />
           </div>
 
-          {/* Filtros */}
+          {/* Filtro de Categoría */}
           <div className="w-full lg:w-48">
             <StyledSelect
               value={categoryFilter}
@@ -284,6 +286,7 @@ export default function ProductsAdminPage() {
             />
           </div>
 
+          {/* Filtro de Estado */}
           <div className="w-full lg:w-48">
             <StyledSelect
               value={statusFilter}
@@ -316,56 +319,51 @@ export default function ProductsAdminPage() {
               ]}
             />
           </div>
-        </motion.div>
 
-        {/* Botones de Acción */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="flex gap-3"
-        >
-          <motion.button
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => router.push('/admin/productos/nuevo')}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all backdrop-blur-sm border font-medium text-white"
-            style={{
-              background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`,
-              borderColor: themeColors.primary + "40"
-            }}
-          >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Crear Producto</span>
-          </motion.button>
+          {/* Acciones */}
+          <div className="flex gap-3">
+            <motion.button
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => router.push('/admin/productos/nuevo')}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all backdrop-blur-sm border font-medium text-white"
+              style={{
+                background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`,
+                borderColor: themeColors.primary + "40"
+              }}
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden sm:inline">Crear Producto</span>
+            </motion.button>
 
-          <motion.button
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all backdrop-blur-sm border font-medium"
-            style={{
-              backgroundColor: themeColors.accent + "20",
-              color: themeColors.text.primary,
-              borderColor: themeColors.accent + "40"
-            }}
-          >
-            <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Exportar Excel</span>
-          </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all backdrop-blur-sm border font-medium"
+              style={{
+                backgroundColor: themeColors.accent + "20",
+                color: themeColors.text.primary,
+                borderColor: themeColors.accent + "40"
+              }}
+            >
+              <Download className="w-4 h-4" />
+              <span className="hidden sm:inline">Exportar Excel</span>
+            </motion.button>
 
-          <motion.button
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all backdrop-blur-sm border font-medium"
-            style={{
-              backgroundColor: themeColors.secondary + "20",
-              color: themeColors.text.primary,
-              borderColor: themeColors.secondary + "40"
-            }}
-          >
-            <Upload className="w-4 h-4" />
-            <span className="hidden sm:inline">Importar</span>
-          </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all backdrop-blur-sm border font-medium"
+              style={{
+                backgroundColor: themeColors.secondary + "20",
+                color: themeColors.text.primary,
+                borderColor: themeColors.secondary + "40"
+              }}
+            >
+              <Upload className="w-4 h-4" />
+              <span className="hidden sm:inline">Importar</span>
+            </motion.button>
+          </div>
         </motion.div>
 
         {/* Tabla */}
@@ -465,39 +463,51 @@ export default function ProductsAdminPage() {
                     const statusInfo = getStatusInfo(product.status);
                     const productColor = [themeColors.primary, themeColors.secondary, themeColors.accent][index % 3];
                     
+                    // Generar iniciales del nombre del producto
+                    const productWords = product.name.split(' ');
+                    const initials = productWords.length >= 2 
+                      ? `${productWords[0][0]}${productWords[1][0]}`.toUpperCase()
+                      : product.name.substring(0, 2).toUpperCase();
+                    
                     return (
                       <motion.tr 
                         key={product.prodVirtaId}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="transition-colors cursor-pointer"
+                        className="group transition-all duration-300 backdrop-blur-sm hover:backdrop-blur-md"
                         style={{
-                          backgroundColor: themeColors.surface + "40",
+                          "--hover-bg": `linear-gradient(90deg, ${themeColors.primary}10, ${themeColors.secondary}10)`
+                        } as React.CSSProperties}
+                        onMouseEnter={(e) => {
+                          const target = e.currentTarget as HTMLElement;
+                          target.style.background = `linear-gradient(90deg, ${themeColors.primary}10, ${themeColors.secondary}10)`;
                         }}
-                        whileHover={{
-                          backgroundColor: themeColors.primary + "10",
+                        onMouseLeave={(e) => {
+                          const target = e.currentTarget as HTMLElement;
+                          target.style.background = "transparent";
                         }}
                       >
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div 
-                              className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold shadow-lg"
+                        <td className="px-6 py-5">
+                          <div className="flex items-center gap-4">
+                            <motion.div
+                              whileHover={{ scale: 1.1 }}
+                              className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg"
                               style={{
-                                background: `linear-gradient(135deg, ${productColor}, ${productColor}dd)`
+                                background: `linear-gradient(45deg, ${productColor}, ${productColor}90)`
                               }}
                             >
-                              <Package className="w-6 h-6" />
-                            </div>
+                              {initials}
+                            </motion.div>
                             <div>
                               <div 
-                                className="font-semibold"
+                                className="font-semibold text-sm"
                                 style={{ color: themeColors.text.primary }}
                               >
                                 {product.name}
                               </div>
                               <div 
-                                className="text-sm"
+                                className="text-xs"
                                 style={{ color: themeColors.text.secondary }}
                               >
                                 {product.brand}
@@ -505,11 +515,11 @@ export default function ProductsAdminPage() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-5">
                           <code 
-                            className="text-sm font-mono px-3 py-1.5 rounded-lg"
+                            className="text-sm font-mono px-3 py-1.5 rounded-lg inline-block"
                             style={{
-                              backgroundColor: themeColors.surface,
+                              backgroundColor: themeColors.secondary + "20",
                               color: themeColors.text.primary,
                               border: `1px solid ${themeColors.primary}30`
                             }}
@@ -517,61 +527,70 @@ export default function ProductsAdminPage() {
                             {product.sku}
                           </code>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-5">
                           <span 
-                            className="text-sm font-medium"
-                            style={{ color: themeColors.text.secondary }}
+                            className="text-sm font-medium px-2 py-1 rounded-md inline-block"
+                            style={{ 
+                              backgroundColor: themeColors.primary + "20",
+                              color: themeColors.text.primary 
+                            }}
                           >
                             {product.category}
                           </span>
                         </td>
-                        <td className="px-6 py-4">
-                          <span 
-                            className="font-bold text-lg"
-                            style={{ color: themeColors.primary }}
+                        <td className="px-6 py-5">
+                          <div 
+                            className="text-lg font-bold bg-gradient-to-r bg-clip-text text-transparent"
+                            style={{
+                              backgroundImage: `linear-gradient(to right, ${productColor}, ${productColor}90)`
+                            }}
                           >
                             {formatCurrency(product.price)}
-                          </span>
+                          </div>
                         </td>
-                        <td className="px-6 py-4">
-                          <span 
-                            className="font-semibold text-lg"
+                        <td className="px-6 py-5">
+                          <div 
+                            className="text-lg font-semibold"
                             style={{ color: themeColors.text.primary }}
                           >
                             {product.stockQuantity}
-                          </span>
+                          </div>
                         </td>
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-5">
                           <span
-                            className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                            className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider"
                             style={{ backgroundColor: statusInfo.bgColor, color: statusInfo.color }}
                           >
                             {statusInfo.label}
                           </span>
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="flex gap-2">
+                        <td className="px-6 py-5">
+                          <div className="flex items-center gap-2">
                             <motion.button
-                              whileHover={{ scale: 1.1 }}
+                              whileHover={{ scale: 1.15, rotate: 5 }}
                               whileTap={{ scale: 0.9 }}
                               onClick={() => router.push(`/admin/productos/${product.prodVirtaId}`)}
-                              className="p-2 rounded-lg transition-all"
+                              className="p-2.5 rounded-xl transition-all shadow-md"
                               style={{
                                 backgroundColor: themeColors.primary + "20",
-                                color: themeColors.primary
+                                color: themeColors.primary,
+                                border: `1px solid ${themeColors.primary}40`
                               }}
+                              title="Ver detalles"
                             >
                               <Eye className="w-4 h-4" />
                             </motion.button>
                             <motion.button
-                              whileHover={{ scale: 1.1 }}
+                              whileHover={{ scale: 1.15, rotate: -5 }}
                               whileTap={{ scale: 0.9 }}
                               onClick={() => router.push(`/admin/productos/${product.prodVirtaId}?mode=edit`)}
-                              className="p-2 rounded-lg transition-all"
+                              className="p-2.5 rounded-xl transition-all shadow-md"
                               style={{
                                 backgroundColor: themeColors.accent + "20",
-                                color: themeColors.accent
+                                color: themeColors.accent,
+                                border: `1px solid ${themeColors.accent}40`
                               }}
+                              title="Editar producto"
                             >
                               <Edit className="w-4 h-4" />
                             </motion.button>
@@ -596,54 +615,91 @@ export default function ProductsAdminPage() {
                   className="text-sm"
                   style={{ color: themeColors.text.secondary }}
                 >
-                  Mostrando <span className="font-semibold" style={{ color: themeColors.text.primary }}>
+                  Mostrando{" "}
+                  <span 
+                    className="font-semibold"
+                    style={{ color: themeColors.primary }}
+                  >
                     {(currentPage - 1) * itemsPerPage + 1}
-                  </span> a <span className="font-semibold" style={{ color: themeColors.text.primary }}>
+                  </span>{" "}
+                  a{" "}
+                  <span 
+                    className="font-semibold"
+                    style={{ color: themeColors.primary }}
+                  >
                     {Math.min(currentPage * itemsPerPage, totalProducts)}
-                  </span> de <span className="font-semibold" style={{ color: themeColors.text.primary }}>
+                  </span>{" "}
+                  de{" "}
+                  <span 
+                    className="font-semibold"
+                    style={{ color: themeColors.primary }}
+                  >
                     {totalProducts}
-                  </span> productos
+                  </span>{" "}
+                  productos
                 </div>
                 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{ scale: 1.05, x: -2 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    className="p-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="p-3 rounded-xl border disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm"
                     style={{
-                      backgroundColor: currentPage === 1 ? themeColors.surface : themeColors.primary + "20",
-                      color: currentPage === 1 ? themeColors.text.secondary : themeColors.primary,
-                      border: `1px solid ${themeColors.primary}30`
-                    }}
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </motion.button>
-                  
-                  <span 
-                    className="px-4 py-2 rounded-lg font-medium"
-                    style={{
-                      backgroundColor: themeColors.primary + "10",
+                      backgroundColor: themeColors.surface + "60",
+                      borderColor: themeColors.primary + "30",
                       color: themeColors.text.primary
                     }}
                   >
-                    Página {currentPage} de {totalPages}
-                  </span>
-                  
+                    <ChevronLeft className="w-4 h-4" />
+                  </motion.button>
+
+                  <div className="flex items-center gap-2">
+                    {[...Array(Math.min(5, totalPages))].map((_, i) => {
+                      const pageNum = i + 1;
+                      const isActive = currentPage === pageNum;
+                      return (
+                        <motion.button
+                          key={pageNum}
+                          whileHover={{ scale: 1.05, y: -2 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handlePageChange(pageNum)}
+                          className="w-10 h-10 rounded-xl text-sm font-semibold transition-all backdrop-blur-sm border"
+                          style={{
+                            backgroundColor: isActive 
+                              ? `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})` 
+                              : themeColors.surface + "60",
+                            borderColor: isActive 
+                              ? themeColors.primary + "60" 
+                              : themeColors.primary + "30",
+                            color: isActive 
+                              ? "white" 
+                              : themeColors.text.primary,
+                            background: isActive 
+                              ? `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})` 
+                              : themeColors.surface + "60"
+                          }}
+                        >
+                          {pageNum}
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{ scale: 1.05, x: 2 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
-                    className="p-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="p-3 rounded-xl border disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm"
                     style={{
-                      backgroundColor: currentPage === totalPages ? themeColors.surface : themeColors.primary + "20",
-                      color: currentPage === totalPages ? themeColors.text.secondary : themeColors.primary,
-                      border: `1px solid ${themeColors.primary}30`
+                      backgroundColor: themeColors.surface + "60",
+                      borderColor: themeColors.primary + "30",
+                      color: themeColors.text.primary
                     }}
                   >
-                    <ChevronRight className="w-5 h-5" />
+                    <ChevronRight className="w-4 h-4" />
                   </motion.button>
                 </div>
               </div>
