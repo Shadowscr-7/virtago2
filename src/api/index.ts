@@ -168,27 +168,30 @@ export interface Brand {
 }
 
 export interface PriceList {
-  id: string;
-  price_list_id: string;
+  listPriceId: string; // UUID del registro
+  price_list_id: string; // Código de la lista
   name: string;
   description?: string;
   currency: string;
-  country: string;
+  country?: string;
   region?: string;
   customer_type: string;
-  channel: string;
-  start_date: string;
+  channel?: string;
+  start_date?: string;
   end_date?: string;
   status: "active" | "inactive" | "draft";
-  default: boolean;
-  priority: number;
-  applies_to: "all" | "specific_categories" | "specific_products" | "promotional_items" | "premium_products";
-  discount_type: "percentage" | "fixed" | "tiered";
-  minimum_quantity: number;
-  maximum_quantity: number;
+  default?: boolean;
+  priority?: number;
+  applies_to?: "all" | "specific_categories" | "specific_products" | "promotional_items" | "premium_products";
+  discount_type?: "percentage" | "fixed" | "tiered";
+  minimum_quantity?: number;
+  maximum_quantity?: number;
   custom_fields?: Record<string, unknown>;
   tags?: string[];
   notes?: string;
+  distributorCode: string;
+  createdAt: string;
+  updatedAt?: string;
 }
 
 export interface CartItem {
@@ -1308,11 +1311,34 @@ export const adminApi = {
 
   // Listas de Precios
   priceLists: {
-    getAll: async (params?: unknown): Promise<ApiResponse<PriceList[]>> => {
+    getAll: async (params?: { 
+      distributorCode?: string;
+      page?: number; 
+      limit?: number; 
+      search?: string 
+    }): Promise<ApiResponse<{ 
+      success: boolean;
+      distributorCode: string;
+      data: PriceList[];
+      total: number;
+      count: number;
+      currentPage: number;
+      rowsPerPage: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+    }>> => {
       const queryString = params 
-        ? "?" + new URLSearchParams(params as Record<string, string>).toString()
+        ? "?" + new URLSearchParams(
+            Object.entries(params).reduce((acc, [key, value]) => {
+              if (value !== undefined && value !== null && value !== '') {
+                acc[key] = String(value);
+              }
+              return acc;
+            }, {} as Record<string, string>)
+          ).toString()
         : "";
-      return http.get(`/admin/price-lists${queryString}`);
+      console.log('[API] Obteniendo listas de precios:', `/listprice${queryString}`);
+      return http.get(`/listprice${queryString}`);
     },
     
     create: async (data: PriceListBulkData): Promise<ApiResponse<PriceList>> => 
@@ -1348,6 +1374,11 @@ export const adminApi = {
     
     update: async (id: string, data: PriceListBulkData): Promise<ApiResponse<PriceList>> => 
       http.put(`/admin/price-lists/${id}`, data),
+    
+    updateStatus: async (priceListId: string, status: 'active' | 'inactive'): Promise<ApiResponse<{ message: string }>> => {
+      console.log(`[API] Actualizando estado de lista de precios ${priceListId} a ${status}`);
+      return http.patch(`/listPrice/${priceListId}/status`, { status });
+    },
     
     delete: async (id: string): Promise<ApiResponse<{ message: string }>> => 
       http.delete(`/admin/price-lists/${id}`),
