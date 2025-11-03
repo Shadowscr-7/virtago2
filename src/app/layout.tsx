@@ -41,36 +41,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  icons: {
-    icon: [
-      { url: "/images/logo.png", sizes: "any" },
-      { url: "/images/logo.png", type: "image/png" },
-    ],
-    apple: "/images/logo.png",
-    shortcut: "/images/logo.png",
-  },
-  openGraph: {
-    title: "Virtago - B2B E-commerce Platform",
-    description: "Professional B2B multi-brand e-commerce platform for wholesale business",
-    url: "https://www.virtago.shop/",
-    siteName: "Virtago",
-    images: [
-      {
-        url: "/images/logo.png",
-        width: 1200,
-        height: 630,
-        alt: "Virtago - B2B E-commerce Platform",
-      },
-    ],
-    locale: "es_ES",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Virtago - B2B E-commerce Platform",
-    description: "Professional B2B multi-brand e-commerce platform for wholesale business",
-    images: ["/images/logo.png"],
-  },
+  metadataBase: new URL("https://www.virtago.shop"),
 };
 
 export default function RootLayout({
