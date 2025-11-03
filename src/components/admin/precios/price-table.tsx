@@ -2,10 +2,10 @@
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   Eye,
   Edit,
-  Trash2,
   Calendar,
   Check,
   Package,
@@ -65,20 +65,33 @@ export const PriceTable: React.FC<PriceTableProps> = ({
 }) => {
   const { themeColors } = useTheme();
   const router = useRouter();
+  const [showConfirmDialog, setShowConfirmDialog] = useState<{
+    show: boolean;
+    priceId: string;
+    currentState: boolean;
+  }>({
+    show: false,
+    priceId: "",
+    currentState: false,
+  });
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "ACTIVO":
-        return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300";
-      case "INACTIVO":
-        return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300";
-      case "VENCIDO":
-        return "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300";
-      case "PROGRAMADO":
-        return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300";
-      default:
-        return "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300";
-    }
+  const handleStatusClick = (priceId: string, currentStatus: string) => {
+    setShowConfirmDialog({
+      show: true,
+      priceId: priceId,
+      currentState: currentStatus === "ACTIVO",
+    });
+  };
+
+  const confirmStatusChange = async () => {
+    const priceId = showConfirmDialog.priceId;
+    const currentStatus = showConfirmDialog.currentState;
+    
+    // TODO: Implementar cambio de estado en el backend
+    console.log(`Cambiar estado del precio ${priceId} de ${currentStatus ? "ACTIVO" : "INACTIVO"} a ${currentStatus ? "INACTIVO" : "ACTIVO"}`);
+    
+    // Cerrar modal
+    setShowConfirmDialog({ show: false, priceId: "", currentState: false });
   };
 
   const formatCurrency = (value: number, currency: string) => {
@@ -99,7 +112,7 @@ export const PriceTable: React.FC<PriceTableProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
-      className="backdrop-blur-xl rounded-2xl border shadow-lg overflow-hidden"
+      className="rounded-2xl border shadow-lg overflow-hidden"
       style={{
         backgroundColor: themeColors.surface + "70",
         borderColor: themeColors.primary + "30",
@@ -163,7 +176,7 @@ export const PriceTable: React.FC<PriceTableProps> = ({
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
                 Estado
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
+              <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
                 Acciones
               </th>
             </tr>
@@ -285,40 +298,43 @@ export const PriceTable: React.FC<PriceTableProps> = ({
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(price.status)}`}>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleStatusClick(price.id, price.status)}
+                    className="inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold transition-all backdrop-blur-sm border cursor-pointer"
+                    style={{
+                      backgroundColor: price.status === "ACTIVO"
+                        ? themeColors.accent + "20"
+                        : themeColors.primary + "20",
+                      color: themeColors.text.primary,
+                      borderColor: price.status === "ACTIVO"
+                        ? themeColors.accent + "40"
+                        : themeColors.primary + "40",
+                    }}
+                  >
                     {price.status}
-                  </span>
+                  </motion.button>
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div className="flex items-center gap-2">
                     <motion.button
-                      whileHover={{
-                        scale: 1.1,
-                        color: themeColors.secondary,
-                      }}
-                      whileTap={{ scale: 0.9 }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => router.push(`/admin/precios/${price.id}`)}
-                      className="p-2 text-gray-400 transition-colors duration-200"
+                      className="p-2 rounded-lg bg-pink-500/10 hover:bg-pink-500/20 text-pink-500 transition-colors duration-200"
+                      title="Ver"
                     >
                       <Eye className="w-4 h-4" />
                     </motion.button>
                     <motion.button
-                      whileHover={{
-                        scale: 1.1,
-                        color: themeColors.primary,
-                      }}
-                      whileTap={{ scale: 0.9 }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => router.push(`/admin/precios/${price.id}/editar`)}
-                      className="p-2 text-gray-400 transition-colors duration-200"
+                      className="p-2 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-500 transition-colors duration-200"
+                      title="Editar"
                     >
                       <Edit className="w-4 h-4" />
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200"
-                    >
-                      <Trash2 className="w-4 h-4" />
                     </motion.button>
                   </div>
                 </td>
@@ -390,6 +406,97 @@ export const PriceTable: React.FC<PriceTableProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Modal de Confirmación - Cambio de Estado */}
+      {showConfirmDialog.show && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+          onClick={() => setShowConfirmDialog({ show: false, priceId: "", currentState: false })}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            onClick={(e) => e.stopPropagation()}
+            className="rounded-2xl p-6 max-w-md w-full border"
+            style={{
+              backgroundColor: themeColors.surface + "95",
+              borderColor: themeColors.primary + "30",
+            }}
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div
+                className="p-3 rounded-xl"
+                style={{
+                  backgroundColor: themeColors.accent + "20",
+                }}
+              >
+                <AlertTriangle
+                  className="w-6 h-6"
+                  style={{ color: themeColors.accent }}
+                />
+              </div>
+              <div>
+                <h3
+                  className="text-lg font-semibold"
+                  style={{ color: themeColors.text.primary }}
+                >
+                  Confirmar Cambio de Estado
+                </h3>
+                <p
+                  className="text-sm"
+                  style={{ color: themeColors.text.secondary }}
+                >
+                  Esta acción afectará el acceso del cliente
+                </p>
+              </div>
+            </div>
+
+            <p
+              className="mb-6"
+              style={{ color: themeColors.text.secondary }}
+            >
+              ¿Estás seguro que deseas{" "}
+              {showConfirmDialog.currentState ? "desactivar" : "activar"} este
+              precio?
+            </p>
+
+            <div className="flex gap-3 justify-end">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() =>
+                  setShowConfirmDialog({
+                    show: false,
+                    priceId: "",
+                    currentState: false,
+                  })
+                }
+                className="px-4 py-2 rounded-lg transition-all"
+                style={{
+                  color: themeColors.text.secondary,
+                  backgroundColor: themeColors.surface + "50",
+                }}
+              >
+                Cancelar
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={confirmStatusChange}
+                className="px-4 py-2 text-white rounded-lg transition-all"
+                style={{
+                  background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`,
+                }}
+              >
+                Confirmar
+              </motion.button>
+            </div>
+          </motion.div>
+        </motion.div>
       )}
     </motion.div>
   );

@@ -495,7 +495,7 @@ export default function ListasPreciosAdminPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="backdrop-blur-xl border border-white/20 dark:border-gray-700/30 rounded-2xl shadow-xl overflow-hidden"
+          className="border border-white/20 dark:border-gray-700/30 rounded-2xl shadow-xl overflow-hidden"
           style={{
             background: `linear-gradient(135deg, ${themeColors.surface}80, ${themeColors.surface}70)`
           }}

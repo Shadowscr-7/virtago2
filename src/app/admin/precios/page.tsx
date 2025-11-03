@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Download, Upload, Plus } from "lucide-react";
 import { AdminLayout } from "@/components/admin/admin-layout";
 import { useTheme } from "@/contexts/theme-context";
-import { PriceFilters, PriceStatistics, PriceTable } from "@/components/admin/precios";
+import { PriceFilters, PriceTable } from "@/components/admin/precios";
+import http from "@/api/http-client";
+import { toast } from "sonner";
 
 // Tipos para precios
 interface PriceItem {
@@ -27,99 +28,27 @@ interface PriceItem {
   supplier?: string;
 }
 
-// Datos de ejemplo
-const mockPrices: PriceItem[] = [
-  {
-    id: "P001",
-    productCode: "2",
-    productName: "iPhone 15 Pro Max 256GB",
-    minQuantity: 2,
-    price: 1450,
-    currency: "UYU",
-    endDate: "2025-12-31",
-    includeIVA: false,
-    status: "INACTIVO",
-    createdAt: "2024-01-15",
-    updatedAt: "2024-09-12",
-    margin: 28.5,
-    costPrice: 1037,
-    category: "Electrónicos",
-    supplier: "Tech Distribution"
-  },
-  {
-    id: "P002",
-    productCode: "SKU-39108",
-    productName: "MacBook Pro 16\" M3",
-    minQuantity: 1,
-    price: 2850,
-    currency: "USD",
-    endDate: "2025-12-31",
-    includeIVA: true,
-    status: "ACTIVO",
-    createdAt: "2024-02-10",
-    updatedAt: "2024-09-11",
-    margin: 35.2,
-    costPrice: 1848,
-    category: "Informática",
-    supplier: "Apple Authorized"
-  },
-  {
-    id: "P003",
-    productCode: "SAM-S24U",
-    productName: "Samsung Galaxy S24 Ultra",
-    minQuantity: 3,
-    price: 1250,
-    currency: "USD",
-    endDate: "2025-11-30",
-    includeIVA: true,
-    status: "ACTIVO",
-    createdAt: "2024-01-20",
-    updatedAt: "2024-09-10",
-    margin: 22.8,
-    costPrice: 965,
-    category: "Electrónicos",
-    supplier: "Samsung Electronics"
-  },
-  {
-    id: "P004",
-    productCode: "APL-AIRP2",
-    productName: "AirPods Pro 2da Gen",
-    minQuantity: 5,
-    price: 180,
-    currency: "USD",
-    endDate: "2025-10-15",
-    includeIVA: false,
-    status: "ACTIVO",
-    createdAt: "2024-03-05",
-    updatedAt: "2024-09-09",
-    margin: 40.0,
-    costPrice: 108,
-    category: "Electrónicos",
-    supplier: "Tech Distribution"
-  },
-  {
-    id: "P005",
-    productCode: "HP-PAV15",
-    productName: "HP Pavilion 15\"",
-    minQuantity: 1,
-    price: 850,
-    currency: "USD",
-    endDate: "2025-09-30",
-    includeIVA: true,
-    status: "VENCIDO",
-    createdAt: "2024-04-12",
-    updatedAt: "2024-09-08",
-    margin: 18.5,
-    costPrice: 693,
-    category: "Informática",
-    supplier: "HP Inc"
-  }
-];
+interface PaginationInfo {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
 
 export default function PreciosAdminPage() {
   const router = useRouter();
   const { themeColors } = useTheme();
-  const [prices] = useState<PriceItem[]>(mockPrices);
+  const [prices, setPrices] = useState<PriceItem[]>([]);
+  const [pagination, setPagination] = useState<PaginationInfo>({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0,
+    hasNextPage: false,
+    hasPrevPage: false,
+  });
   const [selectedPrices, setSelectedPrices] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -127,32 +56,81 @@ export default function PreciosAdminPage() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Filtrar precios
-  const filteredPrices = prices.filter((price) => {
-    const matchesSearch =
-      price.productCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      price.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (price.supplier && price.supplier.toLowerCase().includes(searchQuery.toLowerCase()));
+  // Cargar precios desde el API con paginación en servidor
+  useEffect(() => {
+    const loadPrices = async () => {
+      setIsLoading(true);
+      try {
+        // Construir parámetros de consulta
+        const params = new URLSearchParams({
+          page: currentPage.toString(),
+          limit: itemsPerPage.toString(),
+        });
 
-    const matchesStatus = statusFilter === "all" || price.status === statusFilter;
-    const matchesCurrency = currencyFilter === "all" || price.currency === currencyFilter;
-    const matchesCategory = categoryFilter === "all" || price.category === categoryFilter;
+        // Agregar filtros si están activos
+        if (statusFilter !== "all") {
+          params.append("status", statusFilter.toLowerCase());
+        }
+        if (currencyFilter !== "all") {
+          params.append("currency", currencyFilter);
+        }
+        if (searchQuery) {
+          params.append("search", searchQuery);
+        }
 
-    return matchesSearch && matchesStatus && matchesCurrency && matchesCategory;
-  });
+        const response = await http.get(`/price/?${params.toString()}`);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const result = response.data as any;
+        
+        console.log("📦 Respuesta del API de precios:", result);
+        
+        // Mapear datos del backend al formato del frontend
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pricesData = (result.data || []).map((item: any) => ({
+          id: item.priceId || item.price_id || item.id,
+          productCode: item.productSku || item.product_id || "",
+          productName: item.productName || item.name || "",
+          minQuantity: item.minQuantity || item.min_quantity || 1,
+          price: item.basePrice || item.base_price || item.salePrice || item.sale_price || 0,
+          currency: (item.currency || "USD").toUpperCase(),
+          endDate: item.validFrom || item.valid_from || new Date().toISOString(),
+          includeIVA: item.taxIncluded || item.tax_included || false,
+          status: item.status === "active" ? "ACTIVO" : item.status === "inactive" ? "INACTIVO" : "ACTIVO",
+          createdAt: item.createdAt || new Date().toISOString(),
+          updatedAt: item.updatedAt || new Date().toISOString(),
+          margin: item.margin || item.margin_percentage || 0,
+          costPrice: item.costPrice || item.cost_price || 0,
+          category: item.category || "",
+          supplier: item.supplier || "",
+        }));
+        
+        setPrices(pricesData);
+        
+        // Actualizar información de paginación
+        if (result.pagination) {
+          setPagination({
+            page: result.pagination.page || 1,
+            limit: result.pagination.limit || itemsPerPage,
+            total: result.pagination.total || 0,
+            totalPages: result.pagination.totalPages || 0,
+            hasNextPage: result.pagination.hasNextPage || false,
+            hasPrevPage: result.pagination.hasPrevPage || false,
+          });
+        }
+        
+        console.log("✅ Precios cargados:", pricesData.length);
+      } catch (error) {
+        console.error("❌ Error cargando precios:", error);
+        toast.error("Error al cargar los precios");
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  // Ordenar precios por fecha de actualización (más reciente primero)
-  const sortedPrices = [...filteredPrices].sort((a, b) => {
-    const aValue = new Date(a.updatedAt).getTime();
-    const bValue = new Date(b.updatedAt).getTime();
-    return bValue - aValue;
-  });
-
-  // Paginación
-  const totalPages = Math.ceil(sortedPrices.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentPrices = sortedPrices.slice(startIndex, startIndex + itemsPerPage);
+    loadPrices();
+  }, [currentPage, itemsPerPage, statusFilter, currencyFilter, searchQuery]);
 
   // Handlers
   const handleSelectPrice = (priceId: string) => {
@@ -165,87 +143,66 @@ export default function PreciosAdminPage() {
 
   const handleSelectAll = () => {
     setSelectedPrices(
-      selectedPrices.length === currentPrices.length
+      selectedPrices.length === prices.length
         ? []
-        : currentPrices.map((price) => price.id)
+        : prices.map((price: PriceItem) => price.id)
     );
   };
 
-  // Estadísticas
-  const stats = {
-    total: prices.length,
-    activos: prices.filter((price) => price.status === "ACTIVO").length,
-    inactivos: prices.filter((price) => price.status === "INACTIVO").length,
-    totalValue: prices.reduce((acc, price) => acc + price.price, 0),
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    setSelectedPrices([]); // Limpiar selección al cambiar de página
+  };
+
+  const handlePreviousPage = () => {
+    if (pagination.hasPrevPage) {
+      setCurrentPage((prev) => prev - 1);
+      setSelectedPrices([]);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (pagination.hasNextPage) {
+      setCurrentPage((prev) => prev + 1);
+      setSelectedPrices([]);
+    }
+  };
+
+  const handleItemsPerPageChange = (value: number) => {
+    setItemsPerPage(value);
+    setCurrentPage(1); // Resetear a la primera página
+    setSelectedPrices([]);
   };
 
   return (
     <AdminLayout>
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+          className="backdrop-blur-xl border border-white/20 dark:border-gray-700/30 rounded-3xl p-6 shadow-2xl"
+          style={{
+            background: `linear-gradient(135deg, ${themeColors.surface}95, ${themeColors.surface}90)`,
+          }}
         >
           <div>
             <h1
-              className="text-2xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
+              className="text-3xl font-bold"
               style={{
                 backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
               }}
             >
               Precios
             </h1>
-            <p style={{ color: themeColors.text.secondary }}>
+            <p className="text-gray-600 dark:text-gray-300 mt-1">
               Administra y gestiona los precios de tus productos
             </p>
           </div>
-
-          <div className="flex flex-col sm:flex-row gap-3">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="px-4 py-2 text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-lg"
-              style={{
-                backgroundImage: `linear-gradient(to right, ${themeColors.secondary}, ${themeColors.accent})`,
-              }}
-            >
-              <Upload className="w-4 h-4" />
-              Importar
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="px-4 py-2 border rounded-xl font-medium transition-all duration-200 flex items-center gap-2"
-              style={{
-                backgroundColor: themeColors.surface + "60",
-                borderColor: themeColors.primary + "30",
-                color: themeColors.text.primary,
-              }}
-            >
-              <Download className="w-4 h-4" />
-              Descargar Formato
-            </motion.button>
-
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => router.push("/admin/precios/nuevo")}
-              className="px-4 py-2 text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-lg"
-              style={{
-                backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
-              }}
-            >
-              <Plus className="w-4 h-4" />
-              Agregar Precio
-            </motion.button>
-          </div>
         </motion.div>
-
-        {/* Estadísticas */}
-        <PriceStatistics stats={stats} />
 
         {/* Filtros y búsqueda */}
         <PriceFilters
@@ -258,24 +215,51 @@ export default function PreciosAdminPage() {
           categoryFilter={categoryFilter}
           onCategoryChange={setCategoryFilter}
           itemsPerPage={itemsPerPage}
-          onItemsPerPageChange={setItemsPerPage}
+          onItemsPerPageChange={handleItemsPerPageChange}
+          onImport={() => {
+            // TODO: Implementar importación
+            toast.info("Función de importación en desarrollo");
+          }}
+          onDownloadFormat={() => {
+            // TODO: Implementar descarga de formato
+            toast.info("Función de descarga en desarrollo");
+          }}
+          onAddPrice={() => router.push("/admin/precios/nuevo")}
         />
 
         {/* Tabla de precios */}
-        <PriceTable
-          prices={currentPrices}
-          selectedPrices={selectedPrices}
-          onSelectPrice={handleSelectPrice}
-          onSelectAll={handleSelectAll}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          itemsPerPage={itemsPerPage}
-          onPageChange={setCurrentPage}
-          onPreviousPage={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          onNextPage={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-          startIndex={startIndex}
-          totalItems={sortedPrices.length}
-        />
+        {isLoading ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex items-center justify-center py-12"
+          >
+            <div className="text-center">
+              <div
+                className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4"
+                style={{ borderColor: themeColors.primary }}
+              ></div>
+              <p className="text-gray-600 dark:text-gray-300">
+                Cargando precios...
+              </p>
+            </div>
+          </motion.div>
+        ) : (
+          <PriceTable
+            prices={prices}
+            selectedPrices={selectedPrices}
+            onSelectPrice={handleSelectPrice}
+            onSelectAll={handleSelectAll}
+            currentPage={pagination.page}
+            totalPages={pagination.totalPages}
+            itemsPerPage={pagination.limit}
+            onPageChange={handlePageChange}
+            onPreviousPage={handlePreviousPage}
+            onNextPage={handleNextPage}
+            startIndex={(pagination.page - 1) * pagination.limit}
+            totalItems={pagination.total}
+          />
+        )}
       </div>
     </AdminLayout>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
+import { Search, Upload, Download, Plus } from "lucide-react";
 import { useTheme } from "@/contexts/theme-context";
 import { StyledSelect } from "@/components/ui/styled-select";
 
@@ -16,6 +16,9 @@ interface PriceFiltersProps {
   onCategoryChange: (value: string) => void;
   itemsPerPage: number;
   onItemsPerPageChange: (value: number) => void;
+  onImport?: () => void;
+  onDownloadFormat?: () => void;
+  onAddPrice?: () => void;
 }
 
 export const PriceFilters: React.FC<PriceFiltersProps> = ({
@@ -29,6 +32,9 @@ export const PriceFilters: React.FC<PriceFiltersProps> = ({
   onCategoryChange,
   itemsPerPage,
   onItemsPerPageChange,
+  onImport,
+  onDownloadFormat,
+  onAddPrice,
 }) => {
   const { themeColors } = useTheme();
 
@@ -37,38 +43,34 @@ export const PriceFilters: React.FC<PriceFiltersProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="flex flex-col xl:flex-row gap-4 p-6 backdrop-blur-xl rounded-2xl border shadow-lg"
+      className="backdrop-blur-xl border border-white/20 dark:border-gray-700/30 rounded-2xl p-6 shadow-xl"
       style={{
-        backgroundColor: themeColors.surface + "70",
-        borderColor: themeColors.primary + "30",
+        background: `linear-gradient(135deg, ${themeColors.surface}80, ${themeColors.surface}70)`,
       }}
     >
-      {/* Primera fila - Búsqueda y filtros */}
-      <div className="flex flex-col lg:flex-row gap-4 flex-1">
+      {/* Búsqueda, filtros y botones en una sola fila */}
+      <div className="flex flex-col xl:flex-row gap-4">
         {/* Búsqueda */}
-        <div className="flex-1 lg:flex-[2] relative">
+        <div className="xl:w-64 relative">
           <Search
             className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5"
-            style={{ color: themeColors.text.secondary }}
+            style={{ color: themeColors.primary }}
           />
           <input
             type="text"
             placeholder="Buscar por código, nombre o proveedor..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all placeholder-gray-400 backdrop-blur-sm"
+            className="w-full pl-12 pr-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all placeholder-gray-400 backdrop-blur-sm"
             style={{
-              backgroundColor: themeColors.surface + "60",
-              borderColor: themeColors.primary + "30",
-              color: themeColors.text.primary,
               "--tw-ring-color": `${themeColors.primary}50`,
             } as React.CSSProperties}
           />
         </div>
 
         {/* Filtros */}
-        <div className="flex flex-col sm:flex-row gap-3 lg:flex-[3]">
-          <div className="flex-1 min-w-[200px]">
+        <div className="flex flex-col sm:flex-row gap-3 flex-1">
+          <div className="w-full sm:flex-1 relative z-1">
             <StyledSelect
               value={statusFilter}
               onChange={onStatusChange}
@@ -82,7 +84,7 @@ export const PriceFilters: React.FC<PriceFiltersProps> = ({
             />
           </div>
 
-          <div className="flex-1 min-w-[180px]">
+          <div className="w-full sm:flex-1 relative z-1">
             <StyledSelect
               value={currencyFilter}
               onChange={onCurrencyChange}
@@ -96,7 +98,7 @@ export const PriceFilters: React.FC<PriceFiltersProps> = ({
             />
           </div>
 
-          <div className="flex-1 min-w-[180px]">
+          <div className="w-full sm:flex-1 relative z-10">
             <StyledSelect
               value={categoryFilter}
               onChange={onCategoryChange}
@@ -109,7 +111,7 @@ export const PriceFilters: React.FC<PriceFiltersProps> = ({
             />
           </div>
 
-          <div className="w-full sm:w-32">
+          <div className="w-full sm:w-32 relative z-1">
             <StyledSelect
               value={itemsPerPage.toString()}
               onChange={(value) => onItemsPerPageChange(Number(value))}
@@ -121,6 +123,45 @@ export const PriceFilters: React.FC<PriceFiltersProps> = ({
               ]}
             />
           </div>
+        </div>
+
+        {/* Botones de acción */}
+        <div className="flex flex-col sm:flex-row gap-3 xl:flex-shrink-0">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={onImport}
+            className="px-4 py-2 text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-lg whitespace-nowrap"
+            style={{
+              backgroundImage: `linear-gradient(to right, ${themeColors.secondary}, ${themeColors.accent})`,
+            }}
+          >
+            <Upload className="w-4 h-4" />
+            Importar
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={onDownloadFormat}
+            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200 flex items-center gap-2 whitespace-nowrap"
+          >
+            <Download className="w-4 h-4" />
+            Descargar Formato
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={onAddPrice}
+            className="px-4 py-2 text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-lg whitespace-nowrap"
+            style={{
+              backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
+            }}
+          >
+            <Plus className="w-4 h-4" />
+            Agregar Precio
+          </motion.button>
         </div>
       </div>
     </motion.div>

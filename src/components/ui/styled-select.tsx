@@ -83,7 +83,7 @@ export function StyledSelect({
         </label>
       )}
 
-      <div className="relative z-[10000]" ref={selectRef}>
+      <div className="relative" ref={selectRef}>
         {/* Trigger Button */}
         <motion.button
           type="button"
@@ -94,7 +94,7 @@ export function StyledSelect({
           className={`
             w-full h-full px-4 py-0 bg-white/80 dark:bg-slate-700/80 border-2 border-white/40 dark:border-slate-600/40 
             rounded-2xl text-left transition-all duration-300 backdrop-blur-lg shadow-lg shadow-purple-500/5
-            flex items-center justify-between min-h-[3.5rem] relative z-[10001]
+            flex items-center justify-between min-h-[3.5rem] relative
             ${
               disabled
                 ? "cursor-not-allowed opacity-60 bg-gray-200/60 dark:bg-gray-600/60"
