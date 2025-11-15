@@ -28,6 +28,8 @@ import {
 import { useTheme } from "@/contexts/theme-context";
 import { AdminLayout } from "@/components/admin/admin-layout";
 import { ThemedSelect } from "@/components/ui/themed-select";
+import http from "@/api/http-client";
+import { toast } from "sonner";
 
 // Schema de validación
 const discountSchema = z.object({
@@ -109,79 +111,83 @@ export default function EditDiscountPage() {
   useEffect(() => {
     const loadDiscount = async () => {
       setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Datos de ejemplo
-      const mockDiscount: DiscountItem = {
-        id: discountId,
-        nombre: "Descuento Black Friday",
-        descripcion: "Descuento especial para la campaña de Black Friday. Válido para productos seleccionados con condiciones específicas.",
-        validoHasta: "2024-11-30",
-        acumulativo: true,
-        activo: true,
-        tipo: "PORCENTAJE",
-        valor: 25,
-        codigoDescuento: "BLACKFRIDAY25",
-        usoMaximo: 1000,
-        usoActual: 347,
-        fechaCreacion: "2024-11-01",
-        fechaModificacion: "2024-11-15",
-        condiciones: [
-          {
-            id: "1",
-            tipoCondicion: "MONTO_MINIMO",
-            valorCondicion: 50000,
-            descripcion: "Compra mínima de $50.000"
-          },
-          {
-            id: "2",
-            tipoCondicion: "CATEGORIA",
-            valorCondicion: "electronics",
-            descripcion: "Solo productos de electrónicos"
-          },
-          {
-            id: "3",
-            tipoCondicion: "CLIENTE_VIP",
-            valorCondicion: "premium",
-            descripcion: "Solo clientes Premium"
-          }
-        ],
-        relaciones: [
-          {
-            id: "1",
-            descuentoRelacionadoId: "desc-2",
-            tipoRelacion: "CASCADA"
-          },
-          {
-            id: "2",
-            descuentoRelacionadoId: "desc-3",
-            tipoRelacion: "CONFLICTO"
-          }
-        ]
-      };
-      
-      setDiscount(mockDiscount);
-      setConditions(mockDiscount.condiciones);
-      setRelations(mockDiscount.relaciones);
-      
-      // Llenar el formulario con los datos existentes
-      reset({
-        nombre: mockDiscount.nombre,
-        descripcion: mockDiscount.descripcion,
-        tipo: mockDiscount.tipo,
-        valor: mockDiscount.valor,
-        validoHasta: mockDiscount.validoHasta,
-        codigoDescuento: mockDiscount.codigoDescuento,
-        usoMaximo: mockDiscount.usoMaximo,
-        acumulativo: mockDiscount.acumulativo,
-        activo: mockDiscount.activo,
-        modoAplicacion: "ACUMULABLE",
-        tipoDescuento: "PORCENTAJE",
-        prioridad: 1,
-        moneda: "UYU",
-      });
-      
-      setLoading(false);
+      try {
+        console.log('📝 Cargando descuento ID:', discountId);
+        
+        const response = await http.get(`/discount/${discountId}`);
+        const data = response.data as {
+          name?: string;
+          description?: string;
+          discount_type?: string;
+          discount_value?: number;
+          discount_id?: string;
+          currency?: string;
+          valid_to?: string;
+          is_active?: boolean;
+          is_cumulative?: boolean;
+          priority?: number;
+          usage_limit?: number;
+          createdAt?: string;
+          updatedAt?: string;
+        };
+
+        console.log('✅ Descuento cargado:', data);
+        
+        // Mapear datos del backend a formato del formulario
+        let tipoFrontend: 'PORCENTAJE' | 'MONTO_FIJO' | 'COMPRA_LLEVA' = 'PORCENTAJE';
+        if (data.discount_type === 'percentage') {
+          tipoFrontend = 'PORCENTAJE';
+        } else if (data.discount_type === 'fixed') {
+          tipoFrontend = 'MONTO_FIJO';
+        } else if (data.discount_type === 'bogo') {
+          tipoFrontend = 'COMPRA_LLEVA';
+        }
+
+        const mockDiscount: DiscountItem = {
+          id: discountId,
+          nombre: data.name || '',
+          descripcion: data.description || '',
+          validoHasta: data.valid_to ? new Date(data.valid_to).toISOString().split('T')[0] : '',
+          acumulativo: data.is_cumulative || false,
+          activo: data.is_active || false,
+          tipo: tipoFrontend,
+          valor: data.discount_value || 0,
+          codigoDescuento: data.discount_id || '',
+          usoMaximo: data.usage_limit,
+          usoActual: 0,
+          fechaCreacion: data.createdAt || new Date().toISOString(),
+          fechaModificacion: data.updatedAt || new Date().toISOString(),
+          condiciones: [],
+          relaciones: []
+        };
+        
+        setDiscount(mockDiscount);
+        setConditions([]);
+        setRelations([]);
+        
+        // Llenar el formulario con los datos existentes
+        reset({
+          nombre: mockDiscount.nombre,
+          descripcion: mockDiscount.descripcion,
+          tipo: mockDiscount.tipo,
+          valor: mockDiscount.valor,
+          validoHasta: mockDiscount.validoHasta,
+          codigoDescuento: mockDiscount.codigoDescuento,
+          usoMaximo: mockDiscount.usoMaximo,
+          acumulativo: mockDiscount.acumulativo,
+          activo: mockDiscount.activo,
+          modoAplicacion: "ACUMULABLE",
+          tipoDescuento: "PORCENTAJE",
+          prioridad: data.priority || 1,
+          moneda: (data.currency as "UYU" | "USD" | "EUR" | "BRL") || "UYU",
+        });
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('❌ Error al cargar descuento:', error);
+        toast.error('Error al cargar el descuento');
+        setLoading(false);
+      }
     };
 
     loadDiscount();
@@ -190,16 +196,49 @@ export default function EditDiscountPage() {
   const onSubmit = async (data: DiscountFormData) => {
     setSaving(true);
     try {
-      // Simular guardado
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      console.log("Datos actualizados del descuento:", data);
-      console.log("Condiciones actualizadas:", conditions);
-      console.log("Relaciones actualizadas:", relations);
-      
+      console.log('📝 Preparando actualización del descuento...');
+
+      // Mapear tipo de descuento
+      let discountType: 'percentage' | 'fixed' | 'bogo' = 'percentage';
+      if (data.tipo === 'PORCENTAJE') {
+        discountType = 'percentage';
+      } else if (data.tipo === 'MONTO_FIJO') {
+        discountType = 'fixed';
+      } else if (data.tipo === 'COMPRA_LLEVA') {
+        discountType = 'bogo';
+      }
+
+      const payload = {
+        name: data.nombre,
+        discount_id: data.codigoDescuento || `DISC-${Date.now()}`,
+        discount_type: discountType,
+        discount_value: data.valor,
+        currency: data.moneda,
+        valid_from: new Date().toISOString(),
+        valid_to: new Date(data.validoHasta).toISOString(),
+        is_active: data.activo,
+        status: data.activo ? "active" : "inactive",
+        is_cumulative: data.acumulativo,
+        priority: data.prioridad,
+        usage_limit: data.usoMaximo,
+        description: data.descripcion,
+        customFields: {
+          modo_aplicacion: data.modoAplicacion,
+          tipo_descuento_frontend: data.tipoDescuento,
+        }
+      };
+
+      console.log('📦 Payload a enviar:', JSON.stringify(payload, null, 2));
+
+      const response = await http.put(`/discount/${discountId}`, payload);
+
+      console.log('✅ Respuesta de la API:', response);
+
+      toast.success('Descuento actualizado exitosamente');
       router.push(`/admin/descuentos/${discountId}`);
     } catch (error) {
-      console.error("Error al actualizar descuento:", error);
+      console.error('❌ Error al actualizar descuento:', error);
+      toast.error('Error al actualizar el descuento');
     } finally {
       setSaving(false);
     }

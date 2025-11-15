@@ -1,0 +1,282 @@
+{
+  "success": true,
+  "summary": {
+    "total": 3,
+    "successful": 3,
+    "failed": 0
+  },
+  "results": [
+    {
+      "imageUrl": "https://res.cloudinary.com/dyy8hc876/image/upload/v1699123456/products/smartphone-samsung.jpg",
+      "matchScore": 92,
+      "matchedProduct": {
+        "id": "prod-001",
+        "nombre": "Samsung Galaxy S23 Ultra 256GB Negro",
+        "codigo": "SAM-S23U-256-BLK",
+        "precio": 1199.99,
+        "categoria": "Electrónica > Smartphones",
+        "imagen": "https://example.com/products/samsung-s23-ultra.jpg",
+        "stock": 15,
+        "marca": "Samsung"
+      },
+      "visionData": {
+        "description": "Smartphone de alta gama con pantalla AMOLED de 6.8 pulgadas, sistema de cámaras cuádruple con sensor principal de 200MP, acabado en color negro mate con marco de aluminio",
+        "detectedFeatures": [
+          "Pantalla grande AMOLED",
+          "Cámara cuádruple trasera",
+          "Color negro",
+          "Acabado premium",
+          "S Pen integrado",
+          "Puerto USB-C",
+          "Botones laterales metálicos"
+        ],
+        "suggestedCategory": "Electrónica > Smartphones > Gama Alta",
+        "detectedBrand": "Samsung",
+        "detectedModel": "Galaxy S23 Ultra",
+        "detectedColor": "Negro",
+        "confidence": 0.92,
+        "additionalInfo": {
+          "estimatedSize": "Grande (6.5+ pulgadas)",
+          "estimatedPrice": "$1000-$1500",
+          "targetAudience": "Profesional/Entusiasta"
+        }
+      },
+      "allMatches": [
+        {
+          "product": {
+            "id": "prod-001",
+            "nombre": "Samsung Galaxy S23 Ultra 256GB Negro",
+            "codigo": "SAM-S23U-256-BLK",
+            "precio": 1199.99,
+            "categoria": "Electrónica > Smartphones",
+            "imagen": "https://example.com/products/samsung-s23-ultra.jpg",
+            "marca": "Samsung"
+          },
+          "score": 92,
+          "matchReasons": [
+            "Marca exacta",
+            "Modelo exacto",
+            "Color exacto",
+            "Características coincidentes"
+          ]
+        },
+        {
+          "product": {
+            "id": "prod-002",
+            "nombre": "Samsung Galaxy S23 Ultra 512GB Negro",
+            "codigo": "SAM-S23U-512-BLK",
+            "precio": 1399.99,
+            "categoria": "Electrónica > Smartphones",
+            "imagen": "https://example.com/products/samsung-s23-ultra-512.jpg",
+            "marca": "Samsung"
+          },
+          "score": 88,
+          "matchReasons": [
+            "Marca exacta",
+            "Modelo exacto",
+            "Color exacto",
+            "Diferencia en capacidad"
+          ]
+        },
+        {
+          "product": {
+            "id": "prod-003",
+            "nombre": "Samsung Galaxy S22 Ultra 256GB Negro",
+            "codigo": "SAM-S22U-256-BLK",
+            "precio": 999.99,
+            "categoria": "Electrónica > Smartphones",
+            "imagen": "https://example.com/products/samsung-s22-ultra.jpg",
+            "marca": "Samsung"
+          },
+          "score": 75,
+          "matchReasons": [
+            "Marca exacta",
+            "Modelo similar (generación anterior)",
+            "Color exacto"
+          ]
+        }
+      ],
+      "processingTime": 1250
+    },
+    {
+      "imageUrl": "https://res.cloudinary.com/dyy8hc876/image/upload/v1699123457/products/laptop-dell.jpg",
+      "matchScore": 78,
+      "matchedProduct": {
+        "id": "prod-101",
+        "nombre": "Dell XPS 13 i7 16GB 512GB SSD",
+        "codigo": "DELL-XPS13-i7-16-512",
+        "precio": 1499.99,
+        "categoria": "Computación > Laptops",
+        "imagen": "https://example.com/products/dell-xps-13.jpg",
+        "stock": 8,
+        "marca": "Dell"
+      },
+      "visionData": {
+        "description": "Laptop ultradelgada de 13 pulgadas con pantalla InfinityEdge, acabado plateado con teclado retroiluminado, diseño premium de aluminio",
+        "detectedFeatures": [
+          "Pantalla 13 pulgadas",
+          "Teclado retroiluminado",
+          "Acabado aluminio plateado",
+          "Puertos USB-C",
+          "Diseño ultradelgado",
+          "Webcam superior"
+        ],
+        "suggestedCategory": "Computación > Laptops > Ultrabooks",
+        "detectedBrand": "Dell",
+        "detectedModel": "XPS 13",
+        "detectedColor": "Plateado",
+        "confidence": 0.78,
+        "additionalInfo": {
+          "estimatedSize": "13 pulgadas",
+          "estimatedPrice": "$1200-$1800",
+          "targetAudience": "Profesional/Estudiante"
+        }
+      },
+      "allMatches": [
+        {
+          "product": {
+            "id": "prod-101",
+            "nombre": "Dell XPS 13 i7 16GB 512GB SSD",
+            "codigo": "DELL-XPS13-i7-16-512",
+            "precio": 1499.99,
+            "categoria": "Computación > Laptops",
+            "marca": "Dell"
+          },
+          "score": 78,
+          "matchReasons": [
+            "Marca exacta",
+            "Modelo exacto",
+            "Tamaño coincidente"
+          ]
+        },
+        {
+          "product": {
+            "id": "prod-102",
+            "nombre": "Dell XPS 15 i7 32GB 1TB SSD",
+            "codigo": "DELL-XPS15-i7-32-1TB",
+            "precio": 2199.99,
+            "categoria": "Computación > Laptops",
+            "marca": "Dell"
+          },
+          "score": 65,
+          "matchReasons": [
+            "Marca exacta",
+            "Línea similar (XPS)",
+            "Diferencia en tamaño"
+          ]
+        }
+      ],
+      "processingTime": 1180
+    },
+    {
+      "imageUrl": "https://res.cloudinary.com/dyy8hc876/image/upload/v1699123458/products/headphones-sony.jpg",
+      "matchScore": 85,
+      "matchedProduct": {
+        "id": "prod-201",
+        "nombre": "Sony WH-1000XM5 Auriculares Bluetooth Negro",
+        "codigo": "SONY-WH1000XM5-BLK",
+        "precio": 399.99,
+        "categoria": "Audio > Auriculares",
+        "imagen": "https://example.com/products/sony-wh1000xm5.jpg",
+        "stock": 22,
+        "marca": "Sony"
+      },
+      "visionData": {
+        "description": "Auriculares over-ear con cancelación de ruido activa, acabado negro mate, acolchado suave en auriculares y diadema, controles táctiles en auricular derecho",
+        "detectedFeatures": [
+          "Auriculares over-ear",
+          "Color negro",
+          "Acolchado grueso",
+          "Controles táctiles",
+          "Cable USB-C",
+          "Estuche rígido incluido"
+        ],
+        "suggestedCategory": "Audio > Auriculares > Premium/Cancelación de Ruido",
+        "detectedBrand": "Sony",
+        "detectedModel": "WH-1000XM5",
+        "detectedColor": "Negro",
+        "confidence": 0.85,
+        "additionalInfo": {
+          "estimatedPrice": "$300-$450",
+          "features": ["Cancelación de ruido", "Bluetooth", "Premium"],
+          "targetAudience": "Audiófilos/Viajeros frecuentes"
+        }
+      },
+      "allMatches": [
+        {
+          "product": {
+            "id": "prod-201",
+            "nombre": "Sony WH-1000XM5 Auriculares Bluetooth Negro",
+            "codigo": "SONY-WH1000XM5-BLK",
+            "precio": 399.99,
+            "categoria": "Audio > Auriculares",
+            "marca": "Sony"
+          },
+          "score": 85,
+          "matchReasons": [
+            "Marca exacta",
+            "Modelo exacto",
+            "Color exacto",
+            "Características premium"
+          ]
+        },
+        {
+          "product": {
+            "id": "prod-202",
+            "nombre": "Sony WH-1000XM5 Auriculares Bluetooth Plateado",
+            "codigo": "SONY-WH1000XM5-SLV",
+            "precio": 399.99,
+            "categoria": "Audio > Auriculares",
+            "marca": "Sony"
+          },
+          "score": 82,
+          "matchReasons": [
+            "Marca exacta",
+            "Modelo exacto",
+            "Diferencia solo en color"
+          ]
+        },
+        {
+          "product": {
+            "id": "prod-203",
+            "nombre": "Sony WH-1000XM4 Auriculares Bluetooth Negro",
+            "codigo": "SONY-WH1000XM4-BLK",
+            "precio": 299.99,
+            "categoria": "Audio > Auriculares",
+            "marca": "Sony"
+          },
+          "score": 72,
+          "matchReasons": [
+            "Marca exacta",
+            "Modelo similar (generación anterior)",
+            "Color exacto"
+          ]
+        },
+        {
+          "product": {
+            "id": "prod-204",
+            "nombre": "Bose QuietComfort 45 Auriculares Negro",
+            "codigo": "BOSE-QC45-BLK",
+            "precio": 329.99,
+            "categoria": "Audio > Auriculares",
+            "marca": "Bose"
+          },
+          "score": 58,
+          "matchReasons": [
+            "Categoría similar",
+            "Color exacto",
+            "Características premium similares"
+          ]
+        }
+      ],
+      "processingTime": 1320
+    }
+  ],
+  "errors": [],
+  "metadata": {
+    "apiVersion": "1.0.0",
+    "totalProcessingTime": 3750,
+    "model": "gpt-4o",
+    "timestamp": "2025-11-08T10:30:45Z"
+  }
+}

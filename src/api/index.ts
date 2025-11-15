@@ -151,6 +151,84 @@ export interface Product {
   specifications?: Record<string, unknown>;
 }
 
+// Tipos para la respuesta real del backend
+export interface ProductPricing {
+  base_price: number;
+  final_price: number;
+  total_savings: number;
+  percentage_saved: number;
+  has_discount: boolean;
+  stacking_info: {
+    method: string;
+    discounts_applied_count: number;
+    is_stacked: boolean;
+    applied_discounts: Array<{
+      discount_id: string;
+      name: string;
+      type: string;
+      value: number;
+      applied_value: number;
+    }>;
+  };
+}
+
+export interface ProductDiscount {
+  id: string;
+  name: string;
+  type: string; // 'percentage', 'fixed', 'bogo', 'bundle', etc.
+  value: number;
+  description?: string;
+  min_quantity?: number;
+  min_purchase_amount?: number;
+  potential_savings?: number;
+  potential_final_price?: number;
+}
+
+export interface ProductDiscounts {
+  total_applicable: number;
+  direct_discounts: ProductDiscount[];
+  promotional_discounts: ProductDiscount[];
+  min_purchase_discounts: ProductDiscount[];
+  tiered_volume_discounts: ProductDiscount[];
+  loyalty_discounts: ProductDiscount[];
+  shipping_discounts: ProductDiscount[];
+}
+
+export interface ProductWithDiscounts {
+  id: string;
+  prodVirtaId: string;
+  productId: string;
+  sku: string;
+  name: string;
+  productSlug: string;
+  title: string;
+  shortDescription: string;
+  fullDescription: string;
+  categoryCode: string;
+  brandId: string;
+  stockQuantity: number;
+  status: string;
+  published: boolean;
+  distributorCode: string;
+  productImages: string[];
+  createdAt: string;
+  updatedAt: string;
+  pricing: ProductPricing;
+  discounts: ProductDiscounts;
+}
+
+export interface ProductsWithDiscountsResponse {
+  products: ProductWithDiscounts[];
+  total: number;
+  pages: number;
+  currentPage: number;
+}
+
+// Respuesta anidada que viene del backend
+export interface NestedProductsResponse {
+  data: ProductWithDiscounts[];
+}
+
 export interface Category {
   id: string;
   name: string;
@@ -886,6 +964,40 @@ export const productApi = {
   // Obtener productos destacados
   getFeaturedProducts: async (): Promise<ApiResponse<Product[]>> => 
     http.get("/products/featured"),
+
+  // 🆕 Obtener productos ecommerce con descuentos aplicados
+  getProductsWithDiscounts: async (params?: {
+    page?: number;
+    limit?: number;
+    category?: string;
+    brand?: string;
+    search?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    inStock?: boolean;
+  }): Promise<ApiResponse<ProductWithDiscounts[] | ProductsWithDiscountsResponse | NestedProductsResponse>> => {
+    const queryString = params 
+      ? "?" + new URLSearchParams(
+          Object.entries(params).reduce((acc, [key, value]) => {
+            if (value !== undefined && value !== null) {
+              acc[key] = String(value);
+            }
+            return acc;
+          }, {} as Record<string, string>)
+        ).toString()
+      : "";
+    
+    console.log('[API] 🛍️ Obteniendo productos con descuentos:', `/products/ecommerce/with-discounts${queryString}`);
+    
+    try {
+      const response = await http.get(`/products/ecommerce/with-discounts${queryString}`) as ApiResponse<ProductWithDiscounts[] | ProductsWithDiscountsResponse | NestedProductsResponse>;
+      console.log('[API] ✅ Productos con descuentos obtenidos:', response);
+      return response;
+    } catch (error) {
+      console.error('[API] ❌ Error obteniendo productos con descuentos:', error);
+      throw error;
+    }
+  },
 
   // Obtener categorías
   getCategories: async (): Promise<ApiResponse<Category[]>> => 

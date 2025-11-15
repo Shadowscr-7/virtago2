@@ -1,14 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { Download, Upload, Plus } from "lucide-react";
+import { Download, Upload, Plus, Loader2 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/admin-layout";
 import { useTheme } from "@/contexts/theme-context";
 import { DiscountStatistics, DiscountFilters, DiscountTable } from "@/components/admin/descuentos";
+import { toast } from "sonner";
+import http from "@/api/http-client";
 
-// Tipos para descuentos
+// Tipos para descuentos del backend
+interface BackendDiscount {
+  id: string;
+  discount_id: string;
+  name: string;
+  description: string;
+  type: string;
+  discount_value: number;
+  currency: string;
+  valid_from: string;
+  valid_to: string;
+  status: string;
+  priority: number;
+  is_cumulative: boolean;
+  customer_type: string;
+  channel: string;
+  region: string;
+  category: string;
+  tags: string[];
+  notes?: string;
+  created_by: string;
+  conditions: Record<string, unknown>;
+  applicable_to: Array<{
+    type: string;
+    value: string;
+  }>;
+  customFields: Record<string, unknown>;
+  start_date: string;
+  end_date: string;
+  discount_type: string;
+  is_active: boolean;
+  distributorCode: string;
+  discountId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Tipos para descuentos en el frontend
 interface DiscountItem {
   id: string;
   nombre: string;
@@ -29,125 +68,114 @@ interface DiscountItem {
 
 interface DiscountCondition {
   id: string;
-  tipoCondicion: 'CATEGORIA' | 'PRODUCTO' | 'MONTO_MINIMO' | 'CANTIDAD_MINIMA' | 'CLIENTE_VIP';
+  tipoCondicion: 
+    | 'CATEGORIA' 
+    | 'PRODUCTO' 
+    | 'MARCA'
+    | 'MONTO_MINIMO' 
+    | 'CANTIDAD_MINIMA'
+    | 'CANTIDAD_MAXIMA'
+    | 'CLIENTE_VIP'
+    | 'CLIENTE_NUEVO'
+    | 'CLIENTE_MAYORISTA'
+    | 'METODO_PAGO'
+    | 'REGION'
+    | 'CANAL_VENTA'
+    | 'DIA_SEMANA'
+    | 'RANGO_HORARIO'
+    | 'EXCLUIR_OFERTAS'
+    | 'PRIMER_PEDIDO';
   valorCondicion: string | number;
 }
 
 interface DiscountRelation {
   id: string;
   descuentoRelacionadoId: string;
-  tipoRelacion: 'CASCADA' | 'SOBRESCRIBIR' | 'REQUERIDO' | 'CONFLICTO';
+  tipoRelacion: 'CASCADA' | 'SOBRESCRIBIR' | 'REQUERIDO' | 'CONFLICTO' | 'COMBINABLE';
 }
 
-// Datos de ejemplo
-const mockDiscounts: DiscountItem[] = [
-  {
-    id: "DESC001",
-    nombre: "Descuento Black Friday",
-    descripcion: "Descuento especial para Black Friday en categoría electrónicos",
-    validoHasta: "2025-11-30",
-    acumulativo: false,
-    activo: true,
-    tipo: "PORCENTAJE",
-    valor: 25,
-    codigoDescuento: "BLACKFRIDAY25",
-    usoMaximo: 1000,
-    usoActual: 287,
-    fechaCreacion: "2024-10-01",
-    fechaModificacion: "2024-11-15",
-    condiciones: [
-      { id: "C1", tipoCondicion: "CATEGORIA", valorCondicion: "Electrónicos" },
-      { id: "C2", tipoCondicion: "MONTO_MINIMO", valorCondicion: 500 }
-    ],
-    relaciones: []
-  },
-  {
-    id: "DESC002", 
-    nombre: "Descuento Cliente VIP",
-    descripcion: "Descuento permanente para clientes VIP",
-    validoHasta: "2025-12-31",
-    acumulativo: true,
-    activo: true,
-    tipo: "PORCENTAJE",
-    valor: 15,
-    usoMaximo: undefined,
-    usoActual: 1524,
-    fechaCreacion: "2024-01-01",
-    fechaModificacion: "2024-09-10",
-    condiciones: [
-      { id: "C3", tipoCondicion: "CLIENTE_VIP", valorCondicion: "VIP" }
-    ],
-    relaciones: [
-      { id: "R1", descuentoRelacionadoId: "DESC001", tipoRelacion: "CASCADA" }
-    ]
-  },
-  {
-    id: "DESC003",
-    nombre: "3x2 en Accesorios",
-    descripcion: "Promoción 3x2 en toda la categoría de accesorios",
-    validoHasta: "2025-10-15",
-    acumulativo: false,
-    activo: true,
-    tipo: "COMPRA_LLEVA",
-    valor: 3,
-    codigoDescuento: "3X2ACC",
-    usoMaximo: 500,
-    usoActual: 156,
-    fechaCreacion: "2024-09-01",
-    fechaModificacion: "2024-09-20",
-    condiciones: [
-      { id: "C4", tipoCondicion: "CATEGORIA", valorCondicion: "Accesorios" },
-      { id: "C5", tipoCondicion: "CANTIDAD_MINIMA", valorCondicion: 3 }
-    ],
-    relaciones: []
-  },
-  {
-    id: "DESC004",
-    nombre: "Descuento Nuevo Cliente",
-    descripcion: "Descuento de bienvenida para nuevos clientes",
-    validoHasta: "2025-12-31",
-    acumulativo: false,
-    activo: false,
-    tipo: "MONTO_FIJO",
-    valor: 50,
-    codigoDescuento: "BIENVENIDO50",
-    usoMaximo: 10000,
-    usoActual: 3245,
-    fechaCreacion: "2024-06-01",
-    fechaModificacion: "2024-11-01",
-    condiciones: [
-      { id: "C6", tipoCondicion: "MONTO_MINIMO", valorCondicion: 200 }
-    ],
-    relaciones: []
-  },
-  {
-    id: "DESC005",
-    nombre: "Descuento Informática",
-    descripcion: "Descuento especial en productos de informática",
-    validoHasta: "2025-09-30",
-    acumulativo: true,
-    activo: true,
-    tipo: "PORCENTAJE",
-    valor: 20,
-    codigoDescuento: "INFO20",
-    usoMaximo: 750,
-    usoActual: 89,
-    fechaCreacion: "2024-08-15",
-    fechaModificacion: "2024-09-05",
-    condiciones: [
-      { id: "C7", tipoCondicion: "CATEGORIA", valorCondicion: "Informática" },
-      { id: "C8", tipoCondicion: "MONTO_MINIMO", valorCondicion: 300 }
-    ],
-    relaciones: [
-      { id: "R2", descuentoRelacionadoId: "DESC002", tipoRelacion: "REQUERIDO" }
-    ]
+// Función para mapear descuentos del backend al formato del frontend
+function mapBackendDiscountToFrontend(backend: BackendDiscount): DiscountItem {
+  // Mapear tipo de descuento
+  let tipo: 'PORCENTAJE' | 'MONTO_FIJO' | 'COMPRA_LLEVA' = 'PORCENTAJE';
+  if (backend.discount_type === 'percentage') {
+    tipo = 'PORCENTAJE';
+  } else if (backend.discount_type === 'fixed') {
+    tipo = 'MONTO_FIJO';
+  } else if (backend.discount_type === 'bogo') {
+    tipo = 'COMPRA_LLEVA';
   }
-];
+
+  // Mapear condiciones
+  const condiciones: DiscountCondition[] = [];
+  
+  // Agregar condición de monto mínimo si existe
+  if (backend.conditions?.min_purchase_amount) {
+    condiciones.push({
+      id: `cond_min_${backend.id}`,
+      tipoCondicion: 'MONTO_MINIMO',
+      valorCondicion: backend.conditions.min_purchase_amount as number,
+    });
+  }
+
+  // Agregar condición de cantidad mínima si existe
+  if (backend.conditions?.min_items) {
+    condiciones.push({
+      id: `cond_qty_${backend.id}`,
+      tipoCondicion: 'CANTIDAD_MINIMA',
+      valorCondicion: backend.conditions.min_items as number,
+    });
+  }
+
+  // Mapear applicable_to a condiciones
+  backend.applicable_to?.forEach((app, index) => {
+    if (app.type === 'category') {
+      condiciones.push({
+        id: `cond_cat_${backend.id}_${index}`,
+        tipoCondicion: 'CATEGORIA',
+        valorCondicion: app.value,
+      });
+    } else if (app.type === 'product') {
+      condiciones.push({
+        id: `cond_prod_${backend.id}_${index}`,
+        tipoCondicion: 'PRODUCTO',
+        valorCondicion: app.value,
+      });
+    }
+  });
+
+  // Verificar si es VIP
+  if (backend.customer_type === 'vip') {
+    condiciones.push({
+      id: `cond_vip_${backend.id}`,
+      tipoCondicion: 'CLIENTE_VIP',
+      valorCondicion: 'VIP',
+    });
+  }
+
+  return {
+    id: backend.id,
+    nombre: backend.name,
+    descripcion: backend.description,
+    validoHasta: backend.valid_to,
+    acumulativo: backend.is_cumulative,
+    activo: backend.status === 'active',
+    tipo,
+    valor: backend.discount_value,
+    codigoDescuento: backend.discount_id,
+    usoMaximo: undefined, // No viene en el backend actual
+    usoActual: 0, // No viene en el backend actual
+    fechaCreacion: backend.createdAt,
+    fechaModificacion: backend.updatedAt,
+    condiciones,
+    relaciones: [], // Por ahora vacío, agregar si el backend lo soporta
+  };
+}
 
 export default function DescuentosAdminPage() {
   const router = useRouter();
   const { themeColors } = useTheme();
-  const [discounts] = useState<DiscountItem[]>(mockDiscounts);
+  const [discounts, setDiscounts] = useState<DiscountItem[]>([]);
   const [selectedDiscounts, setSelectedDiscounts] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -155,40 +183,90 @@ export default function DescuentosAdminPage() {
   const [accumulativeFilter, setAccumulativeFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [isLoading, setIsLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalDiscounts, setTotalDiscounts] = useState(0);
 
-  // Filtrar descuentos
-  const filteredDiscounts = discounts.filter((discount) => {
-    const matchesSearch =
-      discount.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      discount.descripcion.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (discount.codigoDescuento && discount.codigoDescuento.toLowerCase().includes(searchQuery.toLowerCase()));
+  // Cargar descuentos desde la API
+  const loadDiscounts = async (page = 1) => {
+    setIsLoading(true);
+    try {
+      // Construir parámetros
+      const params: Record<string, string> = {
+        page: page.toString(),
+        limit: itemsPerPage.toString(),
+      };
 
-    const matchesStatus = 
-      statusFilter === "all" || 
-      (statusFilter === "activo" && discount.activo) ||
-      (statusFilter === "inactivo" && !discount.activo) ||
-      (statusFilter === "vencido" && new Date(discount.validoHasta) < new Date());
+      // Agregar filtros si están activos
+      if (searchQuery) {
+        params.search = searchQuery;
+      }
 
-    const matchesType = typeFilter === "all" || discount.tipo === typeFilter;
-    const matchesAccumulative = 
-      accumulativeFilter === "all" ||
-      (accumulativeFilter === "si" && discount.acumulativo) ||
-      (accumulativeFilter === "no" && !discount.acumulativo);
+      if (statusFilter !== 'all') {
+        params.status = statusFilter;
+      }
 
-    return matchesSearch && matchesStatus && matchesType && matchesAccumulative;
-  });
+      if (typeFilter !== 'all') {
+        params.discount_type = typeFilter;
+      }
 
-  // Ordenar descuentos por fecha de modificación (más reciente primero)
-  const sortedDiscounts = [...filteredDiscounts].sort((a, b) => {
-    const aValue = new Date(a.fechaModificacion).getTime();
-    const bValue = new Date(b.fechaModificacion).getTime();
-    return bValue - aValue;
-  });
+      console.log('🔍 Cargando descuentos con params:', params);
 
-  // Paginación
-  const totalPages = Math.ceil(sortedDiscounts.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentDiscounts = sortedDiscounts.slice(startIndex, startIndex + itemsPerPage);
+      // Llamar a la API usando httpClient
+      const response = await http.get<{
+        success: boolean;
+        message: string;
+        data?: BackendDiscount[];
+        pagination?: {
+          page: number;
+          limit: number;
+          total: number;
+          totalPages: number;
+          hasNextPage: boolean;
+          hasPrevPage: boolean;
+        };
+      }>('/discounts', { params });
+
+      console.log('📦 Respuesta de la API:', response);
+
+      // Mapear los datos del backend al formato del frontend
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const backendDiscounts: BackendDiscount[] = (response.data as any)?.data || [];
+      const mappedDiscounts: DiscountItem[] = backendDiscounts.map(mapBackendDiscountToFrontend);
+      
+      setDiscounts(mappedDiscounts);
+      
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const pagination = (response.data as any)?.pagination;
+      setTotalDiscounts(pagination?.total || mappedDiscounts.length);
+      setTotalPages(pagination?.totalPages || 1);
+      setCurrentPage(page);
+      
+      console.log(`✅ ${mappedDiscounts.length} descuentos cargados y mapeados`);
+    } catch (error) {
+      console.error('❌ Error al cargar descuentos:', error);
+      toast.error('Error al cargar descuentos');
+      setDiscounts([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Cargar descuentos al montar el componente
+  useEffect(() => {
+    loadDiscounts(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Recargar cuando cambian los filtros
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      loadDiscounts(1);
+    }, 500); // Debounce de 500ms para búsqueda
+
+    return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusFilter, typeFilter, searchQuery, itemsPerPage]);
 
   // Handlers
   const handleSelectDiscount = (discountId: string) => {
@@ -201,15 +279,20 @@ export default function DescuentosAdminPage() {
 
   const handleSelectAll = () => {
     setSelectedDiscounts(
-      selectedDiscounts.length === currentDiscounts.length
+      selectedDiscounts.length === discounts.length
         ? []
-        : currentDiscounts.map((discount) => discount.id)
+        : discounts.map((discount) => discount.id)
     );
+  };
+
+  const handlePageChange = (page: number) => {
+    loadDiscounts(page);
+    setSelectedDiscounts([]); // Limpiar selección al cambiar página
   };
 
   // Estadísticas
   const stats = {
-    total: discounts.length,
+    total: totalDiscounts || discounts.length,
     activos: discounts.filter((discount) => discount.activo).length,
     inactivos: discounts.filter((discount) => !discount.activo).length,
     vencidos: discounts.filter((discount) => new Date(discount.validoHasta) < new Date()).length,
@@ -232,7 +315,7 @@ export default function DescuentosAdminPage() {
                 backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
               }}
             >
-              Listas De Descuentos
+              Descuentos
             </h1>
             <p style={{ color: themeColors.text.secondary }}>
               Administra y gestiona los descuentos y promociones
@@ -269,14 +352,32 @@ export default function DescuentosAdminPage() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={() => router.push("/admin/descuentos/nuevo")}
-              className="px-4 py-2 text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-lg"
+              onClick={() => router.push("/admin/descuentos/nuevo-template")}
+              className="px-4 py-2 text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-lg relative group"
               style={{
-                backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
+                backgroundImage: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
               }}
             >
               <Plus className="w-4 h-4" />
-              Agregar Descuento
+              Nuevo con Template
+              <span className="absolute -top-2 -right-2 bg-yellow-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse">
+                NUEVO
+              </span>
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => router.push("/admin/descuentos/nuevo")}
+              className="px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 border"
+              style={{
+                backgroundColor: themeColors.surface + "60",
+                borderColor: themeColors.primary + "30",
+                color: themeColors.text.primary,
+              }}
+            >
+              <Plus className="w-4 h-4" />
+              Modo Avanzado
             </motion.button>
           </div>
         </motion.div>
@@ -298,21 +399,45 @@ export default function DescuentosAdminPage() {
           onItemsPerPageChange={setItemsPerPage}
         />
 
-        {/* Tabla de descuentos */}
-        <DiscountTable
-          discounts={currentDiscounts}
-          selectedDiscounts={selectedDiscounts}
-          onSelectDiscount={handleSelectDiscount}
-          onSelectAll={handleSelectAll}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          itemsPerPage={itemsPerPage}
-          onPageChange={setCurrentPage}
-          onPreviousPage={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          onNextPage={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-          startIndex={startIndex}
-          totalItems={sortedDiscounts.length}
-        />
+        {/* Tabla de descuentos o estado de carga */}
+        {isLoading ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex flex-col items-center justify-center py-20"
+          >
+            <Loader2 className="w-12 h-12 animate-spin" style={{ color: themeColors.primary }} />
+            <p className="mt-4 text-gray-600 dark:text-gray-300">Cargando descuentos...</p>
+          </motion.div>
+        ) : discounts.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex flex-col items-center justify-center py-20"
+          >
+            <p className="text-xl font-semibold text-gray-600 dark:text-gray-300">
+              No hay descuentos
+            </p>
+            <p className="text-gray-500 dark:text-gray-400 mt-2">
+              Comienza agregando tu primer descuento
+            </p>
+          </motion.div>
+        ) : (
+          <DiscountTable
+            discounts={discounts}
+            selectedDiscounts={selectedDiscounts}
+            onSelectDiscount={handleSelectDiscount}
+            onSelectAll={handleSelectAll}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            itemsPerPage={itemsPerPage}
+            onPageChange={handlePageChange}
+            onPreviousPage={() => handlePageChange(Math.max(1, currentPage - 1))}
+            onNextPage={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+            startIndex={(currentPage - 1) * itemsPerPage}
+            totalItems={totalDiscounts}
+          />
+        )}
       </div>
     </AdminLayout>
   );

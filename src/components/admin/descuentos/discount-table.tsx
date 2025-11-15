@@ -21,14 +21,30 @@ import { useTheme } from "@/contexts/theme-context";
 // Tipos para descuentos
 interface DiscountCondition {
   id: string;
-  tipoCondicion: 'CATEGORIA' | 'PRODUCTO' | 'MONTO_MINIMO' | 'CANTIDAD_MINIMA' | 'CLIENTE_VIP';
+  tipoCondicion: 
+    | 'CATEGORIA' 
+    | 'PRODUCTO' 
+    | 'MARCA'
+    | 'MONTO_MINIMO' 
+    | 'CANTIDAD_MINIMA'
+    | 'CANTIDAD_MAXIMA'
+    | 'CLIENTE_VIP'
+    | 'CLIENTE_NUEVO'
+    | 'CLIENTE_MAYORISTA'
+    | 'METODO_PAGO'
+    | 'REGION'
+    | 'CANAL_VENTA'
+    | 'DIA_SEMANA'
+    | 'RANGO_HORARIO'
+    | 'EXCLUIR_OFERTAS'
+    | 'PRIMER_PEDIDO';
   valorCondicion: string | number;
 }
 
 interface DiscountRelation {
   id: string;
   descuentoRelacionadoId: string;
-  tipoRelacion: 'CASCADA' | 'SOBRESCRIBIR' | 'REQUERIDO' | 'CONFLICTO';
+  tipoRelacion: 'CASCADA' | 'SOBRESCRIBIR' | 'REQUERIDO' | 'CONFLICTO' | 'COMBINABLE';
 }
 
 interface DiscountItem {
@@ -357,33 +373,45 @@ export const DiscountTable: React.FC<DiscountTableProps> = ({
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div className="flex items-center gap-2">
                     <motion.button
-                      whileHover={{
-                        scale: 1.1,
-                        color: themeColors.secondary,
-                      }}
-                      whileTap={{ scale: 0.9 }}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => router.push(`/admin/descuentos/${discount.id}`)}
-                      className="p-2 text-gray-400 transition-colors duration-200"
+                      className="p-2.5 rounded-xl transition-all duration-200 backdrop-blur-sm border"
+                      style={{
+                        backgroundColor: themeColors.surface + "60",
+                        borderColor: themeColors.primary + "30",
+                        color: themeColors.primary
+                      }}
+                      title="Ver detalles"
                     >
                       <Eye className="w-4 h-4" />
                     </motion.button>
+                    
                     <motion.button
-                      whileHover={{
-                        scale: 1.1,
-                        color: themeColors.primary,
-                      }}
-                      whileTap={{ scale: 0.9 }}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={() => router.push(`/admin/descuentos/${discount.id}/editar`)}
-                      className="p-2 text-gray-400 transition-colors duration-200"
+                      className="p-2.5 rounded-xl transition-all duration-200 backdrop-blur-sm border"
+                      style={{
+                        backgroundColor: themeColors.surface + "60",
+                        borderColor: themeColors.secondary + "30",
+                        color: themeColors.secondary
+                      }}
+                      title="Editar"
                     >
                       <Edit className="w-4 h-4" />
                     </motion.button>
+                    
                     <motion.button
                       whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      className="p-2 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200"
+                      whileTap={{ scale: 0.95 }}
+                      className="p-2.5 rounded-xl transition-all duration-200 backdrop-blur-sm border border-red-500/30 text-red-500 dark:text-red-400"
+                      style={{
+                        backgroundColor: themeColors.surface + "60"
+                      }}
+                      title="Eliminar"
                     >
                       <Trash2 className="w-4 h-4" />
                     </motion.button>
@@ -395,61 +423,105 @@ export const DiscountTable: React.FC<DiscountTableProps> = ({
         </table>
       </div>
 
-      {/* Paginación */}
+      {/* Paginación estilo clientes */}
       {totalPages > 1 && (
-        <div className="px-6 py-4 border-t" style={{ borderColor: themeColors.primary + "20" }}>
-          <div className="flex items-center justify-between">
-            <div className="text-sm" style={{ color: themeColors.text.secondary }}>
-              Mostrando {startIndex + 1} a {Math.min(startIndex + itemsPerPage, totalItems)} de{" "}
-              {totalItems} resultados
+        <div 
+          className="px-6 py-5 border-t backdrop-blur-sm"
+          style={{
+            borderColor: themeColors.primary + "30",
+            backgroundColor: themeColors.surface + "30"
+          }}
+        >
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div 
+              className="text-sm px-3 py-2 rounded-lg backdrop-blur-sm"
+              style={{
+                backgroundColor: themeColors.surface + "50",
+                color: themeColors.text.secondary
+              }}
+            >
+              Mostrando{" "}
+              <span 
+                className="font-semibold"
+                style={{ color: themeColors.primary }}
+              >
+                {discounts.length > 0 ? startIndex + 1 : 0}
+              </span>{" "}
+              a{" "}
+              <span 
+                className="font-semibold"
+                style={{ color: themeColors.primary }}
+              >
+                {Math.min(startIndex + itemsPerPage, totalItems)}
+              </span>{" "}
+              de{" "}
+              <span 
+                className="font-semibold"
+                style={{ color: themeColors.primary }}
+              >
+                {totalItems}
+              </span>{" "}
+              descuentos
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <motion.button
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.05, x: -2 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onPreviousPage}
                 disabled={currentPage === 1}
-                className="p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-3 rounded-xl border disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm"
                 style={{
-                  color: currentPage === 1 ? themeColors.text.secondary : themeColors.text.primary,
+                  backgroundColor: themeColors.surface + "60",
+                  borderColor: themeColors.primary + "30",
+                  color: themeColors.text.primary
                 }}
               >
                 <ChevronLeft className="w-4 h-4" />
               </motion.button>
 
-              <div className="flex gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <motion.button
-                    key={page}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => onPageChange(page)}
-                    className="w-8 h-8 rounded-lg text-sm font-medium transition-all"
-                    style={{
-                      ...(currentPage === page && {
-                        backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
-                        color: "white",
-                        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                      }),
-                      ...(currentPage !== page && {
-                        color: themeColors.text.secondary,
-                      }),
-                    }}
-                  >
-                    {page}
-                  </motion.button>
-                ))}
+              <div className="flex items-center gap-2">
+                {[...Array(Math.min(5, totalPages))].map((_, i) => {
+                  const pageNum = i + 1;
+                  const isActive = currentPage === pageNum;
+                  return (
+                    <motion.button
+                      key={pageNum}
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => onPageChange(pageNum)}
+                      className="w-10 h-10 rounded-xl text-sm font-semibold transition-all backdrop-blur-sm border"
+                      style={{
+                        backgroundColor: isActive 
+                          ? `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})` 
+                          : themeColors.surface + "60",
+                        borderColor: isActive 
+                          ? themeColors.primary + "60" 
+                          : themeColors.primary + "30",
+                        color: isActive 
+                          ? "white" 
+                          : themeColors.text.primary,
+                        background: isActive 
+                          ? `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})` 
+                          : themeColors.surface + "60"
+                      }}
+                    >
+                      {pageNum}
+                    </motion.button>
+                  );
+                })}
               </div>
 
               <motion.button
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.05, x: 2 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onNextPage}
                 disabled={currentPage === totalPages}
-                className="p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-3 rounded-xl border disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm"
                 style={{
-                  color: currentPage === totalPages ? themeColors.text.secondary : themeColors.text.primary,
+                  backgroundColor: themeColors.surface + "60",
+                  borderColor: themeColors.primary + "30",
+                  color: themeColors.text.primary
                 }}
               >
                 <ChevronRight className="w-4 h-4" />

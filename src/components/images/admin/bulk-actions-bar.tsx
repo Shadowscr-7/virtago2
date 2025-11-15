@@ -16,7 +16,8 @@ import { useTheme } from "@/contexts/theme-context";
 
 interface BulkActionsBarProps {
   selectedCount: number;
-  onAssignToProducts: () => void;
+  onAutoAssign: () => void;
+  onManualAssign: () => void;
   onDelete: () => void;
   onDownload: () => void;
   onClearSelection: () => void;
@@ -26,7 +27,8 @@ interface BulkActionsBarProps {
 
 export function BulkActionsBar({
   selectedCount,
-  onAssignToProducts,
+  onAutoAssign,
+  onManualAssign,
   onDelete,
   onDownload,
   onClearSelection,
@@ -79,7 +81,7 @@ export function BulkActionsBar({
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={onAssignToProducts}
+              onClick={onAutoAssign}
               className="flex items-center gap-2 px-4 py-2 text-white rounded-lg font-medium transition-all duration-200 shadow-lg"
               style={{
                 backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
@@ -93,7 +95,7 @@ export function BulkActionsBar({
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={onAssignToProducts}
+              onClick={onManualAssign}
               className="flex items-center gap-2 px-4 py-2 text-white rounded-lg font-medium transition-all duration-200 shadow-lg"
               style={{
                 backgroundImage: `linear-gradient(to right, ${themeColors.secondary}, ${themeColors.accent})`

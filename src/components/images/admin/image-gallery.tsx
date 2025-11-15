@@ -79,19 +79,6 @@ export function ImageGallery({
     });
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "ASSIGNED":
-        return <CheckCircle className="w-4 h-4" style={{ color: themeColors.primary }} />;
-      case "PROCESSING":
-        return <Clock className="w-4 h-4 animate-pulse" style={{ color: themeColors.secondary }} />;
-      case "ERROR":
-        return <AlertCircle className="w-4 h-4 text-red-500" />;
-      default:
-        return <FileText className="w-4 h-4 text-gray-400" />;
-    }
-  };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case "ASSIGNED":
@@ -110,7 +97,7 @@ export function ImageGallery({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="backdrop-blur-sm border border-white/20 dark:border-gray-700/30 rounded-2xl p-12 shadow-xl text-center"
+        className="border border-white/20 dark:border-gray-700/30 rounded-2xl p-12 shadow-xl text-center"
         style={{
           background: `linear-gradient(135deg, ${themeColors.surface}80, ${themeColors.surface}40)`
         }}
@@ -139,7 +126,7 @@ export function ImageGallery({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
-      className="backdrop-blur-sm border border-white/20 dark:border-gray-700/30 rounded-2xl shadow-xl overflow-hidden"
+      className="border border-white/20 dark:border-gray-700/30 rounded-2xl shadow-xl overflow-hidden"
       style={{
         background: `linear-gradient(135deg, ${themeColors.surface}80, ${themeColors.surface}40)`
       }}
@@ -148,7 +135,7 @@ export function ImageGallery({
       <div className="p-6 border-b border-gray-200/50 dark:border-gray-700/50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <label className="relative inline-flex items-center cursor-pointer">
+            <label className="relative inline-flex items-center cursor-pointer group">
               <input
                 type="checkbox"
                 checked={
@@ -157,19 +144,34 @@ export function ImageGallery({
                 onChange={onSelectAll}
                 className="sr-only peer"
               />
-              <div 
-                className="relative w-5 h-5 bg-white/50 dark:bg-slate-600/50 border-2 border-gray-300 dark:border-gray-500 rounded-md transition-all duration-200 peer-hover:border-purple-400"
+              <motion.div 
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className={`
+                  relative w-7 h-7 rounded-full shadow-md transition-all duration-300 flex items-center justify-center
+                  ${selectedImages.length === images.length && images.length > 0 
+                    ? 'shadow-xl' 
+                    : 'bg-white/90 dark:bg-gray-800/90 border border-white/50 group-hover:bg-white dark:group-hover:bg-gray-700'
+                  }
+                `}
                 style={{
                   ...(selectedImages.length === images.length && images.length > 0 && {
-                    backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
-                    borderColor: themeColors.primary
+                    background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
+                    boxShadow: `0 0 15px ${themeColors.primary}50`
                   })
                 }}
               >
-                <Check className="absolute inset-0 w-3 h-3 m-auto text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" />
-              </div>
+                {selectedImages.length === images.length && images.length > 0 ? (
+                  <Check className="w-4 h-4 text-white" strokeWidth={3} />
+                ) : (
+                  <div className="w-3 h-3 rounded-full border-2 border-gray-400 dark:border-gray-500 group-hover:border-gray-600 dark:group-hover:border-gray-300 transition-colors" />
+                )}
+              </motion.div>
             </label>
-            <span className="text-sm text-gray-600 dark:text-gray-300">
+            <span 
+              className="text-sm font-medium"
+              style={{ color: themeColors.text.secondary }}
+            >
               {selectedImages.length > 0
                 ? `${selectedImages.length} de ${images.length} seleccionadas`
                 : `${images.length} imagen${images.length !== 1 ? "es" : ""}`}
@@ -189,7 +191,7 @@ export function ImageGallery({
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: index * 0.05 }}
                 className={`
-                  group relative backdrop-blur-sm border rounded-2xl p-4 hover:shadow-xl transition-all duration-300 cursor-pointer
+                  group relative border rounded-2xl p-4 hover:shadow-xl transition-all duration-300 cursor-pointer z-0
                   ${selectedImages.includes(image.id) ? "ring-2 shadow-lg" : ""}
                 `}
                 style={{
@@ -200,37 +202,87 @@ export function ImageGallery({
                 }}
                 onClick={() => onImageSelect(image.id)}
               >
-                {/* Checkbox */}
-                <div className="absolute top-2 left-2 z-10">
+                {/* Checkbox - Diseño mejorado */}
+                <motion.div 
+                  className="absolute top-2 left-2 z-10"
+                  initial={{ scale: 0.8 }}
+                  animate={{ 
+                    scale: selectedImages.includes(image.id) ? 1 : 0.8,
+                  }}
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                >
                   <div
                     className={`
-                    w-5 h-5 rounded-md border-2 transition-all duration-200 flex items-center justify-center
+                    w-7 h-7 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center backdrop-blur-md
                     ${
                       selectedImages.includes(image.id)
-                        ? "border-2"
-                        : "bg-white/80 border-gray-300 group-hover:border-gray-400"
+                        ? "scale-110 shadow-2xl"
+                        : "bg-white/90 dark:bg-gray-800/90 border border-white/50 group-hover:bg-white dark:group-hover:bg-gray-700"
                     }
                   `}
                     style={{
                       ...(selectedImages.includes(image.id) && {
-                        backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
-                        borderColor: themeColors.primary
+                        background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
+                        boxShadow: `0 0 20px ${themeColors.primary}60`
                       })
                     }}
                   >
-                    {selectedImages.includes(image.id) && (
-                      <Check className="w-3 h-3 text-white" />
+                    {selectedImages.includes(image.id) ? (
+                      <Check className="w-4 h-4 text-white animate-in zoom-in duration-200" strokeWidth={3} />
+                    ) : (
+                      <div className="w-3 h-3 rounded-full border-2 border-gray-400 dark:border-gray-500 group-hover:border-gray-600 dark:group-hover:border-gray-300 transition-colors" />
                     )}
                   </div>
-                </div>
+                </motion.div>
 
-                {/* Estado */}
-                <div className="absolute top-2 right-2 z-10">
-                  {getStatusIcon(image.status)}
-                </div>
+                {/* Estado - Diseño mejorado */}
+                <motion.div 
+                  className="absolute top-2 right-2 z-10"
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                >
+                  {image.status === "ASSIGNED" ? (
+                    <div 
+                      className="px-2.5 py-1.5 rounded-full shadow-lg backdrop-blur-md flex items-center gap-1.5"
+                      style={{
+                        background: `linear-gradient(135deg, ${themeColors.primary}F0, ${themeColors.secondary}F0)`,
+                        boxShadow: `0 4px 12px ${themeColors.primary}40`
+                      }}
+                    >
+                      <CheckCircle className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+                      <span className="text-[10px] font-bold text-white uppercase tracking-wide">
+                        Asignada
+                      </span>
+                    </div>
+                  ) : image.status === "PROCESSING" ? (
+                    <div 
+                      className="px-2.5 py-1.5 rounded-full shadow-lg backdrop-blur-md flex items-center gap-1.5 bg-gradient-to-r from-amber-400/90 to-orange-500/90"
+                    >
+                      <Clock className="w-3.5 h-3.5 text-white animate-pulse" strokeWidth={2.5} />
+                      <span className="text-[10px] font-bold text-white uppercase tracking-wide">
+                        Procesando
+                      </span>
+                    </div>
+                  ) : image.status === "ERROR" ? (
+                    <div className="px-2.5 py-1.5 rounded-full shadow-lg backdrop-blur-md flex items-center gap-1.5 bg-gradient-to-r from-red-500/90 to-red-600/90">
+                      <AlertCircle className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+                      <span className="text-[10px] font-bold text-white uppercase tracking-wide">
+                        Error
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="px-2.5 py-1.5 rounded-full shadow-lg backdrop-blur-md flex items-center gap-1.5 bg-gray-500/90 dark:bg-gray-600/90">
+                      <FileText className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+                      <span className="text-[10px] font-bold text-white uppercase tracking-wide">
+                        Disponible
+                      </span>
+                    </div>
+                  )}
+                </motion.div>
 
                 {/* Imagen */}
-                <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-700 mb-3 relative">
+                <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-700 mb-3 relative z-0">
                   <Image
                     src={image.thumbnailUrl}
                     alt={image.originalName}
@@ -316,9 +368,9 @@ export function ImageGallery({
                   {/* Tags */}
                   {image.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1">
-                      {image.tags.slice(0, 2).map((tag) => (
+                      {image.tags.slice(0, 2).map((tag, tagIdx) => (
                         <span
-                          key={tag}
+                          key={`${tag}-${tagIdx}`}
                           className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-xs text-gray-600 dark:text-gray-300 rounded-full"
                         >
                           <Tag className="w-2 h-2" />
@@ -345,7 +397,7 @@ export function ImageGallery({
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.02 }}
                 className={`
-                  group flex items-center gap-4 p-4 backdrop-blur-sm border border-white/30 dark:border-gray-600/30 rounded-xl hover:shadow-lg transition-all duration-200 cursor-pointer
+                  group flex items-center gap-4 p-4 border border-white/30 dark:border-gray-600/30 rounded-xl hover:shadow-lg transition-all duration-200 cursor-pointer
                   ${selectedImages.includes(image.id) ? "ring-2" : ""}
                 `}
                 style={{
@@ -357,27 +409,38 @@ export function ImageGallery({
                 }}
                 onClick={() => onImageSelect(image.id)}
               >
-                {/* Checkbox */}
-                <div
-                  className={`
-                  w-5 h-5 rounded-md border-2 transition-all duration-200 flex items-center justify-center flex-shrink-0
-                  ${
-                    selectedImages.includes(image.id)
-                      ? ""
-                      : "bg-white/80 border-gray-300 group-hover:border-gray-400"
-                  }
-                `}
-                  style={{
-                    ...(selectedImages.includes(image.id) && {
-                      backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
-                      borderColor: themeColors.primary
-                    })
+                {/* Checkbox - Diseño mejorado en lista */}
+                <motion.div
+                  initial={{ scale: 0.8 }}
+                  animate={{ 
+                    scale: selectedImages.includes(image.id) ? 1 : 0.8,
                   }}
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  className="flex-shrink-0"
                 >
-                  {selectedImages.includes(image.id) && (
-                    <Check className="w-3 h-3 text-white" />
-                  )}
-                </div>
+                  <div
+                    className={`
+                    w-7 h-7 rounded-full shadow-md transition-all duration-300 flex items-center justify-center
+                    ${
+                      selectedImages.includes(image.id)
+                        ? "scale-110 shadow-xl"
+                        : "bg-white/90 dark:bg-gray-800/90 border border-white/50 group-hover:bg-white dark:group-hover:bg-gray-700"
+                    }
+                  `}
+                    style={{
+                      ...(selectedImages.includes(image.id) && {
+                        background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
+                        boxShadow: `0 0 15px ${themeColors.primary}50`
+                      })
+                    }}
+                  >
+                    {selectedImages.includes(image.id) ? (
+                      <Check className="w-4 h-4 text-white" strokeWidth={3} />
+                    ) : (
+                      <div className="w-3 h-3 rounded-full border-2 border-gray-400 dark:border-gray-500 group-hover:border-gray-600 dark:group-hover:border-gray-300 transition-colors" />
+                    )}
+                  </div>
+                </motion.div>
 
                 {/* Thumbnail */}
                 <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0 relative">
@@ -395,7 +458,42 @@ export function ImageGallery({
                     <h4 className="font-medium text-gray-900 dark:text-white text-sm truncate">
                       {image.originalName}
                     </h4>
-                    {getStatusIcon(image.status)}
+                    
+                    {/* Badge de estado mejorado */}
+                    {image.status === "ASSIGNED" ? (
+                      <div 
+                        className="px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm"
+                        style={{
+                          background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
+                        }}
+                      >
+                        <CheckCircle className="w-3 h-3 text-white" strokeWidth={2.5} />
+                        <span className="text-[10px] font-bold text-white uppercase tracking-wide">
+                          Asignada
+                        </span>
+                      </div>
+                    ) : image.status === "PROCESSING" ? (
+                      <div className="px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm bg-gradient-to-r from-amber-400 to-orange-500">
+                        <Clock className="w-3 h-3 text-white animate-pulse" strokeWidth={2.5} />
+                        <span className="text-[10px] font-bold text-white uppercase tracking-wide">
+                          Procesando
+                        </span>
+                      </div>
+                    ) : image.status === "ERROR" ? (
+                      <div className="px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm bg-gradient-to-r from-red-500 to-red-600">
+                        <AlertCircle className="w-3 h-3 text-white" strokeWidth={2.5} />
+                        <span className="text-[10px] font-bold text-white uppercase tracking-wide">
+                          Error
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm bg-gray-500 dark:bg-gray-600">
+                        <FileText className="w-3 h-3 text-white" strokeWidth={2.5} />
+                        <span className="text-[10px] font-bold text-white uppercase tracking-wide">
+                          Disponible
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">

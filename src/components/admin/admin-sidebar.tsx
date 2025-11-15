@@ -15,6 +15,7 @@ import {
   Percent,
   ShoppingCart,
   Ticket,
+  BookOpen,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -80,6 +81,13 @@ const menuItems = [
     label: "Cupones",
     icon: Ticket,
     href: "/admin/cupones",
+  },
+  {
+    id: "documentation",
+    label: "Documentación",
+    icon: BookOpen,
+    href: "/redoc-es",
+    external: true,
   },
 ];
 
@@ -177,6 +185,93 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
           const active = isActive(item.href);
           const itemColor = getItemColor(index);
 
+          const linkContent = (
+            <motion.div
+              whileHover={{ scale: 1.02, x: isCollapsed ? 0 : 4 }}
+              whileTap={{ scale: 0.98 }}
+              className={`
+                relative group flex items-center gap-3 p-3 rounded-xl transition-all duration-300
+                ${isCollapsed ? "justify-center" : ""}
+              `}
+              style={{
+                backgroundColor: active 
+                  ? itemColor + "40" 
+                  : "transparent",
+                color: active 
+                  ? themeColors.text.primary 
+                  : themeColors.text.secondary
+              }}
+            >
+              {/* Marcador activo */}
+              {active && (
+                <motion.div
+                  layoutId="activeIndicator"
+                  className="absolute left-0 top-0 bottom-0 w-1 rounded-r-full"
+                  style={{ backgroundColor: itemColor }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 500,
+                    damping: 30,
+                  }}
+                />
+              )}
+
+              {/* Efecto de brillo al hacer hover */}
+              <div 
+                className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                style={{
+                  background: `linear-gradient(90deg, transparent, ${itemColor}15, transparent)`
+                }}
+              />
+
+              {/* Icono */}
+              <div
+                className="relative z-10 p-2 rounded-lg transition-all duration-300"
+                style={{
+                  backgroundColor: active 
+                    ? itemColor + "30" 
+                    : themeColors.surface + "20"
+                }}
+              >
+                <IconComponent className="w-5 h-5" />
+              </div>
+
+              {/* Texto */}
+              {!isCollapsed && (
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="relative z-10 font-medium"
+                >
+                  {item.label}
+                </motion.span>
+              )}
+
+              {/* Tooltip para modo colapsado */}
+              {isCollapsed && (
+                <motion.div
+                  initial={{ opacity: 0, x: -10 }}
+                  whileHover={{ opacity: 1, x: 0 }}
+                  className="absolute left-full ml-4 px-3 py-2 text-sm rounded-lg shadow-lg border z-50 whitespace-nowrap pointer-events-none group-hover:pointer-events-auto"
+                  style={{
+                    backgroundColor: themeColors.surface + "95",
+                    color: themeColors.text.primary,
+                    borderColor: themeColors.primary + "30"
+                  }}
+                >
+                  {item.label}
+                  <div 
+                    className="absolute left-0 top-1/2 transform -translate-x-1 -translate-y-1/2 w-2 h-2 rotate-45 border-l border-b"
+                    style={{
+                      backgroundColor: themeColors.surface + "95",
+                      borderColor: themeColors.primary + "30"
+                    }}
+                  />
+                </motion.div>
+              )}
+            </motion.div>
+          );
+
           return (
             <motion.div
               key={item.id}
@@ -184,92 +279,15 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <Link href={item.href}>
-                <motion.div
-                  whileHover={{ scale: 1.02, x: isCollapsed ? 0 : 4 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`
-                    relative group flex items-center gap-3 p-3 rounded-xl transition-all duration-300
-                    ${isCollapsed ? "justify-center" : ""}
-                  `}
-                  style={{
-                    backgroundColor: active 
-                      ? itemColor + "40" 
-                      : "transparent",
-                    color: active 
-                      ? themeColors.text.primary 
-                      : themeColors.text.secondary
-                  }}
-                >
-                  {/* Marcador activo */}
-                  {active && (
-                    <motion.div
-                      layoutId="activeIndicator"
-                      className="absolute left-0 top-0 bottom-0 w-1 rounded-r-full"
-                      style={{ backgroundColor: itemColor }}
-                      transition={{
-                        type: "spring",
-                        stiffness: 500,
-                        damping: 30,
-                      }}
-                    />
-                  )}
-
-                  {/* Efecto de brillo al hacer hover */}
-                  <div 
-                    className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    style={{
-                      background: `linear-gradient(90deg, transparent, ${itemColor}15, transparent)`
-                    }}
-                  />
-
-                  {/* Icono */}
-                  <div
-                    className="relative z-10 p-2 rounded-lg transition-all duration-300"
-                    style={{
-                      backgroundColor: active 
-                        ? itemColor + "30" 
-                        : themeColors.surface + "20"
-                    }}
-                  >
-                    <IconComponent className="w-5 h-5" />
-                  </div>
-
-                  {/* Texto */}
-                  {!isCollapsed && (
-                    <motion.span
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="relative z-10 font-medium"
-                    >
-                      {item.label}
-                    </motion.span>
-                  )}
-
-                  {/* Tooltip para modo colapsado */}
-                  {isCollapsed && (
-                    <motion.div
-                      initial={{ opacity: 0, x: -10 }}
-                      whileHover={{ opacity: 1, x: 0 }}
-                      className="absolute left-full ml-4 px-3 py-2 text-sm rounded-lg shadow-lg border z-50 whitespace-nowrap pointer-events-none group-hover:pointer-events-auto"
-                      style={{
-                        backgroundColor: themeColors.surface + "95",
-                        color: themeColors.text.primary,
-                        borderColor: themeColors.primary + "30"
-                      }}
-                    >
-                      {item.label}
-                      <div 
-                        className="absolute left-0 top-1/2 transform -translate-x-1 -translate-y-1/2 w-2 h-2 rotate-45 border-l border-b"
-                        style={{
-                          backgroundColor: themeColors.surface + "95",
-                          borderColor: themeColors.primary + "30"
-                        }}
-                      />
-                    </motion.div>
-                  )}
-                </motion.div>
-              </Link>
+              {item.external ? (
+                <a href={item.href} target="_blank" rel="noopener noreferrer">
+                  {linkContent}
+                </a>
+              ) : (
+                <Link href={item.href}>
+                  {linkContent}
+                </Link>
+              )}
             </motion.div>
           );
         })}

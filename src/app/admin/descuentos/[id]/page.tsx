@@ -27,11 +27,29 @@ import {
 } from "lucide-react";
 import { useTheme } from "@/contexts/theme-context";
 import { AdminLayout } from "@/components/admin/admin-layout";
+import http from "@/api/http-client";
+import { toast } from "sonner";
 
 // Tipos para descuentos
 interface DiscountCondition {
   id: string;
-  tipoCondicion: 'CATEGORIA' | 'PRODUCTO' | 'MONTO_MINIMO' | 'CANTIDAD_MINIMA' | 'CLIENTE_VIP';
+  tipoCondicion: 
+    | 'CATEGORIA' 
+    | 'PRODUCTO' 
+    | 'MARCA'
+    | 'MONTO_MINIMO' 
+    | 'CANTIDAD_MINIMA'
+    | 'CANTIDAD_MAXIMA'
+    | 'CLIENTE_VIP'
+    | 'CLIENTE_NUEVO'
+    | 'CLIENTE_MAYORISTA'
+    | 'METODO_PAGO'
+    | 'REGION'
+    | 'CANAL_VENTA'
+    | 'DIA_SEMANA'
+    | 'RANGO_HORARIO'
+    | 'EXCLUIR_OFERTAS'
+    | 'PRIMER_PEDIDO';
   valorCondicion: string | number;
   descripcion?: string;
 }
@@ -39,7 +57,7 @@ interface DiscountCondition {
 interface DiscountRelation {
   id: string;
   descuentoRelacionadoId: string;
-  tipoRelacion: 'CASCADA' | 'SOBRESCRIBIR' | 'REQUERIDO' | 'CONFLICTO';
+  tipoRelacion: 'CASCADA' | 'SOBRESCRIBIR' | 'REQUERIDO' | 'CONFLICTO' | 'COMBINABLE';
   nombre?: string;
 }
 
@@ -59,6 +77,20 @@ interface DiscountItem {
   fechaModificacion: string;
   condiciones: DiscountCondition[];
   relaciones: DiscountRelation[];
+  // Campos adicionales del backend
+  currency?: string;
+  validFrom?: string;
+  status?: string;
+  priority?: number;
+  customerType?: string;
+  channel?: string;
+  region?: string;
+  category?: string;
+  tags?: string[];
+  notes?: string;
+  createdBy?: string;
+  distributorCode?: string;
+  customFields?: Record<string, unknown>;
 }
 
 interface DiscountUsage {
@@ -81,6 +113,8 @@ export default function DiscountDetailPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'general' | 'condiciones' | 'relaciones' | 'usos'>('general');
   const [copied, setCopied] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Datos de ejemplo
   const mockUsages: DiscountUsage[] = [
@@ -114,64 +148,201 @@ export default function DiscountDetailPage() {
   ];
 
   useEffect(() => {
-    // Simular carga de datos
     const loadDiscount = async () => {
+      if (!discountId) return;
+
       setLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Datos de ejemplo
-      const mockDiscount: DiscountItem = {
-        id: discountId,
-        nombre: "Descuento Black Friday",
-        descripcion: "Descuento especial para la campaña de Black Friday. Válido para productos seleccionados con condiciones específicas.",
-        validoHasta: "2024-11-30",
-        acumulativo: true,
-        activo: true,
-        tipo: "PORCENTAJE",
-        valor: 25,
-        codigoDescuento: "BLACKFRIDAY25",
-        usoMaximo: 1000,
-        usoActual: 347,
-        fechaCreacion: "2024-11-01",
-        fechaModificacion: "2024-11-15",
-        condiciones: [
-          {
-            id: "1",
-            tipoCondicion: "MONTO_MINIMO",
-            valorCondicion: 50000,
-            descripcion: "Compra mínima de $50.000"
-          },
-          {
-            id: "2",
-            tipoCondicion: "CATEGORIA",
-            valorCondicion: "electronics",
-            descripcion: "Solo productos de electrónicos"
-          },
-          {
-            id: "3",
-            tipoCondicion: "CLIENTE_VIP",
-            valorCondicion: "premium",
-            descripcion: "Solo clientes Premium"
+      try {
+        console.log(`🔍 Cargando descuento ID: ${discountId}`);
+        
+        const response = await http.get<{
+          success: boolean;
+          message?: string;
+          discount?: {
+            discount_id: string;
+            name: string;
+            description: string;
+            type: string;
+            discount_value: number;
+            currency: string;
+            valid_from: string;
+            valid_to: string;
+            status: string;
+            priority: number;
+            is_cumulative: boolean;
+            customer_type?: string;
+            channel?: string;
+            region?: string;
+            category?: string;
+            tags?: string[];
+            notes?: string;
+            created_by?: string;
+            conditions?: Record<string, unknown>;
+            applicable_to?: Array<{
+              type: string;
+              value: string;
+            }>;
+            customFields?: Record<string, unknown>;
+            start_date?: string;
+            end_date?: string;
+            discount_type: string;
+            is_active: boolean;
+            usage_count?: number;
+            usage_limit?: number;
+            distributorCode?: string;
+            discountId: string;
+            createdAt: string;
+            updatedAt: string;
+          };
+        }>(`/discount/${discountId}`);
+
+        console.log('📦 Respuesta de la API:', response);
+
+        if (!response.data?.discount) {
+          throw new Error('No se encontró el descuento');
+        }
+
+        const backendData = response.data.discount;
+
+        // Mapear tipo de descuento
+        let tipo: 'PORCENTAJE' | 'MONTO_FIJO' | 'COMPRA_LLEVA' = 'PORCENTAJE';
+        if (backendData.discount_type === 'percentage' || backendData.type === 'percentage') {
+          tipo = 'PORCENTAJE';
+        } else if (backendData.discount_type === 'fixed' || backendData.type === 'fixed') {
+          tipo = 'MONTO_FIJO';
+        } else if (backendData.discount_type === 'bogo' || backendData.type === 'bogo') {
+          tipo = 'COMPRA_LLEVA';
+        }
+
+        // Mapear condiciones desde el backend
+        const condiciones: DiscountCondition[] = [];
+        
+        if (backendData.conditions) {
+          // Monto mínimo
+          if (backendData.conditions.min_purchase_amount) {
+            condiciones.push({
+              id: `cond_min_${backendData.discountId}`,
+              tipoCondicion: 'MONTO_MINIMO',
+              valorCondicion: backendData.conditions.min_purchase_amount as number,
+              descripcion: `Compra mínima de $${(backendData.conditions.min_purchase_amount as number).toLocaleString()}`
+            });
           }
-        ],
-        relaciones: [
-          {
-            id: "1",
-            descuentoRelacionadoId: "desc-2",
-            tipoRelacion: "CASCADA",
-            nombre: "Descuento Navidad"
-          },
-          {
-            id: "2",
-            descuentoRelacionadoId: "desc-3",
-            tipoRelacion: "CONFLICTO",
-            nombre: "Descuento Empleados"
+
+          // Cantidad mínima
+          if (backendData.conditions.min_items) {
+            condiciones.push({
+              id: `cond_items_${backendData.discountId}`,
+              tipoCondicion: 'CANTIDAD_MINIMA',
+              valorCondicion: backendData.conditions.min_items as number,
+              descripcion: `Mínimo ${backendData.conditions.min_items} items`
+            });
           }
-        ]
-      };
-      
-      setDiscount(mockDiscount);
-      setLoading(false);
+
+          // Cliente VIP
+          if (backendData.conditions.customer_type || backendData.customer_type) {
+            const customerType = (backendData.conditions.customer_type || backendData.customer_type) as string;
+            condiciones.push({
+              id: `cond_vip_${backendData.discountId}`,
+              tipoCondicion: 'CLIENTE_VIP',
+              valorCondicion: customerType,
+              descripcion: `Solo clientes ${customerType}`
+            });
+          }
+
+          // Condiciones adicionales de clearance
+          if (backendData.conditions.limited_stock) {
+            condiciones.push({
+              id: `cond_stock_${backendData.discountId}`,
+              tipoCondicion: 'CANTIDAD_MINIMA',
+              valorCondicion: 'limited',
+              descripcion: 'Stock limitado'
+            });
+          }
+
+          if (backendData.conditions.while_supplies_last) {
+            condiciones.push({
+              id: `cond_supplies_${backendData.discountId}`,
+              tipoCondicion: 'CANTIDAD_MINIMA',
+              valorCondicion: 'supplies_last',
+              descripcion: 'Hasta agotar stock'
+            });
+          }
+
+          if (backendData.conditions.final_sale) {
+            condiciones.push({
+              id: `cond_final_${backendData.discountId}`,
+              tipoCondicion: 'CANTIDAD_MINIMA',
+              valorCondicion: 'final_sale',
+              descripcion: 'Venta final - No reembolsable'
+            });
+          }
+        }
+
+        // Agregar condiciones desde applicable_to
+        if (backendData.applicable_to && Array.isArray(backendData.applicable_to)) {
+          backendData.applicable_to.forEach((item: { type: string; value: string }, index: number) => {
+            if (item.type === 'category') {
+              condiciones.push({
+                id: `cond_cat_${index}`,
+                tipoCondicion: 'CATEGORIA',
+                valorCondicion: item.value,
+                descripcion: `Categoría: ${item.value}`
+              });
+            } else if (item.type === 'product') {
+              condiciones.push({
+                id: `cond_prod_${index}`,
+                tipoCondicion: 'PRODUCTO',
+                valorCondicion: item.value,
+                descripcion: `Producto: ${item.value}`
+              });
+            }
+          });
+        }
+
+        // Mapear relaciones (actualmente vacío, se puede expandir)
+        const relaciones: DiscountRelation[] = [];
+
+        const mappedDiscount: DiscountItem = {
+          id: backendData.discountId,
+          nombre: backendData.name,
+          descripcion: backendData.description || 'Sin descripción',
+          validoHasta: backendData.valid_to || backendData.end_date || '',
+          acumulativo: backendData.is_cumulative || false,
+          activo: backendData.is_active || backendData.status === 'active',
+          tipo,
+          valor: backendData.discount_value,
+          codigoDescuento: backendData.discount_id,
+          usoMaximo: backendData.usage_limit,
+          usoActual: backendData.usage_count || 0,
+          fechaCreacion: backendData.createdAt,
+          fechaModificacion: backendData.updatedAt,
+          condiciones,
+          relaciones,
+          // Campos adicionales
+          currency: backendData.currency,
+          validFrom: backendData.valid_from || backendData.start_date,
+          status: backendData.status,
+          priority: backendData.priority,
+          customerType: backendData.customer_type,
+          channel: backendData.channel,
+          region: backendData.region,
+          category: backendData.category,
+          tags: backendData.tags,
+          notes: backendData.notes,
+          createdBy: backendData.created_by,
+          distributorCode: backendData.distributorCode,
+          customFields: backendData.customFields,
+        };
+
+        setDiscount(mappedDiscount);
+        console.log('✅ Descuento cargado y mapeado:', mappedDiscount);
+      } catch (error) {
+        console.error('❌ Error al cargar descuento:', error);
+        toast.error('Error al cargar el descuento');
+        setDiscount(null);
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadDiscount();
@@ -252,6 +423,24 @@ export default function DiscountDetailPage() {
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      console.log('🗑️ Eliminando descuento ID:', discountId);
+      
+      await http.delete(`/discount/${discountId}`);
+      
+      console.log('✅ Descuento eliminado exitosamente');
+      toast.success('Descuento eliminado exitosamente');
+      
+      router.push('/admin/descuentos');
+    } catch (error) {
+      console.error('❌ Error al eliminar descuento:', error);
+      toast.error('Error al eliminar el descuento');
+      setDeleting(false);
+    }
   };
 
   if (loading) {
@@ -376,6 +565,7 @@ export default function DiscountDetailPage() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
+                onClick={() => setShowDeleteModal(true)}
                 className="px-4 py-2 border rounded-xl font-medium transition-all duration-200 flex items-center gap-2 border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
               >
                 <Trash2 className="w-4 h-4" />
@@ -556,6 +746,210 @@ export default function DiscountDetailPage() {
                     </p>
                   </div>
                 </div>
+
+                {/* Información Adicional */}
+                {(discount.currency || discount.region || discount.channel || discount.category || discount.distributorCode || discount.createdBy) && (
+                  <div
+                    className="p-6 rounded-xl"
+                    style={{ backgroundColor: themeColors.surface + "50" }}
+                  >
+                    <h3 className="font-semibold mb-4 text-lg" style={{ color: themeColors.text.primary }}>
+                      Información Adicional
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {discount.currency && (
+                        <div className="flex items-start gap-3">
+                          <DollarSign className="w-5 h-5 mt-0.5" style={{ color: themeColors.primary }} />
+                          <div>
+                            <p className="text-sm font-medium" style={{ color: themeColors.text.secondary }}>
+                              Moneda
+                            </p>
+                            <p className="font-semibold" style={{ color: themeColors.text.primary }}>
+                              {discount.currency}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {discount.region && (
+                        <div className="flex items-start gap-3">
+                          <Target className="w-5 h-5 mt-0.5" style={{ color: themeColors.primary }} />
+                          <div>
+                            <p className="text-sm font-medium" style={{ color: themeColors.text.secondary }}>
+                              Región
+                            </p>
+                            <p className="font-semibold" style={{ color: themeColors.text.primary }}>
+                              {discount.region}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {discount.channel && (
+                        <div className="flex items-start gap-3">
+                          <ShoppingCart className="w-5 h-5 mt-0.5" style={{ color: themeColors.primary }} />
+                          <div>
+                            <p className="text-sm font-medium" style={{ color: themeColors.text.secondary }}>
+                              Canal
+                            </p>
+                            <p className="font-semibold" style={{ color: themeColors.text.primary }}>
+                              {discount.channel}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {discount.category && (
+                        <div className="flex items-start gap-3">
+                          <Package className="w-5 h-5 mt-0.5" style={{ color: themeColors.primary }} />
+                          <div>
+                            <p className="text-sm font-medium" style={{ color: themeColors.text.secondary }}>
+                              Categoría
+                            </p>
+                            <p className="font-semibold" style={{ color: themeColors.text.primary }}>
+                              {discount.category}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {discount.customerType && (
+                        <div className="flex items-start gap-3">
+                          <Crown className="w-5 h-5 mt-0.5" style={{ color: themeColors.primary }} />
+                          <div>
+                            <p className="text-sm font-medium" style={{ color: themeColors.text.secondary }}>
+                              Tipo de Cliente
+                            </p>
+                            <p className="font-semibold" style={{ color: themeColors.text.primary }}>
+                              {discount.customerType}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {discount.distributorCode && (
+                        <div className="flex items-start gap-3">
+                          <Tag className="w-5 h-5 mt-0.5" style={{ color: themeColors.primary }} />
+                          <div>
+                            <p className="text-sm font-medium" style={{ color: themeColors.text.secondary }}>
+                              Código Distribuidor
+                            </p>
+                            <p className="font-semibold" style={{ color: themeColors.text.primary }}>
+                              {discount.distributorCode}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {discount.createdBy && (
+                        <div className="flex items-start gap-3">
+                          <Users className="w-5 h-5 mt-0.5" style={{ color: themeColors.primary }} />
+                          <div>
+                            <p className="text-sm font-medium" style={{ color: themeColors.text.secondary }}>
+                              Creado Por
+                            </p>
+                            <p className="font-semibold" style={{ color: themeColors.text.primary }}>
+                              {discount.createdBy}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {discount.priority !== undefined && (
+                        <div className="flex items-start gap-3">
+                          <TrendingUp className="w-5 h-5 mt-0.5" style={{ color: themeColors.primary }} />
+                          <div>
+                            <p className="text-sm font-medium" style={{ color: themeColors.text.secondary }}>
+                              Prioridad
+                            </p>
+                            <p className="font-semibold" style={{ color: themeColors.text.primary }}>
+                              {discount.priority}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {discount.validFrom && (
+                        <div className="flex items-start gap-3">
+                          <Calendar className="w-5 h-5 mt-0.5" style={{ color: themeColors.primary }} />
+                          <div>
+                            <p className="text-sm font-medium" style={{ color: themeColors.text.secondary }}>
+                              Válido Desde
+                            </p>
+                            <p className="font-semibold" style={{ color: themeColors.text.primary }}>
+                              {formatDate(discount.validFrom)}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Tags */}
+                {discount.tags && discount.tags.length > 0 && (
+                  <div
+                    className="p-4 rounded-xl"
+                    style={{ backgroundColor: themeColors.surface + "50" }}
+                  >
+                    <h3 className="font-semibold mb-3" style={{ color: themeColors.text.primary }}>
+                      Etiquetas
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {discount.tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="px-3 py-1 rounded-full text-sm font-medium"
+                          style={{
+                            backgroundColor: `${themeColors.primary}20`,
+                            color: themeColors.primary,
+                          }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Notas */}
+                {discount.notes && (
+                  <div
+                    className="p-4 rounded-xl"
+                    style={{ backgroundColor: themeColors.surface + "50" }}
+                  >
+                    <h3 className="font-semibold mb-3" style={{ color: themeColors.text.primary }}>
+                      Notas
+                    </h3>
+                    <p style={{ color: themeColors.text.secondary }}>
+                      {discount.notes}
+                    </p>
+                  </div>
+                )}
+
+                {/* Custom Fields */}
+                {discount.customFields && Object.keys(discount.customFields).length > 0 && (
+                  <div
+                    className="p-4 rounded-xl"
+                    style={{ backgroundColor: themeColors.surface + "50" }}
+                  >
+                    <h3 className="font-semibold mb-3" style={{ color: themeColors.text.primary }}>
+                      Campos Personalizados
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {Object.entries(discount.customFields).map(([key, value]) => (
+                        <div key={key} className="flex flex-col gap-1">
+                          <p className="text-sm font-medium" style={{ color: themeColors.text.secondary }}>
+                            {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          </p>
+                          <p className="font-semibold" style={{ color: themeColors.text.primary }}>
+                            {typeof value === 'boolean' ? (value ? 'Sí' : 'No') : String(value)}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </motion.div>
             )}
 
@@ -747,6 +1141,84 @@ export default function DiscountDetailPage() {
             )}
           </div>
         </motion.div>
+
+        {/* Modal de Confirmación de Eliminación */}
+        {showDeleteModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={() => !deleting && setShowDeleteModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="rounded-2xl border p-6 max-w-md w-full"
+              style={{
+                backgroundColor: themeColors.surface,
+                borderColor: themeColors.primary + "30",
+              }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-red-100 dark:bg-red-900/20">
+                  <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold" style={{ color: themeColors.text.primary }}>
+                    Eliminar Descuento
+                  </h3>
+                  <p className="text-sm" style={{ color: themeColors.text.secondary }}>
+                    Esta acción no se puede deshacer
+                  </p>
+                </div>
+              </div>
+
+              <p className="mb-6" style={{ color: themeColors.text.secondary }}>
+                ¿Estás seguro de que deseas eliminar el descuento <strong style={{ color: themeColors.text.primary }}>{discount?.nombre}</strong>?
+                {discount && discount.usoActual > 0 && (
+                  <span className="block mt-2 text-red-600 dark:text-red-400">
+                    Este descuento ya ha sido usado {discount.usoActual} {discount.usoActual === 1 ? 'vez' : 'veces'}.
+                  </span>
+                )}
+              </p>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  disabled={deleting}
+                  className="flex-1 px-4 py-2 rounded-xl font-medium transition-all duration-200 border"
+                  style={{
+                    backgroundColor: themeColors.surface + "60",
+                    borderColor: themeColors.primary + "30",
+                    color: themeColors.text.primary,
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="flex-1 px-4 py-2 rounded-xl font-medium transition-all duration-200 bg-red-600 hover:bg-red-700 text-white disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {deleting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      Eliminando...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      Eliminar
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </div>
     </AdminLayout>
   );

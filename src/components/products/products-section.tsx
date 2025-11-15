@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
+import { api, ProductWithDiscounts, ProductDiscount } from "@/api";
 import { ProductsHero } from "./products-hero";
 import { ProductsFilters } from "./products-filters";
 import { ProductsGrid } from "./products-grid";
@@ -339,8 +341,53 @@ export interface ProductFilters {
   onSaleOnly: boolean;
 }
 
+// Tipo local para ProductsGrid (temporalmente, hasta tener todos los campos del backend)
+interface GridProduct {
+  id: string;
+  name: string;
+  brand: string;
+  supplier: string;
+  image: string;
+  price: number;
+  originalPrice?: number;
+  description: string;
+  category: string;
+  subcategory: string;
+  inStock: boolean;
+  stockQuantity: number;
+  rating?: number;
+  reviews?: number;
+  tags: string[];
+  specifications: Record<string, string>;
+  // Campos adicionales para mostrar descuentos
+  pricing?: {
+    base_price: number;
+    final_price: number;
+    total_savings: number;
+    percentage_saved: number;
+    has_discount: boolean;
+  };
+  discounts?: {
+    total_applicable: number;
+  };
+  bestAdditionalDiscount?: {
+    type: string;
+    description: string;
+    potentialSavings: number;
+    badge: string;
+  } | null;
+}
+
 export function ProductsSection() {
-  const [products, setProducts] = useState(mockProducts);
+  // Estado para productos de la API
+  const [apiProducts, setApiProducts] = useState<ProductWithDiscounts[]>([]);
+  const [displayProducts, setDisplayProducts] = useState<GridProduct[]>([]);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+  const PRODUCTS_PER_PAGE = 20;
+
+  // Estado para filtros UI
   const [filters, setFilters] = useState<ProductFilters>({
     search: "",
     category: "all",
@@ -355,103 +402,239 @@ export function ProductsSection() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Aplicar filtros
+  // Adaptar ProductWithDiscounts al formato esperado por ProductsGrid
+  const adaptProducts = (products: ProductWithDiscounts[]): GridProduct[] => {
+    return products.map((p) => {
+      // Calcular el mejor descuento adicional disponible
+      const bestAdditionalDiscount = getBestAdditionalDiscount(p);
+
+      return {
+        id: p.id,
+        name: p.name || p.title,
+        brand: p.brandId || "Sin marca",
+        supplier: p.distributorCode || "Proveedor",
+        image: p.productImages?.[0] || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400",
+        price: p.pricing.final_price, // Precio con descuento aplicado
+        originalPrice: p.pricing.has_discount ? p.pricing.base_price : undefined,
+        description: p.shortDescription || p.fullDescription || "",
+        category: p.categoryCode || "General",
+        subcategory: p.categoryCode || "General",
+        inStock: p.stockQuantity > 0,
+        stockQuantity: p.stockQuantity,
+        rating: 4.5, // Placeholder
+        reviews: 0, // Placeholder
+        tags: [],
+        specifications: {},
+        // Campos adicionales para descuentos
+        pricing: p.pricing,
+        discounts: p.discounts,
+        bestAdditionalDiscount,
+      };
+    });
+  };
+
+  // Analizar todos los descuentos disponibles y retornar el mejor
+  const getBestAdditionalDiscount = (product: ProductWithDiscounts): {
+    type: string;
+    description: string;
+    potentialSavings: number;
+    badge: string;
+  } | null => {
+    const allDiscounts: ProductDiscount[] = [
+      ...(product.discounts.direct_discounts || []),
+      ...(product.discounts.promotional_discounts || []),
+      ...(product.discounts.min_purchase_discounts || []),
+      ...(product.discounts.tiered_volume_discounts || []),
+      ...(product.discounts.loyalty_discounts || []),
+    ];
+
+    if (allDiscounts.length === 0) return null;
+
+    // Encontrar el descuento con mayor ahorro potencial
+    let bestDiscount: ProductDiscount | undefined;
+    let maxSavings = 0;
+
+    allDiscounts.forEach((discount) => {
+      const potentialSavings = discount.potential_savings || 0;
+      if (potentialSavings > maxSavings) {
+        maxSavings = potentialSavings;
+        bestDiscount = discount;
+      }
+    });
+
+    if (!bestDiscount) return null;
+
+    // Generar descripción y badge según el tipo de descuento
+    let description = "";
+    let badge = "";
+
+    switch (bestDiscount.type) {
+      case "bogo":
+      case "buy_x_get_y":
+        description = bestDiscount.name || "Oferta especial";
+        badge = "🎁 PROMO";
+        break;
+      
+      case "bundle":
+        description = bestDiscount.name || "Compra en pack";
+        badge = "📦 PACK";
+        break;
+      
+      case "tiered_volume":
+      case "volume":
+        const minQty = bestDiscount.min_quantity || 2;
+        description = `Comprando ${minQty}+ unidades`;
+        badge = `🔢 x${minQty}`;
+        break;
+      
+      case "min_purchase":
+        const minAmount = bestDiscount.min_purchase_amount || 0;
+        description = `Comprando por $${minAmount.toLocaleString()}+`;
+        badge = "💰 MIN";
+        break;
+      
+      case "loyalty":
+        description = bestDiscount.name || "Descuento por fidelidad";
+        badge = "⭐ LOYALTY";
+        break;
+      
+      default:
+        description = bestDiscount.name || "Descuento adicional";
+        badge = "🏷️ OFERTA";
+    }
+
+    return {
+      type: bestDiscount.type,
+      description,
+      potentialSavings: maxSavings,
+      badge,
+    };
+  };
+
+  // Cargar productos desde la API
   useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setIsLoadingProducts(true);
+        console.log("🛍️ Cargando productos página:", currentPage);
+
+        const params: {
+          page: number;
+          limit: number;
+          category?: string;
+          brand?: string;
+          search?: string;
+          minPrice?: number;
+          maxPrice?: number;
+          inStock?: boolean;
+        } = {
+          page: currentPage,
+          limit: PRODUCTS_PER_PAGE,
+        };
+
+        // Aplicar filtros a la API si están activos
+        if (filters.search) params.search = filters.search;
+        if (filters.category !== "all") params.category = filters.category;
+        if (filters.brand !== "all") params.brand = filters.brand;
+        if (filters.inStockOnly) params.inStock = true;
+
+        // Filtro de precio
+        if (filters.priceRange !== "all") {
+          const range = filterData.priceRanges.find(
+            (r) => r.id === filters.priceRange,
+          );
+          if (range) {
+            if (range.min > 0) params.minPrice = range.min;
+            if (range.max < Infinity) params.maxPrice = range.max;
+          }
+        }
+
+        const response = await api.product.getProductsWithDiscounts(params);
+
+        console.log("📦 Respuesta completa de la API:", response);
+
+        if (response.success && response.data) {
+          // La respuesta tiene estructura: { data: { data: Array(20) } }
+          // Necesitamos acceder a response.data.data
+          let productsArray: ProductWithDiscounts[] = [];
+          let totalCount = 0;
+
+          // Type assertion para manejar múltiples estructuras posibles
+          const data = response.data as ProductWithDiscounts[] | { data?: ProductWithDiscounts[]; products?: ProductWithDiscounts[]; total?: number };
+
+          if (Array.isArray(data)) {
+            // Caso 1: response.data es directamente un array
+            productsArray = data;
+            totalCount = data.length;
+          } else if (data.data && Array.isArray(data.data)) {
+            // Caso 2: response.data.data contiene el array (caso actual del backend)
+            productsArray = data.data;
+            totalCount = data.data.length;
+          } else if (data.products && Array.isArray(data.products)) {
+            // Caso 3: response.data.products contiene el array
+            productsArray = data.products;
+            totalCount = data.total || data.products.length;
+          }
+
+          console.log("✅ Productos cargados:", productsArray.length);
+          console.log("📊 Primer producto:", productsArray[0]);
+          
+          setApiProducts(productsArray);
+          setDisplayProducts(adaptProducts(productsArray));
+          setTotalProducts(totalCount);
+        } else {
+          console.error("❌ Error al cargar productos:", response.message);
+          toast.error("Error al cargar productos", {
+            description: response.message || "Intente nuevamente",
+          });
+          setApiProducts([]);
+          setDisplayProducts([]);
+          setTotalProducts(0);
+        }
+      } catch (error) {
+        console.error("❌ Error en loadProducts:", error);
+        toast.error("Error al cargar productos", {
+          description: "No se pudo conectar con el servidor",
+        });
+        setApiProducts([]);
+        setDisplayProducts([]);
+        setTotalProducts(0);
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    };
+
+    loadProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, filters.search, filters.category, filters.brand, filters.priceRange, filters.inStockOnly]);
+
+  // Aplicar filtros locales (los que no se envían a la API)
+  useEffect(() => {
+    if (apiProducts.length === 0) {
+      setDisplayProducts([]);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
 
     setTimeout(() => {
-      let filtered = [...mockProducts];
+      let filtered = [...apiProducts];
 
-      // Búsqueda por texto
-      if (filters.search) {
-        filtered = filtered.filter(
-          (product) =>
-            product.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-            product.brand
-              .toLowerCase()
-              .includes(filters.search.toLowerCase()) ||
-            product.description
-              .toLowerCase()
-              .includes(filters.search.toLowerCase()),
-        );
-      }
-
-      // Filtro por categoría
-      if (filters.category !== "all") {
-        const categoryName = filterData.categories.find(
-          (c) => c.id === filters.category,
-        )?.name;
-        if (categoryName) {
-          filtered = filtered.filter(
-            (product) => product.category === categoryName,
-          );
-        }
-      }
-
-      // Filtro por subcategoría
-      if (filters.subcategory !== "all") {
-        filtered = filtered.filter(
-          (product) => product.subcategory === filters.subcategory,
-        );
-      }
-
-      // Filtro por marca
-      if (filters.brand !== "all") {
-        const brandName = filterData.brands.find(
-          (b) => b.id === filters.brand,
-        )?.name;
-        if (brandName) {
-          filtered = filtered.filter((product) => product.brand === brandName);
-        }
-      }
-
-      // Filtro por proveedor
-      if (filters.supplier !== "all") {
-        const supplierName = filterData.suppliers.find(
-          (s) => s.id === filters.supplier,
-        )?.name;
-        if (supplierName) {
-          filtered = filtered.filter(
-            (product) => product.supplier === supplierName,
-          );
-        }
-      }
-
-      // Filtro por rango de precio
-      if (filters.priceRange !== "all") {
-        const range = filterData.priceRanges.find(
-          (r) => r.id === filters.priceRange,
-        );
-        if (range) {
-          filtered = filtered.filter(
-            (product) =>
-              product.price >= range.min && product.price <= range.max,
-          );
-        }
-      }
-
-      // Solo productos en stock
-      if (filters.inStockOnly) {
-        filtered = filtered.filter(
-          (product) => product.inStock && product.stockQuantity > 0,
-        );
-      }
-
-      // Solo productos en oferta
+      // Solo productos en oferta (local)
       if (filters.onSaleOnly) {
         filtered = filtered.filter(
-          (product) =>
-            product.originalPrice && product.originalPrice > product.price,
+          (product) => product.pricing.has_discount,
         );
       }
 
       // Ordenamiento
       switch (filters.sortBy) {
         case "price-asc":
-          filtered.sort((a, b) => a.price - b.price);
+          filtered.sort((a, b) => a.pricing.final_price - b.pricing.final_price);
           break;
         case "price-desc":
-          filtered.sort((a, b) => b.price - a.price);
+          filtered.sort((a, b) => b.pricing.final_price - a.pricing.final_price);
           break;
         case "name-asc":
           filtered.sort((a, b) => a.name.localeCompare(b.name));
@@ -459,28 +642,70 @@ export function ProductsSection() {
         case "name-desc":
           filtered.sort((a, b) => b.name.localeCompare(a.name));
           break;
-        case "rating":
-          filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-          break;
         case "newest":
-          // Simular ordenamiento por fecha (usando ID como proxy)
-          filtered.sort((a, b) => parseInt(b.id) - parseInt(a.id));
+          // Ordenar por fecha de creación
+          filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
           break;
         default:
-          // Relevancia (orden original con productos en oferta primero)
+          // Relevancia (productos con descuento primero)
           filtered.sort((a, b) => {
-            const aOnSale =
-              a.originalPrice && a.originalPrice > a.price ? 1 : 0;
-            const bOnSale =
-              b.originalPrice && b.originalPrice > b.price ? 1 : 0;
+            const aOnSale = a.pricing.has_discount ? 1 : 0;
+            const bOnSale = b.pricing.has_discount ? 1 : 0;
             return bOnSale - aOnSale;
           });
       }
 
-      setProducts(filtered);
+      setDisplayProducts(adaptProducts(filtered));
       setIsLoading(false);
-    }, 300); // Simular delay de red
-  }, [filters]);
+    }, 100);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiProducts.length, filters.onSaleOnly, filters.sortBy]);
+
+  // Manejar cambio de página
+  const handlePageChange = (newPage: number) => {
+    const totalPages = Math.ceil(totalProducts / PRODUCTS_PER_PAGE);
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const totalPages = Math.ceil(totalProducts / PRODUCTS_PER_PAGE);
+
+  // Generar números de página para mostrar
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const maxVisible = 7; // Máximo de números visibles
+
+    if (totalPages <= maxVisible) {
+      // Mostrar todas las páginas si son pocas
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Mostrar con ellipsis
+      if (currentPage <= 3) {
+        // Inicio
+        for (let i = 1; i <= 5; i++) pages.push(i);
+        pages.push("...");
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        // Final
+        pages.push(1);
+        pages.push("...");
+        for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i);
+      } else {
+        // Medio
+        pages.push(1);
+        pages.push("...");
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
+        pages.push("...");
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-purple-900">
@@ -488,7 +713,7 @@ export function ProductsSection() {
       <ProductsHero />
 
       {/* Stats Section */}
-      <ProductsStats totalProducts={mockProducts.length} />
+      <ProductsStats totalProducts={totalProducts} />
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
@@ -505,13 +730,89 @@ export function ProductsSection() {
           {/* Grid de productos */}
           <div className="flex-1">
             <ProductsGrid
-              products={products}
+              products={displayProducts}
               viewMode={viewMode}
               onViewModeChange={setViewMode}
-              isLoading={isLoading}
+              isLoading={isLoading || isLoadingProducts}
               filters={filters}
               onFiltersChange={setFilters}
             />
+
+            {/* Paginación Elegante */}
+            {!isLoadingProducts && totalProducts > 0 && totalPages > 1 && (
+              <div className="mt-12 flex flex-col items-center gap-4">
+                {/* Información de productos */}
+                <div className="text-sm text-slate-600 dark:text-slate-400">
+                  Mostrando <span className="font-semibold text-slate-900 dark:text-white">{((currentPage - 1) * PRODUCTS_PER_PAGE) + 1}</span> - <span className="font-semibold text-slate-900 dark:text-white">{Math.min(currentPage * PRODUCTS_PER_PAGE, totalProducts)}</span> de <span className="font-semibold text-slate-900 dark:text-white">{totalProducts}</span> productos
+                </div>
+
+                {/* Controles de paginación */}
+                <div className="flex items-center gap-2">
+                  {/* Botón Anterior */}
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="group relative px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-slate-200 dark:disabled:hover:border-slate-700 disabled:hover:bg-white dark:disabled:hover:bg-slate-800 transition-all duration-200"
+                  >
+                    <div className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-slate-600 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Anterior</span>
+                    </div>
+                  </button>
+
+                  {/* Números de página */}
+                  <div className="flex items-center gap-1">
+                    {getPageNumbers().map((page, index) => {
+                      if (page === "...") {
+                        return (
+                          <span
+                            key={`ellipsis-${index}`}
+                            className="px-3 py-2 text-slate-400 dark:text-slate-600"
+                          >
+                            ...
+                          </span>
+                        );
+                      }
+
+                      const pageNum = page as number;
+                      const isActive = pageNum === currentPage;
+
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => handlePageChange(pageNum)}
+                          className={`
+                            min-w-[40px] h-10 px-3 rounded-lg font-medium text-sm transition-all duration-200
+                            ${isActive 
+                              ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 scale-105" 
+                              : "bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400"
+                            }
+                          `}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Botón Siguiente */}
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="group relative px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-slate-200 dark:disabled:hover:border-slate-700 disabled:hover:bg-white dark:disabled:hover:bg-slate-800 transition-all duration-200"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Siguiente</span>
+                      <svg className="w-4 h-4 text-slate-600 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -23,10 +23,15 @@ import {
   Link,
   AlertCircle,
   Info,
+  Check,
+  X,
 } from "lucide-react";
 import { ThemedSelect } from "@/components/ui/themed-select";
+import { CustomSelect } from "@/components/ui/custom-select";
 import { useTheme } from "@/contexts/theme-context";
 import { AdminLayout } from "@/components/admin/admin-layout";
+import http from "@/api/http-client";
+import { toast } from "sonner";
 
 // Schema de validación
 const discountSchema = z.object({
@@ -50,7 +55,23 @@ type DiscountFormData = z.infer<typeof discountSchema>;
 // Tipos para condiciones y relaciones
 interface DiscountCondition {
   id: string;
-  tipoCondicion: 'CATEGORIA' | 'PRODUCTO' | 'MONTO_MINIMO' | 'CANTIDAD_MINIMA' | 'CLIENTE_VIP';
+  tipoCondicion: 
+    | 'CATEGORIA' 
+    | 'PRODUCTO' 
+    | 'MARCA'
+    | 'MONTO_MINIMO' 
+    | 'CANTIDAD_MINIMA'
+    | 'CANTIDAD_MAXIMA'
+    | 'CLIENTE_VIP'
+    | 'CLIENTE_NUEVO'
+    | 'CLIENTE_MAYORISTA'
+    | 'METODO_PAGO'
+    | 'REGION'
+    | 'CANAL_VENTA'
+    | 'DIA_SEMANA'
+    | 'RANGO_HORARIO'
+    | 'EXCLUIR_OFERTAS'
+    | 'PRIMER_PEDIDO';
   valorCondicion: string | number;
   descripcion?: string;
 }
@@ -58,7 +79,7 @@ interface DiscountCondition {
 interface DiscountRelation {
   id: string;
   descuentoRelacionadoId: string;
-  tipoRelacion: 'CASCADA' | 'SOBRESCRIBIR' | 'REQUERIDO' | 'CONFLICTO';
+  tipoRelacion: 'CASCADA' | 'SOBRESCRIBIR' | 'REQUERIDO' | 'CONFLICTO' | 'COMBINABLE';
 }
 
 export default function NewDiscountPage() {
@@ -92,16 +113,108 @@ export default function NewDiscountPage() {
   const onSubmit = async (data: DiscountFormData) => {
     setLoading(true);
     try {
-      // Simular guardado
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      console.log("Datos del descuento:", data);
-      console.log("Condiciones:", conditions);
-      console.log("Relaciones:", relations);
-      
-      router.push("/admin/descuentos");
+      console.log('📝 Preparando datos para enviar...');
+
+      // Mapear tipo de descuento
+      let discountType: 'percentage' | 'fixed' | 'bogo' = 'percentage';
+      if (data.tipo === 'PORCENTAJE') {
+        discountType = 'percentage';
+      } else if (data.tipo === 'MONTO_FIJO') {
+        discountType = 'fixed';
+      } else if (data.tipo === 'COMPRA_LLEVA') {
+        discountType = 'bogo';
+      }
+
+      // Construir objeto de condiciones para el backend
+      const backendConditions: Record<string, unknown> = {};
+      const applicableTo: Array<{ type: string; value: string }> = [];
+
+      conditions.forEach(condition => {
+        switch (condition.tipoCondicion) {
+          case 'MONTO_MINIMO':
+            backendConditions.min_purchase_amount = condition.valorCondicion;
+            break;
+          case 'CANTIDAD_MINIMA':
+            backendConditions.min_items = condition.valorCondicion;
+            break;
+          case 'CANTIDAD_MAXIMA':
+            backendConditions.max_items = condition.valorCondicion;
+            break;
+          case 'CLIENTE_VIP':
+          case 'CLIENTE_NUEVO':
+          case 'CLIENTE_MAYORISTA':
+            backendConditions.customer_type = condition.valorCondicion;
+            break;
+          case 'CATEGORIA':
+            applicableTo.push({ type: 'category', value: String(condition.valorCondicion) });
+            break;
+          case 'PRODUCTO':
+            applicableTo.push({ type: 'product', value: String(condition.valorCondicion) });
+            break;
+          case 'MARCA':
+            if (!backendConditions.applicable_brands) {
+              backendConditions.applicable_brands = [];
+            }
+            (backendConditions.applicable_brands as string[]).push(String(condition.valorCondicion));
+            break;
+          case 'METODO_PAGO':
+            backendConditions.payment_methods = String(condition.valorCondicion).split(',').map(s => s.trim());
+            break;
+          case 'REGION':
+            backendConditions.regions = String(condition.valorCondicion).split(',').map(s => s.trim());
+            break;
+          case 'CANAL_VENTA':
+            backendConditions.channel = condition.valorCondicion;
+            break;
+          case 'DIA_SEMANA':
+            backendConditions.days_of_week = String(condition.valorCondicion).split(',').map(s => s.trim());
+            break;
+          case 'RANGO_HORARIO':
+            backendConditions.time_range = condition.valorCondicion;
+            break;
+          case 'EXCLUIR_OFERTAS':
+            backendConditions.exclude_sale_items = String(condition.valorCondicion).toLowerCase() === 'true';
+            break;
+          case 'PRIMER_PEDIDO':
+            backendConditions.first_order_only = String(condition.valorCondicion).toLowerCase() === 'true';
+            break;
+        }
+      });
+
+      // Construir payload para la API
+      const payload = {
+        name: data.nombre,
+        discount_id: data.codigoDescuento || `DSC${Date.now()}`,
+        description: data.descripcion,
+        discount_type: discountType,
+        discount_value: data.valor,
+        currency: data.moneda,
+        valid_from: new Date().toISOString(),
+        valid_to: new Date(data.validoHasta).toISOString(),
+        is_active: data.activo,
+        status: data.activo ? "active" : "inactive",
+        is_cumulative: data.acumulativo,
+        priority: data.prioridad,
+        usage_limit: data.usoMaximo,
+        conditions: Object.keys(backendConditions).length > 0 ? backendConditions : undefined,
+        applicable_to: applicableTo.length > 0 ? applicableTo : undefined,
+        customFields: {
+          modo_aplicacion: data.modoAplicacion,
+          tipo_descuento_frontend: data.tipoDescuento,
+        }
+      };
+
+      console.log('📦 Payload a enviar:', JSON.stringify(payload, null, 2));
+
+      const response = await http.post('/discount', payload);
+
+      console.log('✅ Respuesta de la API:', response);
+
+      toast.success('Descuento creado exitosamente');
+      router.push('/admin/descuentos');
     } catch (error) {
-      console.error("Error al guardar descuento:", error);
+      console.error('❌ Error al guardar descuento:', error);
+      toast.error('Error al crear el descuento');
     } finally {
       setLoading(false);
     }
@@ -164,12 +277,28 @@ export default function NewDiscountPage() {
         return <Package className="w-4 h-4" />;
       case "PRODUCTO":
         return <Tag className="w-4 h-4" />;
+      case "MARCA":
+        return <Tag className="w-4 h-4" />;
       case "MONTO_MINIMO":
         return <DollarSign className="w-4 h-4" />;
       case "CANTIDAD_MINIMA":
+      case "CANTIDAD_MAXIMA":
         return <ShoppingCart className="w-4 h-4" />;
       case "CLIENTE_VIP":
+      case "CLIENTE_NUEVO":
+      case "CLIENTE_MAYORISTA":
         return <Crown className="w-4 h-4" />;
+      case "METODO_PAGO":
+        return <DollarSign className="w-4 h-4" />;
+      case "REGION":
+      case "CANAL_VENTA":
+        return <Target className="w-4 h-4" />;
+      case "DIA_SEMANA":
+      case "RANGO_HORARIO":
+        return <Calendar className="w-4 h-4" />;
+      case "EXCLUIR_OFERTAS":
+      case "PRIMER_PEDIDO":
+        return <AlertCircle className="w-4 h-4" />;
       default:
         return <Target className="w-4 h-4" />;
     }
@@ -194,12 +323,34 @@ export default function NewDiscountPage() {
         return "ID de la categoría";
       case "PRODUCTO":
         return "ID del producto";
+      case "MARCA":
+        return "ID de la marca";
       case "MONTO_MINIMO":
         return "Monto mínimo en pesos";
       case "CANTIDAD_MINIMA":
         return "Cantidad mínima de items";
+      case "CANTIDAD_MAXIMA":
+        return "Cantidad máxima de items";
       case "CLIENTE_VIP":
-        return "Tipo de cliente VIP";
+        return "vip, premium, gold, etc.";
+      case "CLIENTE_NUEVO":
+        return "true/false";
+      case "CLIENTE_MAYORISTA":
+        return "wholesale, distributor";
+      case "METODO_PAGO":
+        return "credit_card, paypal, etc.";
+      case "REGION":
+        return "colombia, usa, etc.";
+      case "CANAL_VENTA":
+        return "online, retail, mobile";
+      case "DIA_SEMANA":
+        return "lunes, martes, etc.";
+      case "RANGO_HORARIO":
+        return "09:00-18:00";
+      case "EXCLUIR_OFERTAS":
+        return "true/false";
+      case "PRIMER_PEDIDO":
+        return "true/false";
       default:
         return "Valor de la condición";
     }
@@ -274,13 +425,13 @@ export default function NewDiscountPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="backdrop-blur-xl rounded-2xl border overflow-hidden"
+          className="backdrop-blur-xl rounded-2xl border"
           style={{
             backgroundColor: themeColors.surface + "70",
             borderColor: themeColors.primary + "30",
           }}
         >
-          <div className="flex border-b" style={{ borderColor: themeColors.primary + "20" }}>
+          <div className="flex border-b overflow-hidden rounded-t-2xl" style={{ borderColor: themeColors.primary + "20" }}>
             {[
               { id: 'general', label: 'Información General', icon: Info },
               { id: 'condiciones', label: 'Condiciones', icon: Target },
@@ -680,28 +831,33 @@ export default function NewDiscountPage() {
                       name="activo"
                       control={control}
                       render={({ field: { onChange, value } }) => (
-                        <label className="flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all duration-200"
-                          style={{
-                            backgroundColor: value ? `${themeColors.secondary}10` : themeColors.surface + "50",
-                            borderColor: value ? themeColors.secondary : themeColors.primary + "30",
-                          }}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={value}
-                            onChange={onChange}
-                            className="w-5 h-5 rounded"
-                            style={{ accentColor: themeColors.secondary }}
-                          />
-                          <div>
-                            <span className="font-medium" style={{ color: themeColors.text.primary }}>
-                              Descuento Activo
-                            </span>
-                            <p className="text-sm" style={{ color: themeColors.text.secondary }}>
-                              El descuento estará disponible inmediatamente
-                            </p>
+                        <div className="flex items-center justify-between p-4 rounded-xl" style={{ backgroundColor: themeColors.surface + "50" }}>
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: value ? "#10b981" + "20" : "#ef4444" + "20" }}>
+                              {value ? <Check className="w-5 h-5" style={{ color: "#10b981" }} /> : <X className="w-5 h-5" style={{ color: "#ef4444" }} />}
+                            </div>
+                            <div>
+                              <p className="font-medium" style={{ color: themeColors.text.primary }}>
+                                Estado del Descuento
+                              </p>
+                              <p className="text-sm" style={{ color: themeColors.text.secondary }}>
+                                {value ? "El descuento estará activo inmediatamente" : "El descuento se creará como inactivo"}
+                              </p>
+                            </div>
                           </div>
-                        </label>
+                          <button
+                            type="button"
+                            onClick={() => onChange(!value)}
+                            className="relative w-14 h-7 rounded-full transition-all duration-300"
+                            style={{ backgroundColor: value ? "#10b981" : "#ef4444" + "40" }}
+                          >
+                            <motion.div
+                              className="absolute top-0.5 w-6 h-6 bg-white rounded-full shadow-md"
+                              animate={{ left: value ? "calc(100% - 26px)" : "2px" }}
+                              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                            />
+                          </button>
+                        </div>
                       )}
                     />
                   </div>
@@ -767,28 +923,43 @@ export default function NewDiscountPage() {
 
                           <div className="flex-1 space-y-3">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              <select
+                              <CustomSelect
                                 value={condition.tipoCondicion}
-                                onChange={(e) => updateCondition(condition.id, 'tipoCondicion', e.target.value)}
-                                className="px-4 py-3 rounded-xl border text-sm transition-all duration-200 focus:outline-none focus:ring-2"
-                                style={{
-                                  backgroundColor: themeColors.surface + "50",
-                                  borderColor: themeColors.primary + "30",
-                                  color: themeColors.text.primary,
-                                }}
-                              >
-                                <option value="CATEGORIA">Categoría</option>
-                                <option value="PRODUCTO">Producto</option>
-                                <option value="MONTO_MINIMO">Monto Mínimo</option>
-                                <option value="CANTIDAD_MINIMA">Cantidad Mínima</option>
-                                <option value="CLIENTE_VIP">Cliente VIP</option>
-                              </select>
+                                onChange={(value) => updateCondition(condition.id, 'tipoCondicion', value)}
+                                options={[
+                                  { value: "CATEGORIA", label: "Categoría", description: "Filtrar por categoría de productos" },
+                                  { value: "PRODUCTO", label: "Producto", description: "Producto específico" },
+                                  { value: "MARCA", label: "Marca", description: "Filtrar por marca" },
+                                  { value: "MONTO_MINIMO", label: "Monto Mínimo", description: "Compra mínima requerida" },
+                                  { value: "CANTIDAD_MINIMA", label: "Cantidad Mínima", description: "Mínimo de items" },
+                                  { value: "CANTIDAD_MAXIMA", label: "Cantidad Máxima", description: "Máximo de items" },
+                                  { value: "CLIENTE_VIP", label: "Cliente VIP", description: "Solo clientes VIP/Premium" },
+                                  { value: "CLIENTE_NUEVO", label: "Cliente Nuevo", description: "Primera compra" },
+                                  { value: "CLIENTE_MAYORISTA", label: "Cliente Mayorista", description: "Wholesale/Distribuidor" },
+                                  { value: "METODO_PAGO", label: "Método de Pago", description: "Tarjeta, PayPal, etc." },
+                                  { value: "REGION", label: "Región", description: "Ubicación geográfica" },
+                                  { value: "CANAL_VENTA", label: "Canal de Venta", description: "Online, retail, mobile" },
+                                  { value: "DIA_SEMANA", label: "Día de Semana", description: "Días específicos" },
+                                  { value: "RANGO_HORARIO", label: "Rango Horario", description: "Horarios específicos" },
+                                  { value: "EXCLUIR_OFERTAS", label: "Excluir Ofertas", description: "No aplica en items en oferta" },
+                                  { value: "PRIMER_PEDIDO", label: "Primer Pedido", description: "Solo para nuevos clientes" },
+                                ]}
+                                placeholder="Seleccionar tipo de condición"
+                              />
 
                               <input
-                                type={condition.tipoCondicion === 'MONTO_MINIMO' || condition.tipoCondicion === 'CANTIDAD_MINIMA' ? 'number' : 'text'}
+                                type={
+                                  condition.tipoCondicion === 'MONTO_MINIMO' || 
+                                  condition.tipoCondicion === 'CANTIDAD_MINIMA' ||
+                                  condition.tipoCondicion === 'CANTIDAD_MAXIMA'
+                                    ? 'number' 
+                                    : 'text'
+                                }
                                 value={condition.valorCondicion}
                                 onChange={(e) => updateCondition(condition.id, 'valorCondicion', 
-                                  condition.tipoCondicion === 'MONTO_MINIMO' || condition.tipoCondicion === 'CANTIDAD_MINIMA' 
+                                  condition.tipoCondicion === 'MONTO_MINIMO' || 
+                                  condition.tipoCondicion === 'CANTIDAD_MINIMA' ||
+                                  condition.tipoCondicion === 'CANTIDAD_MAXIMA'
                                     ? Number(e.target.value) 
                                     : e.target.value
                                 )}
@@ -898,21 +1069,18 @@ export default function NewDiscountPage() {
 
                           <div className="flex-1 space-y-3">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              <select
+                              <CustomSelect
                                 value={relation.tipoRelacion}
-                                onChange={(e) => updateRelation(relation.id, 'tipoRelacion', e.target.value)}
-                                className="px-4 py-3 rounded-xl border text-sm transition-all duration-200 focus:outline-none focus:ring-2"
-                                style={{
-                                  backgroundColor: themeColors.surface + "50",
-                                  borderColor: themeColors.primary + "30",
-                                  color: themeColors.text.primary,
-                                }}
-                              >
-                                <option value="CASCADA">Cascada</option>
-                                <option value="SOBRESCRIBIR">Sobrescribir</option>
-                                <option value="REQUERIDO">Requerido</option>
-                                <option value="CONFLICTO">Conflicto</option>
-                              </select>
+                                onChange={(value) => updateRelation(relation.id, 'tipoRelacion', value)}
+                                options={[
+                                  { value: "CASCADA", label: "Cascada", description: "Se aplica después del otro descuento" },
+                                  { value: "SOBRESCRIBIR", label: "Sobrescribir", description: "Reemplaza al otro descuento" },
+                                  { value: "REQUERIDO", label: "Requerido", description: "Requiere el otro descuento primero" },
+                                  { value: "CONFLICTO", label: "Conflicto", description: "No se puede usar con el otro" },
+                                  { value: "COMBINABLE", label: "Combinable", description: "Se pueden usar juntos" },
+                                ]}
+                                placeholder="Seleccionar tipo de relación"
+                              />
 
                               <input
                                 type="text"

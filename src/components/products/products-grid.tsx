@@ -37,6 +37,23 @@ interface Product {
   reviews?: number;
   tags: string[];
   specifications: Record<string, string>;
+  // Campos adicionales para mostrar descuentos
+  pricing?: {
+    base_price: number;
+    final_price: number;
+    total_savings: number;
+    percentage_saved: number;
+    has_discount: boolean;
+  };
+  discounts?: {
+    total_applicable: number;
+  };
+  bestAdditionalDiscount?: {
+    type: string;
+    description: string;
+    potentialSavings: number;
+    badge: string;
+  } | null;
 }
 
 interface ProductsGridProps {
@@ -240,14 +257,48 @@ export function ProductsGrid({
           )}
 
           {/* Price */}
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-xl font-bold text-slate-900 dark:text-white">
-              {formatPrice(product.price)}
-            </span>
-            {isOnSale && (
-              <span className="text-sm text-slate-500 line-through">
-                {formatPrice(product.originalPrice!)}
+          <div className="mb-3">
+            {/* Precio Final (destacado) */}
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                {formatPrice(product.price)}
               </span>
+              {isOnSale && product.pricing?.percentage_saved && (
+                <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                  -{Math.round(product.pricing.percentage_saved)}%
+                </span>
+              )}
+            </div>
+
+            {/* Precio Base (tachado) */}
+            {isOnSale && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-slate-500 dark:text-slate-400 line-through">
+                  {formatPrice(product.originalPrice!)}
+                </span>
+                {product.pricing?.total_savings && product.pricing.total_savings > 0 && (
+                  <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                    Ahorras ${product.pricing.total_savings.toLocaleString()}
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Descuento Adicional Disponible */}
+            {product.bestAdditionalDiscount && product.bestAdditionalDiscount.potentialSavings > 0 && (
+              <div className="mt-2 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-purple-700 dark:text-purple-300">
+                    {product.bestAdditionalDiscount.badge}
+                  </span>
+                  <span className="text-xs text-purple-600 dark:text-purple-400">
+                    {product.bestAdditionalDiscount.description}
+                  </span>
+                </div>
+                <div className="text-xs text-purple-700 dark:text-purple-300 font-medium mt-1">
+                  Ahorro extra: ${product.bestAdditionalDiscount.potentialSavings.toLocaleString()}
+                </div>
+              </div>
             )}
           </div>
 
@@ -377,15 +428,49 @@ export function ProductsGrid({
               </div>
 
               {/* Right side - Price & Actions */}
-              <div className="flex flex-col justify-between items-end ml-4">
+              <div className="flex flex-col justify-between items-end ml-4 min-w-[250px]">
                 {/* Price */}
-                <div className="text-right mb-4">
-                  <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                    {formatPrice(product.price)}
+                <div className="text-right mb-4 w-full">
+                  {/* Precio Final */}
+                  <div className="flex items-center justify-end gap-2 mb-1">
+                    <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                      {formatPrice(product.price)}
+                    </span>
+                    {isOnSale && product.pricing?.percentage_saved && (
+                      <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                        -{Math.round(product.pricing.percentage_saved)}%
+                      </span>
+                    )}
                   </div>
+
+                  {/* Precio Base (tachado) */}
                   {isOnSale && (
-                    <div className="text-sm text-slate-500 line-through">
-                      {formatPrice(product.originalPrice!)}
+                    <div className="flex items-center justify-end gap-2 mb-1">
+                      <span className="text-sm text-slate-500 dark:text-slate-400 line-through">
+                        {formatPrice(product.originalPrice!)}
+                      </span>
+                      {product.pricing?.total_savings && product.pricing.total_savings > 0 && (
+                        <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                          Ahorras ${product.pricing.total_savings.toLocaleString()}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Descuento Adicional */}
+                  {product.bestAdditionalDiscount && product.bestAdditionalDiscount.potentialSavings > 0 && (
+                    <div className="mt-2 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-2">
+                      <div className="flex items-center justify-end gap-2">
+                        <span className="text-xs font-bold text-purple-700 dark:text-purple-300">
+                          {product.bestAdditionalDiscount.badge}
+                        </span>
+                        <span className="text-xs text-purple-600 dark:text-purple-400">
+                          {product.bestAdditionalDiscount.description}
+                        </span>
+                      </div>
+                      <div className="text-xs text-purple-700 dark:text-purple-300 font-medium mt-1 text-right">
+                        Ahorro extra: ${product.bestAdditionalDiscount.potentialSavings.toLocaleString()}
+                      </div>
                     </div>
                   )}
                 </div>

@@ -17,6 +17,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { useTheme } from "@/contexts/theme-context";
+import { toast } from "sonner";
 
 interface ImageData {
   id: string;
@@ -48,88 +49,214 @@ interface AutoAssignModalProps {
   isOpen: boolean;
   onClose: () => void;
   images: ImageData[];
+  onComplete?: () => void;
 }
 
 interface AssignmentResult {
   imageId: string;
-  productId: string;
-  productName: string;
-  productSku: string;
+  imageUrl: string;
+  prodVirtaId?: string;
+  productName?: string;
   confidence: number;
-  status: "pending" | "assigned" | "rejected" | "manual";
+  status: "pending" | "approved" | "rejected" | "manual";
+  wasAutoAssigned?: boolean; // Nueva propiedad para marcar si fue auto-asignada
+  aiAnalysis?: {
+    detectedProduct: string;
+    detectedBrand: string;
+    keywords: string[];
+  };
+  suggestedMatches?: Array<{
+    prodVirtaId: string;
+    productName: string;
+    score: number;
+  }>;
 }
 
 export function AutoAssignModal({
   isOpen,
   onClose,
   images,
+  onComplete,
 }: AutoAssignModalProps) {
   const { themeColors } = useTheme();
-  const [step, setStep] = useState<"config" | "processing" | "review">(
-    "config",
-  );
-  const [assignmentResults, setAssignmentResults] = useState<
-    AssignmentResult[]
-  >([]);
+  const [step, setStep] = useState<"config" | "processing" | "review">("config");
+  const [assignmentResults, setAssignmentResults] = useState<AssignmentResult[]>([]);
   const [confidenceThreshold, setConfidenceThreshold] = useState(80);
   const [autoApprove, setAutoApprove] = useState(false);
   const [processedCount, setProcessedCount] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  // Simular procesamiento de IA
+  // Procesar imágenes con IA
   const processImages = async () => {
     setStep("processing");
     setProcessedCount(0);
+    setIsProcessing(true);
 
-    const results: AssignmentResult[] = [];
-
-    for (let i = 0; i < images.length; i++) {
-      const image = images[i];
-
-      // Simular delay de procesamiento
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      // Simular resultado de IA
-      if (
-        image.aiSuggestions &&
-        image.aiSuggestions.productMatches.length > 0
-      ) {
-        const bestMatch = image.aiSuggestions.productMatches[0];
-        const result: AssignmentResult = {
-          imageId: image.id,
-          productId: bestMatch.productId,
-          productName: bestMatch.productName,
-          productSku: bestMatch.productSku,
-          confidence: bestMatch.confidence,
-          status:
-            bestMatch.confidence >= confidenceThreshold
-              ? "assigned"
-              : "pending",
-        };
-        results.push(result);
-      } else {
-        // Simular que no se encontró coincidencia
-        const result: AssignmentResult = {
-          imageId: image.id,
-          productId: "",
-          productName: "Sin coincidencia encontrada",
-          productSku: "",
-          confidence: 0,
-          status: "manual",
-        };
-        results.push(result);
+    try {
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('jwt_token');
+      
+      if (!token) {
+        toast.error("No autenticado");
+        return;
       }
 
-      setProcessedCount(i + 1);
-    }
+      // Llamar al API para re-analizar las imágenes
+      const response = await fetch("/api/product-images/re-analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          imageIds: images.map(img => img.id),
+        }),
+      });
 
-    setAssignmentResults(results);
-    setStep("review");
+      if (!response.ok) {
+        throw new Error("Error al analizar imágenes");
+      }
+
+      const data = await response.json();
+      
+      console.log("🔍 Respuesta del backend re-analyze:", data);
+
+      if (data.success && data.results) {
+        // Actualizar progreso
+        setProcessedCount(images.length);
+        
+        const results: AssignmentResult[] = [];
+        let autoAssignedCount = 0;
+
+        // Procesar cada resultado
+        for (const result of data.results) {
+          console.log("📦 Procesando resultado:", {
+            imageId: result.imageId,
+            success: result.success,
+            suggestedMatches: result.suggestedMatches,
+            aiAnalysis: result.aiAnalysis
+          });
+          if (!result.success || !result.suggestedMatches || result.suggestedMatches.length === 0) {
+            // Sin coincidencias - marcar como manual
+            results.push({
+              imageId: result.imageId,
+              imageUrl: images.find(img => img.id === result.imageId)?.url || '',
+              confidence: 0,
+              status: "manual" as const,
+              aiAnalysis: result.aiAnalysis,
+            });
+            continue;
+          }
+
+          const bestMatch = result.suggestedMatches[0];
+          const confidencePercent = bestMatch.score;
+          const prodVirtaId = bestMatch.product?.prodVirtaId || bestMatch.prodVirtaId;
+          const productName = bestMatch.product?.name || bestMatch.productName;
+          
+          console.log("🎯 bestMatch:", { 
+            score: confidencePercent, 
+            prodVirtaId, 
+            productName,
+            fullMatch: bestMatch 
+          });
+          
+          console.log("⚙️ Config:", {
+            autoApprove,
+            confidenceThreshold,
+            willAutoAssign: autoApprove && confidencePercent >= confidenceThreshold
+          });
+          
+          // Si auto-aprobar está activado y supera el umbral, asignar inmediatamente
+          if (autoApprove && confidencePercent >= confidenceThreshold) {
+            try {
+              const assignResponse = await fetch("/api/product-images/assign", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                  imageUrl: images.find(img => img.id === result.imageId)?.url || '',
+                  prodVirtaId: prodVirtaId,
+                  visionData: result.aiAnalysis || {},
+                  metadata: {},
+                }),
+              });
+
+              if (assignResponse.ok) {
+                autoAssignedCount++;
+                results.push({
+                  imageId: result.imageId,
+                  imageUrl: images.find(img => img.id === result.imageId)?.url || '',
+                  prodVirtaId: prodVirtaId,
+                  productName: productName,
+                  confidence: confidencePercent,
+                  status: "approved" as const,
+                  wasAutoAssigned: true, // Marcado como auto-asignada
+                  aiAnalysis: result.aiAnalysis,
+                  suggestedMatches: result.suggestedMatches,
+                });
+              } else {
+                // Si falla la asignación automática, marcar como pendiente
+                results.push({
+                  imageId: result.imageId,
+                  imageUrl: images.find(img => img.id === result.imageId)?.url || '',
+                  prodVirtaId: prodVirtaId,
+                  productName: productName,
+                  confidence: confidencePercent,
+                  status: "pending" as const,
+                  aiAnalysis: result.aiAnalysis,
+                  suggestedMatches: result.suggestedMatches,
+                });
+              }
+            } catch (error) {
+              console.error(`Error asignando automáticamente imagen ${result.imageId}:`, error);
+              // Si hay error, marcar como pendiente para revisión manual
+              results.push({
+                imageId: result.imageId,
+                imageUrl: images.find(img => img.id === result.imageId)?.url || '',
+                prodVirtaId: prodVirtaId,
+                productName: productName,
+                confidence: confidencePercent,
+                status: "pending" as const,
+                aiAnalysis: result.aiAnalysis,
+                suggestedMatches: result.suggestedMatches,
+              });
+            }
+          } else {
+            // Por debajo del umbral o auto-aprobar desactivado - marcar como pendiente
+            results.push({
+              imageId: result.imageId,
+              imageUrl: images.find(img => img.id === result.imageId)?.url || '',
+              prodVirtaId: prodVirtaId,
+              productName: productName,
+              confidence: confidencePercent,
+              status: "pending" as const,
+              aiAnalysis: result.aiAnalysis,
+              suggestedMatches: result.suggestedMatches,
+            });
+          }
+        }
+
+        setAssignmentResults(results);
+        
+        if (autoAssignedCount > 0) {
+          toast.success(`${autoAssignedCount} imagen(es) asignadas automáticamente`);
+        }
+        
+        setStep("review");
+      }
+    } catch (error) {
+      console.error("Error procesando imágenes:", error);
+      toast.error("Error al procesar las imágenes");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleAcceptAssignment = (imageId: string) => {
     setAssignmentResults((prev) =>
       prev.map((result) =>
-        result.imageId === imageId ? { ...result, status: "assigned" } : result,
+        result.imageId === imageId ? { ...result, status: "approved" as const } : result,
       ),
     );
   };
@@ -137,23 +264,99 @@ export function AutoAssignModal({
   const handleRejectAssignment = (imageId: string) => {
     setAssignmentResults((prev) =>
       prev.map((result) =>
-        result.imageId === imageId ? { ...result, status: "rejected" } : result,
+        result.imageId === imageId ? { ...result, status: "rejected" as const } : result,
       ),
     );
   };
 
-  const handleApplyAssignments = () => {
-    // Aquí iría la lógica para aplicar las asignaciones
-    const acceptedAssignments = assignmentResults.filter(
-      (r) => r.status === "assigned",
-    );
-    console.log("Aplicando asignaciones:", acceptedAssignments);
-    onClose();
+  const handleApplyAssignments = async () => {
+    // Filtrar solo las que fueron aprobadas MANUALMENTE
+    // (las que NO fueron auto-asignadas durante el procesamiento)
+    const manuallyApproved = assignmentResults.filter(r => {
+      if (r.status !== "approved" || !r.prodVirtaId) return false;
+      
+      // Si auto-aprobar estaba activado, solo las que estaban bajo el umbral son manuales
+      if (autoApprove) {
+        return r.confidence < confidenceThreshold;
+      }
+      
+      // Si auto-aprobar estaba desactivado, TODAS son manuales
+      return true;
+    });
+    
+    if (manuallyApproved.length === 0) {
+      // Si no hay pendientes aprobadas manualmente, verificar si hay auto-asignadas
+      const autoApproved = assignmentResults.filter(r => 
+        r.status === "approved" && 
+        autoApprove &&
+        r.confidence >= confidenceThreshold
+      );
+      
+      if (autoApproved.length > 0) {
+        toast.success("Las asignaciones ya fueron aplicadas automáticamente");
+        if (onComplete) {
+          onComplete();
+        }
+        onClose();
+      } else {
+        toast.error("No hay asignaciones pendientes por aplicar");
+      }
+      return;
+    }
+
+    setIsProcessing(true);
+    
+    try {
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('jwt_token');
+      
+      // Asignar cada imagen aprobada manualmente
+      let successCount = 0;
+      
+      for (const assignment of manuallyApproved) {
+        try {
+          const response = await fetch("/api/product-images/assign", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              ...(token && { "Authorization": `Bearer ${token}` }),
+            },
+            body: JSON.stringify({
+              imageUrl: assignment.imageUrl,
+              prodVirtaId: assignment.prodVirtaId,
+              visionData: assignment.aiAnalysis || {},
+              metadata: {},
+            }),
+          });
+
+          if (response.ok) {
+            successCount++;
+          }
+        } catch (error) {
+          console.error(`Error asignando imagen ${assignment.imageId}:`, error);
+        }
+      }
+
+      if (successCount > 0) {
+        toast.success(`${successCount} imagen(es) asignada(s) manualmente`);
+      }
+      
+      // Siempre completar si hubo asignaciones (auto o manuales)
+      if (onComplete) {
+        onComplete();
+      }
+      
+      onClose();
+    } catch (error) {
+      console.error("Error aplicando asignaciones:", error);
+      toast.error("Error al aplicar asignaciones");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const stats = {
     total: assignmentResults.length,
-    assigned: assignmentResults.filter((r) => r.status === "assigned").length,
+    assigned: assignmentResults.filter((r) => r.status === "approved").length,
     pending: assignmentResults.filter((r) => r.status === "pending").length,
     rejected: assignmentResults.filter((r) => r.status === "rejected").length,
     manual: assignmentResults.filter((r) => r.status === "manual").length,
@@ -566,7 +769,7 @@ export function AutoAssignModal({
                             className={`
                               flex items-center gap-4 p-4 rounded-xl border transition-all
                               ${
-                                result.status === "assigned"
+                                result.status === "approved"
                                   ? "border-green-200 dark:border-green-700"
                                   : result.status === "rejected"
                                     ? "border-red-200 dark:border-red-700"
@@ -576,7 +779,7 @@ export function AutoAssignModal({
                               }
                             `}
                             style={{
-                              backgroundColor: result.status === "assigned"
+                              backgroundColor: result.status === "approved"
                                 ? `${themeColors.primary}10`
                                 : result.status === "rejected"
                                   ? "rgba(239, 68, 68, 0.1)"
@@ -610,9 +813,6 @@ export function AutoAssignModal({
                                   />
                                   <span className="text-sm text-gray-600 dark:text-gray-300">
                                     {result.productName}
-                                  </span>
-                                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                                    ({result.productSku})
                                   </span>
                                 </div>
                               ) : (
@@ -651,32 +851,43 @@ export function AutoAssignModal({
                             </div>
 
                             {/* Acciones */}
-                            {result.status === "pending" &&
-                              result.productName !==
-                                "Sin coincidencia encontrada" && (
-                                <div className="flex gap-2">
-                                  <button
-                                    onClick={() =>
-                                      handleAcceptAssignment(result.imageId)
-                                    }
-                                    className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors"
-                                  >
-                                    <CheckCircle className="w-4 h-4" />
-                                  </button>
-                                  <button
-                                    onClick={() =>
-                                      handleRejectAssignment(result.imageId)
-                                    }
-                                    className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
-                                  >
-                                    <X className="w-4 h-4" />
-                                  </button>
-                                </div>
-                              )}
-
-                            {result.status === "assigned" && (
-                              <div className="text-green-600 dark:text-green-400">
-                                <CheckCircle className="w-5 h-5" />
+                            {result.prodVirtaId && result.status !== "rejected" && (
+                              <div className="flex gap-2">
+                                {result.status === "approved" ? (
+                                  // Mostrar estado de aprobación
+                                  <div className="flex items-center gap-2">
+                                    {result.wasAutoAssigned && (
+                                      <span className="text-xs text-green-600 dark:text-green-400 font-medium px-2 py-1 bg-green-100 dark:bg-green-900/30 rounded">
+                                        Auto-asignada
+                                      </span>
+                                    )}
+                                    <div className="text-green-600 dark:text-green-400">
+                                      <CheckCircle className="w-5 h-5" />
+                                    </div>
+                                  </div>
+                                ) : result.status === "pending" ? (
+                                  // Botones de aprobar/rechazar para pendientes
+                                  <>
+                                    <button
+                                      onClick={() =>
+                                        handleAcceptAssignment(result.imageId)
+                                      }
+                                      className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors dark:bg-green-900/30 dark:hover:bg-green-900/50"
+                                      title="Aprobar asignación"
+                                    >
+                                      <CheckCircle className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        handleRejectAssignment(result.imageId)
+                                      }
+                                      className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors dark:bg-red-900/30 dark:hover:bg-red-900/50"
+                                      title="Rechazar asignación"
+                                    >
+                                      <X className="w-4 h-4" />
+                                    </button>
+                                  </>
+                                ) : null}
                               </div>
                             )}
 
@@ -742,7 +953,34 @@ export function AutoAssignModal({
                         className="px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg font-medium hover:from-green-600 hover:to-emerald-600 transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <CheckCircle className="w-4 h-4" />
-                        Aplicar Asignaciones ({stats.assigned})
+                        {(() => {
+                          // Calcular cuántas son aprobaciones manuales
+                          const manuallyApproved = assignmentResults.filter(r => {
+                            if (r.status !== "approved" || !r.prodVirtaId) return false;
+                            
+                            // Si auto-aprobar estaba activado, solo las bajo el umbral son manuales
+                            if (autoApprove) {
+                              return r.confidence < confidenceThreshold;
+                            }
+                            
+                            // Si auto-aprobar estaba desactivado, TODAS son manuales
+                            return true;
+                          }).length;
+                          
+                          const autoAssigned = assignmentResults.filter(r =>
+                            r.status === "approved" &&
+                            autoApprove &&
+                            r.confidence >= confidenceThreshold
+                          ).length;
+                          
+                          if (manuallyApproved > 0) {
+                            return `Asignar Aprobadas (${manuallyApproved})`;
+                          } else if (autoAssigned > 0) {
+                            return `Finalizar (${autoAssigned} auto-asignadas)`;
+                          } else {
+                            return "Finalizar";
+                          }
+                        })()}
                       </button>
                     )}
                   </div>
