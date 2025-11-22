@@ -152,9 +152,9 @@ export default function ProductsAdminPage() {
 
   const getStatusInfo = (status?: string) => {
     switch (status) {
-      case "A": return { label: "Activo", color: "#10b981", bgColor: "rgba(16, 185, 129, 0.1)" };
-      case "I": return { label: "Inactivo", color: "#ef4444", bgColor: "rgba(239, 68, 68, 0.1)" };
-      case "N": return { label: "Nuevo", color: "#3b82f6", bgColor: "rgba(59, 130, 246, 0.1)" };
+      case "active": return { label: "Activo", color: "#10b981", bgColor: "rgba(16, 185, 129, 0.1)" };
+      case "inactive": return { label: "Inactivo", color: "#ef4444", bgColor: "rgba(239, 68, 68, 0.1)" };
+      case "new": return { label: "Nuevo", color: "#3b82f6", bgColor: "rgba(59, 130, 246, 0.1)" };
       default: return { label: "Desconocido", color: "#6b7280", bgColor: "rgba(107, 114, 128, 0.1)" };
     }
   };

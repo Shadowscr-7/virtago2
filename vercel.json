@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/redoc",
-      "destination": "https://virtago-backend.vercel.app/redoc"
+      "destination": "https://virtago-backend.vercel.app/api/redoc"
     },
     {
       "source": "/redoc/:path*",
-      "destination": "https://virtago-backend.vercel.app/redoc/:path*"
+      "destination": "https://virtago-backend.vercel.app/api/redoc/:path*"
     },
     {
       "source": "/api/:path*",
@@ -14,11 +14,11 @@
     },
     {
       "source": "/docs",
-      "destination": "https://virtago-backend.vercel.app/docs"
+      "destination": "https://virtago-backend.vercel.app/api/docs"
     },
     {
       "source": "/docs/:path*",
-      "destination": "https://virtago-backend.vercel.app/docs/:path*"
+      "destination": "https://virtago-backend.vercel.app/api/docs/:path*"
     }
   ],
   "headers": [

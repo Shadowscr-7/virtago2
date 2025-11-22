@@ -450,6 +450,7 @@ export const useAuthStore = create<AuthState>()(
               firstName: registrationData?.firstName || "",
               lastName: registrationData?.lastName || "",
               userType: "client",
+              role: "user",
               isVerified: true,
             };
 
@@ -529,6 +530,7 @@ export const useAuthStore = create<AuthState>()(
             firstName: registrationData?.firstName || user?.firstName || "",
             lastName: registrationData?.lastName || user?.lastName || "",
             userType: "distributor",
+            role: "distributor",
             isVerified: true,
             profile: user?.profile,
             distributorInfo: data,
@@ -761,8 +763,9 @@ export const useAuthStore = create<AuthState>()(
           
           // Actualizar usuario con el plan seleccionado
           if (user) {
-            const updatedUser = {
+            const updatedUser: User = {
               ...user,
+              role: "distributor" as const,
               plan: {
                 id: plan.id,
                 name: plan.name,
@@ -824,6 +827,7 @@ export const useAuthStore = create<AuthState>()(
             firstName: registrationData?.firstName || user?.firstName || "",
             lastName: registrationData?.lastName || user?.lastName || "",
             userType: user?.userType || "distributor",
+            role: user?.userType === "client" ? "user" : "distributor",
             isVerified: true,
             profile: user?.profile,
             distributorInfo: user?.distributorInfo,

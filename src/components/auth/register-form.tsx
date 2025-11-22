@@ -151,27 +151,8 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
             initial={{ scale: 0.5, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="w-16 h-16 mx-auto mb-4"
+            className="w-16 mx-auto mb-4"
           >
-            <div className="relative">
-              <div
-                className="absolute inset-0 rounded-full"
-                style={{
-                  background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.accent})`,
-                }}
-              />
-              <div
-                className="absolute inset-2 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: themeColors.background }}
-              >
-                <span
-                  className="text-2xl font-bold"
-                  style={{ color: themeColors.primary }}
-                >
-                  V
-                </span>
-              </div>
-            </div>
           </motion.div>
 
           <motion.h1

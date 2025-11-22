@@ -136,32 +136,6 @@ export default function LoginPage() {
         >
           {/* Logo y título */}
           <div className="text-center mb-8">
-            <motion.div
-              initial={{ scale: 0.5, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="w-16 h-16 mx-auto mb-4"
-            >
-              <div className="relative">
-                <div
-                  className="absolute inset-0 rounded-full"
-                  style={{
-                    background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.accent})`,
-                  }}
-                />
-                <div
-                  className="absolute inset-2 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: themeColors.background }}
-                >
-                  <span
-                    className="text-2xl font-bold"
-                    style={{ color: themeColors.primary }}
-                  >
-                    V
-                  </span>
-                </div>
-              </div>
-            </motion.div>
 
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
@@ -182,40 +156,6 @@ export default function LoginPage() {
               Accede a precios exclusivos B2B
             </motion.p>
           </div>
-
-          {/* Test Users Info */}
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            className="bg-blue-500/20 border border-blue-400/30 rounded-xl p-4 mb-6"
-          >
-            <p className="text-blue-200 text-sm mb-3">
-              🔐 Datos de prueba disponibles:
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => fillTestUser("cliente")}
-                className="text-left p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
-              >
-                <div className="text-white text-xs font-medium">👩‍💼 Cliente</div>
-                <div className="text-white/70 text-xs">María González</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => fillTestUser("distribuidor")}
-                className="text-left p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
-              >
-                <div className="text-white text-xs font-medium">
-                  👨‍💼 Distribuidor
-                </div>
-                <div className="text-white/70 text-xs">Carlos Rodríguez</div>
-              </button>
-            </div>
-            <p className="text-blue-200/70 text-xs mt-2">
-              Contraseña para ambos: <code>123456</code>
-            </p>
-          </motion.div>
 
           {/* Formulario */}
           <form onSubmit={handleSubmit} className="space-y-6">

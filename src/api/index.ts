@@ -18,7 +18,7 @@ export interface ApiProductData {
   category: string;
   description?: string;
   images?: string[];
-  status?: 'A' | 'I' | 'N'; // Activo, Inactivo, Nuevo
+  status?: 'active' | 'inactive' | 'new'; // Activo, Inactivo, Nuevo
   createdAt?: string;
   updatedAt?: string;
 }
