@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { AdminLayout } from "@/components/admin/admin-layout";
 import { useTheme } from "@/contexts/theme-context";
 import { PriceFilters, PriceTable } from "@/components/admin/precios";
+import { PriceImportModal } from "@/components/admin/precios/price-import-modal";
 import http from "@/api/http-client";
 import { toast } from "sonner";
 
@@ -57,6 +58,7 @@ export default function PreciosAdminPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [isLoading, setIsLoading] = useState(true);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   // Cargar precios desde el API con paginación en servidor
   useEffect(() => {
@@ -174,6 +176,13 @@ export default function PreciosAdminPage() {
     setSelectedPrices([]);
   };
 
+  const handleImportSuccess = () => {
+    // Recargar los precios después de una importación exitosa
+    setCurrentPage(1);
+    setIsLoading(true);
+    // El useEffect se encargará de recargar los datos
+  };
+
   return (
     <AdminLayout>
       <div className="space-y-6">
@@ -216,10 +225,7 @@ export default function PreciosAdminPage() {
           onCategoryChange={setCategoryFilter}
           itemsPerPage={itemsPerPage}
           onItemsPerPageChange={handleItemsPerPageChange}
-          onImport={() => {
-            // TODO: Implementar importación
-            toast.info("Función de importación en desarrollo");
-          }}
+          onImport={() => setIsImportModalOpen(true)}
           onDownloadFormat={() => {
             // TODO: Implementar descarga de formato
             toast.info("Función de descarga en desarrollo");
@@ -260,6 +266,13 @@ export default function PreciosAdminPage() {
             totalItems={pagination.total}
           />
         )}
+
+        {/* Modal de importación */}
+        <PriceImportModal
+          isOpen={isImportModalOpen}
+          onClose={() => setIsImportModalOpen(false)}
+          onSuccess={handleImportSuccess}
+        />
       </div>
     </AdminLayout>
   );

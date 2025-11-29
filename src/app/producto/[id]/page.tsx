@@ -1,147 +1,205 @@
+"use client";
+
 import { ProductDetailSection } from "@/components/product-detail/product-detail-section";
-import { notFound } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { api, type ProductComplete } from "@/api";
+import type { DiscountRule } from "@/lib/price-calculator";
 
-// This would typically come from a database or API
-const getProductById = async (id: string) => {
-  // Mock product data - in real app this would be a database query
-  const products = [
-    {
-      id: "1",
-      name: "iPhone 15 Pro Max 256GB",
-      brand: "Apple",
-      supplier: "TechDistributor Corp",
-      images: [
-        "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=800&h=800&fit=crop",
-        "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=800&h=800&fit=crop&auto=format&q=80",
-        "https://images.unsplash.com/photo-1695048004047-6bb5ae5561a5?w=800&h=800&fit=crop",
-        "https://images.unsplash.com/photo-1695048004047-6bb5ae5561a5?w=800&h=800&fit=crop&auto=format&q=80",
-      ],
-      price: 1299,
-      originalPrice: 1499,
-      description:
-        "El iPhone más avanzado hasta la fecha con el chip A17 Pro, sistema de cámaras Pro revolucionario y estructura de titanio de grado aeroespacial.",
-      longDescription:
-        "El iPhone 15 Pro Max redefine lo que es posible en un smartphone. Con el chip A17 Pro construido en tecnología de 3 nanómetros, experimentarás un rendimiento sin precedentes para gaming, creación de contenido y aplicaciones profesionales. El sistema de cámaras Pro con lente de 120mm permite capturar imágenes con una calidad excepcional, mientras que la estructura de titanio ofrece resistencia y ligereza incomparables.",
-      category: "Smartphones",
-      subcategory: "iPhone",
-      inStock: true,
-      stockQuantity: 25,
-      rating: 4.8,
-      reviews: 2847,
-      tags: ["Premium", "5G", "Cámara Pro", "Titanio"],
-      specifications: {
-        Pantalla: "6.1 pulgadas Super Retina XDR",
-        Procesador: "A17 Pro",
-        Almacenamiento: "256GB",
-        Cámara: "48MP + 12MP + 12MP",
-        Batería: "Hasta 29 horas de video",
-        Material: "Titanio con Ceramic Shield",
-        Resistencia: "IP68",
-        Conectividad: "5G, WiFi 6E, Bluetooth 5.3",
-        Sistema: "iOS 17",
-        Colores: "Titanio Natural, Azul, Blanco, Negro",
-      } as Record<string, string>,
-      features: [
-        "Chip A17 Pro con GPU de 6 núcleos",
-        "Sistema de cámaras Pro con teleobjetivo de 120mm",
-        "Pantalla Super Retina XDR de 6.7 pulgadas",
-        "Estructura de titanio ultraligera",
-        "Resistente al agua IP68",
-        "Batería de todo el día",
-        "Conector USB-C",
-        "Face ID avanzado",
-      ],
-      warranty: "1 año de garantía limitada Apple",
-      shipping: {
-        free: true,
-        estimatedDays: "2-3 días hábiles",
-        cost: 0,
-      },
-      supplier_info: {
-        name: "TechDistributor Corp",
-        rating: 4.9,
-        reviews: 15420,
-        response_time: "< 2 horas",
-        verified: true,
-      },
-    },
-    {
-      id: "2",
-      name: "Samsung Galaxy S24 Ultra 512GB",
-      brand: "Samsung",
-      supplier: "Samsung Electronics",
-      images: [
-        "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=800&h=800&fit=crop",
-        "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=800&h=800&fit=crop&auto=format&q=80",
-        "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&h=800&fit=crop",
-        "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&h=800&fit=crop&auto=format&q=80",
-      ],
-      price: 1399,
-      originalPrice: 1599,
-      description:
-        "Smartphone premium con S Pen integrado, cámara de 200MP y pantalla Dynamic AMOLED 2X de 6.8 pulgadas.",
-      longDescription:
-        "El Galaxy S24 Ultra representa la cumbre de la innovación móvil de Samsung. Equipado con una cámara principal de 200MP y zoom óptico de hasta 10x, captura cada detalle con claridad excepcional. El S Pen integrado transforma tu dispositivo en una herramienta de productividad completa, perfecta para tomar notas, dibujar y controlar presentaciones.",
-      category: "Smartphones",
-      subcategory: "Galaxy",
-      inStock: true,
-      stockQuantity: 18,
-      rating: 4.7,
-      reviews: 1923,
-      tags: ["S Pen", "200MP", "Zoom 10x", "Premium"],
-      specifications: {
-        Pantalla: "6.8 pulgadas Dynamic AMOLED 2X",
-        Procesador: "Snapdragon 8 Gen 3",
-        Almacenamiento: "512GB",
-        RAM: "12GB",
-        Cámara: "200MP + 50MP + 12MP + 10MP",
-        Batería: "5000mAh con carga rápida 45W",
-        "S Pen": "Incluido con latencia ultra baja",
-        Resistencia: "IP68",
-        Conectividad: "5G, WiFi 7, Bluetooth 5.3",
-        Sistema: "Android 14 con One UI 6.1",
-        Colores: "Titanio Gray, Violet, Yellow, Black",
-      } as Record<string, string>,
-      features: [
-        "Cámara principal de 200MP con zoom óptico 10x",
-        "S Pen con latencia ultra baja",
-        "Pantalla Dynamic AMOLED 2X de 120Hz",
-        "Batería de 5000mAh con carga rápida",
-        "Procesador Snapdragon 8 Gen 3",
-        "12GB de RAM + 512GB de almacenamiento",
-        "Resistente al agua y polvo IP68",
-        "Samsung Galaxy AI integrada",
-      ],
-      warranty: "2 años de garantía Samsung",
-      shipping: {
-        free: true,
-        estimatedDays: "1-2 días hábiles",
-        cost: 0,
-      },
-      supplier_info: {
-        name: "Samsung Electronics",
-        rating: 4.8,
-        reviews: 28640,
-        response_time: "< 1 hora",
-        verified: true,
-      },
-    },
-  ];
-
-  return products.find((p) => p.id === id);
-};
-
-interface ProductPageProps {
-  params: Promise<{
-    id: string;
+interface AdaptedProduct {
+  id: string;
+  name: string;
+  brand: string;
+  supplier: string;
+  productImages: Array<{
+    url: string;
+    blurDataURL?: string;
+    alt?: string;
+    isPrimary?: boolean;
   }>;
+  images: string[];
+  price: number;
+  originalPrice?: number;
+  description: string;
+  longDescription: string;
+  category: string;
+  subcategory: string;
+  inStock: boolean;
+  stockQuantity: number;
+  rating: number;
+  reviews: number;
+  tags: string[];
+  specifications: Record<string, string>;
+  features: string[];
+  warranty: string;
+  shipping: {
+    free: boolean;
+    estimatedDays: string;
+    cost: number;
+  };
+  supplier_info: {
+    name: string;
+    rating: number;
+    reviews: number;
+    response_time: string;
+    verified: boolean;
+  };
+  // 🆕 Información de descuentos
+  discounts?: DiscountRule[];
+  priceSale?: number;
+  discountPercentage?: number;
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
-  const { id } = await params;
-  const product = await getProductById(id);
+export default function ProductPage() {
+  const params = useParams();
+  const id = params.id as string;
+  const [product, setProduct] = useState<AdaptedProduct | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  if (!product) {
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        console.log('[PRODUCT DETAIL] Fetching product with ID:', id);
+        
+        // 🆕 Usar el endpoint /complete que trae pricing y descuentos calculados
+        const response = await api.product.getProductComplete(id);
+        
+        console.log('[PRODUCT DETAIL] API Response:', response);
+        
+        if (!response.success || !response.data) {
+          console.error('[PRODUCT DETAIL] API returned no data:', response);
+          setError(true);
+          return;
+        }
+
+        // ⚠️ IMPORTANTE: response.data contiene {success: true, data: {...}}
+        // El backend wrappea en {success, data}, y http-client también wrappea
+        // Entonces necesitamos acceder a response.data.data
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const backendResponse = response.data as any;
+        
+        if (!backendResponse.data) {
+          console.error('[PRODUCT DETAIL] Backend response has no data:', backendResponse);
+          setError(true);
+          return;
+        }
+        
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const apiProduct: ProductComplete = backendResponse.data as any;
+
+        // Log para debugging
+        console.log('[PRODUCT DETAIL] API Product:', apiProduct);
+        console.log('[PRODUCT DETAIL] Product Name:', apiProduct.name);
+        console.log('[PRODUCT DETAIL] Pricing:', apiProduct.pricing);
+        console.log('[PRODUCT DETAIL] Discounts:', apiProduct.discounts);
+
+        // 🆕 Usar pricing del endpoint /complete - YA VIENE CALCULADO
+        const basePrice = apiProduct.pricing.originalPrice || apiProduct.pricing.listPrice || 0;
+        const finalPrice = apiProduct.pricing.finalPrice || basePrice;
+        const priceSale = apiProduct.pricing.priceSale || 0;
+        const originalPrice = finalPrice < basePrice ? basePrice : undefined;
+        const totalSavings = apiProduct.discounts?.totalSavings ? parseFloat(apiProduct.discounts.totalSavings) : 0;
+
+        console.log('[PRODUCT DETAIL] Prices:', { basePrice, finalPrice, priceSale, originalPrice, totalSavings });
+
+        // 🆕 Adaptar descuentos disponibles para el calculador
+        const discounts: DiscountRule[] = [];
+        
+        if (apiProduct.discounts?.available) {
+          console.log('[PRODUCT DETAIL] Processing discounts:', apiProduct.discounts.available);
+          
+          for (const discount of apiProduct.discounts.available) {
+            discounts.push({
+              id: discount.discountId,
+              name: discount.name,
+              type: discount.type as DiscountRule['type'],
+              value: discount.value,
+              min_quantity: discount.min_quantity,
+              max_quantity: discount.max_quantity,
+              min_purchase_amount: discount.min_purchase_amount,
+              conditions: discount.conditions,
+            });
+          }
+          
+          console.log('[PRODUCT DETAIL] Adapted discounts:', discounts);
+        }
+
+        // Adapt API product to component format
+        const adaptedProduct: AdaptedProduct = {
+          id: apiProduct.prodVirtaId || apiProduct.productId || '',
+          name: apiProduct.name || apiProduct.title || "Producto sin nombre",
+          brand: apiProduct.brand?.name || apiProduct.brand?.brandId || "Sin marca",
+          supplier: apiProduct.distributorCode || "Proveedor",
+          productImages: apiProduct.productImages || [],
+          images: apiProduct.productImages?.map(img => img.url) || [],
+          price: finalPrice, // 🎯 Precio final YA CALCULADO por el backend
+          originalPrice: originalPrice,
+          description: apiProduct.shortDescription || apiProduct.description || "Sin descripción",
+          longDescription: apiProduct.fullDescription || apiProduct.description || "Sin descripción detallada",
+          category: apiProduct.category?.name || apiProduct.category?.categoryCode || "General",
+          subcategory: apiProduct.category?.name || "General",
+          inStock: (apiProduct.stockQuantity || apiProduct.quantity || 0) > 0,
+          stockQuantity: apiProduct.stockQuantity || apiProduct.quantity || 0,
+          rating: 4.5,
+          reviews: apiProduct.likes || 0,
+          tags: apiProduct.productTagsList || [],
+          specifications: {
+            'SKU': apiProduct.sku || 'N/A',
+            'Código': apiProduct.productId || 'N/A',
+            'Categoría': apiProduct.category?.categoryCode || apiProduct.category?.name || 'N/A',
+            'Marca': apiProduct.brand?.name || 'N/A',
+            'Stock': `${apiProduct.stockQuantity || 0} unidades`,
+          },
+          features: apiProduct.fullDescription ? [apiProduct.fullDescription] : [],
+          warranty: "Garantía según fabricante",
+          shipping: {
+            free: true,
+            estimatedDays: "3-5 días hábiles",
+            cost: 0,
+          },
+          supplier_info: {
+            name: apiProduct.distributorCode || "Proveedor General",
+            rating: 4.5,
+            reviews: 128,
+            response_time: "< 24 horas",
+            verified: true,
+          },
+          // 🆕 Información de descuentos
+          discounts: discounts.length > 0 ? discounts : undefined,
+          priceSale: priceSale > 0 ? priceSale : undefined,
+          discountPercentage: apiProduct.discounts?.totalDiscountPercentage ? parseFloat(apiProduct.discounts.totalDiscountPercentage) : undefined,
+        };
+
+        console.log('[PRODUCT DETAIL] Adapted Product:', adaptedProduct);
+        setProduct(adaptedProduct);
+      } catch (error) {
+        console.error("[PRODUCT DETAIL] Error fetching product:", error);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchProduct();
+    }
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-slate-600 dark:text-slate-400">Cargando producto...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !product) {
     notFound();
   }
 

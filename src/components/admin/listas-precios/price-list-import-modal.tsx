@@ -5,39 +5,60 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Upload, FileJson, FileSpreadsheet, Download, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { useTheme } from '@/contexts/theme-context';
 import { showToast } from '@/store/toast-helpers';
+import { api } from '@/api';
 
-interface ProductImportModalProps {
+interface PriceListImportModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
 }
 
-interface ProductData {
+interface PriceListData {
   name: string;
-  sku: string;
-  brand?: string;
-  category?: string;
-  price: number;
-  stockQuantity: number;
-  status?: 'A' | 'I' | 'N';
+  priceListId: string;
+  currency?: string;
+  status?: 'active' | 'inactive' | 'draft';
   description?: string;
+  validFrom?: string;
+  validTo?: string;
+  distributorCode?: string;
+  country?: string;
+  region?: string;
+  customerType?: string;
+  channel?: string;
   [key: string]: unknown;
+}
+
+interface PriceListBulkData {
+  price_list_id: string;
+  name: string;
+  currency: string;
+  country: string;
+  customer_type: string;
+  channel: string;
+  start_date: string;
+  description?: string;
+  end_date?: string;
+  status?: 'active' | 'inactive' | 'draft';
+  region?: string;
+  default?: boolean;
+  priority?: number;
 }
 
 type UploadMethod = 'file' | 'json';
 
-export function ProductImportModal({ isOpen, onClose, onSuccess }: ProductImportModalProps) {
+export function PriceListImportModal({ isOpen, onClose, onSuccess }: PriceListImportModalProps) {
   const { themeColors } = useTheme();
   const [uploadMethod, setUploadMethod] = useState<UploadMethod>('file');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [jsonInput, setJsonInput] = useState('');
-  const [uploadedData, setUploadedData] = useState<ProductData[]>([]);
+  const [uploadedData, setUploadedData] = useState<PriceListData[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   // Validar JSON
-  const validateJSON = (jsonString: string): { isValid: boolean; data?: ProductData[]; errors: string[] } => {
+  const validateJSON = (jsonString: string): { isValid: boolean; data?: PriceListData[]; errors: string[] } => {
     const errors: string[] = [];
     
     try {
@@ -49,19 +70,13 @@ export function ProductImportModal({ isOpen, onClose, onSuccess }: ProductImport
         return { isValid: false, errors };
       }
 
-      // Validar cada producto
-      parsed.forEach((product, index) => {
-        if (!product.name) {
-          errors.push(`Producto ${index + 1}: El nombre es requerido`);
+      // Validar cada lista de precios
+      parsed.forEach((priceList, index) => {
+        if (!priceList.name) {
+          errors.push(`Lista ${index + 1}: El nombre es requerido`);
         }
-        if (!product.sku) {
-          errors.push(`Producto ${index + 1}: El SKU es requerido`);
-        }
-        if (product.price == null || isNaN(Number(product.price))) {
-          errors.push(`Producto ${index + 1}: El precio es requerido y debe ser un número`);
-        }
-        if (product.stockQuantity == null || isNaN(Number(product.stockQuantity))) {
-          errors.push(`Producto ${index + 1}: La cantidad de stock es requerida y debe ser un número`);
+        if (!priceList.priceListId) {
+          errors.push(`Lista ${index + 1}: El priceListId es requerido`);
         }
       });
 
@@ -103,28 +118,53 @@ export function ProductImportModal({ isOpen, onClose, onSuccess }: ProductImport
     }
   };
 
+  // Transformar datos al formato del API
+  const transformToAPIFormat = (data: PriceListData[]): PriceListBulkData[] => {
+    return data.map(priceList => ({
+      price_list_id: priceList.priceListId,
+      name: priceList.name,
+      currency: priceList.currency || 'USD',
+      country: priceList.country || 'UY',
+      customer_type: priceList.customerType || 'all',
+      channel: priceList.channel || 'all',
+      start_date: priceList.validFrom || new Date().toISOString().split('T')[0],
+      description: priceList.description,
+      end_date: priceList.validTo,
+      status: priceList.status || 'active',
+      region: priceList.region,
+      default: false,
+      priority: 0
+    }));
+  };
+
   // Descargar archivo de ejemplo
   const handleDownloadExample = () => {
     const exampleData = [
       {
-        name: "AMD Ryzen 9 7950X",
-        sku: "AMD-7950X-001",
-        brand: "AMD",
-        category: "Procesadores",
-        price: 699.99,
-        stockQuantity: 50,
-        status: "A",
-        description: "Procesador de alto rendimiento de 16 núcleos"
+        name: "Lista Premium",
+        priceListId: "PREMIUM_001",
+        currency: "USD",
+        status: "active",
+        description: "Lista de precios para clientes premium",
+        validFrom: "2024-01-01",
+        validTo: "2024-12-31",
+        country: "UY",
+        region: "Montevideo",
+        customerType: "premium",
+        channel: "online"
       },
       {
-        name: "NVIDIA RTX 4090",
-        sku: "NV-4090-001",
-        brand: "NVIDIA",
-        category: "Tarjetas Gráficas",
-        price: 1599.99,
-        stockQuantity: 25,
-        status: "A",
-        description: "Tarjeta gráfica de última generación"
+        name: "Lista Mayorista",
+        priceListId: "WHOLESALE_001",
+        currency: "UYU",
+        status: "active",
+        description: "Precios especiales para mayoristas",
+        validFrom: "2024-01-01",
+        validTo: "2024-12-31",
+        country: "UY",
+        region: "Interior",
+        customerType: "wholesale",
+        channel: "retail"
       }
     ];
 
@@ -132,7 +172,7 @@ export function ProductImportModal({ isOpen, onClose, onSuccess }: ProductImport
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'ejemplo_productos.json';
+    link.download = 'ejemplo_listas_precios.json';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -159,77 +199,43 @@ export function ProductImportModal({ isOpen, onClose, onSuccess }: ProductImport
           return;
         }
 
-        console.log('[PRODUCT IMPORT] 📤 Enviando productos vía JSON...');
+        console.log('[PRICELIST IMPORT] 📤 Enviando listas de precios vía JSON...');
+        console.log('[PRICELIST IMPORT] Datos originales:', uploadedData);
         
-        // Llamar a la API del wizard (misma que usa el wizard de productos)
-        const response = await fetch('/api/products', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ products: uploadedData }),
+        // Transformar datos al formato del API
+        const transformedData = transformToAPIFormat(uploadedData);
+        console.log('[PRICELIST IMPORT] Datos transformados:', transformedData);
+        
+        const response = await api.admin.priceLists.bulkCreate(transformedData);
+        
+        console.log('[PRICELIST IMPORT] ✅ Resultado:', response);
+        
+        showToast({
+          title: "Importación exitosa",
+          description: `${uploadedData.length} lista(s) de precios importada(s) correctamente`,
+          type: "success"
         });
         
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: 'Error desconocido' }));
-          throw new Error(errorData.message || `Error HTTP: ${response.status}`);
-        }
-        
-        const result = await response.json();
-        console.log('[PRODUCT IMPORT] ✅ Resultado:', result);
-        
-        if (result.errorCount && result.errorCount > 0) {
-          showToast({
-            title: "Importación parcial",
-            description: `${result.successCount || 0} productos importados, ${result.errorCount} con errores`,
-            type: "warning"
-          });
-        } else {
-          showToast({
-            title: "Importación exitosa",
-            description: `${uploadedData.length} productos importados correctamente`,
-            type: "success"
-          });
-        }
-        
-        // Cerrar modal y actualizar lista
         setTimeout(() => {
           onSuccess?.();
           handleClose();
         }, 1000);
       } else if (uploadMethod === 'file' && uploadedFile) {
         // Importar desde archivo
-        console.log('[PRODUCT IMPORT] 📁 Enviando archivo...');
+        console.log('[PRICELIST IMPORT] 📁 Enviando archivo...');
         
         const formData = new FormData();
         formData.append('file', uploadedFile);
         
-        const response = await fetch('/api/products', {
-          method: 'POST',
-          body: formData,
+        const response = await api.admin.priceLists.bulkCreate(formData);
+        
+        console.log('[PRICELIST IMPORT] ✅ Resultado:', response);
+        
+        showToast({
+          title: "Importación exitosa",
+          description: "Las listas de precios se han importado correctamente",
+          type: "success"
         });
-        
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: 'Error desconocido' }));
-          throw new Error(errorData.message || `Error HTTP: ${response.status}`);
-        }
-        
-        const result = await response.json();
-        console.log('[PRODUCT IMPORT] ✅ Resultado:', result);
-        
-        if (result.errorCount && result.errorCount > 0) {
-          showToast({
-            title: "Importación parcial",
-            description: `${result.successCount || 0} productos importados, ${result.errorCount} con errores`,
-            type: "warning"
-          });
-        } else {
-          showToast({
-            title: "Importación exitosa",
-            description: "Los productos se han importado correctamente",
-            type: "success"
-          });
-        }
         
         setTimeout(() => {
           onSuccess?.();
@@ -239,13 +245,13 @@ export function ProductImportModal({ isOpen, onClose, onSuccess }: ProductImport
         setError('Selecciona un archivo o ingresa un JSON válido');
       }
     } catch (error) {
-      console.error('[PRODUCT IMPORT] ❌ Error:', error);
+      console.error('[PRICELIST IMPORT] ❌ Error:', error);
       showToast({
         title: "Error al importar",
         description: error instanceof Error ? error.message : "Ocurrió un error inesperado",
         type: "error"
       });
-      setError(error instanceof Error ? error.message : "Error al importar productos");
+      setError(error instanceof Error ? error.message : "Error al importar listas de precios");
     } finally {
       setIsProcessing(false);
     }
@@ -292,13 +298,13 @@ export function ProductImportModal({ isOpen, onClose, onSuccess }: ProductImport
                 className="text-2xl font-bold"
                 style={{ color: themeColors.text.primary }}
               >
-                Importar Productos
+                Importar Listas de Precios
               </h2>
               <p 
                 className="text-sm mt-1"
                 style={{ color: themeColors.text.secondary }}
               >
-                Sube un archivo o pega JSON con los datos de los productos
+                Sube un archivo o pega JSON con los datos de las listas de precios
               </p>
             </div>
             <button
@@ -374,10 +380,10 @@ export function ProductImportModal({ isOpen, onClose, onSuccess }: ProductImport
                   accept=".csv,.xlsx,.json"
                   onChange={handleFileChange}
                   className="hidden"
-                  id="file-upload"
+                  id="file-upload-pricelist"
                 />
                 <label
-                  htmlFor="file-upload"
+                  htmlFor="file-upload-pricelist"
                   className="inline-block px-6 py-3 rounded-lg cursor-pointer transition-all text-white"
                   style={{
                     background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`
@@ -402,13 +408,16 @@ export function ProductImportModal({ isOpen, onClose, onSuccess }: ProductImport
                   placeholder='Ejemplo:
 [
   {
-    "name": "Nombre del Producto",
-    "sku": "SKU-001",
-    "brand": "Marca",
-    "category": "Categoría",
-    "price": 99.99,
-    "stockQuantity": 100,
-    "status": "A"
+    "name": "Lista Premium",
+    "priceListId": "PREMIUM_001",
+    "currency": "USD",
+    "status": "active",
+    "description": "Lista para clientes premium",
+    "validFrom": "2024-01-01",
+    "validTo": "2024-12-31",
+    "country": "UY",
+    "customerType": "premium",
+    "channel": "online"
   }
 ]'
                   className="w-full h-64 p-4 rounded-lg font-mono text-sm border-2"
@@ -425,7 +434,7 @@ export function ProductImportModal({ isOpen, onClose, onSuccess }: ProductImport
                     {validationErrors.length === 0 ? (
                       <div className="flex items-center gap-2 text-green-600">
                         <CheckCircle className="w-5 h-5" />
-                        <span>JSON válido - {uploadedData.length} producto(s) detectado(s)</span>
+                        <span>JSON válido - {uploadedData.length} lista(s) detectada(s)</span>
                       </div>
                     ) : (
                       <div>
@@ -449,11 +458,9 @@ export function ProductImportModal({ isOpen, onClose, onSuccess }: ProductImport
                     💡 Campos requeridos:
                   </p>
                   <ul className="text-xs space-y-1" style={{ color: themeColors.text.secondary }}>
-                    <li>• <strong>name</strong>: Nombre del producto (texto)</li>
-                    <li>• <strong>sku</strong>: Código SKU único (texto)</li>
-                    <li>• <strong>price</strong>: Precio (número)</li>
-                    <li>• <strong>stockQuantity</strong>: Cantidad en stock (número)</li>
-                    <li className="mt-2">Opcionales: brand, category, status (A/I/N), description</li>
+                    <li>• <strong>name</strong>: Nombre de la lista de precios</li>
+                    <li>• <strong>priceListId</strong>: ID único de la lista</li>
+                    <li className="mt-2">Opcionales: currency (USD/UYU), status (active/inactive/draft), description, validFrom, validTo, country, region, customerType, channel</li>
                   </ul>
                 </div>
               </div>
@@ -503,7 +510,7 @@ export function ProductImportModal({ isOpen, onClose, onSuccess }: ProductImport
               ) : (
                 <>
                   <Upload className="w-5 h-5" />
-                  Importar Productos
+                  Importar Listas de Precios
                 </>
               )}
             </button>

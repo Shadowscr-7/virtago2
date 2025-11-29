@@ -469,8 +469,21 @@ export const useAuthStore = create<AuthState>()(
               type: "success",
             });
           } else {
-            // Si es distribuidor, ir a formulario de información personal
+            // Si es distribuidor, crear/actualizar usuario con el tipo y continuar al siguiente paso
+            const { user } = get();
+            const updatedUser: User = {
+              ...user,
+              id: user?.id || Date.now().toString(),
+              email: registrationData?.email || user?.email || "",
+              firstName: registrationData?.firstName || user?.firstName || "",
+              lastName: registrationData?.lastName || user?.lastName || "",
+              userType: "distributor",
+              role: "distributor",
+              isVerified: user?.isVerified || true,
+            };
+
             set({
+              user: updatedUser,
               registrationStep: "personalInfo",
               isLoading: false,
             });
@@ -623,11 +636,13 @@ export const useAuthStore = create<AuthState>()(
         try {
           await new Promise((resolve) => setTimeout(resolve, 1000));
 
-          // Actualizar datos del usuario con información personal
+          // Actualizar datos del usuario con información personal preservando userType y role
           const { user } = get();
           if (user) {
-            const updatedUser = {
+            const updatedUser: User = {
               ...user,
+              userType: user.userType || "distributor",
+              role: user.role || "distributor",
               profile: { ...user.profile, ...data },
             };
             set({ user: updatedUser });
@@ -663,11 +678,13 @@ export const useAuthStore = create<AuthState>()(
         try {
           await new Promise((resolve) => setTimeout(resolve, 1000));
 
-          // Actualizar información de negocio
+          // Actualizar información de negocio preservando userType y role
           const { user } = get();
           if (user) {
-            const updatedUser = {
+            const updatedUser: User = {
               ...user,
+              userType: user.userType || "distributor",
+              role: user.role || "distributor",
               distributorInfo: { ...user.distributorInfo, ...data },
             };
             set({ user: updatedUser });
@@ -705,6 +722,13 @@ export const useAuthStore = create<AuthState>()(
           // Recopilar todos los datos del distribuidor
           const { user, registrationData } = get();
           console.log("🟡 Store: Datos recopilados, creando payload...");
+          
+          // Verificar que tenemos un token válido
+          const currentToken = localStorage.getItem('auth_token') || localStorage.getItem('temp_auth_token');
+          if (!currentToken) {
+            throw new Error('No se encontró un token de autenticación válido. Por favor inicia sesión nuevamente.');
+          }
+          console.log("🟡 Store: Token encontrado:", currentToken ? 'Presente' : 'No presente');
           
           // Crear el payload completo del distribuidor
           const distributorPayload = {
@@ -761,11 +785,12 @@ export const useAuthStore = create<AuthState>()(
 
           // SOLO si la API fue exitosa, actualizar el estado
           
-          // Actualizar usuario con el plan seleccionado
+          // Actualizar usuario con el plan seleccionado preservando userType y role
           if (user) {
             const updatedUser: User = {
               ...user,
-              role: "distributor" as const,
+              userType: user.userType || "distributor",
+              role: user.role || "distributor",
               plan: {
                 id: plan.id,
                 name: plan.name,
@@ -778,8 +803,19 @@ export const useAuthStore = create<AuthState>()(
             set({ user: updatedUser });
           }
 
+          // IMPORTANTE: Usar el token existente (del registro), no crear uno mock
+          const finalToken = currentToken;
+          
+          // Si había un temp_auth_token, moverlo a auth_token permanente
+          if (localStorage.getItem('temp_auth_token')) {
+            localStorage.setItem('auth_token', localStorage.getItem('temp_auth_token')!);
+            localStorage.removeItem('temp_auth_token');
+            console.log("✅ Store: Token temporal movido a auth_token permanente");
+          }
+
           // Pasar al paso final
           set({
+            token: finalToken,
             registrationStep: "completed",
             isLoading: false,
             isRegistering: false,
@@ -833,18 +869,27 @@ export const useAuthStore = create<AuthState>()(
             distributorInfo: user?.distributorInfo,
           };
 
-          const mockToken = "completed-registration-token";
+          // Usar el token existente del registro/verificación, no crear uno mock
+          const existingToken = localStorage.getItem('auth_token') || localStorage.getItem('temp_auth_token');
+          
+          if (!existingToken) {
+            throw new Error('No se encontró un token de autenticación válido. Por favor inicia sesión nuevamente.');
+          }
+
+          // Si había un temp_auth_token, moverlo a auth_token permanente
+          if (localStorage.getItem('temp_auth_token')) {
+            localStorage.setItem('auth_token', localStorage.getItem('temp_auth_token')!);
+            localStorage.removeItem('temp_auth_token');
+          }
 
           set({
             user: completedUser,
-            token: mockToken,
+            token: existingToken,
             isAuthenticated: true,
             registrationStep: "completed",
             isLoading: false,
             isRegistering: false,
           });
-
-          localStorage.setItem("auth_token", mockToken);
 
           // Mostrar notificación de finalización exitosa
           showToast({

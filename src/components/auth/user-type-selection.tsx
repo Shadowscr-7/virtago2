@@ -228,19 +228,6 @@ export function UserTypeSelection({
             </>
           )}
         </motion.button>
-
-        {/* Información adicional */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2, duration: 0.6 }}
-          className="mt-6 p-4 bg-white/5 rounded-lg border border-white/10"
-        >
-          <p className="text-white/70 text-sm text-center">
-            💡 <strong>Tip:</strong> Puedes cambiar tu tipo de usuario más tarde
-            desde tu perfil
-          </p>
-        </motion.div>
       </motion.div>
     </div>
   );

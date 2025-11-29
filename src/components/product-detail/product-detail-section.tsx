@@ -6,6 +6,7 @@ import { ProductDetailsTabs } from "./product-details-tabs";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useTheme } from "@/contexts/theme-context";
 
 interface Product {
   id: string;
@@ -13,6 +14,12 @@ interface Product {
   brand: string;
   supplier: string;
   images: string[];
+  productImages?: Array<{
+    url: string;
+    blurDataURL?: string;
+    alt?: string;
+    isPrimary?: boolean;
+  }>;
   price: number;
   originalPrice?: number;
   description: string;
@@ -46,8 +53,10 @@ interface ProductDetailSectionProps {
 }
 
 export function ProductDetailSection({ product }: ProductDetailSectionProps) {
+  const { themeColors } = useTheme();
+  
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-8">
+    <div className="min-h-screen py-8" style={{ background: `${themeColors.surface}30` }}>
       <div className="container mx-auto px-4">
         {/* Breadcrumb */}
         <motion.div
@@ -57,32 +66,33 @@ export function ProductDetailSection({ product }: ProductDetailSectionProps) {
         >
           <Link
             href="/productos"
-            className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+            className="inline-flex items-center gap-2 transition-colors font-medium"
+            style={{ color: themeColors.primary }}
           >
             <ArrowLeft className="w-4 h-4" />
-            <span className="font-medium">Volver a Productos</span>
+            <span>Volver a Productos</span>
           </Link>
 
-          <div className="flex items-center gap-2 mt-2 text-sm text-slate-500 dark:text-slate-400">
+          <div className="flex items-center gap-2 mt-2 text-sm" style={{ color: themeColors.text.secondary }}>
             <Link
               href="/"
-              className="hover:text-slate-700 dark:hover:text-slate-300"
+              className="hover:opacity-80"
             >
               Inicio
             </Link>
             <span>/</span>
             <Link
               href="/productos"
-              className="hover:text-slate-700 dark:hover:text-slate-300"
+              className="hover:opacity-80"
             >
               Productos
             </Link>
             <span>/</span>
-            <span className="text-slate-700 dark:text-slate-300">
+            <span style={{ color: themeColors.text.primary }}>
               {product.category}
             </span>
             <span>/</span>
-            <span className="text-slate-900 dark:text-white font-medium">
+            <span className="font-medium" style={{ color: themeColors.text.primary }}>
               {product.name}
             </span>
           </div>
@@ -97,7 +107,7 @@ export function ProductDetailSection({ product }: ProductDetailSectionProps) {
             transition={{ duration: 0.5 }}
           >
             <ProductImageGallery
-              images={product.images}
+              images={product.productImages || product.images}
               productName={product.name}
             />
           </motion.div>
@@ -128,11 +138,11 @@ export function ProductDetailSection({ product }: ProductDetailSectionProps) {
           transition={{ duration: 0.5, delay: 0.6 }}
           className="mt-16"
         >
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-8">
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6 text-center">
+          <div className="rounded-2xl shadow-lg p-8" style={{ background: themeColors.surface, border: `1px solid ${themeColors.primary}20` }}>
+            <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: themeColors.text.primary }}>
               Productos Relacionados
             </h2>
-            <div className="text-center text-slate-500 dark:text-slate-400">
+            <div className="text-center" style={{ color: themeColors.text.secondary }}>
               <p className="text-lg mb-4">🔄</p>
               <p>
                 Próximamente: productos relacionados y recomendaciones
@@ -141,7 +151,8 @@ export function ProductDetailSection({ product }: ProductDetailSectionProps) {
               <div className="mt-6">
                 <Link
                   href="/productos"
-                  className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
+                  className="inline-flex items-center gap-2 font-semibold py-3 px-6 rounded-xl transition-colors"
+                  style={{ background: themeColors.primary, color: '#fff' }}
                 >
                   Ver Todos los Productos
                 </Link>
@@ -158,32 +169,32 @@ export function ProductDetailSection({ product }: ProductDetailSectionProps) {
           className="mt-12"
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-green-50 dark:bg-green-900/20 p-6 rounded-xl text-center">
+            <div className="p-6 rounded-xl text-center" style={{ background: `${themeColors.accent}15` }}>
               <div className="text-4xl mb-3">🔒</div>
-              <h3 className="font-semibold text-green-800 dark:text-green-300 mb-2">
+              <h3 className="font-semibold mb-2" style={{ color: themeColors.text.primary }}>
                 Compra Segura
               </h3>
-              <p className="text-green-600 dark:text-green-400 text-sm">
+              <p className="text-sm" style={{ color: themeColors.text.secondary }}>
                 Tus datos están protegidos con encriptación SSL
               </p>
             </div>
 
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-xl text-center">
+            <div className="p-6 rounded-xl text-center" style={{ background: `${themeColors.primary}15` }}>
               <div className="text-4xl mb-3">🚚</div>
-              <h3 className="font-semibold text-blue-800 dark:text-blue-300 mb-2">
+              <h3 className="font-semibold mb-2" style={{ color: themeColors.text.primary }}>
                 Envío Rápido
               </h3>
-              <p className="text-blue-600 dark:text-blue-400 text-sm">
+              <p className="text-sm" style={{ color: themeColors.text.secondary }}>
                 Entrega en {product.shipping.estimatedDays}
               </p>
             </div>
 
-            <div className="bg-purple-50 dark:bg-purple-900/20 p-6 rounded-xl text-center">
+            <div className="p-6 rounded-xl text-center" style={{ background: `${themeColors.secondary}15` }}>
               <div className="text-4xl mb-3">⭐</div>
-              <h3 className="font-semibold text-purple-800 dark:text-purple-300 mb-2">
+              <h3 className="font-semibold mb-2" style={{ color: themeColors.text.primary }}>
                 Calidad Garantizada
               </h3>
-              <p className="text-purple-600 dark:text-purple-400 text-sm">
+              <p className="text-sm" style={{ color: themeColors.text.secondary }}>
                 {product.warranty}
               </p>
             </div>

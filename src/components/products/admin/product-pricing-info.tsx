@@ -148,7 +148,7 @@ export function ProductPricingInfo({
             </div>
           ) : (
             <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
-              {productData.originalPrice ? (
+              {productData.originalPrice && productData.originalPrice > productData.price ? (
                 <div className="space-y-1">
                   <span className="text-lg font-semibold text-gray-500 dark:text-gray-400 line-through">
                     {formatCurrency(productData.originalPrice)}
@@ -165,7 +165,7 @@ export function ProductPricingInfo({
                 </div>
               ) : (
                 <span className="text-gray-500 dark:text-gray-400">
-                  Sin descuento
+                  No especificado
                 </span>
               )}
             </div>

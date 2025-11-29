@@ -128,39 +128,46 @@ export const PriceFilters: React.FC<PriceFiltersProps> = ({
         {/* Botones de acción */}
         <div className="flex flex-col sm:flex-row gap-3 xl:flex-shrink-0">
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={onImport}
-            className="px-4 py-2 text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-lg whitespace-nowrap"
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onDownloadFormat}
+            className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all backdrop-blur-sm border font-medium"
             style={{
-              backgroundImage: `linear-gradient(to right, ${themeColors.secondary}, ${themeColors.accent})`,
+              backgroundColor: themeColors.accent + "20",
+              color: themeColors.text.primary,
+              borderColor: themeColors.accent + "40"
+            }}
+          >
+            <Download className="w-4 h-4" />
+            <span className="hidden sm:inline">Exportar</span>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onImport}
+            className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all backdrop-blur-sm border font-medium"
+            style={{
+              backgroundColor: themeColors.secondary + "20",
+              color: themeColors.text.primary,
+              borderColor: themeColors.secondary + "40"
             }}
           >
             <Upload className="w-4 h-4" />
-            Importar
+            <span className="hidden sm:inline">Importar</span>
           </motion.button>
 
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={onDownloadFormat}
-            className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200 flex items-center gap-2 whitespace-nowrap"
-          >
-            <Download className="w-4 h-4" />
-            Descargar Formato
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
             onClick={onAddPrice}
-            className="px-4 py-2 text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-lg whitespace-nowrap"
+            className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all text-white font-medium"
             style={{
-              backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
+              background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`
             }}
           >
             <Plus className="w-4 h-4" />
-            Agregar Precio
+            <span className="hidden sm:inline">Agregar</span>
           </motion.button>
         </div>
       </div>

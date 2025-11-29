@@ -221,13 +221,32 @@ class HttpClient {
     config?: AxiosRequestConfig
   ): Promise<ApiResponse<T>> {
     try {
+      console.log(`[HTTP-CLIENT POST] Iniciando request a ${url}`);
+      console.log(`[HTTP-CLIENT POST] Data type:`, typeof data);
+      console.log(`[HTTP-CLIENT POST] Data es array:`, Array.isArray(data));
+      if (Array.isArray(data)) {
+        console.log(`[HTTP-CLIENT POST] Array length:`, data.length);
+        console.log(`[HTTP-CLIENT POST] Primer elemento:`, data[0]);
+      }
+      
       const response = await this.client.post<T>(url, data, config);
+      
+      console.log(`[HTTP-CLIENT POST] Response status:`, response.status);
+      console.log(`[HTTP-CLIENT POST] Response data:`, response.data);
+      
       return {
         data: response.data,
         status: response.status,
         success: true,
       };
     } catch (error: unknown) {
+      console.error(`[HTTP-CLIENT POST] Error capturado:`, error);
+      if (axios.isAxiosError(error)) {
+        console.error(`[HTTP-CLIENT POST] Es AxiosError`);
+        console.error(`[HTTP-CLIENT POST] Error response:`, error.response);
+        console.error(`[HTTP-CLIENT POST] Error request:`, error.request);
+        console.error(`[HTTP-CLIENT POST] Error message:`, error.message);
+      }
       throw this.handleError(error);
     }
   }

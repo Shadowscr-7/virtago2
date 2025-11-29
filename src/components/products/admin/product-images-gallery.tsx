@@ -10,13 +10,25 @@ import {
   Star,
   ArrowUp,
   ArrowDown,
+  Loader2,
+  CheckCircle,
 } from "lucide-react";
+import { toast } from "sonner";
 import type { ProductData } from "@/app/admin/productos/[id]/page";
+import { uploadMultipleImages, type UploadProgress } from "@/services/cloudinary";
 
 interface ProductImagesGalleryProps {
   productData: ProductData;
   isEditing: boolean;
   onChange: (updates: Partial<ProductData>) => void;
+}
+
+interface UploadingImage {
+  id: string;
+  preview: string;
+  progress: number;
+  status: 'uploading' | 'completed' | 'error';
+  error?: string;
 }
 
 export function ProductImagesGallery({
@@ -25,26 +37,100 @@ export function ProductImagesGallery({
   onChange,
 }: ProductImagesGalleryProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [uploadingImages, setUploadingImages] = useState<UploadingImage[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (!files) return;
+    if (!files || files.length === 0) return;
 
-    // Aquí iría la lógica para subir las imágenes
-    console.log("Subiendo imágenes:", files);
+    // Validar archivos
+    const validFiles: File[] = [];
+    const maxSize = 10 * 1024 * 1024; // 10MB
 
-    // Simular agregado de nuevas imágenes
-    const newImages = Array.from(files).map((file, index) => ({
-      id: `new-${Date.now()}-${index}`,
-      url: URL.createObjectURL(file),
-      alt: file.name,
-      isPrimary: false,
-      order: productData.images.length + index + 1,
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith('image/')) {
+        toast.error(`${file.name} no es una imagen válida`);
+        continue;
+      }
+      if (file.size > maxSize) {
+        toast.error(`${file.name} es muy grande (máx. 10MB)`);
+        continue;
+      }
+      validFiles.push(file);
+    }
+
+    if (validFiles.length === 0) return;
+
+    // Crear objetos de upload con preview
+    const uploadItems: UploadingImage[] = validFiles.map((file, index) => ({
+      id: `uploading-${Date.now()}-${index}`,
+      preview: URL.createObjectURL(file),
+      progress: 0,
+      status: 'uploading' as const,
     }));
 
-    onChange({
-      images: [...productData.images, ...newImages],
-    });
+    setUploadingImages(uploadItems);
+    setIsUploading(true);
+
+    try {
+      // Subir a Cloudinary con progreso
+      const uploadResults = await uploadMultipleImages(
+        validFiles,
+        (fileIndex, progress: UploadProgress) => {
+          setUploadingImages((prev) => {
+            const updated = [...prev];
+            if (updated[fileIndex]) {
+              updated[fileIndex].progress = progress.percentage;
+            }
+            return updated;
+          });
+        }
+      );
+
+      // Marcar como completadas
+      setUploadingImages((prev) =>
+        prev.map((img) => ({ ...img, status: 'completed' as const }))
+      );
+
+      // Agregar las nuevas imágenes al producto
+      const newImages = uploadResults.map((result, index) => ({
+        id: `img-${Date.now()}-${index}`,
+        url: result.url,
+        blurDataURL: result.blurDataURL,
+        alt: validFiles[index].name.replace(/\.[^/.]+$/, ''),
+        isPrimary: productData.images.length === 0 && index === 0, // Primera imagen es principal si no hay otras
+        order: productData.images.length + index + 1,
+      }));
+
+      onChange({
+        images: [...productData.images, ...newImages],
+      });
+
+      toast.success(`${uploadResults.length} imagen(es) subida(s) exitosamente`);
+
+      // Limpiar uploading después de 2 segundos
+      setTimeout(() => {
+        setUploadingImages([]);
+        setIsUploading(false);
+      }, 2000);
+    } catch (error) {
+      console.error('Error subiendo imágenes:', error);
+      toast.error('Error al subir las imágenes');
+      
+      setUploadingImages((prev) =>
+        prev.map((img) => ({
+          ...img,
+          status: 'error' as const,
+          error: 'Error al subir',
+        }))
+      );
+      
+      setTimeout(() => {
+        setUploadingImages([]);
+        setIsUploading(false);
+      }, 3000);
+    }
   };
 
   const removeImage = (imageId: string) => {
@@ -125,11 +211,26 @@ export function ProductImagesGallery({
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <div className="text-center">
-                <ImageIcon className="w-16 h-16 text-gray-400 mx-auto mb-3" />
-                <p className="text-gray-500 dark:text-gray-400">
-                  No hay imagen principal
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-purple-900/20 dark:via-pink-900/20 dark:to-blue-900/20">
+              <div className="text-center p-8">
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                  className="relative"
+                >
+                  <div className="w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-purple-200 to-pink-200 dark:from-purple-800 dark:to-pink-800 rounded-3xl flex items-center justify-center shadow-xl">
+                    <ImageIcon className="w-16 h-16 text-purple-600 dark:text-purple-300" />
+                  </div>
+                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
+                    <span className="text-xl">📷</span>
+                  </div>
+                </motion.div>
+                <p className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                  Sin imagen
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {isEditing ? 'Sube una imagen para este producto' : 'No hay imagen principal'}
                 </p>
               </div>
             </div>
@@ -238,16 +339,59 @@ export function ProductImagesGallery({
             </motion.div>
           ))}
 
+          {/* Imágenes subiendo */}
+          {uploadingImages.map((uploadImg) => (
+            <motion.div
+              key={uploadImg.id}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="relative aspect-square rounded-xl overflow-hidden border-2 border-purple-300"
+            >
+              <Image
+                src={uploadImg.preview}
+                alt="Subiendo..."
+                fill
+                className="object-cover opacity-50"
+                sizes="(max-width: 768px) 33vw, 11vw"
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                {uploadImg.status === 'uploading' && (
+                  <div className="text-center">
+                    <Loader2 className="w-6 h-6 text-white animate-spin mx-auto mb-2" />
+                    <span className="text-xs text-white font-medium">
+                      {uploadImg.progress}%
+                    </span>
+                  </div>
+                )}
+                {uploadImg.status === 'completed' && (
+                  <CheckCircle className="w-8 h-8 text-green-400" />
+                )}
+                {uploadImg.status === 'error' && (
+                  <div className="text-center">
+                    <X className="w-6 h-6 text-red-400 mx-auto" />
+                    <span className="text-xs text-red-300">{uploadImg.error}</span>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          ))}
+
           {/* Botón para agregar imágenes */}
           {isEditing && (
             <motion.label
               whileHover={{ scale: 1.05 }}
-              className="relative aspect-square border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:border-purple-400 transition-colors flex items-center justify-center bg-gray-50/50 dark:bg-slate-700/50"
+              className={`relative aspect-square border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:border-purple-400 transition-colors flex items-center justify-center bg-gray-50/50 dark:bg-slate-700/50 ${
+                isUploading ? 'opacity-50 pointer-events-none' : ''
+              }`}
             >
               <div className="text-center">
-                <Upload className="w-6 h-6 text-gray-400 mx-auto mb-1" />
+                {isUploading ? (
+                  <Loader2 className="w-6 h-6 text-gray-400 mx-auto mb-1 animate-spin" />
+                ) : (
+                  <Upload className="w-6 h-6 text-gray-400 mx-auto mb-1" />
+                )}
                 <span className="text-xs text-gray-500 dark:text-gray-400">
-                  Agregar
+                  {isUploading ? 'Subiendo...' : 'Agregar'}
                 </span>
               </div>
               <input
@@ -256,6 +400,7 @@ export function ProductImagesGallery({
                 accept="image/*"
                 onChange={handleImageUpload}
                 className="sr-only"
+                disabled={isUploading}
               />
             </motion.label>
           )}

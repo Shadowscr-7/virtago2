@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Star,
@@ -17,6 +17,8 @@ import {
   Check,
 } from "lucide-react";
 import { useCartStore } from "@/components/cart/cart-store";
+import { useTheme } from "@/contexts/theme-context";
+import { calculatePrice, type DiscountRule } from "@/lib/price-calculator";
 
 interface ProductInfo {
   id: string;
@@ -48,6 +50,10 @@ interface ProductInfo {
     response_time: string;
     verified: boolean;
   };
+  // 🆕 Información de descuentos
+  discounts?: DiscountRule[];
+  priceSale?: number;
+  discountPercentage?: number;
 }
 
 interface ProductInfoPanelProps {
@@ -57,6 +63,16 @@ interface ProductInfoPanelProps {
 export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showAddedToast, setShowAddedToast] = useState(false);
+  const [calculatedPrice, setCalculatedPrice] = useState({
+    basePrice: product.price,
+    subtotal: product.price,
+    finalPrice: product.price,
+    discount: 0,
+    discountPercentage: 0,
+    totalSavings: 0,
+  });
+  const { themeColors } = useTheme();
 
   const { addItem } = useCartStore();
 
@@ -92,6 +108,11 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
       stockQuantity: product.stockQuantity,
       category: product.category,
     });
+    
+    // Mostrar confirmación
+    setShowAddedToast(true);
+    setTimeout(() => setShowAddedToast(false), 3000);
+    
     // Reset quantity after adding
     setQuantity(1);
   };
@@ -105,11 +126,11 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
         {/* Brand and Tags */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="text-blue-600 dark:text-blue-400 font-semibold text-lg">
+            <span className="font-semibold text-lg" style={{ color: themeColors.primary }}>
               {product.brand}
             </span>
             {product.supplier_info.verified && (
-              <div className="flex items-center gap-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-1 rounded-full text-xs">
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs" style={{ background: `${themeColors.accent}20`, color: themeColors.accent }}>
                 <Shield className="w-3 h-3" />
                 Verificado
               </div>
@@ -118,22 +139,22 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsFavorite(!isFavorite)}
-              className={`p-2 rounded-full transition-colors ${
-                isFavorite
-                  ? "bg-red-500 text-white"
-                  : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900"
-              }`}
+              className="p-2 rounded-full transition-colors"
+              style={{
+                background: isFavorite ? themeColors.accent : `${themeColors.surface}90`,
+                color: isFavorite ? '#fff' : themeColors.text.secondary
+              }}
             >
               <Heart className="w-5 h-5" />
             </button>
-            <button className="p-2 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+            <button className="p-2 rounded-full transition-colors" style={{ background: `${themeColors.surface}90`, color: themeColors.text.secondary }}>
               <Share2 className="w-5 h-5" />
             </button>
           </div>
         </div>
 
         {/* Product Name */}
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white leading-tight">
+        <h1 className="text-3xl font-bold leading-tight" style={{ color: themeColors.text.primary }}>
           {product.name}
         </h1>
 
@@ -145,18 +166,18 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`w-5 h-5 ${
-                      i < Math.floor(product.rating!)
-                        ? "text-yellow-400 fill-yellow-400"
-                        : "text-slate-300 dark:text-slate-600"
-                    }`}
+                    className="w-5 h-5"
+                    style={{
+                      color: i < Math.floor(product.rating!) ? themeColors.accent : `${themeColors.text.secondary}40`,
+                      fill: i < Math.floor(product.rating!) ? themeColors.accent : 'transparent'
+                    }}
                   />
                 ))}
               </div>
-              <span className="font-semibold text-slate-900 dark:text-white">
+              <span className="font-semibold" style={{ color: themeColors.text.primary }}>
                 {product.rating}
               </span>
-              <span className="text-slate-500 dark:text-slate-400">
+              <span style={{ color: themeColors.text.secondary }}>
                 ({product.reviews?.toLocaleString()} reseñas)
               </span>
             </div>
@@ -168,7 +189,8 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
           {product.tags.map((tag) => (
             <span
               key={tag}
-              className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full text-sm font-medium"
+              className="px-3 py-1 rounded-full text-sm font-medium"
+              style={{ background: `${themeColors.primary}20`, color: themeColors.primary }}
             >
               {tag}
             </span>
@@ -177,29 +199,29 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
       </div>
 
       {/* Pricing */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 p-6 rounded-2xl border border-blue-200 dark:border-blue-800">
+      <div className="p-6 rounded-2xl" style={{ background: `linear-gradient(135deg, ${themeColors.primary}10, ${themeColors.secondary}10)`, border: `1px solid ${themeColors.primary}30` }}>
         <div className="space-y-3">
           <div className="flex items-baseline gap-3">
-            <span className="text-4xl font-bold text-slate-900 dark:text-white">
-              ${product.price.toLocaleString()}
+            <span className="text-4xl font-bold" style={{ color: themeColors.text.primary }}>
+              ${(product.price || 0).toLocaleString()}
             </span>
             {isOnSale && (
               <>
-                <span className="text-xl text-slate-400 line-through">
-                  ${product.originalPrice!.toLocaleString()}
+                <span className="text-xl line-through" style={{ color: themeColors.text.secondary }}>
+                  ${(product.originalPrice || 0).toLocaleString()}
                 </span>
-                <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                <span className="px-3 py-1 rounded-full text-sm font-bold" style={{ background: themeColors.accent, color: '#fff' }}>
                   -{discountPercentage}%
                 </span>
               </>
             )}
           </div>
           {isOnSale && (
-            <p className="text-green-600 dark:text-green-400 font-semibold">
-              ¡Ahorras ${savings.toLocaleString()}!
+            <p className="font-semibold" style={{ color: themeColors.accent }}>
+              ¡Ahorras ${(savings || 0).toLocaleString()}!
             </p>
           )}
-          <p className="text-sm text-slate-600 dark:text-slate-400">
+          <p className="text-sm" style={{ color: themeColors.text.secondary }}>
             Precio por unidad • Impuestos incluidos
           </p>
         </div>
@@ -208,21 +230,21 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
       {/* Stock Status */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="font-medium text-slate-900 dark:text-white">
+          <span className="font-medium" style={{ color: themeColors.text.primary }}>
             Disponibilidad:
           </span>
           <div className="flex items-center gap-2">
             {product.inStock ? (
               <>
-                <Check className="w-4 h-4 text-green-500" />
-                <span className="text-green-600 dark:text-green-400 font-semibold">
+                <Check className="w-4 h-4" style={{ color: themeColors.accent }} />
+                <span className="font-semibold" style={{ color: themeColors.accent }}>
                   En stock ({product.stockQuantity} disponibles)
                 </span>
               </>
             ) : (
               <>
-                <AlertCircle className="w-4 h-4 text-red-500" />
-                <span className="text-red-600 dark:text-red-400 font-semibold">
+                <AlertCircle className="w-4 h-4" style={{ color: themeColors.accent }} />
+                <span className="font-semibold" style={{ color: themeColors.accent }}>
                   Sin stock
                 </span>
               </>
@@ -231,10 +253,10 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
         </div>
 
         {product.inStock && product.stockQuantity < 10 && (
-          <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 p-3 rounded-lg">
+          <div className="p-3 rounded-lg" style={{ background: `${themeColors.accent}20`, border: `1px solid ${themeColors.accent}40` }}>
             <div className="flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 text-orange-500" />
-              <span className="text-orange-700 dark:text-orange-300 text-sm font-medium">
+              <AlertCircle className="w-4 h-4" style={{ color: themeColors.accent }} />
+              <span className="text-sm font-medium" style={{ color: themeColors.accent }}>
                 ¡Pocas unidades disponibles! Solo quedan {product.stockQuantity}
               </span>
             </div>
@@ -246,38 +268,62 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
       {product.inStock && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <span className="font-medium text-slate-900 dark:text-white">
+            <span className="font-medium" style={{ color: themeColors.text.primary }}>
               Cantidad:
             </span>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => handleQuantityChange(quantity - 1)}
                 disabled={quantity <= 1}
-                className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                className="w-10 h-10 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors hover:scale-105"
+                style={{ background: `${themeColors.surface}90`, color: themeColors.text.primary }}
+                aria-label="Disminuir cantidad"
               >
-                <Minus className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+                <Minus className="w-4 h-4" />
               </button>
-              <span className="w-16 text-center font-semibold text-lg text-slate-900 dark:text-white">
-                {quantity}
-              </span>
+              <input
+                type="number"
+                min="1"
+                max={product.stockQuantity}
+                value={quantity}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value) || 1;
+                  handleQuantityChange(value);
+                }}
+                className="w-16 text-center font-semibold text-lg border-2 rounded-lg py-1 focus:outline-none focus:ring-2 transition-all"
+                style={{ 
+                  color: themeColors.text.primary,
+                  borderColor: `${themeColors.primary}40`,
+                  background: `${themeColors.surface}20`
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = themeColors.primary;
+                  e.target.style.background = `${themeColors.primary}05`;
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = `${themeColors.primary}40`;
+                  e.target.style.background = `${themeColors.surface}20`;
+                }}
+              />
               <button
                 onClick={() => handleQuantityChange(quantity + 1)}
                 disabled={quantity >= product.stockQuantity}
-                className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                className="w-10 h-10 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors hover:scale-105"
+                style={{ background: `${themeColors.surface}90`, color: themeColors.text.primary }}
               >
-                <Plus className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+                <Plus className="w-4 h-4" />
               </button>
             </div>
           </div>
 
           {/* Total Price */}
-          <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl">
+          <div className="p-4 rounded-xl" style={{ background: `${themeColors.surface}50` }}>
             <div className="flex items-center justify-between">
-              <span className="font-medium text-slate-700 dark:text-slate-300">
+              <span className="font-medium" style={{ color: themeColors.text.secondary }}>
                 Total ({quantity} {quantity === 1 ? "unidad" : "unidades"}):
               </span>
-              <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                ${totalPrice.toLocaleString()}
+              <span className="text-2xl font-bold" style={{ color: themeColors.primary }}>
+                ${(totalPrice || 0).toLocaleString()}
               </span>
             </div>
           </div>
@@ -291,72 +337,74 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
           disabled={!product.inStock}
           whileHover={{ scale: product.inStock ? 1.02 : 1 }}
           whileTap={{ scale: product.inStock ? 0.98 : 1 }}
-          className={`w-full py-4 px-6 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all duration-300 ${
-            product.inStock
-              ? "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/25"
-              : "bg-slate-300 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed"
-          }`}
+          className="w-full py-4 px-6 rounded-xl font-bold text-lg flex items-center justify-center gap-3 transition-all duration-300"
+          style={{
+            background: product.inStock ? themeColors.primary : `${themeColors.surface}80`,
+            color: product.inStock ? '#fff' : themeColors.text.secondary,
+            boxShadow: product.inStock ? `0 10px 25px ${themeColors.primary}25` : 'none',
+            cursor: product.inStock ? 'pointer' : 'not-allowed'
+          }}
         >
           <ShoppingCart className="w-5 h-5" />
           {product.inStock ? "Agregar al Carrito" : "Sin Stock"}
         </motion.button>
 
-        <button className="w-full py-3 px-6 rounded-xl font-semibold border-2 border-blue-600 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+        <button className="w-full py-3 px-6 rounded-xl font-semibold transition-colors" style={{ border: `2px solid ${themeColors.primary}`, color: themeColors.primary, background: 'transparent' }}>
           Comprar Ahora
         </button>
       </div>
 
       {/* Features */}
       <div className="space-y-4">
-        <h3 className="font-semibold text-lg text-slate-900 dark:text-white">
+        <h3 className="font-semibold text-lg" style={{ color: themeColors.text.primary }}>
           Incluye:
         </h3>
         <div className="grid grid-cols-1 gap-3">
-          <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-            <Truck className="w-5 h-5 text-green-600" />
+          <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: `${themeColors.accent}15` }}>
+            <Truck className="w-5 h-5" style={{ color: themeColors.accent }} />
             <div>
-              <p className="font-medium text-green-800 dark:text-green-300">
+              <p className="font-medium" style={{ color: themeColors.text.primary }}>
                 {product.shipping.free
                   ? "Envío Gratis"
                   : `Envío $${product.shipping.cost}`}
               </p>
-              <p className="text-sm text-green-600 dark:text-green-400">
+              <p className="text-sm" style={{ color: themeColors.text.secondary }}>
                 Entrega estimada: {product.shipping.estimatedDays}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <Shield className="w-5 h-5 text-blue-600" />
+          <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: `${themeColors.primary}15` }}>
+            <Shield className="w-5 h-5" style={{ color: themeColors.primary }} />
             <div>
-              <p className="font-medium text-blue-800 dark:text-blue-300">
+              <p className="font-medium" style={{ color: themeColors.text.primary }}>
                 Garantía
               </p>
-              <p className="text-sm text-blue-600 dark:text-blue-400">
+              <p className="text-sm" style={{ color: themeColors.text.secondary }}>
                 {product.warranty}
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-            <RotateCcw className="w-5 h-5 text-purple-600" />
+          <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: `${themeColors.secondary}15` }}>
+            <RotateCcw className="w-5 h-5" style={{ color: themeColors.secondary }} />
             <div>
-              <p className="font-medium text-purple-800 dark:text-purple-300">
+              <p className="font-medium" style={{ color: themeColors.text.primary }}>
                 Devoluciones
               </p>
-              <p className="text-sm text-purple-600 dark:text-purple-400">
+              <p className="text-sm" style={{ color: themeColors.text.secondary }}>
                 30 días para devoluciones
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
-            <CreditCard className="w-5 h-5 text-orange-600" />
+          <div className="flex items-center gap-3 p-3 rounded-lg" style={{ background: `${themeColors.accent}15` }}>
+            <CreditCard className="w-5 h-5" style={{ color: themeColors.accent }} />
             <div>
-              <p className="font-medium text-orange-800 dark:text-orange-300">
+              <p className="font-medium" style={{ color: themeColors.text.primary }}>
                 Pago Seguro
               </p>
-              <p className="text-sm text-orange-600 dark:text-orange-400">
+              <p className="text-sm" style={{ color: themeColors.text.secondary }}>
                 Múltiples métodos de pago
               </p>
             </div>
@@ -365,48 +413,68 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
       </div>
 
       {/* Supplier Info */}
-      <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-xl">
-        <h3 className="font-semibold text-lg text-slate-900 dark:text-white mb-4">
+      <div className="p-6 rounded-xl" style={{ background: `${themeColors.surface}50` }}>
+        <h3 className="font-semibold text-lg mb-4" style={{ color: themeColors.text.primary }}>
           Información del Proveedor
         </h3>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-slate-600 dark:text-slate-400">
+            <span style={{ color: themeColors.text.secondary }}>
               Proveedor:
             </span>
             <div className="flex items-center gap-2">
-              <span className="font-medium text-slate-900 dark:text-white">
+              <span className="font-medium" style={{ color: themeColors.text.primary }}>
                 {product.supplier_info.name}
               </span>
               {product.supplier_info.verified && (
-                <Shield className="w-4 h-4 text-green-500" />
+                <Shield className="w-4 h-4" style={{ color: themeColors.accent }} />
               )}
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-slate-600 dark:text-slate-400">
+            <span style={{ color: themeColors.text.secondary }}>
               Calificación:
             </span>
             <div className="flex items-center gap-2">
-              <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-              <span className="font-medium text-slate-900 dark:text-white">
+              <Star className="w-4 h-4" style={{ color: themeColors.accent, fill: themeColors.accent }} />
+              <span className="font-medium" style={{ color: themeColors.text.primary }}>
                 {product.supplier_info.rating}
               </span>
-              <span className="text-slate-500 dark:text-slate-400 text-sm">
+              <span className="text-sm" style={{ color: themeColors.text.secondary }}>
                 ({product.supplier_info.reviews.toLocaleString()})
               </span>
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-slate-600 dark:text-slate-400">
+            <span style={{ color: themeColors.text.secondary }}>
               Tiempo de respuesta:
             </span>
-            <span className="font-medium text-slate-900 dark:text-white">
+            <span className="font-medium" style={{ color: themeColors.text.primary }}>
               {product.supplier_info.response_time}
             </span>
           </div>
         </div>
       </div>
+      
+      {/* Toast de confirmación */}
+      {showAddedToast && (
+        <div 
+          className="fixed bottom-8 right-8 z-50 animate-slide-in"
+          style={{
+            background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.accent})`,
+            boxShadow: `0 10px 40px ${themeColors.primary}40`
+          }}
+        >
+          <div className="px-6 py-4 rounded-xl text-white flex items-center gap-3">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <span className="font-medium">
+              ✓ {quantity} {quantity === 1 ? 'producto agregado' : 'productos agregados'} al carrito
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

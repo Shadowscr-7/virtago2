@@ -16,6 +16,7 @@ import {
   ShoppingCart,
   Ticket,
   BookOpen,
+  GraduationCap,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -81,6 +82,12 @@ const menuItems = [
     label: "Cupones",
     icon: Ticket,
     href: "/admin/cupones",
+  },
+  {
+    id: "tutorials",
+    label: "Tutoriales",
+    icon: GraduationCap,
+    href: "/admin/tutoriales",
   },
   {
     id: "documentation",

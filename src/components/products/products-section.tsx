@@ -344,6 +344,7 @@ export interface ProductFilters {
 // Tipo local para ProductsGrid (temporalmente, hasta tener todos los campos del backend)
 interface GridProduct {
   id: string;
+  prodVirtaId?: string; // Identificador principal del backend
   name: string;
   brand: string;
   supplier: string;
@@ -376,6 +377,13 @@ interface GridProduct {
     potentialSavings: number;
     badge: string;
   } | null;
+  // Imágenes del producto
+  productImages?: Array<{
+    url: string;
+    blurDataURL?: string;
+    alt?: string;
+    isPrimary?: boolean;
+  }>;
 }
 
 export function ProductsSection() {
@@ -408,12 +416,16 @@ export function ProductsSection() {
       // Calcular el mejor descuento adicional disponible
       const bestAdditionalDiscount = getBestAdditionalDiscount(p);
 
+      // Obtener la imagen principal
+      const primaryImage = p.productImages?.find(img => img.isPrimary) || p.productImages?.[0];
+
       return {
         id: p.id,
+        prodVirtaId: p.prodVirtaId, // Identificador principal del backend
         name: p.name || p.title,
         brand: p.brandId || "Sin marca",
         supplier: p.distributorCode || "Proveedor",
-        image: p.productImages?.[0] || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400",
+        image: primaryImage?.url || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400",
         price: p.pricing.final_price, // Precio con descuento aplicado
         originalPrice: p.pricing.has_discount ? p.pricing.base_price : undefined,
         description: p.shortDescription || p.fullDescription || "",
@@ -429,6 +441,8 @@ export function ProductsSection() {
         pricing: p.pricing,
         discounts: p.discounts,
         bestAdditionalDiscount,
+        // Agregar las imágenes del producto
+        productImages: p.productImages || [],
       };
     });
   };

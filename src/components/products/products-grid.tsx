@@ -22,6 +22,7 @@ import { useCartStore } from "@/components/cart/cart-store";
 
 interface Product {
   id: string;
+  prodVirtaId?: string; // Identificador principal del backend
   name: string;
   brand: string;
   supplier: string;
@@ -54,6 +55,13 @@ interface Product {
     potentialSavings: number;
     badge: string;
   } | null;
+  // Imágenes del producto desde el API
+  productImages?: Array<{
+    url: string;
+    blurDataURL?: string;
+    alt?: string;
+    isPrimary?: boolean;
+  }>;
 }
 
 interface ProductsGridProps {
@@ -153,6 +161,10 @@ export function ProductsGrid({
       ? calculateDiscount(product.originalPrice!, product.price)
       : 0;
 
+    // Obtener la imagen principal o usar fallback
+    const primaryImage = product.productImages?.find(img => img.isPrimary) || product.productImages?.[0];
+    const hasImage = !!primaryImage;
+
     return (
       <motion.div
         layout
@@ -164,12 +176,23 @@ export function ProductsGrid({
       >
         {/* Image */}
         <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-700">
-          <Image
-            src={product.image}
-            alt={product.name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-          />
+          {hasImage ? (
+            <Image
+              src={primaryImage!.url}
+              alt={primaryImage!.alt || product.name}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              placeholder={primaryImage!.blurDataURL ? "blur" : "empty"}
+              blurDataURL={primaryImage!.blurDataURL}
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800">
+              <Package className="w-16 h-16 text-slate-400 dark:text-slate-500 mb-2" />
+              <span className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+                Sin imagen
+              </span>
+            </div>
+          )}
 
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-2">
@@ -203,7 +226,7 @@ export function ProductsGrid({
               <Heart className="w-4 h-4" />
             </button>
             <Link
-              href={`/producto/${product.id}`}
+              href={`/producto/${product.prodVirtaId || product.id}`}
               className="p-2 bg-white/90 text-slate-600 rounded-full backdrop-blur-sm hover:bg-blue-500 hover:text-white transition-colors"
             >
               <Eye className="w-4 h-4" />
@@ -340,6 +363,10 @@ export function ProductsGrid({
       ? calculateDiscount(product.originalPrice!, product.price)
       : 0;
 
+    // Obtener la imagen principal o usar fallback
+    const primaryImage = product.productImages?.find(img => img.isPrimary) || product.productImages?.[0];
+    const hasImage = !!primaryImage;
+
     return (
       <motion.div
         layout
@@ -352,12 +379,23 @@ export function ProductsGrid({
         <div className="flex">
           {/* Image */}
           <div className="relative w-48 h-32 flex-shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-700">
-            <Image
-              src={product.image}
-              alt={product.name}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-            />
+            {hasImage ? (
+              <Image
+                src={primaryImage!.url}
+                alt={primaryImage!.alt || product.name}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
+                placeholder={primaryImage!.blurDataURL ? "blur" : "empty"}
+                blurDataURL={primaryImage!.blurDataURL}
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800">
+                <Package className="w-12 h-12 text-slate-400 dark:text-slate-500 mb-1" />
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                  Sin imagen
+                </span>
+              </div>
+            )}
 
             {/* Badges */}
             <div className="absolute top-2 left-2 flex flex-col gap-1">
@@ -503,7 +541,7 @@ export function ProductsGrid({
                     <Heart className="w-4 h-4" />
                   </button>
                   <Link
-                    href={`/producto/${product.id}`}
+                    href={`/producto/${product.prodVirtaId || product.id}`}
                     className="p-2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-blue-500 hover:text-white transition-colors"
                   >
                     <Eye className="w-4 h-4" />

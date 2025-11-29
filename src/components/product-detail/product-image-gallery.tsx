@@ -2,21 +2,40 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Package } from "lucide-react";
 import Image from "next/image";
+import { useTheme } from "@/contexts/theme-context";
+
+interface ProductImage {
+  url: string;
+  blurDataURL?: string;
+  alt?: string;
+  isPrimary?: boolean;
+}
 
 interface ProductImageGalleryProps {
-  images: string[];
+  images?: string[] | ProductImage[];
   productName: string;
 }
 
 export function ProductImageGallery({
-  images,
+  images = [],
   productName,
 }: ProductImageGalleryProps) {
+  const { themeColors } = useTheme();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+
+  // Normalizar imágenes a formato objeto
+  const normalizedImages: ProductImage[] = images.map(img => 
+    typeof img === 'string' 
+      ? { url: img } 
+      : img
+  );
+
+  const hasImages = normalizedImages.length > 0;
+  const currentImage = normalizedImages[currentImageIndex];
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
@@ -39,85 +58,159 @@ export function ProductImageGallery({
   return (
     <div className="space-y-4">
       {/* Main Image */}
-      <div className="relative aspect-square bg-white dark:bg-slate-800 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700">
-        <div
-          className="relative w-full h-full cursor-zoom-in"
-          onMouseMove={handleMouseMove}
-          onMouseEnter={() => setIsZoomed(true)}
-          onMouseLeave={() => setIsZoomed(false)}
-        >
-          <Image
-            src={images[currentImageIndex]}
-            alt={`${productName} - Imagen ${currentImageIndex + 1}`}
-            fill
-            className={`object-cover transition-transform duration-300 ${
-              isZoomed ? "scale-150" : "scale-100"
-            }`}
-            style={
-              isZoomed
-                ? {
-                    transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
-                  }
-                : {}
-            }
-          />
-        </div>
+      <div 
+        className="relative aspect-square rounded-2xl overflow-hidden border-2"
+        style={{
+          backgroundColor: themeColors.surface,
+          borderColor: themeColors.primary + "30"
+        }}
+      >
+        {hasImages ? (
+          <div
+            className="relative w-full h-full cursor-zoom-in"
+            onMouseMove={handleMouseMove}
+            onMouseEnter={() => setIsZoomed(true)}
+            onMouseLeave={() => setIsZoomed(false)}
+          >
+            <Image
+              src={currentImage.url}
+              alt={currentImage.alt || `${productName} - Imagen ${currentImageIndex + 1}`}
+              fill
+              className={`object-cover transition-transform duration-300 ${
+                isZoomed ? "scale-150" : "scale-100"
+              }`}
+              style={
+                isZoomed
+                  ? {
+                      transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                    }
+                  : {}
+              }
+              placeholder={currentImage.blurDataURL ? "blur" : "empty"}
+              blurDataURL={currentImage.blurDataURL}
+              priority
+            />
+          </div>
+        ) : (
+          <div 
+            className="w-full h-full flex flex-col items-center justify-center"
+            style={{
+              background: `linear-gradient(135deg, ${themeColors.surface}80, ${themeColors.primary}10)`
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="flex flex-col items-center"
+            >
+              <div 
+                className="p-8 rounded-full mb-4"
+                style={{
+                  backgroundColor: themeColors.primary + "20"
+                }}
+              >
+                <Package 
+                  className="w-24 h-24"
+                  style={{ color: themeColors.primary }}
+                />
+              </div>
+              <h3 
+                className="text-2xl font-bold mb-2"
+                style={{ color: themeColors.text.primary }}
+              >
+                Sin imagen disponible
+              </h3>
+              <p style={{ color: themeColors.text.secondary }}>
+                Imagen del producto próximamente
+              </p>
+            </motion.div>
+          </div>
+        )}
 
         {/* Navigation Arrows */}
-        {images.length > 1 && (
+        {hasImages && normalizedImages.length > 1 && (
           <>
             <button
               onClick={prevImage}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-colors"
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 backdrop-blur-sm p-3 rounded-full shadow-lg transition-all hover:scale-110"
+              style={{
+                backgroundColor: themeColors.surface + "90",
+                color: themeColors.text.primary
+              }}
             >
-              <ChevronLeft className="w-5 h-5 text-slate-700 dark:text-slate-300" />
+              <ChevronLeft className="w-5 h-5" />
             </button>
             <button
               onClick={nextImage}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm p-2 rounded-full shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-colors"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 backdrop-blur-sm p-3 rounded-full shadow-lg transition-all hover:scale-110"
+              style={{
+                backgroundColor: themeColors.surface + "90",
+                color: themeColors.text.primary
+              }}
             >
-              <ChevronRight className="w-5 h-5 text-slate-700 dark:text-slate-300" />
+              <ChevronRight className="w-5 h-5" />
             </button>
           </>
         )}
 
         {/* Zoom Indicator */}
-        <div className="absolute top-4 right-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm p-2 rounded-full">
-          {isZoomed ? (
-            <ZoomOut className="w-4 h-4 text-slate-700 dark:text-slate-300" />
-          ) : (
-            <ZoomIn className="w-4 h-4 text-slate-700 dark:text-slate-300" />
-          )}
-        </div>
+        {hasImages && (
+          <div 
+            className="absolute top-4 right-4 backdrop-blur-sm p-2 rounded-full"
+            style={{
+              backgroundColor: themeColors.surface + "90",
+              color: themeColors.text.primary
+            }}
+          >
+            {isZoomed ? (
+              <ZoomOut className="w-4 h-4" />
+            ) : (
+              <ZoomIn className="w-4 h-4" />
+            )}
+          </div>
+        )}
 
         {/* Image Counter */}
-        {images.length > 1 && (
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-            {currentImageIndex + 1} / {images.length}
+        {hasImages && normalizedImages.length > 1 && (
+          <div 
+            className="absolute bottom-4 left-1/2 transform -translate-x-1/2 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium"
+            style={{
+              backgroundColor: themeColors.primary,
+              color: "white"
+            }}
+          >
+            {currentImageIndex + 1} / {normalizedImages.length}
           </div>
         )}
       </div>
 
       {/* Thumbnail Grid */}
-      {images.length > 1 && (
+      {hasImages && normalizedImages.length > 1 && (
         <div className="grid grid-cols-4 gap-3">
-          {images.map((image, index) => (
+          {normalizedImages.map((image, index) => (
             <motion.button
               key={index}
               onClick={() => setCurrentImageIndex(index)}
-              className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all duration-300 ${
-                index === currentImageIndex
-                  ? "border-blue-500 ring-2 ring-blue-500/30"
-                  : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
-              }`}
+              className="relative aspect-square rounded-lg overflow-hidden border-2 transition-all duration-300"
+              style={{
+                borderColor: index === currentImageIndex 
+                  ? themeColors.primary 
+                  : themeColors.primary + "30",
+                boxShadow: index === currentImageIndex 
+                  ? `0 0 0 3px ${themeColors.primary}30` 
+                  : "none"
+              }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <Image
-                src={image}
-                alt={`${productName} - Miniatura ${index + 1}`}
+                src={image.url}
+                alt={image.alt || `${productName} - Miniatura ${index + 1}`}
                 fill
                 className="object-cover"
+                placeholder={image.blurDataURL ? "blur" : "empty"}
+                blurDataURL={image.blurDataURL}
               />
             </motion.button>
           ))}
@@ -125,12 +218,16 @@ export function ProductImageGallery({
       )}
 
       {/* Image Tips */}
-      <div className="text-center text-sm text-slate-500 dark:text-slate-400">
-        <p>
-          Pasa el cursor sobre la imagen para hacer zoom • Click en las
-          miniaturas para cambiar
-        </p>
-      </div>
+      {hasImages && (
+        <div 
+          className="text-center text-sm"
+          style={{ color: themeColors.text.secondary }}
+        >
+          <p>
+            Pasa el cursor sobre la imagen para hacer zoom{normalizedImages.length > 1 && ' • Click en las miniaturas para cambiar'}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

@@ -210,7 +210,12 @@ export interface ProductWithDiscounts {
   status: string;
   published: boolean;
   distributorCode: string;
-  productImages: string[];
+  productImages: {
+    url: string;
+    blurDataURL?: string;
+    alt?: string;
+    isPrimary?: boolean;
+  }[];
   createdAt: string;
   updatedAt: string;
   pricing: ProductPricing;
@@ -227,6 +232,87 @@ export interface ProductsWithDiscountsResponse {
 // Respuesta anidada que viene del backend
 export interface NestedProductsResponse {
   data: ProductWithDiscounts[];
+}
+
+// 🆕 Producto completo con pricing y descuentos del endpoint /complete
+export interface ProductComplete {
+  prodVirtaId: string;
+  productId?: string;
+  name: string;
+  sku: string;
+  title?: string;
+  description?: string;
+  shortDescription?: string;
+  fullDescription?: string;
+  stockQuantity: number;
+  quantity?: number;
+  distributorCode?: string;
+  productImages?: Array<{
+    url: string;
+    blurDataURL?: string;
+    alt?: string;
+    isPrimary?: boolean;
+  }>;
+  likes?: number;
+  productTagsList?: string[];
+  
+  brand?: {
+    brandId: string;
+    name: string;
+    [key: string]: unknown;
+  };
+  
+  category?: {
+    categoryId: string;
+    categoryCode?: string;
+    name: string;
+    [key: string]: unknown;
+  };
+  
+  pricing: {
+    originalPrice: number;
+    listPrice: number;
+    priceSale?: number;
+    finalPrice: number;
+    priceList?: {
+      listPriceId: string;
+      name: string;
+      distributorCode?: string;
+      [key: string]: unknown;
+    };
+  };
+  
+  discounts?: {
+    available?: Array<{
+      discountId: string;
+      name: string;
+      type: string;
+      value: number;
+      apply_mode?: string;
+      priority?: number;
+      min_quantity?: number;
+      max_quantity?: number;
+      min_purchase_amount?: number;
+      conditions?: {
+        quantity_tiers?: Array<{
+          min_quantity: number;
+          max_quantity?: number;
+          discount_percentage?: number;
+          discount_fixed?: number;
+        }>;
+      };
+      [key: string]: unknown;
+    }>;
+    applied?: Array<{
+      discountId: string;
+      name: string;
+      type: string;
+      value: number;
+      [key: string]: unknown;
+    }>;
+    totalDiscountPercentage?: string;
+    totalSavings?: string;
+  };
 }
 
 export interface Category {
@@ -500,7 +586,9 @@ export interface ProductBulkData {
   colors?: string[];
   productImages?: {
     url: string;
+    blurDataURL?: string;
     alt?: string;
+    isPrimary?: boolean;
   }[];
   productTags?: string;
   productTagsList?: string[];
@@ -960,6 +1048,56 @@ export const productApi = {
   // Obtener producto por ID
   getProduct: async (id: string): Promise<ApiResponse<Product>> => 
     http.get(`/products/${id}`),
+  
+  // 🆕 Obtener producto completo con pricing y descuentos
+  getProductComplete: async (id: string): Promise<ApiResponse<ProductComplete>> => {
+    console.log('[API] 🛍️ Obteniendo producto completo:', id);
+    try {
+      const response = await http.get(`/products/${id}/complete`);
+      console.log('[API] ✅ Producto completo obtenido:', response);
+      return response as ApiResponse<ProductComplete>;
+    } catch (error) {
+      console.error('[API] ❌ Error obteniendo producto completo:', error);
+      throw error;
+    }
+  },
+  
+  // 🆕 Obtener producto por ID con descuentos aplicables
+  getProductWithDiscounts: async (id: string): Promise<ApiResponse<ProductWithDiscounts>> => {
+    console.log('[API] 🛍️ Obteniendo producto con descuentos:', id);
+    try {
+      const response = await http.get(`/products/ecommerce/with-discounts?productId=${id}`) as ApiResponse<ProductWithDiscounts[] | ProductsWithDiscountsResponse | NestedProductsResponse>;
+      console.log('[API] ✅ Producto con descuentos obtenido:', response);
+      
+      // El endpoint puede retornar array o objeto con products
+      if (response.data && 'data' in response.data) {
+        const nestedResponse = response.data as NestedProductsResponse;
+        const product = nestedResponse.data[0];
+        return {
+          ...response,
+          data: product,
+        } as ApiResponse<ProductWithDiscounts>;
+      } else if (Array.isArray(response.data)) {
+        const product = response.data[0];
+        return {
+          ...response,
+          data: product,
+        } as ApiResponse<ProductWithDiscounts>;
+      } else if ('products' in response.data) {
+        const productsResponse = response.data as ProductsWithDiscountsResponse;
+        const product = productsResponse.products[0];
+        return {
+          ...response,
+          data: product,
+        } as ApiResponse<ProductWithDiscounts>;
+      }
+      
+      return response as unknown as ApiResponse<ProductWithDiscounts>;
+    } catch (error) {
+      console.error('[API] ❌ Error obteniendo producto con descuentos:', error);
+      throw error;
+    }
+  },
 
   // Obtener productos destacados
   getFeaturedProducts: async (): Promise<ApiResponse<Product[]>> => 

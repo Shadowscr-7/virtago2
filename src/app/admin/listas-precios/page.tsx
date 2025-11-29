@@ -25,6 +25,7 @@ import { useTheme } from "@/contexts/theme-context"
 import { useAuthStore } from "@/store/auth"
 import { api, PriceList } from "@/api"
 import { showToast } from "@/store/toast-helpers"
+import { PriceListImportModal } from "@/components/admin/listas-precios/price-list-import-modal"
 
 export default function ListasPreciosAdminPage() {
   const router = useRouter()
@@ -58,6 +59,9 @@ export default function ListasPreciosAdminPage() {
     currentStatus: "",
     newStatus: "active"
   })
+  
+  // Estado para modal de importación
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false)
   
   // Verificar acceso
   const hasAccess = user && (
@@ -229,12 +233,8 @@ export default function ListasPreciosAdminPage() {
   };
 
   const handleImport = () => {
-    console.log("[LISTAS_PRECIOS] 📂 Importando...");
-    showToast({
-      title: "Próximamente",
-      description: "La importación de listas de precios estará disponible pronto",
-      type: "info"
-    });
+    console.log("[LISTAS_PRECIOS] 📂 Abriendo modal de importación...");
+    setIsImportModalOpen(true);
   };
 
   // Función para abrir modal de confirmación
@@ -952,6 +952,13 @@ export default function ListasPreciosAdminPage() {
             </motion.div>
           </motion.div>
         )}
+        
+        {/* Modal de Importación */}
+        <PriceListImportModal 
+          isOpen={isImportModalOpen}
+          onClose={() => setIsImportModalOpen(false)}
+          onSuccess={loadPriceLists}
+        />
       </div>
     </AdminLayout>
   )

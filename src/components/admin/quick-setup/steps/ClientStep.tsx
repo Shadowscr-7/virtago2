@@ -276,41 +276,64 @@ export function ClientStep({ onNext, onBack, themeColors, stepData }: ClientStep
       // Verificar qué método se usó para subir los datos
       if (uploadMethod === 'json') {
         // Método 1: JSON - Usar POST /api/clients/
-        console.log('📤 Enviando clientes vía JSON (POST /api/clients/)...');
-        console.log('📊 Total de clientes a enviar:', uploadedData.length);
+        console.log('📤 [ClientStep] Enviando clientes vía JSON (POST /api/clients/)...');
+        console.log('📊 [ClientStep] Total de clientes a enviar:', uploadedData.length);
+        console.log('📋 [ClientStep] Datos originales (primeros 2):', uploadedData.slice(0, 2));
         
         const clientsForAPI = transformToAPIFormat(uploadedData);
-        console.log('📋 Datos transformados:', clientsForAPI.slice(0, 2)); // Mostrar primeros 2 para debug
+        console.log('🔄 [ClientStep] Datos transformados (primeros 2):', clientsForAPI.slice(0, 2));
+        console.log('🔄 [ClientStep] Total transformados:', clientsForAPI.length);
         
-        const apiResponse = await api.admin.clients.bulkCreate(clientsForAPI);
-        console.log('📥 Respuesta de la API:', apiResponse);
-        
-        if (apiResponse.success) {
-          const response = apiResponse.data as ClientBulkCreateResponse;
-          console.log('✅ Clientes creados exitosamente:', response);
+        try {
+          console.log('🚀 [ClientStep] Llamando a api.admin.clients.bulkCreate...');
+          const apiResponse = await api.admin.clients.bulkCreate(clientsForAPI);
+          console.log('📥 [ClientStep] Respuesta completa de la API:', apiResponse);
+          console.log('📥 [ClientStep] apiResponse.success:', apiResponse.success);
+          console.log('📥 [ClientStep] apiResponse.data:', apiResponse.data);
+          console.log('📥 [ClientStep] apiResponse.message:', apiResponse.message);
           
-          // Mostrar resumen si hay errores
-          if (response.results.errorCount > 0) {
-            const errorMsg = `⚠️ Se procesaron ${response.results.totalProcessed} clientes. ${response.results.successCount} exitosos, ${response.results.errorCount} con errores.`;
-            setError(errorMsg);
+          if (apiResponse.success) {
+            const response = apiResponse.data as ClientBulkCreateResponse;
+            console.log('✅ [ClientStep] Clientes creados exitosamente:', response);
+            console.log('✅ [ClientStep] response.results:', response.results);
             
-            // Aún así continuar si hubo algunos exitosos
-            if (response.results.successCount > 0) {
+            // Mostrar resumen si hay errores
+            if (response.results && response.results.errorCount > 0) {
+              const errorMsg = `⚠️ Se procesaron ${response.results.totalProcessed} clientes. ${response.results.successCount} exitosos, ${response.results.errorCount} con errores.`;
+              setError(errorMsg);
+              
+              // Aún así continuar si hubo algunos exitosos
+              if (response.results.successCount > 0) {
+                console.log('✅ [ClientStep] Continuando al siguiente paso después de 2 segundos...');
+                setTimeout(() => {
+                  onNext({ uploadedClients: uploadedData });
+                }, 2000);
+              } else {
+                console.log('❌ [ClientStep] Todos los clientes fallaron, deteniendo proceso');
+                setIsConfirming(false);
+                setIsProcessing(false);
+              }
+            } else {
+              // Todo exitoso
+              console.log('✅ [ClientStep] Todos los clientes procesados exitosamente, continuando al siguiente paso...');
               setTimeout(() => {
                 onNext({ uploadedClients: uploadedData });
-              }, 2000);
-            } else {
-              setIsConfirming(false);
-              setIsProcessing(false);
+              }, 1000);
             }
           } else {
-            // Todo exitoso
-            setTimeout(() => {
-              onNext({ uploadedClients: uploadedData });
-            }, 1000);
+            console.error('❌ [ClientStep] API response.success = false');
+            throw new Error(apiResponse.message || 'Error al crear clientes');
           }
-        } else {
-          throw new Error(apiResponse.message || 'Error al crear clientes');
+        } catch (apiError) {
+          console.error('❌ [ClientStep] Error capturado al llamar a bulkCreate:', apiError);
+          console.error('❌ [ClientStep] Tipo de error:', typeof apiError);
+          console.error('❌ [ClientStep] Error instanceof Error:', apiError instanceof Error);
+          if (apiError instanceof Error) {
+            console.error('❌ [ClientStep] Error.message:', apiError.message);
+            console.error('❌ [ClientStep] Error.stack:', apiError.stack);
+          }
+          console.error('❌ [ClientStep] Error completo (JSON):', JSON.stringify(apiError, null, 2));
+          throw apiError; // Re-lanzar para el catch principal
         }
       } else if (uploadMethod === 'file' && uploadedFile) {
         // Método 2: Archivo - Usar POST /api/clients/import
@@ -363,14 +386,29 @@ export function ClientStep({ onNext, onBack, themeColors, stepData }: ClientStep
           errorMessage = '🔴 No se puede conectar con el servidor. Verifica que el backend esté corriendo en http://localhost:3001';
         } else if (errorMessage.includes('timeout')) {
           errorMessage = '⏱️ La solicitud tardó demasiado. El servidor puede estar sobrecargado o no responde.';
-        } else if (errorMessage.includes('401')) {
-          errorMessage = '🔒 No estás autenticado. Por favor inicia sesión nuevamente.';
+        } else if (errorMessage.includes('401') || errorMessage.includes('Unauthorized') || errorMessage.includes('No Token Provided')) {
+          errorMessage = '🔒 Sesión expirada o no válida. Por favor inicia sesión nuevamente. Redirigiendo...';
+          // Redirigir al login después de 2 segundos
+          setTimeout(() => {
+            window.location.href = '/login?redirect=/admin/configuracion-rapida';
+          }, 2000);
         } else if (errorMessage.includes('403')) {
           errorMessage = '🚫 No tienes permisos para realizar esta acción.';
         } else if (errorMessage.includes('404')) {
           errorMessage = '❓ El endpoint /api/clients/ no existe en el servidor. Contacta al administrador.';
         } else if (errorMessage.includes('500')) {
           errorMessage = '💥 Error interno del servidor. Revisa los logs del backend.';
+        }
+      } else if (typeof error === 'object' && error !== null) {
+        // Si el error es un objeto (como ApiError del http-client)
+        const apiError = error as { message?: string; status?: number };
+        if (apiError.status === 401) {
+          errorMessage = '🔒 Sesión expirada o no válida. Por favor inicia sesión nuevamente. Redirigiendo...';
+          setTimeout(() => {
+            window.location.href = '/login?redirect=/admin/configuracion-rapida';
+          }, 2000);
+        } else if (apiError.message) {
+          errorMessage = apiError.message;
         }
       }
       

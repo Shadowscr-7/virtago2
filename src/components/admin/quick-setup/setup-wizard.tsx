@@ -1,13 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle, TrendingUp, Package, List, Percent, Users, ArrowRight, ArrowLeft } from 'lucide-react';
+import { X, CheckCircle, TrendingUp, Package, List, Percent, Users, ArrowRight, ArrowLeft, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '../../../contexts/theme-context';
 import { AdminLayout } from '../admin-layout';
 import { ClientStep, ProductStep, PriceListStep, PriceStep, DiscountStep, ReviewStep } from './steps';
 import { ThemeColors, ClientData, MatchedProduct, PriceList, PriceData, DiscountData } from './shared/types';
+import { useAuthStore } from '@/store/auth';
 
 // Definición de pasos del wizard
 const WIZARD_STEPS = [
@@ -62,8 +63,26 @@ interface WizardData {
 export default function SetupWizard() {
   const router = useRouter();
   const { themeColors: contextThemeColors } = useTheme();
+  const { isAuthenticated, token } = useAuthStore();
   const [currentStep, setCurrentStep] = useState(0);
   const [wizardData, setWizardData] = useState<WizardData>({});
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // Verificar autenticación al montar el componente
+  useEffect(() => {
+    console.log('[SetupWizard] Verificando autenticación...');
+    console.log('[SetupWizard] isAuthenticated:', isAuthenticated);
+    console.log('[SetupWizard] token:', token ? 'Token presente' : 'No token');
+    console.log('[SetupWizard] localStorage token:', localStorage.getItem('auth_token') ? 'Presente' : 'No presente');
+    
+    if (!isAuthenticated || !token) {
+      console.log('[SetupWizard] ⚠️ Usuario no autenticado, redirigiendo a login...');
+      router.push('/login?redirect=/admin/configuracion-rapida');
+    } else {
+      console.log('[SetupWizard] ✅ Usuario autenticado, puede continuar');
+      setAuthChecked(true);
+    }
+  }, [isAuthenticated, token, router]);
 
   const themeColors: ThemeColors = {
     primary: contextThemeColors.primary,
@@ -75,6 +94,24 @@ export default function SetupWizard() {
       secondary: contextThemeColors.text.secondary,
     },
   };
+
+  // Mostrar loading mientras se verifica la autenticación
+  if (!authChecked) {
+    return (
+      <AdminLayout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+              className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"
+            />
+            <p style={{ color: themeColors.text.primary }}>Verificando autenticación...</p>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
 
   const handleNext = (stepData?: unknown) => {
     if (stepData) {
