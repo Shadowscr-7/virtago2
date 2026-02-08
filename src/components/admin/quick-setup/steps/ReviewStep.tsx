@@ -4,10 +4,58 @@ import { StepProps } from '../shared/types';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import { WizardSummaryData } from '@/api';
 
+interface WizardStepData {
+  uploadedClients?: Array<{
+    clientId: string;
+    nombreCompleto?: string;
+    razonSocial?: string;
+    email?: string;
+    telefono?: string;
+    ciudad?: string;
+  }>;
+  matchedProducts?: Array<{
+    codigoProducto: string;
+    nombreProducto: string;
+    backendProductId?: string;
+    marca?: string;
+  }>;
+  uploadedPriceLists?: Array<{
+    listPriceId: string;
+    name: string;
+    description?: string;
+    isDefault?: boolean;
+  }>;
+  uploadedPrices?: Array<{
+    productId: string;
+    listPriceId?: string;
+    price: number;
+    currency?: string;
+    productName?: string;
+  }>;
+  uploadedDiscounts?: Array<{
+    discountId: string;
+    name: string;
+    description?: string;
+    type: string;
+    discountValue: number;
+    currency: string;
+    status?: string;
+    customerType?: string;
+    channel?: string;
+    minPurchaseAmount?: number;
+    maxDiscountAmount?: number;
+    validFrom?: string;
+    validTo?: string;
+  }>;
+}
+
 export function ReviewStep({ onNext, onBack, themeColors, stepData }: StepProps) {
   const [wizardData, setWizardData] = useState<WizardSummaryData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const hasLoadedRef = useRef(false);
+  
+  // Cast stepData al tipo correcto
+  const wizardStepData = stepData as WizardStepData | undefined;
 
   useEffect(() => {
     // Evitar múltiples llamadas
@@ -25,14 +73,13 @@ export function ReviewStep({ onNext, onBack, themeColors, stepData }: StepProps)
         
         // 🆕 USAR DATOS DEL WIZARD DIRECTAMENTE
         // El wizard ya tiene toda la información de lo que se creó en cada paso
-        const localData = stepData as Record<string, unknown>;
         
         // 🔍 Contar registros creados en el wizard
-        const clientsCount = (localData?.uploadedClients as unknown[])?.length || 0;
-        const productsCount = (localData?.matchedProducts as unknown[])?.length || 0;
-        const priceListsCount = (localData?.uploadedPriceLists as unknown[])?.length || 0;
-        const pricesCount = (localData?.uploadedPrices as unknown[])?.length || 0;
-        const discountsCount = (localData?.uploadedDiscounts as unknown[])?.length || 0;
+        const clientsCount = wizardStepData?.uploadedClients?.length || 0;
+        const productsCount = wizardStepData?.matchedProducts?.length || 0;
+        const priceListsCount = wizardStepData?.uploadedPriceLists?.length || 0;
+        const pricesCount = wizardStepData?.uploadedPrices?.length || 0;
+        const discountsCount = wizardStepData?.uploadedDiscounts?.length || 0;
         
         const totalEntities = clientsCount + productsCount + priceListsCount + pricesCount + discountsCount;
         const completionPercentage = totalEntities > 0 ? 100 : 0;
@@ -284,6 +331,326 @@ export function ReviewStep({ onNext, onBack, themeColors, stepData }: StepProps)
           </div>
         )}
       </div>
+
+      {/* Datos Importados - Clientes */}
+      {wizardStepData?.uploadedClients && wizardStepData.uploadedClients.length > 0 && (
+        <div 
+          className="p-6 rounded-xl"
+          style={{ backgroundColor: `${themeColors.secondary}10` }}
+        >
+          <h4 className="text-lg font-semibold mb-4" style={{ color: themeColors.text.primary }}>
+            👥 Clientes Importados ({wizardStepData.uploadedClients.length})
+          </h4>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-y-auto">
+            {wizardStepData.uploadedClients.slice(0, 8).map((client, index) => (
+              <motion.div
+                key={client.clientId || index}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.03 }}
+                className="p-3 rounded-lg border"
+                style={{
+                  backgroundColor: `${themeColors.surface}50`,
+                  borderColor: `${themeColors.secondary}30`
+                }}
+              >
+                <div className="font-medium text-sm" style={{ color: themeColors.text.primary }}>
+                  {client.nombreCompleto || client.razonSocial || 'Sin nombre'}
+                </div>
+                <div className="text-xs mt-1" style={{ color: themeColors.text.secondary }}>
+                  ID: {client.clientId}
+                </div>
+                {client.email && (
+                  <div className="text-xs" style={{ color: themeColors.text.secondary }}>
+                    {client.email}
+                  </div>
+                )}
+                {client.ciudad && (
+                  <div className="text-xs" style={{ color: themeColors.text.secondary }}>
+                    📍 {client.ciudad}
+                  </div>
+                )}
+              </motion.div>
+            ))}
+          </div>
+          
+          {wizardStepData.uploadedClients.length > 8 && (
+            <div className="text-center py-2 mt-2">
+              <span className="text-sm" style={{ color: themeColors.text.secondary }}>
+                ... y {wizardStepData.uploadedClients.length - 8} clientes más
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Datos Importados - Productos Emparejados */}
+      {wizardStepData?.matchedProducts && wizardStepData.matchedProducts.length > 0 && (
+        <div 
+          className="p-6 rounded-xl"
+          style={{ backgroundColor: `${themeColors.accent}10` }}
+        >
+          <h4 className="text-lg font-semibold mb-4" style={{ color: themeColors.text.primary }}>
+            🎁 Productos Emparejados ({wizardStepData.matchedProducts.length})
+          </h4>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-y-auto">
+            {wizardStepData.matchedProducts.slice(0, 8).map((product, index) => (
+              <motion.div
+                key={product.codigoProducto || index}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.03 }}
+                className="p-3 rounded-lg border"
+                style={{
+                  backgroundColor: `${themeColors.surface}50`,
+                  borderColor: `${themeColors.accent}30`
+                }}
+              >
+                <div className="font-medium text-sm" style={{ color: themeColors.text.primary }}>
+                  {product.nombreProducto}
+                </div>
+                <div className="text-xs mt-1" style={{ color: themeColors.text.secondary }}>
+                  Código: {product.codigoProducto}
+                </div>
+                {product.marca && (
+                  <div className="text-xs" style={{ color: themeColors.text.secondary }}>
+                    Marca: {product.marca}
+                  </div>
+                )}
+              </motion.div>
+            ))}
+          </div>
+          
+          {wizardStepData.matchedProducts.length > 8 && (
+            <div className="text-center py-2 mt-2">
+              <span className="text-sm" style={{ color: themeColors.text.secondary }}>
+                ... y {wizardStepData.matchedProducts.length - 8} productos más
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Datos Importados - Listas de Precios */}
+      {wizardStepData?.uploadedPriceLists && wizardStepData.uploadedPriceLists.length > 0 && (
+        <div 
+          className="p-6 rounded-xl"
+          style={{ backgroundColor: `${themeColors.primary}10` }}
+        >
+          <h4 className="text-lg font-semibold mb-4" style={{ color: themeColors.text.primary }}>
+            💲 Listas de Precios ({wizardStepData.uploadedPriceLists.length})
+          </h4>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
+            {wizardStepData.uploadedPriceLists.slice(0, 6).map((priceList, index) => (
+              <motion.div
+                key={priceList.listPriceId || index}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.03 }}
+                className="p-3 rounded-lg border"
+                style={{
+                  backgroundColor: `${themeColors.surface}50`,
+                  borderColor: `${themeColors.primary}30`
+                }}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="font-medium text-sm" style={{ color: themeColors.text.primary }}>
+                      {priceList.name}
+                    </div>
+                    <div className="text-xs mt-1" style={{ color: themeColors.text.secondary }}>
+                      ID: {priceList.listPriceId}
+                    </div>
+                  </div>
+                  {priceList.isDefault && (
+                    <span 
+                      className="px-2 py-1 rounded text-xs font-medium"
+                      style={{ backgroundColor: `${themeColors.secondary}20`, color: themeColors.secondary }}
+                    >
+                      Por defecto
+                    </span>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+          
+          {wizardStepData.uploadedPriceLists.length > 6 && (
+            <div className="text-center py-2 mt-2">
+              <span className="text-sm" style={{ color: themeColors.text.secondary }}>
+                ... y {wizardStepData.uploadedPriceLists.length - 6} listas más
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Datos Importados - Precios */}
+      {wizardStepData?.uploadedPrices && wizardStepData.uploadedPrices.length > 0 && (
+        <div 
+          className="p-6 rounded-xl"
+          style={{ backgroundColor: `${themeColors.secondary}10` }}
+        >
+          <h4 className="text-lg font-semibold mb-4" style={{ color: themeColors.text.primary }}>
+            💰 Precios Importados ({wizardStepData.uploadedPrices.length})
+          </h4>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-y-auto">
+            {wizardStepData.uploadedPrices.slice(0, 8).map((price, index) => (
+              <motion.div
+                key={`${price.productId}-${price.listPriceId || 'default'}-${index}`}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.03 }}
+                className="p-3 rounded-lg border"
+                style={{
+                  backgroundColor: `${themeColors.surface}50`,
+                  borderColor: `${themeColors.secondary}30`
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="font-medium text-sm" style={{ color: themeColors.text.primary }}>
+                      {price.productName || `Producto ${price.productId}`}
+                    </div>
+                    <div className="text-xs mt-1" style={{ color: themeColors.text.secondary }}>
+                      {price.listPriceId ? `Lista: ${price.listPriceId}` : 'Precio base'}
+                    </div>
+                  </div>
+                  <div className="font-bold text-lg" style={{ color: themeColors.primary }}>
+                    {price.currency || 'COP'} {Number(price.price).toLocaleString()}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+          
+          {wizardStepData.uploadedPrices.length > 8 && (
+            <div className="text-center py-2 mt-2">
+              <span className="text-sm" style={{ color: themeColors.text.secondary }}>
+                ... y {wizardStepData.uploadedPrices.length - 8} precios más
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Datos Importados - Descuentos */}
+      {wizardStepData?.uploadedDiscounts && wizardStepData.uploadedDiscounts.length > 0 && (
+        <div 
+          className="p-6 rounded-xl"
+          style={{ backgroundColor: `${themeColors.primary}10` }}
+        >
+          <h4 className="text-lg font-semibold mb-4" style={{ color: themeColors.text.primary }}>
+            📋 Descuentos Importados ({wizardStepData.uploadedDiscounts.length})
+          </h4>
+          
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {wizardStepData.uploadedDiscounts.slice(0, 10).map((discount, index) => (
+              <motion.div
+                key={discount.discountId || index}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className="p-4 rounded-lg border"
+                style={{
+                  backgroundColor: `${themeColors.surface}50`,
+                  borderColor: `${themeColors.secondary}30`
+                }}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="font-medium text-sm mb-1" style={{ color: themeColors.text.primary }}>
+                      {discount.name}
+                    </div>
+                    <div className="text-xs mb-2" style={{ color: themeColors.text.secondary }}>
+                      {discount.description || 'Sin descripción'}
+                    </div>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <span 
+                        className="px-2 py-1 rounded"
+                        style={{ backgroundColor: `${themeColors.primary}20`, color: themeColors.primary }}
+                      >
+                        ID: {discount.discountId}
+                      </span>
+                      <span 
+                        className="px-2 py-1 rounded"
+                        style={{ backgroundColor: `${themeColors.secondary}20`, color: themeColors.secondary }}
+                      >
+                        Tipo: {discount.type}
+                      </span>
+                      {discount.status && (
+                        <span 
+                          className="px-2 py-1 rounded"
+                          style={{ 
+                            backgroundColor: discount.status === 'active' ? '#10b98120' : '#f59e0b20',
+                            color: discount.status === 'active' ? '#10b981' : '#f59e0b'
+                          }}
+                        >
+                          {discount.status === 'active' ? 'Activo' : discount.status}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-right ml-4">
+                    <div className="font-bold text-lg" style={{ color: themeColors.primary }}>
+                      {discount.type === 'percentage' 
+                        ? `${discount.discountValue}%` 
+                        : `${discount.currency} ${discount.discountValue}`
+                      }
+                    </div>
+                    {discount.minPurchaseAmount && (
+                      <div className="text-xs" style={{ color: themeColors.text.secondary }}>
+                        Min: {discount.currency} {discount.minPurchaseAmount}
+                      </div>
+                    )}
+                    {discount.maxDiscountAmount && (
+                      <div className="text-xs" style={{ color: themeColors.text.secondary }}>
+                        Max: {discount.currency} {discount.maxDiscountAmount}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Información adicional */}
+                <div className="mt-3 pt-3 border-t flex flex-wrap gap-3 text-xs" style={{ borderColor: `${themeColors.secondary}20` }}>
+                  {discount.customerType && (
+                    <div style={{ color: themeColors.text.secondary }}>
+                      <span className="font-medium">Cliente:</span> {discount.customerType}
+                    </div>
+                  )}
+                  {discount.channel && (
+                    <div style={{ color: themeColors.text.secondary }}>
+                      <span className="font-medium">Canal:</span> {discount.channel}
+                    </div>
+                  )}
+                  {discount.validFrom && (
+                    <div style={{ color: themeColors.text.secondary }}>
+                      <span className="font-medium">Válido desde:</span> {new Date(discount.validFrom).toLocaleDateString()}
+                    </div>
+                  )}
+                  {discount.validTo && (
+                    <div style={{ color: themeColors.text.secondary }}>
+                      <span className="font-medium">Hasta:</span> {new Date(discount.validTo).toLocaleDateString()}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+            
+            {wizardStepData.uploadedDiscounts.length > 10 && (
+              <div className="text-center py-2">
+                <span className="text-sm" style={{ color: themeColors.text.secondary }}>
+                  ... y {wizardStepData.uploadedDiscounts.length - 10} descuentos más
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Próximos pasos */}
       {wizardData && wizardData.recommendations && (

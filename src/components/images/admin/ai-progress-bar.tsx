@@ -48,6 +48,15 @@ export function AIProgressBar({
     ],
   }), []);
 
+  // Generate particle positions once to avoid hydration mismatch
+  const particles = useMemo(() => {
+    return Array.from({ length: 5 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+    }));
+  }, []);
+
   // Rotar mensajes cada 2 segundos
   useEffect(() => {
     if (stage === "completed") return;
@@ -195,14 +204,14 @@ export function AIProgressBar({
       {/* Partículas decorativas */}
       {stage === "analyzing" && (
         <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-xl">
-          {[...Array(5)].map((_, i) => (
+          {particles.map((particle) => (
             <motion.div
-              key={i}
+              key={particle.id}
               className="absolute w-1 h-1 rounded-full"
               style={{
                 background: themeColors.primary,
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
+                left: `${particle.left}%`,
+                top: `${particle.top}%`,
               }}
               animate={{
                 y: [0, -20, 0],
@@ -212,7 +221,7 @@ export function AIProgressBar({
               transition={{
                 duration: 2,
                 repeat: Infinity,
-                delay: i * 0.4,
+                delay: particle.id * 0.4,
               }}
             />
           ))}

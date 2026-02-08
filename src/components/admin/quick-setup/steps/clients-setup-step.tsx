@@ -652,7 +652,7 @@ export function ClientsSetupStep({ onComplete }: WizardStepProps) {
   };
 
   const handleFinishStep = () => {
-    if (importedData) {
+    if (importedData && onComplete) {
       onComplete({ clients: importedData });
     }
   };

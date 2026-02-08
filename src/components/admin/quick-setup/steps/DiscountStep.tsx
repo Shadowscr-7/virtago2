@@ -4,85 +4,409 @@ import { FileUploadComponent } from '../shared/FileUploadComponent';
 import { StepProps, DiscountData, UploadMethod, UploadResult } from '../shared/types';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import { api, DiscountBulkData, DiscountBulkCreateResponse } from '@/api';
+import { parseDiscountFile } from '@/lib/file-parser';
 
-// Datos de ejemplo para descuentos
+// Datos de ejemplo para descuentos - Casos complejos reales
 const sampleDiscounts: DiscountData[] = [
   {
-    discountId: "DISC_BLACK_FRIDAY_001",
-    name: "Descuento Black Friday Premium",
-    description: "Descuento especial para Black Friday con hasta 50% de descuento en productos seleccionados",
-    type: "percentage",
-    discountValue: 50,
-    currency: "COP",
-    validFrom: "2024-11-29T00:00:00Z",
-    validTo: "2024-12-02T23:59:59Z",
+    discountId: "DISC_3X2_ELECTRONICS_2024",
+    name: "3x2 en Electrónicos",
+    description: "Lleva 3 productos y paga solo 2 en toda la categoría de electrónicos",
+    type: "fixed_amount",
+    discountValue: 0,
+    currency: "USD",
     status: "active",
-    customerType: "all",
-    channel: "online",
-    category: "electronics",
-    maxDiscountAmount: 500000,
-    minPurchaseAmount: 100000,
-    usageLimit: 1000,
-    usageLimitPerCustomer: 1
-  },
-  {
-    discountId: "DISC_WHOLESALE_002",
-    name: "Descuento Mayorista Volumen",
-    description: "Descuento por volumen para clientes mayoristas según cantidad comprada",
-    type: "tiered_percentage",
-    discountValue: 15,
-    currency: "COP",
     validFrom: "2024-01-01T00:00:00Z",
     validTo: "2024-12-31T23:59:59Z",
+    maxDiscountAmount: 1000,
+    minPurchaseAmount: 0,
+    usageLimit: 10000,
+    usageLimitPerCustomer: 5,
+    customerType: "all",
+    channel: "omnichannel",
+    region: "all",
+    conditions: {
+      min_quantity: 3,
+      max_quantity: null,
+      buy_quantity: 3,
+      pay_quantity: 2,
+      description: "Por cada 3 productos, paga solo 2. Se aplica el descuento al producto de menor valor"
+    },
+    applicableTo: {
+      type: "categories",
+      categories: ["electronics", "computers", "smartphones"],
+      products: [],
+      brands: [],
+      exclude_sale_items: true,
+      minimum_margin: 15
+    },
+    tags: ["3x2", "electronics", "seasonal", "high-volume"],
+    notes: "Aplicar descuento al producto de menor valor del grupo. No aplica con otros descuentos.",
+    campaignUrl: "https://www.virtago.shop/promociones/3x2-electronics"
+  },
+  {
+    discountId: "DISC_VIP_EXCLUSIVE_LUXURY",
+    name: "Descuento Exclusivo VIP - Marcas Premium",
+    description: "Descuento exclusivo del 20% para clientes VIP en marcas de lujo seleccionadas",
+    type: "percentage",
+    discountValue: 20,
+    currency: "USD",
     status: "active",
+    validFrom: "2024-01-01T00:00:00Z",
+    validTo: null,
+    priority: 10,
+    isCumulative: false,
+    maxDiscountAmount: 5000,
+    minPurchaseAmount: 500,
+    usageLimit: null,
+    usageLimitPerCustomer: null,
+    customerType: "vip",
+    channel: "online",
+    region: "international",
+    conditions: {
+      customer_segments: ["vip", "platinum", "diamond"],
+      min_amount: 500,
+      excluded_brands: ["generic-brand", "budget-line"],
+      day_of_week: [],
+      time_range: {
+        start: "00:00",
+        end: "23:59"
+      }
+    },
+    applicableTo: {
+      type: "brands",
+      categories: [],
+      products: [],
+      brands: ["Apple", "Samsung", "Sony", "Bose", "LG"],
+      exclude_sale_items: true,
+      minimum_margin: 25
+    },
+    customFields: {
+      campaign_code: "VIP2024LUXURY",
+      marketing_budget: "50000",
+      target_audience: "High-income professionals",
+      invitation_only: true,
+      requires_code: true
+    },
+    tags: ["vip", "exclusive", "luxury", "premium-brands", "high-value"],
+    notes: "Solo para clientes VIP invitados. Requiere código de acceso. No acumulable con otros descuentos.",
+    createdBy: "marketing@virtago.com",
+    campaignUrl: "https://www.virtago.shop/vip/luxury-brands"
+  },
+  {
+    discountId: "DISC_CATEGORY_FASHION_CLEARANCE",
+    name: "Liquidación Ropa y Moda - Solo Categoría",
+    description: "Hasta 50% de descuento en toda la categoría de moda y accesorios. Descuento exclusivo no acumulable.",
+    type: "percentage",
+    discountValue: 50,
+    currency: "USD",
+    status: "active",
+    validFrom: "2024-06-01T00:00:00Z",
+    validTo: "2024-06-30T23:59:59Z",
+    priority: 9,
+    isCumulative: false,
+    maxDiscountAmount: 300,
+    minPurchaseAmount: 50,
+    usageLimit: 5000,
+    usageLimitPerCustomer: 3,
+    customerType: "all",
+    channel: "omnichannel",
+    region: "colombia",
+    category: "fashion",
+    conditions: {
+      min_quantity: 1,
+      product_categories: ["fashion", "clothing", "shoes", "accessories"],
+      excluded_brands: [],
+      seasonal: true,
+      clearance: true
+    },
+    applicableTo: {
+      type: "categories",
+      categories: ["fashion", "clothing", "shoes", "accessories", "jewelry"],
+      products: [],
+      brands: [],
+      exclude_sale_items: false,
+      minimum_margin: 5
+    },
+    tags: ["clearance", "fashion", "seasonal", "summer-sale", "non-cumulative"],
+    notes: "Descuento exclusivo de temporada. No acumulable con ningún otro descuento. Stock limitado.",
+    campaignUrl: "https://www.virtago.shop/liquidacion/moda-verano"
+  },
+  {
+    discountId: "DISC_TIERED_WHOLESALE_VOLUME",
+    name: "Descuento Escalonado Mayoristas - Por Volumen",
+    description: "Descuento escalonado según cantidad comprada para clientes mayoristas. A mayor volumen, mayor descuento.",
+    type: "tiered_percentage",
+    discountValue: 0,
+    currency: "USD",
+    status: "active",
+    validFrom: "2024-01-01T00:00:00Z",
+    validTo: null,
+    priority: 7,
+    isCumulative: false,
+    maxDiscountAmount: null,
+    minPurchaseAmount: 1000,
+    usageLimit: null,
+    usageLimitPerCustomer: null,
     customerType: "wholesale",
     channel: "b2b",
-    category: "all",
-    minPurchaseAmount: 1000000
+    region: "all",
+    conditions: {
+      tier_structure: [
+        {
+          min_quantity: 50,
+          max_quantity: 99,
+          discount_percentage: 8,
+          description: "8% de descuento para 50-99 unidades"
+        },
+        {
+          min_quantity: 100,
+          max_quantity: 249,
+          discount_percentage: 12,
+          description: "12% de descuento para 100-249 unidades"
+        },
+        {
+          min_quantity: 250,
+          max_quantity: 499,
+          discount_percentage: 18,
+          description: "18% de descuento para 250-499 unidades"
+        },
+        {
+          min_quantity: 500,
+          max_quantity: null,
+          discount_percentage: 25,
+          description: "25% de descuento para 500+ unidades"
+        }
+      ],
+      customer_segments: ["wholesale", "distributor", "reseller"],
+      min_amount: 1000
+    },
+    applicableTo: {
+      type: "all_products",
+      categories: [],
+      products: [],
+      brands: [],
+      exclude_sale_items: false,
+      minimum_margin: 10
+    },
+    customFields: {
+      campaign_code: "WHOLESALE2024",
+      payment_terms: "NET30",
+      requires_tax_id: true,
+      auto_apply: true
+    },
+    tags: ["wholesale", "b2b", "volume-discount", "tiered", "high-quantity"],
+    notes: "Solo para clientes mayoristas registrados con RUC/Tax ID válido. Descuento se aplica automáticamente según cantidad.",
+    createdBy: "sales@virtago.com",
+    approvedBy: "director@virtago.com",
+    approvalDate: "2023-12-15T10:00:00Z"
   },
   {
-    discountId: "DISC_LOYALTY_003",
-    name: "Descuento Programa Lealtad VIP",
-    description: "Descuentos exclusivos para miembros VIP del programa de lealtad",
-    type: "fixed_amount",
-    discountValue: 50000,
-    currency: "COP",
-    validFrom: "2024-01-01T00:00:00Z",
-    status: "active",
-    customerType: "vip",
-    channel: "all",
-    category: "premium",
-    usageLimitPerCustomer: 5
-  },
-  {
-    discountId: "DISC_SEASONAL_004",
-    name: "Descuento Temporada Navideña",
-    description: "Promoción especial para la temporada navideña con descuentos progresivos",
-    type: "progressive_percentage",
-    discountValue: 25,
-    currency: "COP",
-    validFrom: "2024-12-01T00:00:00Z",
-    validTo: "2024-12-25T23:59:59Z",
-    status: "draft",
-    customerType: "retail",
-    channel: "omnichannel",
-    category: "gifts"
-  },
-  {
-    discountId: "DISC_CLEARANCE_005",
-    name: "Descuento Liquidación Inventario",
-    description: "Liquidación de inventario con descuentos agresivos para productos de temporadas pasadas",
+    discountId: "DISC_FIRST_PURCHASE_WELCOME",
+    name: "Bienvenida - Primera Compra 15%",
+    description: "Descuento especial de bienvenida del 15% para la primera compra de nuevos clientes",
     type: "percentage",
-    discountValue: 70,
-    currency: "COP",
-    validFrom: "2024-01-15T00:00:00Z",
-    validTo: "2024-02-15T23:59:59Z",
+    discountValue: 15,
+    currency: "USD",
     status: "active",
+    validFrom: "2024-01-01T00:00:00Z",
+    validTo: null,
+    priority: 6,
+    isCumulative: false,
+    maxDiscountAmount: 100,
+    minPurchaseAmount: 30,
+    usageLimit: null,
+    usageLimitPerCustomer: 1,
+    customerType: "retail",
+    channel: "online",
+    region: "all",
+    conditions: {
+      first_purchase_only: true,
+      min_amount: 30,
+      new_customer: true,
+      requires_registration: true
+    },
+    applicableTo: {
+      type: "all_products",
+      categories: [],
+      products: [],
+      brands: [],
+      exclude_sale_items: true,
+      minimum_margin: 20
+    },
+    customFields: {
+      campaign_code: "WELCOME15",
+      welcome_email: true,
+      referral_eligible: false,
+      one_time_use: true
+    },
+    tags: ["welcome", "first-purchase", "new-customer", "one-time", "retail"],
+    notes: "Solo válido para la primera compra. Cliente debe estar registrado. Se envía código por email.",
+    campaignUrl: "https://www.virtago.shop/bienvenida"
+  },
+  {
+    discountId: "DISC_FLASH_SALE_FRIDAY",
+    name: "Flash Sale Viernes - 2 Horas Solamente",
+    description: "Descuento relámpago del 35% solo por 2 horas cada viernes de 18:00 a 20:00",
+    type: "percentage",
+    discountValue: 35,
+    currency: "USD",
+    status: "active",
+    validFrom: "2024-01-05T18:00:00Z",
+    validTo: "2024-12-31T20:00:00Z",
+    priority: 10,
+    isCumulative: false,
+    maxDiscountAmount: 200,
+    minPurchaseAmount: 0,
+    usageLimit: 1000,
+    usageLimitPerCustomer: 1,
     customerType: "all",
-    channel: "all",
-    category: "clearance",
-    maxDiscountAmount: 1000000,
-    usageLimit: 5000
+    channel: "online",
+    region: "all",
+    conditions: {
+      day_of_week: ["friday"],
+      time_range: {
+        start: "18:00",
+        end: "20:00"
+      },
+      flash_sale: true,
+      limited_time: true
+    },
+    applicableTo: {
+      type: "products",
+      categories: [],
+      products: ["PROD_FLASH_001", "PROD_FLASH_002", "PROD_FLASH_003"],
+      brands: [],
+      exclude_sale_items: false,
+      minimum_margin: 15
+    },
+    customFields: {
+      campaign_code: "FLASH35",
+      notification_required: true,
+      countdown_timer: true,
+      limited_stock: 100
+    },
+    tags: ["flash-sale", "time-limited", "friday", "urgent", "limited-stock"],
+    notes: "Solo válido viernes de 18:00 a 20:00. Stock limitado a 100 unidades. Notificar clientes por push.",
+    campaignUrl: "https://www.virtago.shop/flash-sale"
+  },
+  {
+    discountId: "DISC_BUNDLE_TECH_STUDENT",
+    name: "Pack Estudiante Tecnología - Descuento Especial",
+    description: "25% de descuento en packs tecnológicos para estudiantes con credencial válida",
+    type: "percentage",
+    discountValue: 25,
+    currency: "USD",
+    status: "active",
+    validFrom: "2024-01-15T00:00:00Z",
+    validTo: "2024-12-31T23:59:59Z",
+    priority: 7,
+    isCumulative: false,
+    maxDiscountAmount: 400,
+    minPurchaseAmount: 200,
+    usageLimit: null,
+    usageLimitPerCustomer: 2,
+    customerType: "student",
+    channel: "omnichannel",
+    region: "all",
+    conditions: {
+      customer_segments: ["student", "educator"],
+      min_amount: 200,
+      bundle_required: true,
+      verification_required: true,
+      valid_student_id: true
+    },
+    applicableTo: {
+      type: "categories",
+      categories: ["computers", "laptops", "tablets", "software", "accessories"],
+      products: [],
+      brands: [],
+      exclude_sale_items: true,
+      minimum_margin: 18
+    },
+    customFields: {
+      campaign_code: "STUDENT2024",
+      requires_verification: true,
+      educational_discount: true,
+      valid_institutions: ["university", "college", "high-school"],
+      document_required: "student_id"
+    },
+    tags: ["student", "education", "tech-bundle", "verified", "back-to-school"],
+    notes: "Requiere verificación de credencial estudiantil vigente. Máximo 2 compras por año académico.",
+    createdBy: "education@virtago.com",
+    campaignUrl: "https://www.virtago.shop/estudiantes/tech-pack"
+  },
+  {
+    discountId: "DISC_PROGRESSIVE_LOYALTY",
+    name: "Descuento Progresivo Programa de Lealtad",
+    description: "Descuento que aumenta según nivel de lealtad: Bronze 5%, Silver 10%, Gold 15%, Platinum 20%",
+    type: "progressive_percentage",
+    discountValue: 0,
+    currency: "USD",
+    status: "active",
+    validFrom: "2024-01-01T00:00:00Z",
+    validTo: null,
+    priority: 5,
+    isCumulative: true,
+    maxDiscountAmount: 1000,
+    minPurchaseAmount: 0,
+    usageLimit: null,
+    usageLimitPerCustomer: null,
+    customerType: "all",
+    channel: "omnichannel",
+    region: "all",
+    conditions: {
+      progressive_structure: [
+        {
+          level: "bronze",
+          discount_percentage: 5,
+          min_purchases: 1,
+          min_spent: 0,
+          description: "5% de descuento - Nivel Bronze"
+        },
+        {
+          level: "silver",
+          discount_percentage: 10,
+          min_purchases: 5,
+          min_spent: 500,
+          description: "10% de descuento - Nivel Silver"
+        },
+        {
+          level: "gold",
+          discount_percentage: 15,
+          min_purchases: 15,
+          min_spent: 2000,
+          description: "15% de descuento - Nivel Gold"
+        },
+        {
+          level: "platinum",
+          discount_percentage: 20,
+          min_purchases: 30,
+          min_spent: 5000,
+          description: "20% de descuento - Nivel Platinum"
+        }
+      ],
+      loyalty_program: true,
+      auto_upgrade: true
+    },
+    applicableTo: {
+      type: "all_products",
+      categories: [],
+      products: [],
+      brands: [],
+      exclude_sale_items: false,
+      minimum_margin: 10
+    },
+    customFields: {
+      campaign_code: "LOYALTY2024",
+      program_name: "Virtago VIP Club",
+      points_multiplier: 1.5,
+      birthday_bonus: true
+    },
+    tags: ["loyalty", "progressive", "vip-club", "customer-retention", "recurring"],
+    notes: "Descuento se aplica automáticamente según nivel de lealtad. Se puede combinar con otros descuentos acumulables.",
+    createdBy: "loyalty@virtago.com",
+    campaignUrl: "https://www.virtago.shop/loyalty/vip-club"
   }
 ];
 
@@ -172,7 +496,7 @@ export function DiscountStep({ onNext, onBack, themeColors, stepData }: Discount
   };
 
   // Función para normalizar datos de API a formato wizard
-  const normalizeDiscountData = (apiData: Record<string, unknown>): DiscountData => {
+  const normalizeDiscountData = (apiData: Record<string, unknown>, index: number = 0): DiscountData => {
     // Extraer el valor del descuento, considerando estructuras anidadas
     let discountValue = 0;
     if (apiData.discount_value !== undefined) {
@@ -196,32 +520,70 @@ export function DiscountStep({ onNext, onBack, themeColors, stepData }: Discount
     }
 
     // Validar campos requeridos
-    const discountId = apiData.discount_id || apiData.discountId;
+    let discountId = apiData.discount_id || apiData.discountId;
     const name = apiData.name;
-    const type = apiData.type;
+    const type = apiData.type || apiData.discount_type;
     const currency = apiData.currency;
     
+    // 🆕 Si no hay discount_id, generar uno basado en el nombre o un ID único
+    if (!discountId && name) {
+      // Generar ID: quitar espacios, convertir a uppercase, agregar timestamp
+      const nameSlug = String(name).replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_]/g, '').toUpperCase();
+      discountId = `DISC_${nameSlug}_${Date.now().toString().slice(-6)}`;
+      console.log(`🆔 Generando discount_id automático: ${discountId} para "${name}"`);
+    }
+    
     if (!discountId || !name || !type || !currency) {
-      console.warn('Descuento con datos incompletos:', { discountId, name, type, currency });
+      console.warn('Descuento con datos incompletos:', { discountId, name, type, currency, index });
+    }
+
+    // 🆕 Determinar el tipo correcto del descuento
+    let discountType: 'percentage' | 'fixed_amount' | 'tiered_percentage' | 'progressive_percentage' = 'percentage';
+    const typeStr = String(type || 'percentage').toLowerCase();
+    
+    if (typeStr.includes('fixed') || typeStr === 'fixed_amount') {
+      discountType = 'fixed_amount';
+    } else if (typeStr.includes('tier')) {
+      discountType = 'tiered_percentage';
+    } else if (typeStr.includes('progress')) {
+      discountType = 'progressive_percentage';
+    } else {
+      discountType = 'percentage';
+    }
+
+    // 🆕 Determinar el status basado en is_active
+    let status: 'active' | 'inactive' | 'draft' = 'active';
+    if (apiData.is_active !== undefined) {
+      const isActive = apiData.is_active;
+      if (typeof isActive === 'boolean') {
+        status = isActive ? 'active' : 'inactive';
+      } else if (typeof isActive === 'string') {
+        const activeStr = String(isActive).toLowerCase();
+        status = ['true', 'verdadero', '1', 'yes', 'si', 'sí'].includes(activeStr) ? 'active' : 'inactive';
+      }
+    } else if (apiData.status) {
+      status = String(apiData.status) as 'active' | 'inactive' | 'draft';
     }
 
     return {
-      discountId: String(discountId || ''),
+      discountId: String(discountId || `DISC_${index + 1}_${Date.now()}`),
       name: String(name || ''),
       description: String(apiData.description || ''),
-      type: String(type || 'percentage') as 'percentage' | 'fixed_amount' | 'tiered_percentage' | 'progressive_percentage',
+      type: discountType,
       discountValue: discountValue,
-      currency: String(currency || 'COP'),
-      validFrom: String(apiData.valid_from || apiData.validFrom || ''),
-      validTo: String(apiData.valid_to || apiData.validTo || ''),
-      status: String(apiData.status || 'active') as 'active' | 'inactive' | 'draft',
+      currency: String(currency || 'USD'),
+      validFrom: String(apiData.valid_from || apiData.validFrom || apiData.start_date || ''),
+      validTo: String(apiData.valid_to || apiData.validTo || apiData.end_date || ''),
+      status: status,
       customerType: String(apiData.customer_type || apiData.customerType || 'all') as 'all' | 'retail' | 'wholesale' | 'vip',
       channel: String(apiData.channel || 'online') as 'online' | 'offline' | 'omnichannel' | 'b2b' | 'all',
       category: String(apiData.category || 'general'),
       maxDiscountAmount: apiData.max_discount_amount ? Number(apiData.max_discount_amount) : 
-                        apiData.maxDiscountAmount ? Number(apiData.maxDiscountAmount) : undefined,
+                        apiData.maxDiscountAmount ? Number(apiData.maxDiscountAmount) : 
+                        apiData.maximum_discount_amount ? Number(apiData.maximum_discount_amount) : undefined,
       minPurchaseAmount: apiData.min_purchase_amount ? Number(apiData.min_purchase_amount) : 
-                        apiData.minPurchaseAmount ? Number(apiData.minPurchaseAmount) : undefined,
+                        apiData.minPurchaseAmount ? Number(apiData.minPurchaseAmount) : 
+                        apiData.minimum_purchase_amount ? Number(apiData.minimum_purchase_amount) : undefined,
       usageLimit: apiData.usage_limit ? Number(apiData.usage_limit) : 
                  apiData.usageLimit ? Number(apiData.usageLimit) : undefined,
       usageLimitPerCustomer: apiData.usage_limit_per_customer ? Number(apiData.usage_limit_per_customer) : 
@@ -266,8 +628,8 @@ export function DiscountStep({ onNext, onBack, themeColors, stepData }: Discount
     try {
       // 🆕 PRESERVAR JSON ORIGINAL + NORMALIZAR para visualización
       // Normalizar para la UI pero mantener campos originales
-      const normalizedData = result.data.map((rawDiscount: Record<string, unknown>) => {
-        const normalized = normalizeDiscountData(rawDiscount);
+      const normalizedData = result.data.map((rawDiscount: Record<string, unknown>, index: number) => {
+        const normalized = normalizeDiscountData(rawDiscount, index);
         
         // 🔥 CRÍTICO: Agregar campos complejos del JSON original al objeto normalizado
         const enriched = normalized as unknown as Record<string, unknown>;
@@ -305,16 +667,14 @@ export function DiscountStep({ onNext, onBack, themeColors, stepData }: Discount
         customFields: !!(normalizedData[0] as unknown as Record<string, unknown>).customFields
       });
       
-      // Validar que los datos normalizados son válidos
+      // Validar que los datos normalizados son válidos (solo name y type son estrictamente requeridos)
       const validDiscounts = normalizedData.filter(discount => 
-        discount.discountId && 
         discount.name && 
-        discount.type && 
-        discount.currency
+        discount.type
       );
       
       if (validDiscounts.length === 0) {
-        alert('❌ No se encontraron descuentos válidos en el JSON.\n\n💡 Verifica que cada descuento tenga al menos: discount_id, name, type, y currency.');
+        alert('❌ No se encontraron descuentos válidos en el archivo.\n\n💡 Verifica que cada descuento tenga al menos: name y type (discount_type).');
         return;
       }
       
@@ -910,6 +1270,7 @@ export function DiscountStep({ onNext, onBack, themeColors, stepData }: Discount
         acceptedFileTypes=".csv,.xlsx,.json"
         fileExtensions={["csv", "xlsx", "json"]}
         isProcessing={isProcessing}
+        parseFile={parseDiscountFile}
       />
     </div>
   );

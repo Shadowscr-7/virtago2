@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { MapPin, Navigation, ExternalLink } from "lucide-react";
+import { useMemo } from "react";
 
 interface ClientLocationData {
   address: string;
@@ -18,6 +19,15 @@ interface ClientLocationMapProps {
 
 export function ClientLocationMap({ clientData }: ClientLocationMapProps) {
   const hasCoordinates = clientData.latitude && clientData.longitude;
+
+  // Generate grid pattern once to avoid hydration mismatch
+  const gridCells = useMemo(() => {
+    return Array.from({ length: 48 }, (_, i) => ({
+      id: i,
+      backgroundColor: Math.random() > 0.7 ? "#10b981" : "transparent",
+      opacity: Math.random() * 0.3,
+    }));
+  }, []);
 
   const openInGoogleMaps = () => {
     if (hasCoordinates) {
@@ -62,14 +72,13 @@ export function ClientLocationMap({ clientData }: ClientLocationMapProps) {
         {/* Efecto de patrón de mapa */}
         <div className="absolute inset-0 opacity-10">
           <div className="grid grid-cols-8 grid-rows-6 h-full w-full">
-            {Array.from({ length: 48 }).map((_, i) => (
+            {gridCells.map((cell) => (
               <div
-                key={i}
+                key={cell.id}
                 className="border border-slate-400 dark:border-slate-500"
                 style={{
-                  backgroundColor:
-                    Math.random() > 0.7 ? "#10b981" : "transparent",
-                  opacity: Math.random() * 0.3,
+                  backgroundColor: cell.backgroundColor,
+                  opacity: cell.opacity,
                 }}
               />
             ))}

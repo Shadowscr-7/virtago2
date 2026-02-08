@@ -961,17 +961,17 @@ export interface PriceListBulkCreateResponse {
 
 // Repositorio de APIs de Autenticación
 export const authApi = {
-  // Registro inicial
+  // Registro inicial (timeout extendido para envío de correo)
   register: async (data: RegisterData): Promise<ApiResponse<RegisterResponse>> => 
-    http.post("/auth/register-simple", data),
+    http.post("/auth/register-simple", data, { timeout: 60000 }),
 
   // Verificar OTP
   verifyOTP: async (data: OTPVerifyData): Promise<ApiResponse<OTPVerifyResponse>> => 
     http.post("/auth/verify-otp", data),
 
-  // Reenviar OTP
+  // Reenviar OTP (timeout extendido para envío de correo)
   resendOTP: async (email: string): Promise<ApiResponse<RegisterResponse>> => 
-    http.post("/auth/resend-otp", { email }),
+    http.post("/auth/resend-otp", { email }, { timeout: 60000 }),
 
   // Login
   login: async (data: LoginData): Promise<ApiResponse<LoginResponse>> => 
@@ -1139,11 +1139,27 @@ export const productApi = {
 
   // Obtener categorías
   getCategories: async (): Promise<ApiResponse<Category[]>> => 
-    http.get("/products/categories"),
+    http.get("/categories"),
+
+  // Obtener subcategorías
+  getSubcategories: async (): Promise<ApiResponse<Category[]>> => 
+    http.get("/subcategories"),
 
   // Obtener marcas
   getBrands: async (): Promise<ApiResponse<Brand[]>> => 
-    http.get("/products/brands"),
+    http.get("/brands"),
+  
+  // Crear categoría
+  createCategory: async (name: string): Promise<ApiResponse<{ id: string; name: string }>> =>
+    http.post("/categories", { name }),
+  
+  // Crear subcategoría
+  createSubcategory: async (name: string, categoryId?: string): Promise<ApiResponse<{ id: string; name: string }>> =>
+    http.post("/subcategories", { name, categoryId }),
+  
+  // Crear marca
+  createBrand: async (name: string): Promise<ApiResponse<{ id: string; name: string }>> =>
+    http.post("/admin/brands", { name }),
 };
 
 // Repositorio de APIs de Ubicación
@@ -1298,6 +1314,13 @@ export const adminApi = {
       
       // Usar API real - Corregida la URL
       return http.post("/clients", clients);
+    },
+    
+    // 🆕 BULK IMPORT - Importar clientes desde archivo
+    bulkImport: async (file: File): Promise<ApiResponse<ClientBulkCreateResponse>> => {
+      const formData = new FormData();
+      formData.append('file', file);
+      return http.upload("/clients/import", formData);
     },
     
     update: async (id: string, data: unknown): Promise<ApiResponse<unknown>> => 

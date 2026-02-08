@@ -5,6 +5,7 @@ import { ArrowRight, Sparkles, Zap } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/theme-context";
+import { useMemo } from "react";
 
 interface OfferBannerProps {
   title: string;
@@ -31,6 +32,18 @@ export function OfferBanner({
 }: OfferBannerProps) {
   const isPrimary = variant === "primary";
   const { themeColors } = useTheme();
+
+  // Generate particle positions once to avoid hydration mismatch
+  const particles = useMemo(() => {
+    const count = isPrimary ? 8 : 5;
+    return Array.from({ length: count }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      xOffset: Math.random() * 100 - 50,
+      yOffset: Math.random() * 100 - 50,
+    }));
+  }, [isPrimary]);
 
   return (
     <motion.div
@@ -63,26 +76,26 @@ export function OfferBanner({
 
       {/* Partículas flotantes */}
       <div className="absolute inset-0 overflow-hidden">
-        {[...Array(isPrimary ? 8 : 5)].map((_, i) => (
+        {particles.map((particle) => (
           <motion.div
-            key={i}
+            key={particle.id}
             initial={{ opacity: 0, scale: 0 }}
             animate={{
               opacity: [0, 1, 0],
               scale: [0, 1, 0],
-              x: [0, Math.random() * 100 - 50],
-              y: [0, Math.random() * 100 - 50],
+              x: [0, particle.xOffset],
+              y: [0, particle.yOffset],
             }}
             transition={{
               duration: 4,
               repeat: Infinity,
-              delay: i * 0.5,
+              delay: particle.id * 0.5,
               ease: "easeInOut",
             }}
             className="absolute w-2 h-2 bg-white rounded-full"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${particle.left}%`,
+              top: `${particle.top}%`,
             }}
           />
         ))}

@@ -5,8 +5,10 @@
   "scripts": {
     "dev": "next dev -p 3002",
     "build": "next build",
+    "build:check": "next build",
     "start": "next start -p 3002",
-    "lint": "eslint",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
@@ -15,7 +17,6 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
-    "@next/font": "^14.2.15",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-slot": "^1.2.3",
@@ -28,9 +29,10 @@
     "cloudinary-react": "^1.8.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "exceljs": "^4.4.0",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.544.0",
-    "next": "15.5.3",
+    "next": "16.1.6",
     "next-themes": "^0.4.6",
     "openai": "^6.8.1",
     "react": "19.1.0",
@@ -46,13 +48,20 @@
     "@eslint/eslintrc": "^3",
     "@playwright/test": "^1.55.1",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^20.19.33",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.5.3",
+    "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "pnpm": {
+    "overrides": {
+      "tar": ">=7.5.7",
+      "lodash": ">=4.17.23",
+      "js-yaml": ">=4.1.1"
+    }
   },
   "packageManager": "pnpm@9.12.3+sha512.cce0f9de9c5a7c95bef944169cc5dfe8741abfb145078c0d508b868056848a87c81e626246cb60967cbd7fd29a6c062ef73ff840d96b3c86c40ac92cf4a813ee"
 }

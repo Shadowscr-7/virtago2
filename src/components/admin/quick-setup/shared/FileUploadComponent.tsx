@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Upload, Download, X } from 'lucide-react';
 import { ThemeColors, UploadMethod, UploadResult } from '../shared/types';
@@ -14,6 +14,7 @@ interface FileUploadProps<T> {
   acceptedFileTypes: string;
   fileExtensions: string[];
   isProcessing?: boolean;
+  parseFile?: (file: File) => Promise<T[]>; // Optional file parser function
 }
 
 export function FileUploadComponent<T>({
@@ -26,7 +27,8 @@ export function FileUploadComponent<T>({
   title,
   acceptedFileTypes,
   fileExtensions,
-  isProcessing = false
+  isProcessing = false,
+  parseFile: parseFileFn
 }: FileUploadProps<T>) {
   const [dragActive, setDragActive] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -35,6 +37,10 @@ export function FileUploadComponent<T>({
     type: 'success' | 'error' | null;
     message: string;
   }>({ type: null, message: '' });
+  const [isParsingFile, setIsParsingFile] = useState(false);
+  
+  // Ref para resetear el input file
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -56,7 +62,7 @@ export function FileUploadComponent<T>({
     }
   };
 
-  const handleFile = (file: File) => {
+  const handleFile = async (file: File) => {
     setUploadedFile(file);
     
     // Notificar al componente padre que se seleccionó un archivo
@@ -64,9 +70,57 @@ export function FileUploadComponent<T>({
       onFileSelect(file);
     }
     
-    // Por ahora usar datos de ejemplo para la vista previa
-    // En el futuro, aquí se puede implementar un parser real
-    onUpload({ data: sampleData, success: true });
+    // Si hay una función de parseo, usarla
+    if (parseFileFn) {
+      setIsParsingFile(true);
+      setValidationMessage({ type: null, message: '' });
+      
+      try {
+        const parsedData = await parseFileFn(file);
+        
+        if (parsedData.length === 0) {
+          onUpload({ 
+            data: [], 
+            success: false, 
+            error: 'El archivo no contiene datos válidos o está vacío' 
+          });
+          setValidationMessage({
+            type: 'error',
+            message: 'El archivo no contiene datos válidos'
+          });
+        } else {
+          onUpload({ data: parsedData, success: true });
+          setValidationMessage({
+            type: 'success',
+            message: `✓ Se procesaron ${parsedData.length} registro(s) correctamente`
+          });
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido al procesar el archivo';
+        onUpload({ 
+          data: [], 
+          success: false, 
+          error: errorMessage 
+        });
+        setValidationMessage({
+          type: 'error',
+          message: errorMessage
+        });
+      } finally {
+        setIsParsingFile(false);
+        // Resetear el input file para permitir subir el mismo archivo modificado
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      }
+    } else {
+      // Fallback: usar datos de ejemplo si no hay parser
+      onUpload({ data: sampleData, success: true });
+      // Resetear el input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
   };
 
   const validateJson = (input: string): { valid: boolean; error?: string; cleaned?: string; parsed?: T[] } => {
@@ -338,6 +392,7 @@ export function FileUploadComponent<T>({
           }}
         >
           <input
+            ref={fileInputRef}
             type="file"
             accept={acceptedFileTypes}
             onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
@@ -346,16 +401,50 @@ export function FileUploadComponent<T>({
           
           <Upload className="w-16 h-16 mx-auto mb-4" style={{ color: themeColors.primary }} />
           <h4 className="text-xl font-semibold mb-2" style={{ color: themeColors.text.primary }}>
-            {uploadedFile ? `Archivo: ${uploadedFile.name}` : "Arrastra tu archivo aquí"}
+            {isParsingFile ? "Procesando archivo..." : uploadedFile ? `Archivo: ${uploadedFile.name}` : "Arrastra tu archivo aquí"}
           </h4>
           <p className="mb-4" style={{ color: themeColors.text.secondary }}>
-            {uploadedFile ? "Archivo cargado correctamente" : "o haz clic para seleccionar"}
+            {isParsingFile ? "Leyendo y validando datos..." : uploadedFile ? "Archivo cargado correctamente" : "o haz clic para seleccionar"}
           </p>
           <div className="flex items-center justify-center gap-4 text-sm" style={{ color: themeColors.text.secondary }}>
             {fileExtensions.map(ext => (
               <span key={ext}>{ext.toUpperCase()}</span>
             ))}
           </div>
+          
+          {/* Loading spinner for file parsing */}
+          {isParsingFile && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="mt-4"
+            >
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                className="w-8 h-8 border-2 border-transparent rounded-full mx-auto"
+                style={{ 
+                  borderTopColor: themeColors.primary,
+                  borderRightColor: themeColors.primary 
+                }}
+              />
+            </motion.div>
+          )}
+          
+          {/* Validation message for file upload */}
+          {validationMessage.type && !isParsingFile && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 p-3 rounded-lg text-sm"
+              style={{
+                backgroundColor: validationMessage.type === 'success' ? `${themeColors.secondary}20` : '#fef2f2',
+                color: validationMessage.type === 'success' ? themeColors.secondary : '#dc2626'
+              }}
+            >
+              {validationMessage.message}
+            </motion.div>
+          )}
         </motion.div>
       ) : (
         /* JSON Input */

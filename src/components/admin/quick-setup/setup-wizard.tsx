@@ -10,6 +10,11 @@ import { ClientStep, ProductStep, PriceListStep, PriceStep, DiscountStep, Review
 import { ThemeColors, ClientData, MatchedProduct, PriceList, PriceData, DiscountData } from './shared/types';
 import { useAuthStore } from '@/store/auth';
 
+// Interfaz para props de los pasos del wizard
+export interface WizardStepProps {
+  onComplete?: (data: Record<string, unknown>) => void;
+}
+
 // Definición de pasos del wizard
 const WIZARD_STEPS = [
   { 
@@ -149,20 +154,19 @@ export default function SetupWizard() {
       onNext: handleNext,
       onBack: handleBack,
       themeColors,
-      stepData: wizardData,
     };
 
     switch (WIZARD_STEPS[currentStep].id) {
       case 'clients':
-        return <ClientStep {...commonProps} stepData={{ uploadedClients: wizardData.uploadedClients }} />;
+        return <ClientStep {...commonProps} />;
       case 'products':
-        return <ProductStep {...commonProps} stepData={{ matchedProducts: wizardData.matchedProducts }} />;
+        return <ProductStep {...commonProps} />;
       case 'price-lists':
-        return <PriceListStep {...commonProps} stepData={{ uploadedPriceLists: wizardData.uploadedPriceLists }} />;
+        return <PriceListStep {...commonProps} />;
       case 'prices':
-        return <PriceStep {...commonProps} stepData={{ uploadedPrices: wizardData.uploadedPrices }} />;
+        return <PriceStep {...commonProps} />;
       case 'discounts':
-        return <DiscountStep {...commonProps} stepData={{ uploadedDiscounts: wizardData.uploadedDiscounts }} />;
+        return <DiscountStep {...commonProps} />;
       case 'review':
         return <ReviewStep {...commonProps} />;
       default:

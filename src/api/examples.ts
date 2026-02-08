@@ -14,7 +14,7 @@ export const loginExample = async (email: string, password: string) => {
     const response = await api.auth.login(loginData);
     
     console.log('Login exitoso:', response.data);
-    console.log('Token:', response.data.access_token);
+    console.log('Token:', response.data.token);
     console.log('Usuario:', response.data.user);
     
     // El token se guarda automáticamente y se incluye en futuras requests

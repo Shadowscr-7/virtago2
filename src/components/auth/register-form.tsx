@@ -67,10 +67,8 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
       });
       
       // Si llegamos aquí, el registro fue exitoso
-      console.log("✅ Usuario registrado exitosamente");
       onSuccess?.();
-    } catch (error) {
-      console.error("❌ Error en registro:", error);
+    } catch {
       // Los errores ya se muestran vía toast desde el store
     }
   };

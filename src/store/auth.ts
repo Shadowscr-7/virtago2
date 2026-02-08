@@ -318,8 +318,6 @@ export const useAuthStore = create<AuthState>()(
           // Llamar a la API real
           const response = await apiHelpers.register(registerData);
 
-          console.log("Registro exitoso:", response.data);
-
           // La API devuelve: { success, message, otp, token, user }
           const { user, token, otp } = response.data;
 
@@ -356,18 +354,27 @@ export const useAuthStore = create<AuthState>()(
           // En desarrollo, mostrar el OTP en consola
           console.log("🔐 OTP para desarrollo:", otp);
         } catch (error: unknown) {
-          console.error("Error en registro:", error);
           set({ isLoading: false, isRegistering: false });
           
-          // Mostrar notificación de error
-          const errorMessage = error instanceof Error 
-            ? error.message 
-            : (typeof error === 'object' && error !== null && 'message' in error)
-              ? String((error as { message: unknown }).message)
-              : "Error al registrar usuario. Inténtalo de nuevo.";
+          // Extraer mensaje de error del backend
+          let errorMessage = "Error al registrar usuario. Inténtalo de nuevo.";
+          let errorTitle = "Error en el registro";
+          
+          if (error instanceof Error) {
+            errorMessage = error.message;
+            
+            // Personalizar el título según el tipo de error
+            const errorData = (error as Error & { data?: { errorCode?: string; email?: string } }).data;
+            if (errorData?.errorCode === 'EMAIL_ALREADY_EXISTS') {
+              errorTitle = "Correo ya registrado";
+              errorMessage = `El correo ${errorData.email || data.email} ya está registrado. Por favor, usa otro correo o inicia sesión.`;
+            }
+          } else if (typeof error === 'object' && error !== null && 'message' in error) {
+            errorMessage = String((error as { message: unknown }).message);
+          }
           
           showToast({
-            title: "Error en el registro",
+            title: errorTitle,
             description: errorMessage,
             type: "error",
           });

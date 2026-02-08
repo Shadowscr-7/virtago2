@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/contexts/theme-context";
 
@@ -59,6 +59,17 @@ export function LoadingProvider({ children }: LoadingProviderProps) {
 
 function VirtagoLoader() {
   const { themeColors } = useTheme();
+
+  // Generate particle positions once to avoid hydration mismatch
+  const particles = useMemo(() => {
+    return Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      xOffset: Math.random() * 200 - 100,
+      yOffset: Math.random() * 200 - 100,
+    }));
+  }, []);
 
   return (
     <motion.div
@@ -164,27 +175,27 @@ function VirtagoLoader() {
 
       {/* Partículas de fondo */}
       <div className="absolute inset-0 overflow-hidden">
-        {[...Array(20)].map((_, i) => (
+        {particles.map((particle) => (
           <motion.div
-            key={i}
+            key={particle.id}
             initial={{ opacity: 0, scale: 0 }}
             animate={{
               opacity: [0, 1, 0],
               scale: [0, 1, 0],
-              x: [0, Math.random() * 200 - 100],
-              y: [0, Math.random() * 200 - 100],
+              x: [0, particle.xOffset],
+              y: [0, particle.yOffset],
             }}
             transition={{
               duration: 3,
               repeat: Infinity,
-              delay: i * 0.2,
+              delay: particle.id * 0.2,
               ease: "easeInOut",
             }}
             className="absolute w-2 h-2 rounded-full"
             style={{
               backgroundColor: themeColors.primary,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${particle.left}%`,
+              top: `${particle.top}%`,
             }}
           />
         ))}

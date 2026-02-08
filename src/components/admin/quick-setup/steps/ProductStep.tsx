@@ -1,701 +1,951 @@
-import React, { useState } from 'react';
+'use client';
+
+import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { useTheme } from '@/contexts/theme-context';
 import { FileUploadComponent } from '../shared/FileUploadComponent';
-import { StepProps, ProductData, MatchedProduct, Category, UploadMethod, UploadResult, ThemeColors } from '../shared/types';
-import { Check, Edit3, X } from 'lucide-react';
+import { parseProductFile } from '@/lib/file-parser';
+import { matchWithAI, type MatchResult } from '@/lib/product-matcher';
 import { api } from '@/api';
 
-// Datos de ejemplo y lógica de matching (movidos del wizard principal)
-const sampleData: ProductData[] = [
-  {
-    code: "LAP001",
-    name: "Laptop Gaming RGB Ultra",
-    description: "Laptop para gaming con iluminación RGB, procesador Intel i7, 16GB RAM, SSD 512GB",
-    category: "Computadoras",
-    brand: "TechPro",
-    price: 1299.99,
-    stock: 15
-  },
-  {
-    code: "MON002", 
-    name: "Monitor Curvo 27 pulgadas",
-    description: "Monitor gaming curvo de 27 pulgadas, 144Hz, resolución 2K",
-    category: "Monitores",
-    brand: "ViewMax", 
-    price: 399.99,
-    stock: 8
-  },
-  {
-    code: "TEC003",
-    name: "Teclado Mecánico RGB",
-    description: "Teclado mecánico gaming con switches azules y retroiluminación RGB",
-    category: "Periféricos",
-    brand: "KeyMaster",
-    price: 89.99,
-    stock: 25
-  },
-  {
-    code: "GPU009",
-    name: "Tarjeta Gráfica RTX Super",
-    description: "Tarjeta gráfica de alta gama para gaming 4K y ray tracing",
-    category: "Componentes",
-    brand: "GraphicsMax",
-    price: 899.99,
-    stock: 5
-  }
-];
-
-const mockCategories: Category[] = [
-  { id: 1, name: "Electrónicos", subcategories: ["Laptops", "Monitores", "Tablets"] },
-  { id: 2, name: "Gaming", subcategories: ["Periféricos", "Consolas", "Accesorios"] },
-  { id: 3, name: "Audio", subcategories: ["Auriculares", "Micrófonos", "Speakers"] },
-  { id: 4, name: "Componentes", subcategories: ["RAM", "GPU", "CPU"] },
-];
-
-const mockBrands = ["TechMaster", "GamePro", "AudioMax", "ComponentPlus", "ElectroTech"];
-
-interface ProductStepProps extends StepProps {
-  stepData?: {
-    matchedProducts?: MatchedProduct[];
-  };
+interface ProductStepProps {
+  onNext: (data: { 
+    matchedProducts: ProductMatchResult[];
+    createdEntities?: {
+      brands: string[];
+      categories: string[];
+      subcategories: string[];
+    };
+  }) => void;
+  onBack: () => void;
 }
 
-export function ProductStep({ onNext, onBack, themeColors, stepData }: ProductStepProps) {
-  const [method, setMethod] = useState<UploadMethod>("file");
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [matchedProducts, setMatchedProducts] = useState<MatchedProduct[]>(stepData?.matchedProducts || []);
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [isConfirming, setIsConfirming] = useState(false);
+// Interfaz para el resultado del matching interno
+interface ProductMatchResult {
+  product: ParsedProduct;
+  brandMatch: MatchResult & { wasCreated?: boolean };
+  categoryMatch: MatchResult & { wasCreated?: boolean };
+  subcategoryMatch: MatchResult & { wasCreated?: boolean };
+}
 
-  const findBestCategoryMatch = (product: ProductData) => {
-    const matches = mockCategories.map(cat => ({
-      category: cat,
-      score: calculateSimilarity(product.category.toLowerCase(), cat.name.toLowerCase())
-    }));
+// Interfaz para producto parseado
+interface ParsedProduct {
+  productId?: string;
+  sku?: string;
+  status?: string;
+  published?: boolean;
+  name?: string;
+  shortDescription?: string;
+  fullDescription?: string;
+  brand?: string;
+  category?: string;
+  subCategory?: string;
+  price?: number;
+  compareAtPrice?: number;
+  costPrice?: number;
+  stockQuantity?: number;
+  stockStatus?: string;
+  weight?: number;
+  dimensions?: string;
+  tags?: string;
+  images?: string;
+  ean?: string;
+  upc?: string;
+  isbn?: string;
+  mpn?: string;
+  [key: string]: unknown;
+}
+
+interface UploadResult<T> {
+  success: boolean;
+  data: T[];
+  error?: string;
+}
+
+export default function ProductStep({ onNext, onBack }: ProductStepProps) {
+  const { themeColors } = useTheme();
+  
+  const [method] = useState<'file' | 'json'>('file');
+  const [uploadedData, setUploadedData] = useState<ParsedProduct[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isMatching, setIsMatching] = useState(false);
+  
+  // Estado para resultados de matching
+  const [matchingResults, setMatchingResults] = useState<ProductMatchResult[]>([]);
+  
+  // Estado para resumen de creación
+  const [creationSummary, setCreationSummary] = useState<{
+    brands: string[];
+    categories: string[];
+    subcategories: string[];
+    productsCount: number;
+  } | null>(null);
+  
+  const sampleProducts: ParsedProduct[] = [
+    {
+      sku: 'PROD-001',
+      name: 'Laptop HP 15"',
+      brand: 'HP',
+      category: 'Electrónica',
+      subCategory: 'Computadoras',
+      price: 899.99,
+      stockQuantity: 15,
+    },
+  ];
+
+  const handleUpload = async (result: UploadResult<ParsedProduct>) => {
+    if (!result.success || !result.data || result.data.length === 0) {
+      setError('No se pudieron cargar los datos del archivo');
+      return;
+    }
+
+    console.log('📤 [ProductStep] Datos cargados del archivo:', result.data.length);
+    setUploadedData(result.data);
+    setError(null);
     
-    const bestMatch = matches.reduce((best, current) => 
-      current.score > best.score ? current : best
-    );
-    
-    return {
-      name: bestMatch.category.name,
-      confidence: Math.min(bestMatch.score + 0.1, 1.0)
-    };
+    // Iniciar proceso de matching
+    await performMatching(result.data);
   };
 
-  const findBestBrandMatch = (product: ProductData) => {
-    const matches = mockBrands.map(brand => ({
-      brand,
-      score: calculateSimilarity(product.brand.toLowerCase(), brand.toLowerCase())
-    }));
+  const performMatching = async (products: ParsedProduct[]) => {
+    setIsMatching(true);
+    setError(null);
     
-    const bestMatch = matches.reduce((best, current) => 
-      current.score > best.score ? current : best
-    );
-    
-    return {
-      name: bestMatch.brand,
-      confidence: Math.min(bestMatch.score + 0.15, 1.0)
-    };
-  };
-
-  const findBestSubcategoryMatch = (product: ProductData) => {
-    let allSubcategories: string[] = [];
-    mockCategories.forEach(cat => {
-      allSubcategories = [...allSubcategories, ...cat.subcategories];
-    });
-    
-    const matches = allSubcategories.map(sub => ({
-      subcategory: sub,
-      score: calculateSimilarity(product.name.toLowerCase(), sub.toLowerCase()) * 0.8
-    }));
-    
-    const bestMatch = matches.reduce((best, current) => 
-      current.score > best.score ? current : best
-    );
-    
-    return {
-      name: bestMatch.subcategory,
-      confidence: Math.min(bestMatch.score + 0.2, 1.0)
-    };
-  };
-
-  const calculateSimilarity = (str1: string, str2: string): number => {
-    const words1 = str1.toLowerCase().split(' ');
-    const words2 = str2.toLowerCase().split(' ');
-    
-    let matches = 0;
-    words1.forEach(word1 => {
-      if (words2.some(word2 => word2.includes(word1) || word1.includes(word2))) {
-        matches++;
-      }
-    });
-    
-    return matches / Math.max(words1.length, words2.length);
-  };
-
-  const handleUpload = async (result: UploadResult<ProductData>) => {
-    if (result.success) {
-      setIsProcessing(true);
+    try {
+      console.log('🔍 [ProductStep] Iniciando matching inteligente...');
+      console.log('📋 [ProductStep] Productos a procesar:', products);
       
-      try {
-        // Preparar datos para el API (formato ProductBulkData[])
-        const productData = result.data.map(product => ({
-          name: product.name,
-          fullDescription: product.description,
-          categoryCode: product.category,
-          brandId: product.brand,
-          price: product.price,
-          stockQuantity: product.stock,
-          status: "active" as const,
-          published: true
-        }));
+      // 1. Primero cargar datos del sistema
+      console.log('📥 [ProductStep] Cargando marcas, categorías y subcategorías del sistema...');
+      const [brandsRes, categoriesRes, subcategoriesRes] = await Promise.all([
+        api.product.getBrands(),
+        api.product.getCategories(),
+        api.product.getSubcategories(),
+      ]);
 
-        // Llamar al API de bulk creation
-        const apiResponse = await api.admin.products.bulkCreate(productData);
-        
-        if (apiResponse.success) {
-          // Procesar respuesta del API para matching interface
-          // Como el API devuelve ProductBulkData[], necesitamos mapear a nuestro formato interno
-          const matched = result.data.map((originalProduct, index) => {
-            const apiProduct = apiResponse.data.results.products?.[index];
-            return {
-              code: originalProduct.code,
-              name: apiProduct?.name || originalProduct.name,
-              description: apiProduct?.fullDescription || originalProduct.description,
-              category: apiProduct?.categoryCode || originalProduct.category,
-              brand: apiProduct?.brandId || originalProduct.brand,
-              price: apiProduct?.price || originalProduct.price,
-              stock: apiProduct?.stockQuantity || originalProduct.stock,
-              original: { ...originalProduct },
-              aiSuggestions: {
-                category: {
-                  name: apiProduct?.categoryCode || originalProduct.category,
-                  confidence: 0.9
-                },
-                brand: {
-                  name: apiProduct?.brandId || originalProduct.brand,
-                  confidence: 0.9
-                },
-                subcategory: {
-                  name: apiProduct?.subCategoryId || 'General',
-                  confidence: 0.8
-                },
-                confidence: 0.85
-              }
-            };
-          });
-          
-          setMatchedProducts(matched);
-        } else {
-          // Manejar errores del API
-          console.error('Error en bulk creation:', apiResponse.message);
-          // Fallback a procesamiento local
-          const matched = result.data.map(product => ({
-            ...product,
-            original: { ...product },
-            aiSuggestions: {
-              category: findBestCategoryMatch(product),
-              brand: findBestBrandMatch(product),
-              subcategory: findBestSubcategoryMatch(product),
-              confidence: (findBestCategoryMatch(product).confidence + 
-                          findBestBrandMatch(product).confidence + 
-                          findBestSubcategoryMatch(product).confidence) / 3
-            }
-          }));
-          
-          setMatchedProducts(matched);
-        }
-      } catch (error) {
-        console.error('Error en el upload de productos:', error);
-        // Fallback a procesamiento local en caso de error
-        const matched = result.data.map(product => ({
-          ...product,
-          original: { ...product },
-          aiSuggestions: {
-            category: findBestCategoryMatch(product),
-            brand: findBestBrandMatch(product),
-            subcategory: findBestSubcategoryMatch(product),
-            confidence: (findBestCategoryMatch(product).confidence + 
-                        findBestBrandMatch(product).confidence + 
-                        findBestSubcategoryMatch(product).confidence) / 3
-          }
+      console.log('🔍 [ProductStep] Respuestas del API:');
+      console.log('  - Brands:', brandsRes);
+      console.log('  - Categories:', categoriesRes);
+      console.log('  - Subcategories:', subcategoriesRes);
+
+      let brands: Array<{ id: string; name: string }> = [];
+      let categories: Array<{ id: string; name: string }> = [];
+      let subcategories: Array<{ id: string; name: string }> = [];
+
+      if (brandsRes.success && brandsRes.data?.data) {
+        brands = brandsRes.data.data.map((b: { brandId?: string; id?: number | string; name: string }) => ({
+          id: String(b.brandId || b.id),
+          name: b.name,
         }));
-        
-        setMatchedProducts(matched);
-      } finally {
-        setIsProcessing(false);
+        console.log('✅ Marcas cargadas:', brands.length, brands);
+      } else {
+        console.warn('⚠️ No se pudieron cargar marcas:', brandsRes);
       }
+
+      if (categoriesRes.success && categoriesRes.data?.data) {
+        categories = categoriesRes.data.data.map((c: { categoryId?: string; id?: number | string; name: string }) => ({
+          id: String(c.categoryId || c.id),
+          name: c.name,
+        }));
+        console.log('✅ Categorías cargadas:', categories.length, categories);
+      } else {
+        console.warn('⚠️ No se pudieron cargar categorías:', categoriesRes);
+      }
+
+      if (subcategoriesRes.success && subcategoriesRes.data?.data) {
+        subcategories = subcategoriesRes.data.data.map((s: { subCategoryId?: string; id?: number | string; name: string }) => ({
+          id: String(s.subCategoryId || s.id),
+          name: s.name,
+        }));
+        console.log('✅ Subcategorías cargadas:', subcategories.length, subcategories);
+      } else {
+        console.warn('⚠️ No se pudieron cargar subcategorías:', subcategoriesRes);
+      }
+
+      // 2. Hacer matching producto por producto
+      const results: ProductMatchResult[] = [];
+      
+      for (let i = 0; i < products.length; i++) {
+        const product = products[i];
+        console.log(`\n🔄 [${i + 1}/${products.length}] Matching producto:`, {
+          name: product.name,
+          brand: product.brand,
+          category: product.category,
+          subCategory: product.subCategory,
+        });
+        
+        // Hacer matching con IA solo si el campo existe
+        let brandMatch: MatchResult;
+        if (product.brand) {
+          console.log(`  🔍 Buscando brand "${product.brand}" en:`, brands.map(b => b.name));
+          brandMatch = await matchWithAI(product.brand, brands, 'brand');
+          console.log('  🏷️  Brand match resultado:', brandMatch);
+        } else {
+          console.log('  ⚠️  Sin brand para matchear');
+          brandMatch = { matched: false, confidence: 0, shouldCreate: false, reason: 'No brand provided in file' };
+        }
+        
+        let categoryMatch: MatchResult;
+        if (product.category) {
+          console.log(`  🔍 Buscando category "${product.category}" en:`, categories.map(c => c.name));
+          categoryMatch = await matchWithAI(product.category, categories, 'category');
+          console.log('  📁 Category match resultado:', categoryMatch);
+        } else {
+          console.log('  ⚠️  Sin category para matchear');
+          categoryMatch = { matched: false, confidence: 0, shouldCreate: false, reason: 'No category provided in file' };
+        }
+        
+        let subcategoryMatch: MatchResult;
+        if (product.subCategory) {
+          console.log(`  🔍 Buscando subcategory "${product.subCategory}" en:`, subcategories.map(s => s.name));
+          subcategoryMatch = await matchWithAI(product.subCategory, subcategories, 'subcategory');
+          console.log('  📂 Subcategory match resultado:', subcategoryMatch);
+        } else {
+          console.log('  ⚠️  Sin subcategory para matchear');
+          subcategoryMatch = { matched: false, confidence: 0, shouldCreate: false, reason: 'No subcategory provided in file' };
+        }
+        
+        // IMPORTANTE: NO crear aquí, solo marcar para crear
+        // La creación real se hará cuando el usuario confirme
+        
+        results.push({
+          product,
+          brandMatch,
+          categoryMatch,
+          subcategoryMatch,
+        });
+      }
+      
+      console.log('✅ [ProductStep] Matching completado:', results.length, 'productos procesados');
+      console.log('📊 [ProductStep] Resumen de matching:', {
+        total: results.length,
+        brandsToCreate: results.filter(r => r.brandMatch.shouldCreate && !r.brandMatch.matched).length,
+        categoriesToCreate: results.filter(r => r.categoryMatch.shouldCreate && !r.categoryMatch.matched).length,
+        subcategoriesToCreate: results.filter(r => r.subcategoryMatch.shouldCreate && !r.subcategoryMatch.matched).length,
+        results: results,
+      });
+      
+      setMatchingResults(results);
+      setIsMatching(false);
+      
+    } catch (error) {
+      console.error('❌ [ProductStep] Error en matching:', error);
+      console.error('❌ [ProductStep] Stack trace:', error instanceof Error ? error.stack : 'No stack trace');
+      console.error('❌ [ProductStep] Error details:', {
+        message: error instanceof Error ? error.message : String(error),
+        type: typeof error,
+        error: error,
+      });
+      setError(`Error al hacer matching de productos: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      setIsMatching(false);
     }
   };
 
-  // Si tenemos productos procesados, mostrar la interfaz de matching
-  if (matchedProducts.length > 0 && !isProcessing && !showConfirmation) {
-    return (
-      <ProductMatchingInterface
-        products={matchedProducts}
-        onComplete={(finalProducts) => {
-          setMatchedProducts(finalProducts);
-          setShowConfirmation(true);
-        }}
-        onBack={() => setMatchedProducts([])}
-        themeColors={themeColors}
-        mockCategories={mockCategories}
-      />
-    );
-  }
-
-  // Mostrar confirmación antes de proceder
-  if (showConfirmation) {
-    return (
-      <div className="space-y-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-8 rounded-xl text-center"
-          style={{
-            backgroundColor: `${themeColors.surface}30`,
-            borderColor: `${themeColors.primary}30`,
-          }}
-        >
-          <div className="text-center mb-6">
-            <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
-                 style={{ backgroundColor: `${themeColors.primary}20` }}>
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.5, type: 'spring' }}
-                className="text-2xl"
-              >
-                ✓
-              </motion.div>
-            </div>
-            <h4 className="text-lg font-semibold mb-2" style={{ color: themeColors.text.primary }}>
-              ¿Confirmar importación de productos?
-            </h4>
-            <p className="text-sm" style={{ color: themeColors.text.secondary }}>
-              Los datos se han procesado correctamente. Revisa la información anterior y confirma si deseas continuar con estos {matchedProducts.length} productos.
-            </p>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row justify-between gap-4">
-            <motion.button
-              onClick={() => setShowConfirmation(false)}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="px-6 py-3 rounded-xl font-medium order-2 sm:order-1"
-              style={{
-                backgroundColor: `${themeColors.surface}50`,
-                color: themeColors.text.secondary,
-                border: `2px solid ${themeColors.surface}`,
-              }}
-            >
-              ← Volver Atrás
-            </motion.button>
+  // Función para confirmar y crear las entidades necesarias
+  const handleConfirm = async () => {
+    setIsMatching(true);
+    
+    try {
+      console.log('🚀 [ProductStep] Creando marcas, categorías y subcategorías nuevas...');
+      console.log('🚀 [ProductStep] Matching results:', matchingResults);
+      
+      const createdEntities = {
+        brands: [] as string[],
+        categories: [] as string[],
+        subcategories: [] as string[],
+      };
+      
+      // Crear marcas nuevas
+      for (const result of matchingResults) {
+        console.log('🔍 [ProductStep] Procesando resultado:', {
+          product: result.product.name,
+          brandMatch: result.brandMatch,
+          shouldCreate: result.brandMatch.shouldCreate,
+          matched: result.brandMatch.matched,
+          hasBrand: !!result.product.brand,
+        });
+        
+        if (result.brandMatch.shouldCreate && !result.brandMatch.matched && result.product.brand) {
+          try {
+            console.log(`  ✨ Creando marca: ${result.product.brand}`);
+            console.log(`  📤 Enviando request a: POST /admin/brands con body:`, { name: result.product.brand });
+            const newBrand = await api.product.createBrand(result.product.brand);
+            console.log(`  📥 Respuesta recibida:`, newBrand);
             
-            <div className="flex flex-col sm:flex-row gap-3 order-1 sm:order-2">
-              <motion.button
-                onClick={() => {
-                  setMatchedProducts([]);
-                  setShowConfirmation(false);
-                }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="px-6 py-3 rounded-xl font-medium"
-                style={{
-                  backgroundColor: `${themeColors.accent}20`,
-                  color: themeColors.accent,
-                  border: `2px solid ${themeColors.accent}30`,
-                }}
-              >
-                🔄 Cargar Otros Datos
-              </motion.button>
-              
-              <motion.button
-                onClick={() => {
-                  setIsConfirming(true);
-                  setTimeout(() => {
-                    onNext({ matchedProducts });
-                  }, 500);
-                }}
-                disabled={isConfirming}
-                whileHover={{ scale: isConfirming ? 1 : 1.05 }}
-                whileTap={{ scale: isConfirming ? 1 : 0.98 }}
-                className="px-8 py-3 rounded-xl font-semibold text-white shadow-lg flex items-center gap-2 min-w-[200px] justify-center"
-                style={{ 
-                  backgroundColor: isConfirming ? `${themeColors.primary}80` : themeColors.primary,
-                  boxShadow: `0 4px 12px ${themeColors.primary}30`,
-                  cursor: isConfirming ? 'wait' : 'pointer'
-                }}
-              >
-                {isConfirming ? (
-                  <>
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                      className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
-                    />
-                    Confirmando...
-                  </>
-                ) : (
-                  <>
-                    ✅ Confirmar y Continuar
-                  </>
-                )}
-              </motion.button>
-            </div>
-          </div>
-        </motion.div>
+            if (newBrand.success) {
+              result.brandMatch.matchedId = String(newBrand.data.id);
+              result.brandMatch.matchedName = newBrand.data.name;
+              result.brandMatch.matched = true;
+              (result.brandMatch as MatchResult & { wasCreated?: boolean }).wasCreated = true;
+              createdEntities.brands.push(newBrand.data.name);
+              console.log(`  ✅ Marca creada: ${newBrand.data.name} (ID: ${newBrand.data.id})`);
+            } else {
+              console.error(`  ❌ Respuesta no exitosa:`, newBrand);
+            }
+          } catch (error) {
+            console.error(`  ❌ Error creando marca "${result.product.brand}":`, error);
+            console.error(`  ❌ Error completo:`, {
+              message: error instanceof Error ? error.message : String(error),
+              stack: error instanceof Error ? error.stack : undefined,
+              error: error,
+            });
+          }
+        }
+      }
+      
+      // Crear categorías nuevas
+      for (const result of matchingResults) {
+        if (result.categoryMatch.shouldCreate && !result.categoryMatch.matched && result.product.category) {
+          try {
+            console.log(`  ✨ Creando categoría: ${result.product.category}`);
+            const newCategory = await api.product.createCategory(result.product.category);
+            if (newCategory.success) {
+              result.categoryMatch.matchedId = String(newCategory.data.id);
+              result.categoryMatch.matchedName = newCategory.data.name;
+              result.categoryMatch.matched = true;
+              (result.categoryMatch as MatchResult & { wasCreated?: boolean }).wasCreated = true;
+              createdEntities.categories.push(newCategory.data.name);
+              console.log(`  ✅ Categoría creada: ${newCategory.data.name}`);
+            }
+          } catch (error) {
+            console.error(`  ❌ Error creando categoría:`, error);
+          }
+        }
+      }
+      
+      // Crear subcategorías nuevas
+      for (const result of matchingResults) {
+        if (result.subcategoryMatch.shouldCreate && !result.subcategoryMatch.matched && result.product.subCategory) {
+          try {
+            console.log(`  ✨ Creando subcategoría: ${result.product.subCategory}`);
+            const newSubcategory = await api.product.createSubcategory(
+              result.product.subCategory,
+              result.categoryMatch.matchedId
+            );
+            if (newSubcategory.success) {
+              result.subcategoryMatch.matchedId = String(newSubcategory.data.id);
+              result.subcategoryMatch.matchedName = newSubcategory.data.name;
+              result.subcategoryMatch.matched = true;
+              (result.subcategoryMatch as MatchResult & { wasCreated?: boolean }).wasCreated = true;
+              createdEntities.subcategories.push(newSubcategory.data.name);
+              console.log(`  ✅ Subcategoría creada: ${newSubcategory.data.name}`);
+            }
+          } catch (error) {
+            console.error(`  ❌ Error creando subcategoría:`, error);
+          }
+        }
+      }
+      
+      console.log('✅ [ProductStep] Entidades creadas:', createdEntities);
+      
+      // 🆕 CREAR LOS PRODUCTOS CON LOS IDs CORRECTOS
+      console.log('\n🚀 [ProductStep] Creando productos con IDs asignados...');
+      
+      const productsToCreate = matchingResults.map((result, index) => {
+        const product = result.product;
+        
+        // Construir el objeto producto con los IDs del matching
+        const productData: Record<string, unknown> = {
+          // Campos requeridos
+          name: product.name || `Producto ${index + 1}`,
+          price: product.price || 0,
+          
+          // IDs del matching o creados
+          brandId: result.brandMatch.matchedId || undefined,
+          categoryId: result.categoryMatch.matchedId || undefined,
+          subCategoryId: result.subcategoryMatch.matchedId || undefined,
+          
+          // Resto de campos del producto
+          title: product.title,
+          shortDescription: product.shortDescription,
+          fullDescription: product.fullDescription,
+          sku: product.sku,
+          gtin: product.gtin,
+          status: product.status || 'active',
+          published: product.published !== undefined ? product.published : true,
+          priceSale: product.priceSale,
+          priceInPoints: product.priceInPoints,
+          tax: product.tax,
+          stockQuantity: product.stockQuantity,
+          trackInventory: product.trackInventory,
+          weight: product.weight,
+          markAsNew: product.markAsNew,
+          isTopSelling: product.isTopSelling,
+          availableInLoyaltyMarket: product.availableInLoyaltyMarket,
+          availableInPromoPack: product.availableInPromoPack,
+          productTypeCode: product.productTypeCode,
+          gama: product.gama,
+          
+          // Información nutricional
+          energyKcal: product.energyKcal,
+          fatG: product.fatG,
+          saturatedFatG: product.saturatedFatG,
+          carbsG: product.carbsG,
+          sugarsG: product.sugarsG,
+          proteinsG: product.proteinsG,
+          saltG: product.saltG,
+        };
+        
+        console.log(`  📦 Producto preparado:`, {
+          name: productData.name,
+          brandId: productData.brandId,
+          categoryId: productData.categoryId,
+          subCategoryId: productData.subCategoryId,
+          price: productData.price,
+        });
+        
+        return productData;
+      });
+      
+      // Crear productos usando bulk create
+      try {
+        console.log(`  📤 Enviando ${productsToCreate.length} productos a POST /products`);
+        const createResponse = await api.admin.products.bulkCreate(productsToCreate as any[]);
+        console.log(`  📥 Respuesta de creación:`, createResponse);
+        
+        if (createResponse.success) {
+          console.log(`  ✅ Productos creados exitosamente!`);
+          
+          // Mostrar resumen
+          console.log('\n📊 [ProductStep] RESUMEN FINAL:');
+          console.log(`  ✨ Marcas creadas: ${createdEntities.brands.length}`, createdEntities.brands);
+          console.log(`  ✨ Categorías creadas: ${createdEntities.categories.length}`, createdEntities.categories);
+          console.log(`  ✨ Subcategorías creadas: ${createdEntities.subcategories.length}`, createdEntities.subcategories);
+          console.log(`  ✨ Productos creados: ${productsToCreate.length}`);
+          
+          // Guardar resumen para mostrar en pantalla
+          setCreationSummary({
+            brands: createdEntities.brands,
+            categories: createdEntities.categories,
+            subcategories: createdEntities.subcategories,
+            productsCount: productsToCreate.length,
+          });
+          setIsMatching(false);
+        } else {
+          console.error(`  ❌ Error en respuesta:`, createResponse);
+          setError('Error al crear productos. Revisa la consola para más detalles.');
+        }
+      } catch (error) {
+        console.error(`  ❌ Error creando productos:`, error);
+        console.error(`  ❌ Error completo:`, {
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          error: error,
+        });
+        setError(`Error al crear productos: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      }
+      
+    } catch (error) {
+      console.error('❌ [ProductStep] Error en confirmación:', error);
+      setError('Error al crear entidades. Intenta nuevamente.');
+    } finally {
+      setIsMatching(false);
+    }
+  };
+
+  // Función para continuar al siguiente paso después de ver el resumen
+  const handleContinueAfterCreation = () => {
+    if (!creationSummary) return;
+    
+    onNext({ 
+      matchedProducts: matchingResults,
+      createdEntities: {
+        brands: creationSummary.brands,
+        categories: creationSummary.categories,
+        subcategories: creationSummary.subcategories,
+      },
+    });
+  };
+
+  // Si estamos haciendo matching
+  if (isMatching) {
+    return (
+      <div className="text-center space-y-6">
+        <div 
+          className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
+          style={{ backgroundColor: `${themeColors.primary}20` }}
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-8 h-8 border-2 border-transparent rounded-full"
+            style={{ 
+              borderTopColor: themeColors.primary,
+              borderRightColor: themeColors.primary 
+            }}
+          />
+        </div>
+        <h4 className="text-lg font-semibold" style={{ color: themeColors.text.primary }}>
+          🤖 Matching inteligente con IA...
+        </h4>
+        <p className="text-sm" style={{ color: themeColors.text.secondary }}>
+          Analizando {uploadedData.length} productos con OpenAI
+        </p>
+        <div className="text-xs" style={{ color: themeColors.text.secondary }}>
+          Verificando marcas, categorías y subcategorías...
+        </div>
       </div>
     );
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Selector de método */}
-      <div className="flex items-center justify-center">
+  // Si tenemos resumen de creación, mostrar resultado final
+  if (creationSummary) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
+            style={{ backgroundColor: `${themeColors.secondary}20` }}
+          >
+            <CheckCircle2 className="w-10 h-10" style={{ color: themeColors.secondary }} />
+          </motion.div>
+          <h3 className="text-2xl font-bold" style={{ color: themeColors.text.primary }}>
+            ¡Importación Completada! 🎉
+          </h3>
+          <p className="text-sm mt-2" style={{ color: themeColors.text.secondary }}>
+            Todos los productos han sido creados exitosamente
+          </p>
+        </div>
+
+        {/* Resumen de creación */}
         <div 
-          className="flex p-1 rounded-xl"
-          style={{ backgroundColor: `${themeColors.surface}50` }}
+          className="p-6 rounded-xl"
+          style={{ backgroundColor: `${themeColors.surface}30` }}
         >
+          <h4 className="text-lg font-semibold mb-4" style={{ color: themeColors.text.primary }}>
+            📊 Resumen de Creación
+          </h4>
+          
+          <div className="space-y-4">
+            {/* Productos creados */}
+            <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: `${themeColors.secondary}10` }}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: `${themeColors.secondary}20` }}>
+                  <span className="text-xl">📦</span>
+                </div>
+                <div>
+                  <div className="font-semibold" style={{ color: themeColors.text.primary }}>
+                    Productos Creados
+                  </div>
+                  <div className="text-xs" style={{ color: themeColors.text.secondary }}>
+                    Importados correctamente
+                  </div>
+                </div>
+              </div>
+              <div className="text-2xl font-bold" style={{ color: themeColors.secondary }}>
+                {creationSummary.productsCount}
+              </div>
+            </div>
+
+            {/* Marcas creadas */}
+            {creationSummary.brands.length > 0 && (
+              <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: `${themeColors.primary}10` }}>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: `${themeColors.primary}20` }}>
+                    <span className="text-xl">🏷️</span>
+                  </div>
+                  <div>
+                    <div className="font-semibold" style={{ color: themeColors.text.primary }}>
+                      Marcas Nuevas
+                    </div>
+                    <div className="text-xs" style={{ color: themeColors.text.secondary }}>
+                      {creationSummary.brands.join(', ')}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-2xl font-bold" style={{ color: themeColors.primary }}>
+                  {creationSummary.brands.length}
+                </div>
+              </div>
+            )}
+
+            {/* Categorías creadas */}
+            {creationSummary.categories.length > 0 && (
+              <div className="flex items-center justify-between p-4 rounded-lg" style={{ backgroundColor: `${themeColors.accent}10` }}>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: `${themeColors.accent}20` }}>
+                    <span className="text-xl">📁</span>
+                  </div>
+                  <div>
+                    <div className="font-semibold" style={{ color: themeColors.text.primary }}>
+                      Categorías Nuevas
+                    </div>
+                    <div className="text-xs" style={{ color: themeColors.text.secondary }}>
+                      {creationSummary.categories.join(', ')}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-2xl font-bold" style={{ color: themeColors.accent }}>
+                  {creationSummary.categories.length}
+                </div>
+              </div>
+            )}
+
+            {/* Subcategorías creadas */}
+            {creationSummary.subcategories.length > 0 && (
+              <div className="flex items-center justify-between p-4 rounded-lg bg-purple-50">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-purple-100">
+                    <span className="text-xl">📂</span>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-purple-900">
+                      Subcategorías Nuevas
+                    </div>
+                    <div className="text-xs text-purple-600">
+                      {creationSummary.subcategories.join(', ')}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-2xl font-bold text-purple-700">
+                  {creationSummary.subcategories.length}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Botones */}
+        <div className="flex gap-4">
           <motion.button
-            onClick={() => setMethod("file")}
+            onClick={onBack}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${
-              method === "file" ? "" : "opacity-70"
-            }`}
-            style={{
-              backgroundColor: method === "file" ? themeColors.primary : "transparent",
-              color: method === "file" ? "white" : themeColors.text.primary,
+            className="flex-1 px-6 py-3 rounded-xl font-medium"
+            style={{ 
+              backgroundColor: `${themeColors.surface}50`,
+              color: themeColors.text.secondary,
+              border: `1px solid ${themeColors.primary}30`
             }}
           >
-            Subir Archivo
+            ← Volver Atrás
           </motion.button>
+          
           <motion.button
-            onClick={() => setMethod("json")}
+            onClick={handleContinueAfterCreation}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${
-              method === "json" ? "" : "opacity-70"
-            }`}
-            style={{
-              backgroundColor: method === "json" ? themeColors.primary : "transparent",
-              color: method === "json" ? "white" : themeColors.text.primary,
+            className="flex-1 px-6 py-3 rounded-xl font-medium flex items-center justify-center gap-2"
+            style={{ 
+              backgroundColor: themeColors.secondary,
+              color: 'white'
             }}
           >
-            Importar JSON
+            <CheckCircle2 className="w-5 h-5" />
+            Confirmar y Continuar
           </motion.button>
         </div>
       </div>
+    );
+  }
 
-      {/* Componente de upload */}
+  // Si tenemos resultados de matching, mostrar preview
+  if (matchingResults.length > 0) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-xl font-semibold" style={{ color: themeColors.text.primary }}>
+              Productos Procesados con IA
+            </h3>
+            <p className="text-sm mt-1" style={{ color: themeColors.text.secondary }}>
+              Revisa el matching inteligente antes de importar
+            </p>
+          </div>
+          <motion.button
+            onClick={() => {
+              setMatchingResults([]);
+              setUploadedData([]);
+            }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="px-4 py-2 rounded-lg flex items-center gap-2"
+            style={{ 
+              backgroundColor: `${themeColors.accent}20`,
+              color: themeColors.accent,
+              border: `1px solid ${themeColors.accent}30`
+            }}
+          >
+            🔄 Cargar Otros Datos
+          </motion.button>
+        </div>
+
+        {/* Estadísticas */}
+        <div 
+          className="p-6 rounded-xl"
+          style={{ backgroundColor: `${themeColors.surface}30` }}
+        >
+          <h4 className="text-lg font-semibold mb-4" style={{ color: themeColors.text.primary }}>
+            Resumen del Matching
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold" style={{ color: themeColors.primary }}>
+                {matchingResults.length}
+              </div>
+              <div className="text-sm" style={{ color: themeColors.text.secondary }}>
+                Total Productos
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-500">
+                {matchingResults.filter(r => 
+                  (r.brandMatch.shouldCreate && !r.brandMatch.matched) ||
+                  (r.categoryMatch.shouldCreate && !r.categoryMatch.matched) ||
+                  (r.subcategoryMatch.shouldCreate && !r.subcategoryMatch.matched)
+                ).length}
+              </div>
+              <div className="text-sm" style={{ color: themeColors.text.secondary }}>
+                A Crear (✨)
+              </div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold" style={{ color: themeColors.secondary }}>
+                {matchingResults.filter(r => r.brandMatch.matched && r.categoryMatch.matched).length}
+              </div>
+              <div className="text-sm" style={{ color: themeColors.text.secondary }}>
+                Matched Completos
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Lista de productos con matching */}
+        <div className="space-y-4 max-h-96 overflow-y-auto">
+          {matchingResults.map((result, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              className="p-4 rounded-xl border"
+              style={{
+                backgroundColor: `${themeColors.surface}20`,
+                borderColor: `${themeColors.primary}30`,
+              }}
+            >
+              <h5 className="font-semibold mb-3" style={{ color: themeColors.text.primary }}>
+                {result.product.name || 'Sin nombre'}
+              </h5>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                {/* Marca */}
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-medium" style={{ color: themeColors.text.secondary }}>
+                      🏷️ Marca:
+                    </span>
+                    {result.brandMatch.shouldCreate && !result.brandMatch.matched && (
+                      <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700">
+                        ✨ Se creará
+                      </span>
+                    )}
+                    {result.brandMatch.wasCreated && (
+                      <span className="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700">
+                        🆕 Creada
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ color: themeColors.text.primary }}>
+                    {result.brandMatch.matchedName || result.product.brand || 'Sin marca'}
+                  </div>
+                  {result.brandMatch.confidence < 0.8 && (
+                    <div className="text-xs text-yellow-600 flex items-center gap-1 mt-1">
+                      <AlertCircle className="w-3 h-3" />
+                      Confianza: {(result.brandMatch.confidence * 100).toFixed(0)}%
+                    </div>
+                  )}
+                </div>
+                
+                {/* Categoría */}
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-medium" style={{ color: themeColors.text.secondary }}>
+                      📁 Categoría:
+                    </span>
+                    {result.categoryMatch.shouldCreate && !result.categoryMatch.matched && (
+                      <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700">
+                        ✨ Se creará
+                      </span>
+                    )}
+                    {result.categoryMatch.wasCreated && (
+                      <span className="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700">
+                        🆕 Creada
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ color: themeColors.text.primary }}>
+                    {result.categoryMatch.matchedName || result.product.category || 'Sin categoría'}
+                  </div>
+                  {result.categoryMatch.confidence < 0.8 && (
+                    <div className="text-xs text-yellow-600 flex items-center gap-1 mt-1">
+                      <AlertCircle className="w-3 h-3" />
+                      Confianza: {(result.categoryMatch.confidence * 100).toFixed(0)}%
+                    </div>
+                  )}
+                </div>
+                
+                {/* Subcategoría */}
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-medium" style={{ color: themeColors.text.secondary }}>
+                      📂 Subcategoría:
+                    </span>
+                    {result.subcategoryMatch.shouldCreate && !result.subcategoryMatch.matched && (
+                      <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700">
+                        ✨ Se creará
+                      </span>
+                    )}
+                    {result.subcategoryMatch.wasCreated && (
+                      <span className="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700">
+                        🆕 Creada
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ color: themeColors.text.primary }}>
+                    {result.subcategoryMatch.matchedName || result.product.subCategory || 'Sin subcategoría'}
+                  </div>
+                  {result.subcategoryMatch.confidence < 0.8 && (
+                    <div className="text-xs text-yellow-600 flex items-center gap-1 mt-1">
+                      <AlertCircle className="w-3 h-3" />
+                      Confianza: {(result.subcategoryMatch.confidence * 100).toFixed(0)}%
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Precio y stock */}
+              <div className="flex items-center gap-4 mt-3 pt-3 border-t" style={{ borderColor: `${themeColors.primary}20` }}>
+                <div className="text-sm">
+                  <span className="font-medium" style={{ color: themeColors.text.secondary }}>Precio:</span>
+                  <span className="ml-2 font-bold" style={{ color: themeColors.primary }}>
+                    ${result.product.price?.toFixed(2) || '0.00'}
+                  </span>
+                </div>
+                <div className="text-sm">
+                  <span className="font-medium" style={{ color: themeColors.text.secondary }}>Stock:</span>
+                  <span className="ml-2" style={{ color: themeColors.text.primary }}>
+                    {result.product.stockQuantity || 0}
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Botones de acción */}
+        <div className="flex flex-col sm:flex-row justify-between gap-4 mt-6">
+          <motion.button
+            onClick={onBack}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="px-6 py-3 rounded-xl font-medium"
+            style={{
+              backgroundColor: `${themeColors.surface}50`,
+              color: themeColors.text.secondary,
+              border: `2px solid ${themeColors.surface}`,
+            }}
+          >
+            ← Volver Atrás
+          </motion.button>
+          
+          <motion.button
+            onClick={handleConfirm}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.98 }}
+            disabled={isMatching}
+            className="px-8 py-3 rounded-xl font-semibold text-white shadow-lg"
+            style={{ 
+              backgroundColor: isMatching ? `${themeColors.primary}80` : themeColors.primary,
+              boxShadow: `0 4px 12px ${themeColors.primary}30`,
+              cursor: isMatching ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {isMatching ? '⏳ Creando...' : '✅ Confirmar y Continuar'}
+          </motion.button>
+        </div>
+      </div>
+    );
+  }
+
+  // Pantalla principal de carga
+  return (
+    <div className="space-y-6">
+      {/* Título y descripción */}
+      <div>
+        <h2 className="text-2xl font-bold mb-2" style={{ color: themeColors.text.primary }}>
+          📦 Paso 2: Carga de Productos
+        </h2>
+        <p className="text-sm" style={{ color: themeColors.text.secondary }}>
+          Sube tu archivo Excel o CSV con los productos. Usaremos IA para hacer matching inteligente.
+        </p>
+      </div>
+
+      {error && (
+        <div
+          className="p-4 rounded-xl border flex items-start gap-3"
+          style={{
+            backgroundColor: '#fee',
+            borderColor: '#fcc',
+          }}
+        >
+          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-semibold text-red-700 mb-1">Error</h4>
+            <p className="text-sm text-red-600">{error}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Componente de carga */}
       <FileUploadComponent
         method={method}
         onUpload={handleUpload}
+        onFileSelect={() => {}}
         onBack={onBack}
         themeColors={themeColors}
-        sampleData={sampleData}
+        sampleData={sampleProducts}
         title="Productos"
-        acceptedFileTypes=".csv,.xlsx,.json"
-        fileExtensions={["csv", "xlsx", "json"]}
-        isProcessing={isProcessing}
+        acceptedFileTypes=".xlsx,.xls,.csv"
+        fileExtensions={['xlsx', 'xls', 'csv']}
+        isProcessing={isMatching}
+        parseFile={parseProductFile}
       />
-    </div>
-  );
-}
 
-// Componente de interfaz de matching (extraído del wizard principal)
-function ProductMatchingInterface({ 
-  products, 
-  onComplete, 
-  onBack, 
-  themeColors, 
-  mockCategories
-}: {
-  products: MatchedProduct[];
-  onComplete: (finalProducts: MatchedProduct[]) => void;
-  onBack: () => void;
-  themeColors: ThemeColors;
-  mockCategories: Category[];
-}) {
-  const [editingProduct, setEditingProduct] = useState<number | null>(null);
-  const [finalProducts, setFinalProducts] = useState(products);
-
-  const updateProduct = (index: number, field: string, value: string) => {
-    const updated = [...finalProducts];
-    updated[index] = { 
-      ...updated[index], 
-      [field]: value 
-    };
-    setFinalProducts(updated);
-  };
-
-  const acceptSuggestion = (index: number, field: string, suggestion: { name: string; confidence: number; }) => {
-    updateProduct(index, field, suggestion.name);
-  };
-
-  const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 0.8) return themeColors.secondary;
-    if (confidence >= 0.6) return themeColors.primary;  
-    return "#f59e0b";
-  };
-
-  const getConfidenceText = (confidence: number) => {
-    if (confidence >= 0.8) return "Alta";
-    if (confidence >= 0.6) return "Media";
-    return "Baja";
-  };
-
-  return (
-    <div className="space-y-6">
-      {/* Header con estadísticas */}
-      <div 
+      {/* Información sobre el proceso */}
+      <div
         className="p-6 rounded-xl"
         style={{ backgroundColor: `${themeColors.surface}30` }}
       >
-        <h3 className="text-xl font-semibold mb-4" style={{ color: themeColors.text.primary }}>
-          Matching Completado
-        </h3>
-        <div className="grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div className="text-2xl font-bold" style={{ color: themeColors.primary }}>
-              {products.length}
-            </div>
-            <div className="text-sm" style={{ color: themeColors.text.secondary }}>
-              Productos Procesados
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold" style={{ color: themeColors.secondary }}>
-              {products.filter(p => p.aiSuggestions.confidence >= 0.8).length}
-            </div>
-            <div className="text-sm" style={{ color: themeColors.text.secondary }}>
-              Alta Confianza
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold" style={{ color: themeColors.accent }}>
-              {Math.round(products.reduce((sum, p) => sum + p.aiSuggestions.confidence, 0) / products.length * 100)}%
-            </div>
-            <div className="text-sm" style={{ color: themeColors.text.secondary }}>
-              Confianza Promedio
-            </div>
-          </div>
-        </div>
+        <h4 className="font-semibold mb-3 flex items-center gap-2" style={{ color: themeColors.text.primary }}>
+          <CheckCircle2 className="w-5 h-5" style={{ color: themeColors.primary }} />
+          ¿Qué hace el matching inteligente?
+        </h4>
+        <ul className="space-y-2 text-sm" style={{ color: themeColors.text.secondary }}>
+          <li className="flex items-start gap-2">
+            <span className="text-base">🤖</span>
+            <span>Usa OpenAI GPT-4 para encontrar la mejor coincidencia de marcas, categorías y subcategorías</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-base">✨</span>
+            <span>Detecta variaciones (Sony/SONY/sony), abreviaturas (HP/Hewlett Packard) y errores tipográficos</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-base">🆕</span>
+            <span>Crea automáticamente nuevas marcas/categorías si no existen en el sistema</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-base">📊</span>
+            <span>Muestra el nivel de confianza del matching para cada producto</span>
+          </li>
+        </ul>
       </div>
 
-      {/* Lista de productos con sugerencias */}
-      <div className="space-y-4 max-h-96 overflow-y-auto">
-        {finalProducts.map((product, index) => (
-          <motion.div
-            key={`${product.code}-${index}`}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="p-4 rounded-xl border"
-            style={{
-              backgroundColor: `${themeColors.surface}20`,
-              borderColor: `${themeColors.primary}30`,
-            }}
-          >
-            {/* Información del producto */}
-            <div className="mb-4">
-              <h4 className="text-lg font-semibold mb-1" style={{ color: themeColors.text.primary }}>
-                {product.name}
-              </h4>
-              <p className="text-sm mb-2" style={{ color: themeColors.text.secondary }}>
-                {product.description}
-              </p>
-              <p className="text-sm" style={{ color: themeColors.text.secondary }}>
-                <strong>Original:</strong> {product.category} • {product.brand}
-              </p>
-            </div>
-
-            {/* Sugerencias de IA */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Categoría */}
-              <div>
-                <label className="text-sm font-medium flex items-center gap-2" style={{ color: themeColors.text.primary }}>
-                  Categoría
-                  <div 
-                    className="px-2 py-1 rounded text-xs"
-                    style={{ 
-                      backgroundColor: `${getConfidenceColor(product.aiSuggestions.category.confidence)}20`,
-                      color: getConfidenceColor(product.aiSuggestions.category.confidence)
-                    }}
-                  >
-                    {getConfidenceText(product.aiSuggestions.category.confidence)}
-                  </div>
-                </label>
-                <div className="mt-1 flex items-center gap-2">
-                  {editingProduct === index ? (
-                    <select
-                      value={product.category}
-                      onChange={(e) => updateProduct(index, 'category', e.target.value)}
-                      className="flex-1 p-2 rounded border text-sm"
-                      style={{
-                        backgroundColor: `${themeColors.surface}50`,
-                        borderColor: `${themeColors.primary}30`,
-                        color: themeColors.text.primary,
-                      }}
-                    >
-                      {mockCategories.map(cat => (
-                        <option key={cat.id} value={cat.name}>{cat.name}</option>
-                      ))}
-                    </select>
-                  ) : (
-                    <span className="text-sm" style={{ color: themeColors.text.primary }}>
-                      {product.category || product.aiSuggestions.category.name}
-                    </span>
-                  )}
-                  {product.category !== product.aiSuggestions.category.name && (
-                    <motion.button
-                      onClick={() => acceptSuggestion(index, 'category', product.aiSuggestions.category)}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      className="p-1 rounded text-xs"
-                      style={{ 
-                        backgroundColor: `${themeColors.secondary}20`,
-                        color: themeColors.secondary
-                      }}
-                    >
-                      <Check className="w-3 h-3" />
-                    </motion.button>
-                  )}
-                </div>
-                <div className="text-xs opacity-75" style={{ color: themeColors.text.secondary }}>
-                  IA sugiere: {product.aiSuggestions.category.name}
-                </div>
-              </div>
-
-              {/* Marca */}
-              <div>
-                <label className="text-sm font-medium flex items-center gap-2" style={{ color: themeColors.text.primary }}>
-                  Marca
-                  <div 
-                    className="px-2 py-1 rounded text-xs"
-                    style={{ 
-                      backgroundColor: `${getConfidenceColor(product.aiSuggestions.brand.confidence)}20`,
-                      color: getConfidenceColor(product.aiSuggestions.brand.confidence)
-                    }}
-                  >
-                    {getConfidenceText(product.aiSuggestions.brand.confidence)}
-                  </div>
-                </label>
-                <div className="mt-1 flex items-center gap-2">
-                  {editingProduct === index ? (
-                    <input
-                      type="text"
-                      value={product.brand}
-                      onChange={(e) => updateProduct(index, 'brand', e.target.value)}
-                      className="flex-1 p-2 rounded border text-sm"
-                      style={{
-                        backgroundColor: `${themeColors.surface}50`,
-                        borderColor: `${themeColors.primary}30`,
-                        color: themeColors.text.primary,
-                      }}
-                    />
-                  ) : (
-                    <span className="text-sm" style={{ color: themeColors.text.primary }}>
-                      {product.brand || product.aiSuggestions.brand.name}
-                    </span>
-                  )}
-                  {product.brand !== product.aiSuggestions.brand.name && (
-                    <motion.button
-                      onClick={() => acceptSuggestion(index, 'brand', product.aiSuggestions.brand)}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      className="p-1 rounded text-xs"
-                      style={{ 
-                        backgroundColor: `${themeColors.secondary}20`,
-                        color: themeColors.secondary
-                      }}
-                    >
-                      <Check className="w-3 h-3" />
-                    </motion.button>
-                  )}
-                </div>
-                <div className="text-xs opacity-75" style={{ color: themeColors.text.secondary }}>
-                  IA sugiere: {product.aiSuggestions.brand.name}
-                </div>
-              </div>
-
-              {/* Subcategoría */}
-              <div>
-                <label className="text-sm font-medium flex items-center gap-2" style={{ color: themeColors.text.primary }}>
-                  Subcategoría
-                  <div 
-                    className="px-2 py-1 rounded text-xs"
-                    style={{ 
-                      backgroundColor: `${getConfidenceColor(product.aiSuggestions.subcategory.confidence)}20`,
-                      color: getConfidenceColor(product.aiSuggestions.subcategory.confidence)
-                    }}
-                  >
-                    {getConfidenceText(product.aiSuggestions.subcategory.confidence)}
-                  </div>
-                </label>
-                <div className="mt-1 flex items-center gap-2">
-                  {editingProduct === index ? (
-                    <input
-                      type="text"
-                      value={product.subcategory || ''}
-                      onChange={(e) => updateProduct(index, 'subcategory', e.target.value)}
-                      className="flex-1 p-2 rounded border text-sm"
-                      style={{
-                        backgroundColor: `${themeColors.surface}50`,
-                        borderColor: `${themeColors.primary}30`,
-                        color: themeColors.text.primary,
-                      }}
-                    />
-                  ) : (
-                    <span className="text-sm" style={{ color: themeColors.text.primary }}>
-                      {product.subcategory || product.aiSuggestions.subcategory.name}
-                    </span>
-                  )}
-                  {product.subcategory !== product.aiSuggestions.subcategory.name && (
-                    <motion.button
-                      onClick={() => acceptSuggestion(index, 'subcategory', product.aiSuggestions.subcategory)}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      className="p-1 rounded text-xs"
-                      style={{ 
-                        backgroundColor: `${themeColors.secondary}20`,
-                        color: themeColors.secondary
-                      }}
-                    >
-                      <Check className="w-3 h-3" />
-                    </motion.button>
-                  )}
-                </div>
-                <div className="text-xs opacity-75" style={{ color: themeColors.text.secondary }}>
-                  IA sugiere: {product.aiSuggestions.subcategory.name}
-                </div>
-              </div>
-            </div>
-
-            {/* Botón de editar */}
-            <div className="mt-4 flex justify-end">
-              <motion.button
-                onClick={() => setEditingProduct(editingProduct === index ? null : index)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center gap-2 px-3 py-1 rounded text-sm"
-                style={{
-                  backgroundColor: editingProduct === index ? `${themeColors.accent}20` : `${themeColors.primary}20`,
-                  color: editingProduct === index ? themeColors.accent : themeColors.primary
-                }}
-              >
-                {editingProduct === index ? <X className="w-3 h-3" /> : <Edit3 className="w-3 h-3" />}
-                {editingProduct === index ? "Cerrar" : "Editar"}
-              </motion.button>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Botones de navegación */}
-      <div className="flex justify-between pt-6">
+      {/* Botón de navegación */}
+      <div className="flex justify-between mt-6">
         <motion.button
           onClick={onBack}
           whileHover={{ scale: 1.02 }}
@@ -704,18 +954,10 @@ function ProductMatchingInterface({
           style={{
             backgroundColor: `${themeColors.surface}50`,
             color: themeColors.text.secondary,
+            border: `2px solid ${themeColors.surface}`,
           }}
         >
-          Volver
-        </motion.button>
-        <motion.button
-          onClick={() => onComplete(finalProducts)}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="px-6 py-3 rounded-xl font-medium text-white"
-          style={{ backgroundColor: themeColors.primary }}
-        >
-          Revisar y Confirmar
+          ← Volver Atrás
         </motion.button>
       </div>
     </div>

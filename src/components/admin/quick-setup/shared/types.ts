@@ -12,6 +12,7 @@ export interface ClientData {
   taxId?: string;
   creditLimit: number;
   paymentTerms: number;
+  [key: string]: unknown;
 }
 
 export interface ProductData {
@@ -58,8 +59,8 @@ export interface PriceListProduct {
 }
 
 export interface PriceData {
-  // Formato wizard (legacy)
-  productCode?: string;
+  // Formato wizard
+  productId?: string;
   productName?: string;
   basePrice?: number;
   cost?: number;

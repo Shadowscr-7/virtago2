@@ -4,23 +4,19 @@ import { FileUploadComponent } from '../shared/FileUploadComponent';
 import { StepProps, UploadMethod, UploadResult } from '../shared/types';
 import { Users, Building, Mail, Phone } from 'lucide-react';
 import { api, ClientBulkData, ClientBulkCreateResponse } from '@/api';
+import { parseClientFile, ClientFileData } from '@/lib/file-parser';
 
-// Definir tipos para clientes
-interface ClientData {
+// Definir tipos para clientes (compatible con ClientFileData)
+interface ClientData extends Partial<ClientFileData> {
   code?: string;
   name?: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-  city?: string;
-  country?: string;
   clientType?: 'individual' | 'company';
   taxId?: string;
   creditLimit?: number;
   paymentTerms?: number;
-  paymentTerm?: string;
+  address?: string;
+  city?: string;
+  country?: string;
   // Campos adicionales del JSON completo
   [key: string]: unknown;
 }
@@ -43,7 +39,8 @@ const getCreditLimit = (client: ClientData): number => {
 };
 
 const getPaymentTerms = (client: ClientData): string => {
-  if (client.paymentTerm) return client.paymentTerm;
+  if (client.information?.paymentTerm) return client.information.paymentTerm;
+  if (client.paymentTerm) return client.paymentTerm as string;
   if (typeof client.paymentTerms === 'number') return `${client.paymentTerms} días`;
   return 'No especificado';
 };
@@ -220,45 +217,49 @@ export function ClientStep({ onNext, onBack, themeColors, stepData }: ClientStep
 
   // Función para transformar datos al formato de la API
   const transformToAPIFormat = (clients: ClientData[]): ClientBulkData[] => {
-    return clients.map(client => ({
-      email: getClientValue(client, 'email', ''),
-      firstName: getClientValue(client, 'firstName', '') || getClientValue(client, 'name', ''),
-      lastName: getClientValue(client, 'lastName', ''),
-      phone: getClientValue(client, 'phone', ''),
-      phoneOptional: getClientValue(client, 'phoneOptional', '') || undefined,
-      gender: (getClientValue(client, 'gender', '') as "M" | "F") || undefined,
-      documentType: getClientValue(client, 'documentType', '') || undefined,
-      document: getClientValue(client, 'document', '') || undefined,
-      customerClass: getClientValue(client, 'customerClass', '') || undefined,
-      customerClassTwo: getClientValue(client, 'customerClassTwo', '') || undefined,
-      customerClassThree: getClientValue(client, 'customerClassThree', '') || undefined,
-      customerClassDist: getClientValue(client, 'customerClassDist', '') || undefined,
-      customerClassDistTwo: getClientValue(client, 'customerClassDistTwo', '') || undefined,
-      latitude: typeof client.latitude === 'number' ? client.latitude : undefined,
-      longitude: typeof client.longitude === 'number' ? client.longitude : undefined,
-      status: (getClientValue(client, 'status', 'A') as "A" | "N" | "I") || "A",
-      distributorCodes: Array.isArray(client.distributorCodes) ? client.distributorCodes : undefined,
-      information: {
-        paymentMethodCode: getClientValue(client, 'paymentMethodCode', '') || undefined,
-        companyCode: getClientValue(client, 'companyCode', '') || undefined,
-        salesmanName: getClientValue(client, 'salesmanName', '') || undefined,
-        visitDay: getClientValue(client, 'visitDay', '') || undefined,
-        pdv: getClientValue(client, 'pdv', '') || undefined,
-        deliveryDay: getClientValue(client, 'deliveryDay', '') || undefined,
-        warehouse: getClientValue(client, 'warehouse', '') || undefined,
-        frequency: getClientValue(client, 'frequency', '') || undefined,
-        priceList: getClientValue(client, 'priceList', '') || undefined,
-        routeName: getClientValue(client, 'routeName', '') || undefined,
-        withCredit: typeof client.withCredit === 'boolean' ? client.withCredit : undefined,
-        distributorName: getClientValue(client, 'distributorName', '') || undefined,
-        sellerId: getClientValue(client, 'sellerId', '') || undefined,
-        routeId: getClientValue(client, 'routeId', '') || undefined,
-        clientCode: getClientValue(client, 'code', '') || getClientValue(client, 'clientCode', '') || undefined,
-        pdvname: getClientValue(client, 'pdvname', '') || undefined,
-        paymentTerm: getClientValue(client, 'paymentTerm', '') || undefined,
-        customerClassDistTwo: getClientValue(client, 'customerClassDistTwo', '') || undefined
-      }
-    }));
+    return clients.map(client => {
+      // Si el cliente ya tiene un objeto information (del parser), usarlo
+      const info = client.information || {};
+      
+      return {
+        email: getClientValue(client, 'email', ''),
+        firstName: getClientValue(client, 'firstName', '') || getClientValue(client, 'name', ''),
+        lastName: getClientValue(client, 'lastName', ''),
+        phone: getClientValue(client, 'phone', ''),
+        phoneOptional: getClientValue(client, 'phoneOptional', '') || undefined,
+        gender: (getClientValue(client, 'gender', '') as "M" | "F") || undefined,
+        documentType: getClientValue(client, 'documentType', '') || undefined,
+        document: getClientValue(client, 'document', '') || undefined,
+        customerClass: getClientValue(client, 'customerClass', '') || undefined,
+        customerClassTwo: getClientValue(client, 'customerClassTwo', '') || undefined,
+        customerClassThree: getClientValue(client, 'customerClassThree', '') || undefined,
+        customerClassDist: getClientValue(client, 'customerClassDist', '') || undefined,
+        customerClassDistTwo: getClientValue(client, 'customerClassDistTwo', '') || undefined,
+        latitude: typeof client.latitude === 'number' ? client.latitude : undefined,
+        longitude: typeof client.longitude === 'number' ? client.longitude : undefined,
+        status: (getClientValue(client, 'status', 'A') as "A" | "N" | "I") || "A",
+        distributorCodes: Array.isArray(client.distributorCodes) ? client.distributorCodes : undefined,
+        information: {
+          paymentMethodCode: info.paymentMethodCode || getClientValue(client, 'paymentMethodCode', '') || undefined,
+          companyCode: info.companyCode || getClientValue(client, 'companyCode', '') || undefined,
+          salesmanName: info.salesmanName || getClientValue(client, 'salesmanName', '') || undefined,
+          visitDay: info.visitDay || getClientValue(client, 'visitDay', '') || undefined,
+          pdv: info.pdv || getClientValue(client, 'pdv', '') || undefined,
+          deliveryDay: info.deliveryDay || getClientValue(client, 'deliveryDay', '') || undefined,
+          warehouse: info.warehouse || getClientValue(client, 'warehouse', '') || undefined,
+          frequency: info.frequency || getClientValue(client, 'frequency', '') || undefined,
+          priceList: info.priceList || getClientValue(client, 'priceList', '') || undefined,
+          routeName: info.routeName || getClientValue(client, 'routeName', '') || undefined,
+          withCredit: info.withCredit !== undefined ? info.withCredit : (typeof client.withCredit === 'boolean' ? client.withCredit : undefined),
+          distributorName: info.distributorName || getClientValue(client, 'distributorName', '') || undefined,
+          sellerId: info.sellerId || getClientValue(client, 'sellerId', '') || undefined,
+          routeId: info.routeId || getClientValue(client, 'routeId', '') || undefined,
+          clientCode: info.clientCode || getClientValue(client, 'code', '') || getClientValue(client, 'clientCode', '') || undefined,
+          pdvname: info.pdvname || getClientValue(client, 'pdvname', '') || undefined,
+          paymentTerm: info.paymentTerm || getClientValue(client, 'paymentTerm', '') || undefined,
+        }
+      };
+    });
   };
 
   // Función para confirmar y enviar a la API
@@ -337,38 +338,49 @@ export function ClientStep({ onNext, onBack, themeColors, stepData }: ClientStep
         }
       } else if (uploadMethod === 'file' && uploadedFile) {
         // Método 2: Archivo - Usar POST /api/clients/import
-        console.log('📁 Enviando clientes vía archivo (POST /api/clients/import)...');
+        console.log('📁 [ClientStep] Enviando clientes vía archivo (POST /api/clients/import)...');
+        console.log('📁 [ClientStep] Archivo:', uploadedFile.name, uploadedFile.type, uploadedFile.size);
         
-        const formData = new FormData();
-        formData.append('file', uploadedFile);
-        
-        // Llamar al endpoint de importación (necesitamos agregarlo al API)
-        const response = await fetch('/api/clients/import', {
-          method: 'POST',
-          body: formData,
-          headers: {
-            // No agregar Content-Type, el navegador lo establecerá automáticamente con boundary
+        try {
+          console.log('🚀 [ClientStep] Llamando a api.admin.clients.bulkImport...');
+          const apiResponse = await api.admin.clients.bulkImport(uploadedFile);
+          console.log('📥 [ClientStep] Respuesta de importación:', apiResponse);
+          
+          if (apiResponse.success) {
+            const result = apiResponse.data as ClientBulkCreateResponse;
+            console.log('✅ [ClientStep] Archivo importado exitosamente:', result);
+            
+            // Mostrar resumen si hay errores
+            if (result.results && result.results.errorCount > 0) {
+              const errorMsg = `⚠️ Se procesaron ${result.results.totalProcessed} clientes. ${result.results.successCount} guardados, ${result.results.errorCount} con errores.`;
+              setError(errorMsg);
+              
+              // Continuar si hubo algunos exitosos
+              if (result.results.successCount > 0) {
+                console.log('✅ [ClientStep] Continuando al siguiente paso después de 2 segundos...');
+                setTimeout(() => {
+                  onNext({ uploadedClients: uploadedData });
+                }, 2000);
+              } else {
+                console.log('❌ [ClientStep] Todos los clientes fallaron, deteniendo proceso');
+                setIsConfirming(false);
+                setIsProcessing(false);
+              }
+            } else {
+              // Todo exitoso
+              console.log('✅ [ClientStep] Todos los clientes importados exitosamente, continuando al siguiente paso...');
+              setTimeout(() => {
+                onNext({ uploadedClients: uploadedData });
+              }, 1000);
+            }
+          } else {
+            console.error('❌ [ClientStep] API response.success = false');
+            throw new Error(apiResponse.message || 'Error al importar clientes');
           }
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: 'Error desconocido' }));
-          throw new Error(errorData.message || `Error HTTP: ${response.status}`);
+        } catch (apiError) {
+          console.error('❌ [ClientStep] Error capturado al llamar a bulkImport:', apiError);
+          throw apiError;
         }
-        
-        const result = await response.json();
-        console.log('✅ Clientes importados exitosamente:', result);
-        
-        // Mostrar resumen
-        if (result.details?.errorCount > 0) {
-          const errorMsg = `⚠️ Se procesaron ${result.details.totalProcessed} clientes. ${result.details.savedCount} guardados, ${result.details.errorCount} con errores.`;
-          setError(errorMsg);
-        }
-        
-        // Continuar al siguiente paso
-        setTimeout(() => {
-          onNext({ uploadedClients: uploadedData });
-        }, 1000);
       } else {
         throw new Error('Método de carga no válido');
       }
@@ -537,76 +549,105 @@ export function ClientStep({ onNext, onBack, themeColors, stepData }: ClientStep
             Clientes Registrados
           </h4>
           <div className="space-y-3 max-h-96 overflow-y-auto">
-            {uploadedData.map((client, index) => (
-              <motion.div
-                key={`${client.code}-${index}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className="p-4 rounded-xl border"
-                style={{
-                  backgroundColor: `${themeColors.surface}20`,
-                  borderColor: `${themeColors.primary}30`,
-                }}
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      {client.clientType === 'company' ? (
-                        <Building className="w-4 h-4" style={{ color: themeColors.primary }} />
-                      ) : (
-                        <Users className="w-4 h-4" style={{ color: themeColors.accent }} />
+            {uploadedData.map((client, index) => {
+              const clientCode = client.information?.clientCode || client.code || 'Sin código';
+              const clientName = getClientName(client);
+              const documentInfo = client.document ? `${client.documentType || 'Doc'}: ${client.document}` : '';
+              const locationInfo = client.information?.routeName || client.information?.pdvname || '';
+              
+              return (
+                <motion.div
+                  key={`${clientCode}-${index}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="p-4 rounded-xl border"
+                  style={{
+                    backgroundColor: `${themeColors.surface}20`,
+                    borderColor: `${themeColors.primary}30`,
+                  }}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Users className="w-4 h-4" style={{ color: themeColors.primary }} />
+                        <h5 className="font-semibold" style={{ color: themeColors.text.primary }}>
+                          {clientName}
+                        </h5>
+                        {client.customerClass && (
+                          <span 
+                            className="px-2 py-1 rounded text-xs font-medium"
+                            style={{ 
+                              backgroundColor: `${themeColors.primary}20`,
+                              color: themeColors.primary
+                            }}
+                          >
+                            {client.customerClass}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-3 h-3" style={{ color: themeColors.text.secondary }} />
+                          <span style={{ color: themeColors.text.secondary }}>{getClientValue(client, 'email', 'Sin email')}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-3 h-3" style={{ color: themeColors.text.secondary }} />
+                          <span style={{ color: themeColors.text.secondary }}>{getClientValue(client, 'phone', 'Sin teléfono')}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="text-xs mt-2 space-y-1" style={{ color: themeColors.text.secondary }}>
+                        <div>
+                          <span className="font-medium">Código:</span> {clientCode}
+                          {documentInfo && <> • {documentInfo}</>}
+                        </div>
+                        {client.information?.distributorName && (
+                          <div>
+                            <span className="font-medium">Distribuidor:</span> {client.information.distributorName}
+                            {client.information.salesmanName && <> • <span className="font-medium">Vendedor:</span> {client.information.salesmanName}</>}
+                          </div>
+                        )}
+                        {locationInfo && (
+                          <div>
+                            <span className="font-medium">Ubicación:</span> {locationInfo}
+                            {client.information?.visitDay && <> • <span className="font-medium">Día visita:</span> {client.information.visitDay}</>}
+                          </div>
+                        )}
+                        {client.information?.priceList && (
+                          <div>
+                            <span className="font-medium">Lista de precios:</span> {client.information.priceList}
+                            {client.information?.warehouse && <> • <span className="font-medium">Almacén:</span> {client.information.warehouse}</>}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="text-right ml-4">
+                      {client.information?.withCredit !== undefined && (
+                        <div className={`text-lg font-bold ${client.information.withCredit ? 'text-green-500' : 'text-gray-400'}`}>
+                          {client.information.withCredit ? '✓ Con Crédito' : '✗ Sin Crédito'}
+                        </div>
                       )}
-                      <h5 className="font-semibold" style={{ color: themeColors.text.primary }}>
-                        {getClientName(client)}
-                      </h5>
-                      <span 
-                        className="px-2 py-1 rounded text-xs font-medium"
-                        style={{ 
-                          backgroundColor: client.clientType === 'company' ? `${themeColors.primary}20` : `${themeColors.accent}20`,
-                          color: client.clientType === 'company' ? themeColors.primary : themeColors.accent
-                        }}
-                      >
-                        {client.clientType === 'company' ? 'Empresa' : 'Individual'}
-                      </span>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Mail className="w-3 h-3" style={{ color: themeColors.text.secondary }} />
-                        <span style={{ color: themeColors.text.secondary }}>{getClientValue(client, 'email', 'Sin email')}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-3 h-3" style={{ color: themeColors.text.secondary }} />
-                        <span style={{ color: themeColors.text.secondary }}>{getClientValue(client, 'phone', 'Sin teléfono')}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="text-xs mt-2" style={{ color: themeColors.text.secondary }}>
-                      <span className="font-medium">Código:</span> {getClientValue(client, 'code', 'Sin código')} • 
-                      <span className="font-medium"> Ciudad:</span> {getClientValue(client, 'city', 'Sin ciudad')}, {getClientValue(client, 'country', 'Sin país')}
-                      {client.taxId && (
+                      {getCreditLimit(client) > 0 && (
                         <>
-                          <span className="font-medium"> • Tax ID:</span> {client.taxId}
+                          <div className="text-lg font-bold" style={{ color: themeColors.primary }}>
+                            ${getCreditLimit(client).toLocaleString()}
+                          </div>
+                          <div className="text-xs" style={{ color: themeColors.text.secondary }}>
+                            Límite de Crédito
+                          </div>
                         </>
                       )}
+                      <div className="text-xs mt-1" style={{ color: themeColors.text.secondary }}>
+                        Términos: {getPaymentTerms(client)}
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="text-right ml-4">
-                    <div className="text-lg font-bold" style={{ color: themeColors.primary }}>
-                      ${getCreditLimit(client).toLocaleString()}
-                    </div>
-                    <div className="text-xs" style={{ color: themeColors.text.secondary }}>
-                      Límite de Crédito
-                    </div>
-                    <div className="text-xs mt-1" style={{ color: themeColors.text.secondary }}>
-                      Términos: {getPaymentTerms(client)}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
         </div>
 
@@ -827,6 +868,7 @@ export function ClientStep({ onNext, onBack, themeColors, stepData }: ClientStep
         acceptedFileTypes=".csv,.xlsx,.json"
         fileExtensions={["csv", "xlsx", "json"]}
         isProcessing={isProcessing}
+        parseFile={parseClientFile}
       />
     </div>
   );

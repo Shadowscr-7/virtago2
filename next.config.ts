@@ -5,9 +5,6 @@ const nextConfig: NextConfig = {
   env: {
     PORT: process.env.PORT || '3002',
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -31,6 +28,11 @@ const nextConfig: NextConfig = {
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
     
     return [
+      // API proxy - Todas las rutas /api/* van al backend
+      {
+        source: '/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
+      },
       // Documentación de la API
       {
         source: '/redoc',
@@ -69,6 +71,31 @@ const nextConfig: NextConfig = {
       {
         source: '/redoc/:path*',
         destination: `${backendUrl}/redoc/:path*`,
+      },
+    ];
+  },
+  async headers() {
+    return [
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Credentials',
+            value: 'true',
+          },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET,OPTIONS,PATCH,DELETE,POST,PUT',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization',
+          },
+        ],
       },
     ];
   },

@@ -4,11 +4,13 @@ import { FileUploadComponent } from '../shared/FileUploadComponent';
 import { StepProps, PriceData, UploadMethod, UploadResult } from '../shared/types';
 import { TrendingUp, DollarSign, Percent, CheckCircle, Loader2 } from 'lucide-react';
 import { api, PriceBulkData, PriceBulkCreateResponse } from '@/api';
+import { parsePriceFile } from '@/lib/file-parser';
 
 // Datos de ejemplo para precios
 const samplePrices: PriceData[] = [
   {
-    productCode: "LAP001",
+    price_list_id: "PL_RETAIL_000001",
+    productId: "LAP001",
     productName: "Laptop Gaming RGB Ultra",
     basePrice: 1299.99,
     cost: 900.00,
@@ -16,7 +18,8 @@ const samplePrices: PriceData[] = [
     currency: "USD"
   },
   {
-    productCode: "MON002",
+    price_list_id: "PL_RETAIL_000001",
+    productId: "MON002",
     productName: "Monitor Curvo 27 pulgadas",
     basePrice: 399.99,
     cost: 280.00,
@@ -24,7 +27,8 @@ const samplePrices: PriceData[] = [
     currency: "USD"
   },
   {
-    productCode: "TEC003",
+    price_list_id: "PL_RETAIL_000002",
+    productId: "TEC003",
     productName: "Teclado Mecánico RGB",
     basePrice: 89.99,
     cost: 55.00,
@@ -32,7 +36,8 @@ const samplePrices: PriceData[] = [
     currency: "USD"
   },
   {
-    productCode: "RAT004",
+    price_list_id: "PL_RETAIL_000002",
+    productId: "RAT004",
     productName: "Mouse Inalámbrico Precisión",
     basePrice: 59.99,
     cost: 35.00,
@@ -40,7 +45,8 @@ const samplePrices: PriceData[] = [
     currency: "USD"
   },
   {
-    productCode: "AUD005",
+    price_list_id: "PL_WHOLESALE_001",
+    productId: "AUD005",
     productName: "Auriculares Gaming 7.1",
     basePrice: 79.99,
     cost: 45.00,
@@ -48,7 +54,8 @@ const samplePrices: PriceData[] = [
     currency: "USD"
   },
   {
-    productCode: "GPU009",
+    price_list_id: "PL_WHOLESALE_001",
+    productId: "GPU009",
     productName: "Tarjeta Gráfica RTX Super",
     basePrice: 899.99,
     cost: 650.00,
@@ -56,7 +63,8 @@ const samplePrices: PriceData[] = [
     currency: "USD"
   },
   {
-    productCode: "RAM008",
+    price_list_id: "PL_RETAIL_000001",
+    productId: "RAM008",
     productName: "Memoria RAM DDR4 32GB",
     basePrice: 189.99,
     cost: 120.00,
@@ -79,6 +87,7 @@ export function PriceStep({ onNext, onBack, themeColors, stepData }: PriceStepPr
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [apiResponse, setApiResponse] = useState<PriceBulkCreateResponse | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [resetKey, setResetKey] = useState(0);
 
   // 🆕 Callback para cuando se selecciona un archivo
   const handleFileSelect = (file: File) => {
@@ -91,13 +100,13 @@ export function PriceStep({ onNext, onBack, themeColors, stepData }: PriceStepPr
     const rawPrice = price as unknown as Record<string, unknown>;
     
     // Si ya tiene el formato wizard completo, retornar tal cual
-    if (price.productCode && price.productName && price.basePrice !== undefined && price.cost !== undefined) {
+    if (price.productId && price.productName && price.basePrice !== undefined && price.cost !== undefined) {
       return price;
     }
     
     // 🔥 SOPORTE PARA JSON CON SNAKE_CASE (price_id, product_id, base_price, etc.)
     const priceId = rawPrice.price_id || price.price_id;
-    const productId = rawPrice.product_id || price.product_id || price.productCode;
+    const productId = rawPrice.product_id || price.product_id || price.productId;
     const basePrice = rawPrice.base_price || rawPrice.sale_price || price.amount || price.basePrice || 0;
     const costPrice = rawPrice.cost_price || price.cost || 0;
     const marginPercentage = rawPrice.margin_percentage || price.margin;
@@ -120,7 +129,7 @@ export function PriceStep({ onNext, onBack, themeColors, stepData }: PriceStepPr
     }
     
     return {
-      productCode: String(productId || priceId || 'N/A'),
+      productId: String(productId || priceId || 'N/A'),
       productName: String(rawPrice.product_name || price.name || price.productName || `Producto ${productId || priceId}`),
       basePrice: Number(basePrice) || 0,
       cost: Number(costPrice) || 0,
@@ -137,9 +146,9 @@ export function PriceStep({ onNext, onBack, themeColors, stepData }: PriceStepPr
       
       // Construir objeto base
       const apiPrice: Record<string, unknown> = {
-        name: normalized.productName || `Precio para ${normalized.productCode}`,
-        priceId: rawPrice.price_id || `PRC_${normalized.productCode}_${Date.now()}`,
-        productSku: normalized.productCode || '',
+        name: normalized.productName || `Precio para ${normalized.productId}`,
+        priceId: rawPrice.price_id || `PRC_${normalized.productId}_${Date.now()}`,
+        productSku: normalized.productId || '',
         productName: normalized.productName || '',
         basePrice: normalized.basePrice || 0,
         costPrice: normalized.cost || 0,
@@ -533,7 +542,10 @@ export function PriceStep({ onNext, onBack, themeColors, stepData }: PriceStepPr
             Precios Cargados - Revisión
           </h3>
           <motion.button
-            onClick={() => setUploadedData([])}
+            onClick={() => {
+              setUploadedData([]);
+              setResetKey(prev => prev + 1);
+            }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="px-4 py-2 rounded-lg"
@@ -608,7 +620,7 @@ export function PriceStep({ onNext, onBack, themeColors, stepData }: PriceStepPr
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {uploadedData.map((price, index) => (
               <motion.div
-                key={`${price.productCode}-${index}`}
+                key={`${price.productId}-${index}`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
@@ -623,9 +635,14 @@ export function PriceStep({ onNext, onBack, themeColors, stepData }: PriceStepPr
                     <h5 className="font-semibold text-sm" style={{ color: themeColors.text.primary }}>
                       {price.productName}
                     </h5>
-                    <p className="text-xs" style={{ color: themeColors.text.secondary }}>
-                      Código: {price.productCode}
-                    </p>
+                    <div className="flex items-center gap-3 text-xs" style={{ color: themeColors.text.secondary }}>
+                      <span>ID: {price.productId}</span>
+                      {price.price_list_id && (
+                        <span className="px-2 py-0.5 rounded" style={{ backgroundColor: `${themeColors.primary}15`, color: themeColors.primary }}>
+                          Lista: {price.price_list_id}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   
                   <div className="flex items-center gap-4 text-sm">
@@ -749,9 +766,11 @@ export function PriceStep({ onNext, onBack, themeColors, stepData }: PriceStepPr
 
       {/* Componente de upload */}
       <FileUploadComponent
+        key={resetKey}
         method={method}
         onUpload={handleUpload}
         onFileSelect={handleFileSelect}
+        parseFile={parsePriceFile}
         onBack={onBack}
         themeColors={themeColors}
         sampleData={samplePrices}

@@ -13,12 +13,14 @@ declare module 'axios' {
 }
 
 // Configuración base de la API
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+// En desarrollo, usar rutas relativas para que el proxy de Next.js funcione
+// En producción, usar la URL completa del backend
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 // Crear instancia de Axios
 const httpClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 30000, // 30 segundos (aumentado para operaciones lentas)
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -54,32 +56,9 @@ httpClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     
-    // Log para debugging (remover en producción)
-    console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`, {
-      headers: config.headers,
-      data: config.data,
-    });
-    
-    // 🔍 LOG ADICIONAL: Si es POST /discount/ con array, mostrar detalles
-    if (config.url === '/discount/' && config.method?.toUpperCase() === 'POST' && Array.isArray(config.data)) {
-      console.log('🔍 [HTTP-CLIENT] Interceptor - Enviando array de descuentos');
-      console.log('🔍 [HTTP-CLIENT] Content-Type:', config.headers?.['Content-Type']);
-      console.log('🔍 [HTTP-CLIENT] Primer descuento (campos críticos):');
-      const firstDiscount = config.data[0];
-      if (firstDiscount) {
-        console.log('  - conditions:', firstDiscount.conditions);
-        console.log('  - applicable_to:', firstDiscount.applicable_to);
-        console.log('  - customFields:', firstDiscount.customFields);
-        console.log('  - conditions TYPE:', typeof firstDiscount.conditions);
-        console.log('  - applicable_to TYPE:', typeof firstDiscount.applicable_to);
-        console.log('  - customFields TYPE:', typeof firstDiscount.customFields);
-      }
-    }
-    
     return config;
   },
   (error: unknown) => {
-    console.error('❌ Request interceptor error:', error);
     return Promise.reject(error);
   }
 );
@@ -87,12 +66,6 @@ httpClient.interceptors.request.use(
 // Interceptor de response - manejo de errores y refresh token
 httpClient.interceptors.response.use(
   (response: AxiosResponse) => {
-    // Log para debugging (remover en producción)
-    console.log(`✅ API Response: ${response.status}`, {
-      url: response.config.url,
-      data: response.data,
-    });
-    
     return response;
   },
   async (error: unknown) => {
@@ -103,24 +76,15 @@ httpClient.interceptors.response.use(
     
     const originalRequest = error.config;
     const status = error.response?.status;
-    const url = error.config?.url;
     
-    // Solo mostrar errores críticos en la consola
-    // Errores 4xx y 5xx que no sean manejados por el código
-    const isCriticalError = status && (status >= 400);
+    // Solo mostrar errores NO controlados (500, errores de red, etc.)
+    // Los errores 400 con respuesta del backend son controlados
+    const isUnhandledError = !error.response?.data || status === 500 || status === 0;
     
-    if (isCriticalError) {
-      console.error('❌ API Response Error:', {
-        status,
-        url,
-        message: error.message,
-        data: error.response?.data,
-      });
-    } else {
-      // Para otros casos, solo log de debug
-      console.debug('ℹ️ API Request Info:', {
-        status,
-        url,
+    if (isUnhandledError) {
+      console.error('❌ Error de API:', {
+        status: status || 'Sin conexión',
+        url: error.config?.url,
         message: error.message,
       });
     }
@@ -221,31 +185,46 @@ class HttpClient {
     config?: AxiosRequestConfig
   ): Promise<ApiResponse<T>> {
     try {
-      console.log(`[HTTP-CLIENT POST] Iniciando request a ${url}`);
-      console.log(`[HTTP-CLIENT POST] Data type:`, typeof data);
-      console.log(`[HTTP-CLIENT POST] Data es array:`, Array.isArray(data));
-      if (Array.isArray(data)) {
-        console.log(`[HTTP-CLIENT POST] Array length:`, data.length);
-        console.log(`[HTTP-CLIENT POST] Primer elemento:`, data[0]);
-      }
-      
       const response = await this.client.post<T>(url, data, config);
       
-      console.log(`[HTTP-CLIENT POST] Response status:`, response.status);
-      console.log(`[HTTP-CLIENT POST] Response data:`, response.data);
+      // Verificar si el backend devuelve success: false en el body
+      const responseData = response.data as Record<string, unknown>;
+      const backendSuccess = responseData?.success !== false; // Si no existe, asumir success
       
       return {
         data: response.data,
         status: response.status,
-        success: true,
+        success: backendSuccess,
+        message: responseData?.message as string | undefined,
       };
     } catch (error: unknown) {
-      console.error(`[HTTP-CLIENT POST] Error capturado:`, error);
-      if (axios.isAxiosError(error)) {
-        console.error(`[HTTP-CLIENT POST] Es AxiosError`);
-        console.error(`[HTTP-CLIENT POST] Error response:`, error.response);
-        console.error(`[HTTP-CLIENT POST] Error request:`, error.request);
-        console.error(`[HTTP-CLIENT POST] Error message:`, error.message);
+      if (axios.isAxiosError(error) && error.response?.data) {
+        const responseData = error.response.data as Record<string, unknown>;
+        
+        // Si es un error controlado del backend (success: false)
+        if (responseData.success === false) {
+          // Crear un error con el mensaje del backend para que el store lo capture
+          const backendError = new Error(
+            responseData.message as string || error.message || 'Error del servidor'
+          ) as Error & {
+            errorCode?: string;
+            statusCode?: number;
+            data?: Record<string, unknown>;
+          };
+          // Agregar datos adicionales del backend
+          backendError.errorCode = responseData.errorCode as string;
+          backendError.statusCode = error.response.status;
+          backendError.data = responseData;
+          throw backendError;
+        }
+        
+        // Para otros errores, retornar la respuesta
+        return {
+          data: responseData as T,
+          status: error.response.status || 500,
+          success: false,
+          message: (responseData.message as string) || error.message,
+        };
       }
       throw this.handleError(error);
     }
@@ -342,11 +321,12 @@ class HttpClient {
   private handleError(error: unknown): ApiError {
     if (axios.isAxiosError(error)) {
       if (error.response) {
+        const responseData = error.response.data as Record<string, unknown> | undefined;
         // Error de respuesta del servidor
         return {
-          message: error.response.data?.message || error.message || 'Error del servidor',
+          message: responseData?.message as string || error.message || 'Error del servidor',
           status: error.response.status,
-          data: error.response.data,
+          data: error.response.data as unknown,
         };
       } else if (error.request) {
         // Error de red

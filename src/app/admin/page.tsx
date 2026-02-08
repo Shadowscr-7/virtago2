@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   BarChart3,
@@ -22,6 +23,17 @@ import Link from "next/link";
 export default function AdminDashboard() {
   const { user } = useAuthStore();
   const { themeColors } = useTheme();
+
+  // Cache current date to prevent hydration mismatch
+  const currentDate = useMemo(() => 
+    new Date().toLocaleDateString("es-ES", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }),
+    []
+  );
 
   // 🔍 DEBUG COMPLETO
   console.log('====================================');
@@ -212,12 +224,7 @@ export default function AdminDashboard() {
               style={{ color: themeColors.text.secondary }}
             >
               <Calendar className="w-4 h-4" />
-              {new Date().toLocaleDateString("es-ES", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+              {currentDate}
             </div>
           </div>
         </motion.div>

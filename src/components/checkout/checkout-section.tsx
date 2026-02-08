@@ -52,6 +52,7 @@ export function CheckoutSection() {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState<string>("");
+  const [orderNumber] = useState(() => `VTG${Date.now().toString().slice(-6)}`);
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
     fullName: "",
     email: "",
@@ -624,7 +625,7 @@ export function CheckoutSection() {
                       Número de Pedido:
                     </span>
                     <p className="font-bold text-slate-900 dark:text-white">
-                      #VTG{Date.now().toString().slice(-6)}
+                      #{orderNumber}
                     </p>
                   </div>
                   <div>

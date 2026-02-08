@@ -9,11 +9,11 @@ export function DiscountsSetupStep({ onComplete }: WizardStepProps) {
   const { themeColors } = useTheme();
 
   const handleContinue = () => {
-    onComplete({ discounts: [] });
+    onComplete?.({ discounts: [] });
   };
 
   const handleSkip = () => {
-    onComplete({ discounts: [], skipped: true });
+    onComplete?.({ discounts: [], skipped: true });
   };
 
   return (

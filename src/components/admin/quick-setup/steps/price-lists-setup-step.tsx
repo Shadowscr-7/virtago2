@@ -9,7 +9,7 @@ export function PriceListsSetupStep({ onComplete }: WizardStepProps) {
   const { themeColors } = useTheme();
 
   const handleContinue = () => {
-    onComplete({ priceLists: [] });
+    onComplete?.({ priceLists: [] });
   };
 
   return (

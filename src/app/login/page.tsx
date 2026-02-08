@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, ArrowLeft, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -20,6 +20,17 @@ export default function LoginPage() {
   const { login } = useAuthStore();
   const { themeColors } = useTheme();
   const router = useRouter();
+
+  // Cachear las posiciones de las partículas para evitar errores de hidratación
+  const particles = useMemo(() => 
+    Array.from({ length: 30 }, () => ({
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      xOffset: Math.random() * 200 - 100,
+      yOffset: Math.random() * 200 - 100,
+    })),
+    []
+  );
 
   // Estilos dinámicos para inputs
   const inputStyle = {
@@ -78,15 +89,15 @@ export default function LoginPage() {
     >
       {/* Partículas de fondo */}
       <div className="absolute inset-0 overflow-hidden">
-        {[...Array(30)].map((_, i) => (
+        {particles.map((particle, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, scale: 0 }}
             animate={{
               opacity: [0, 1, 0],
               scale: [0, 1, 0],
-              x: [0, Math.random() * 200 - 100],
-              y: [0, Math.random() * 200 - 100],
+              x: [0, particle.xOffset],
+              y: [0, particle.yOffset],
             }}
             transition={{
               duration: 6,
@@ -96,8 +107,8 @@ export default function LoginPage() {
             }}
             className="absolute w-1 h-1 rounded-full"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
+              left: `${particle.left}%`,
+              top: `${particle.top}%`,
               backgroundColor: themeColors.primary + "60",
             }}
           />

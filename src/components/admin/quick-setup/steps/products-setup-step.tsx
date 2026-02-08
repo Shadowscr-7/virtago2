@@ -9,7 +9,7 @@ export function ProductsSetupStep({ onComplete }: WizardStepProps) {
   const { themeColors } = useTheme();
 
   const handleContinue = () => {
-    onComplete({ products: [] }); // Placeholder data
+    onComplete?.({ products: [] }); // Placeholder data
   };
 
   return (
