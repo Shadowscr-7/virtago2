@@ -1262,6 +1262,59 @@ export const plansApi = {
     http.post("/plans/select", { planId }),
 };
 
+// ========================================
+// 📊 Dashboard Data Types
+// ========================================
+
+export interface DashboardStats {
+  sales: {
+    total: number;
+    currency: string;
+    change: number;
+    period: string;
+  };
+  orders: {
+    total: number;
+    change: number;
+    period: string;
+  };
+  products: {
+    total: number;
+    change: number;
+    period: string;
+  };
+  clients: {
+    total: number;
+    change: number;
+    period: string;
+  };
+}
+
+export interface SalesChartData {
+  month: string;
+  value: number;
+  percentage: number;
+}
+
+export interface RecentActivity {
+  id: string;
+  type: string;
+  action: string;
+  description: string;
+  timestamp: string;
+  relativeTime: string;
+}
+
+export interface DashboardData {
+  stats: DashboardStats;
+  salesChart: {
+    period: string;
+    year: number;
+    data: SalesChartData[];
+  };
+  recentActivity: RecentActivity[];
+}
+
 // APIs de Administración
 export const adminApi = {
   // Clientes
@@ -1791,6 +1844,65 @@ export const adminApi = {
       }
     }
   },
+
+  // Dashboard Home
+  dashboard: {
+    /**
+     * Obtiene los datos del dashboard principal
+     * Incluye stats, gráfico de ventas y actividad reciente
+     * @returns Datos completos del dashboard
+     */
+    getHomeData: async (): Promise<ApiResponse<DashboardData>> => {
+      console.log('[API] Obteniendo datos del dashboard home...');
+      return http.get('/distributor/dashboard-home');
+    }
+  },
+};
+
+// ========================
+// 🚀 ONBOARDING API
+// ========================
+const onboardingApi = {
+  /**
+   * Obtiene el estado de onboarding del distribuidor
+   * Indica si el usuario ya tiene datos cargados en el sistema
+   * @returns Estado de completitud del onboarding
+   */
+  getStatus: async () => {
+    return await http.get<{
+      hasData: boolean;
+      details: {
+        products: { count: number; hasData: boolean };
+        clients: { count: number; hasData: boolean };
+        priceLists: { count: number; hasData: boolean };
+        prices: { count: number; hasData: boolean };
+        discounts: { count: number; hasData: boolean };
+      };
+      completionPercentage: number;
+      nextSteps: string[];
+      isFirstLogin: boolean;
+    }>('/distributor/onboarding-status');
+  },
+
+  /**
+   * Verifica si el endpoint de onboarding está implementado en el backend
+   * Útil para debugging y testing
+   * @returns true si el endpoint existe y responde, false si no
+   */
+  checkEndpointExists: async (): Promise<boolean> => {
+    try {
+      const response = await http.get('/distributor/onboarding-status');
+      console.log('✅ Endpoint de onboarding implementado en el backend');
+      return true;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        console.log('❌ Endpoint de onboarding NO implementado (404)');
+        return false;
+      }
+      console.log('⚠️ Error verificando endpoint:', error.message);
+      return false;
+    }
+  }
 };
 
 // Objeto principal API - para usar como api.auth.login(), api.user.getProfile(), etc.
@@ -1805,6 +1917,7 @@ export const api = {
   plans: plansApi,
   distributors: distributorApi,
   admin: adminApi,
+  onboarding: onboardingApi,
 };
 
 // Exportar también el cliente HTTP para casos especiales

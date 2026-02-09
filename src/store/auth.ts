@@ -167,9 +167,12 @@ export const useAuthStore = create<AuthState>()(
       setToken: (token) => {
         set({ token });
         if (token) {
-          localStorage.setItem("auth_token", token);
+          localStorage.setItem("token", token); // ✅ Clave correcta
+          localStorage.setItem("auth_token", token); // Compatibilidad
         } else {
+          localStorage.removeItem("token");
           localStorage.removeItem("auth_token");
+          localStorage.removeItem("user");
         }
       },
       setIsAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
@@ -246,8 +249,12 @@ export const useAuthStore = create<AuthState>()(
 
           console.log("🔵 Estado actualizado en el store");
 
-          // Guardar el token en localStorage
-          localStorage.setItem("auth_token", token);
+          // 🔧 Guardar token y usuario en localStorage con las claves correctas
+          localStorage.setItem("token", token); // ✅ Clave correcta para auth guard
+          localStorage.setItem("user", JSON.stringify(loggedUser)); // ✅ Guardar usuario también
+          localStorage.setItem("auth_token", token); // Mantener por compatibilidad
+          
+          console.log("✅ Token y usuario guardados en localStorage");
 
           // Mostrar notificación de éxito
           showToast({
@@ -291,7 +298,12 @@ export const useAuthStore = create<AuthState>()(
           otpVerified: false,
           registrationStep: "initial",
         });
+        
+        // 🔧 Limpiar todas las claves de localStorage
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
         localStorage.removeItem("auth_token");
+        localStorage.removeItem("temp_auth_token");
 
         // Mostrar notificación de despedida
         showToast({
