@@ -1288,6 +1288,21 @@ export interface DashboardStats {
     change: number;
     period: string;
   };
+  priceLists?: {
+    total: number;
+    change: number;
+    period: string;
+  };
+  prices?: {
+    total: number;
+    change: number;
+    period: string;
+  };
+  discounts?: {
+    total: number;
+    change: number;
+    period: string;
+  };
 }
 
 export interface SalesChartData {

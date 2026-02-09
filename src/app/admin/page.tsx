@@ -14,6 +14,8 @@ import {
   ArrowUpRight,
   Calendar,
   Activity,
+  Tag,
+  FileText,
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/admin-layout";
 import { useAuthStore } from "@/store/auth";
@@ -283,6 +285,22 @@ export default function AdminDashboard() {
       icon: Users,
       colorIndex: 0,
     },
+    ...(dashboardData.stats.prices ? [{
+      title: "Precios",
+      value: dashboardData.stats.prices.total.toLocaleString(),
+      change: `${dashboardData.stats.prices.change > 0 ? '+' : ''}${dashboardData.stats.prices.change.toFixed(1)}%`,
+      trend: dashboardData.stats.prices.change >= 0 ? "up" : "down",
+      icon: DollarSign,
+      colorIndex: 1,
+    }] : []),
+    ...(dashboardData.stats.discounts ? [{
+      title: "Descuentos",
+      value: dashboardData.stats.discounts.total.toLocaleString(),
+      change: `${dashboardData.stats.discounts.change > 0 ? '+' : ''}${dashboardData.stats.discounts.change.toFixed(1)}%`,
+      trend: dashboardData.stats.discounts.change >= 0 ? "up" : "down",
+      icon: Tag,
+      colorIndex: 2,
+    }] : []),
   ] : [];
 
   const quickActions = [

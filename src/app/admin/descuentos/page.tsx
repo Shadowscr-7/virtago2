@@ -109,43 +109,53 @@ function mapBackendDiscountToFrontend(backend: BackendDiscount): DiscountItem {
   // Mapear condiciones
   const condiciones: DiscountCondition[] = [];
   
-  // Agregar condición de monto mínimo si existe
-  if (backend.conditions?.min_purchase_amount) {
+  // ✅ Agregar condición de monto mínimo (está en el root del objeto backend)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((backend as any).min_purchase_amount) {
     condiciones.push({
       id: `cond_min_${backend.id}`,
       tipoCondicion: 'MONTO_MINIMO',
-      valorCondicion: backend.conditions.min_purchase_amount as number,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      valorCondicion: (backend as any).min_purchase_amount as number,
     });
   }
 
-  // Agregar condición de cantidad mínima si existe
-  if (backend.conditions?.min_items) {
+  // ✅ Agregar condición de cantidad mínima (está en conditions.min_items)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((backend.conditions as any)?.min_items) {
     condiciones.push({
       id: `cond_qty_${backend.id}`,
       tipoCondicion: 'CANTIDAD_MINIMA',
-      valorCondicion: backend.conditions.min_items as number,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      valorCondicion: (backend.conditions as any).min_items as number,
     });
   }
 
-  // Mapear applicable_to a condiciones
+  // ✅ Mapear applicable_to a condiciones (using target_type instead of type)
   backend.applicable_to?.forEach((app, index) => {
-    if (app.type === 'category') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const appType = (app as any).target_type || app.type;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const appValue = (app as any).target_value || app.value;
+    
+    if (appType === 'category') {
       condiciones.push({
         id: `cond_cat_${backend.id}_${index}`,
         tipoCondicion: 'CATEGORIA',
-        valorCondicion: app.value,
+        valorCondicion: appValue,
       });
-    } else if (app.type === 'product') {
+    } else if (appType === 'product') {
       condiciones.push({
         id: `cond_prod_${backend.id}_${index}`,
         tipoCondicion: 'PRODUCTO',
-        valorCondicion: app.value,
+        valorCondicion: appValue,
       });
     }
   });
 
-  // Verificar si es VIP
-  if (backend.customer_type === 'vip') {
+  // ✅ Verificar si es VIP (está en conditions.customer_type)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((backend.conditions as any)?.customer_type === 'vip') {
     condiciones.push({
       id: `cond_vip_${backend.id}`,
       tipoCondicion: 'CLIENTE_VIP',
@@ -157,9 +167,14 @@ function mapBackendDiscountToFrontend(backend: BackendDiscount): DiscountItem {
     id: backend.id,
     nombre: backend.name,
     descripcion: backend.description,
-    validoHasta: backend.valid_to,
-    acumulativo: backend.is_cumulative,
-    activo: backend.status === 'active',
+    // ✅ El backend devuelve end_date, no valid_to
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    validoHasta: (backend as any).end_date || backend.valid_to,
+    // ✅ Por ahora usar false, agregar si el backend lo soporta
+    acumulativo: backend.is_cumulative || false,
+    // ✅ El backend devuelve is_active (boolean), no status
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    activo: (backend as any).is_active !== undefined ? (backend as any).is_active : backend.status === 'active',
     tipo,
     valor: backend.discount_value,
     codigoDescuento: backend.discount_id,
@@ -228,11 +243,27 @@ export default function DescuentosAdminPage() {
       }>('/discounts', { params });
 
       console.log('📦 Respuesta de la API:', response);
+      console.log('📦 Tipo de response.data:', typeof response.data);
+      console.log('📦 response.data:', response.data);
 
       // Mapear los datos del backend al formato del frontend
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const backendDiscounts: BackendDiscount[] = (response.data as any)?.data || [];
-      const mappedDiscounts: DiscountItem[] = backendDiscounts.map(mapBackendDiscountToFrontend);
+      console.log('📦 backendDiscounts count:', backendDiscounts.length);
+      console.log('📦 backendDiscounts:', backendDiscounts);
+      
+      // Mapear con try-catch individual para detectar errores
+      const mappedDiscounts: DiscountItem[] = [];
+      for (let i = 0; i < backendDiscounts.length; i++) {
+        try {
+          const mapped = mapBackendDiscountToFrontend(backendDiscounts[i]);
+          mappedDiscounts.push(mapped);
+          console.log(`✅ Descuento ${i + 1} mapeado:`, mapped.nombre);
+        } catch (mapError) {
+          console.error(`❌ Error mapeando descuento ${i + 1}:`, backendDiscounts[i], mapError);
+          throw mapError; // Re-throw para que el catch exterior lo capture
+        }
+      }
       
       setDiscounts(mappedDiscounts);
       
@@ -245,6 +276,13 @@ export default function DescuentosAdminPage() {
       console.log(`✅ ${mappedDiscounts.length} descuentos cargados y mapeados`);
     } catch (error) {
       console.error('❌ Error al cargar descuentos:', error);
+      console.error('❌ Error tipo:', typeof error);
+      console.error('❌ Error es instancia de Error:', error instanceof Error);
+      if (error instanceof Error) {
+        console.error('❌ Error.message:', error.message);
+        console.error('❌ Error.stack:', error.stack);
+      }
+      console.error('❌ Error completo (JSON):', JSON.stringify(error, null, 2));
       toast.error('Error al cargar descuentos');
       setDiscounts([]);
     } finally {

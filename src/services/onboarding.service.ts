@@ -88,7 +88,8 @@ export const getOnboardingStatus = async (): Promise<OnboardingStatus> => {
       const completionPercentage = Math.round((completedSteps / 5) * 100);
       
       // Determinar si tiene datos suficientes
-      const hasData = hasProducts && hasClients && hasPriceLists;
+      // ✅ Permitir dashboard si tiene productos Y clientes Y (precios O listas de precios)
+      const hasData = hasProducts && hasClients && (hasPrices || hasPriceLists);
       
       return {
         hasData,

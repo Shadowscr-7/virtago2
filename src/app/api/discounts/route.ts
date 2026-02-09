@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3001";
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     }
     
     // Construir URL con parámetros
-    const url = new URL(`${API_URL}/discounts`);
+    const url = new URL(`${BACKEND_URL}/api/discounts`);
     
     // Parámetros de paginación
     const page = searchParams.get("page") || "1";
