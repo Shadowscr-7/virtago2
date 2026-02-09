@@ -30,18 +30,22 @@ const httpClient: AxiosInstance = axios.create({
 // Función para obtener el token del localStorage (solo en cliente)
 const getToken = (): string | null => {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('auth_token') || localStorage.getItem('jwt_token');
+  // Buscar con la clave correcta primero, luego las antiguas por compatibilidad
+  return localStorage.getItem('token') || localStorage.getItem('auth_token') || localStorage.getItem('jwt_token');
 };
 
 // Función para guardar el token
 const setToken = (token: string): void => {
   if (typeof window === 'undefined') return;
-  localStorage.setItem('auth_token', token);
+  localStorage.setItem('token', token); // ✅ Clave correcta
+  localStorage.setItem('auth_token', token); // Compatibilidad
 };
 
 // Función para remover el token
 const removeToken = (): void => {
   if (typeof window === 'undefined') return;
+  localStorage.removeItem('token'); // ✅ Clave correcta
+  localStorage.removeItem('user'); // ✅ Limpiar usuario también
   localStorage.removeItem('auth_token');
   localStorage.removeItem('jwt_token');
   localStorage.removeItem('refresh_token');

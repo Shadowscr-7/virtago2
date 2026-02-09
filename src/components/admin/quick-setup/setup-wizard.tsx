@@ -126,8 +126,25 @@ export default function SetupWizard() {
     if (currentStep < WIZARD_STEPS.length - 1) {
       setCurrentStep(prev => prev + 1);
     } else if (stepData && (stepData as { completed?: boolean }).completed) {
-      // ✅ Wizard completado - Redirigir al dashboard
-      console.log('✅ Wizard completado - Redirigiendo al dashboard...');
+      // ✅ Wizard completado - Guardar estado y redirigir
+      console.log('✅ Wizard completado - Guardando estado...');
+      
+      // Guardar en localStorage que el wizard se completó con datos
+      const wizardSummary = {
+        completed: true,
+        completedAt: new Date().toISOString(),
+        hasData: true,
+        data: wizardData
+      };
+      
+      try {
+        localStorage.setItem('virtago_wizard_completed', JSON.stringify(wizardSummary));
+        console.log('✅ Estado del wizard guardado en localStorage');
+      } catch (error) {
+        console.error('❌ Error guardando estado del wizard:', error);
+      }
+      
+      console.log('✅ Redirigiendo al dashboard...');
       router.push('/admin');
     }
   };

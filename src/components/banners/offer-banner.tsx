@@ -5,7 +5,7 @@ import { ArrowRight, Sparkles, Zap } from "lucide-react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/theme-context";
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 
 interface OfferBannerProps {
   title: string;
@@ -33,16 +33,26 @@ export function OfferBanner({
   const isPrimary = variant === "primary";
   const { themeColors } = useTheme();
 
-  // Generate particle positions once to avoid hydration mismatch
-  const particles = useMemo(() => {
+  // Generate particle positions only on client to avoid hydration mismatch
+  const [particles, setParticles] = useState<Array<{
+    id: number;
+    left: number;
+    top: number;
+    xOffset: number;
+    yOffset: number;
+  }>>([]);
+
+  useEffect(() => {
     const count = isPrimary ? 8 : 5;
-    return Array.from({ length: count }, (_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      top: Math.random() * 100,
-      xOffset: Math.random() * 100 - 50,
-      yOffset: Math.random() * 100 - 50,
-    }));
+    setParticles(
+      Array.from({ length: count }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        xOffset: Math.random() * 100 - 50,
+        yOffset: Math.random() * 100 - 50,
+      }))
+    );
   }, [isPrimary]);
 
   return (

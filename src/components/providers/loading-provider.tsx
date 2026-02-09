@@ -60,15 +60,25 @@ export function LoadingProvider({ children }: LoadingProviderProps) {
 function VirtagoLoader() {
   const { themeColors } = useTheme();
 
-  // Generate particle positions once to avoid hydration mismatch
-  const particles = useMemo(() => {
-    return Array.from({ length: 20 }, (_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      top: Math.random() * 100,
-      xOffset: Math.random() * 200 - 100,
-      yOffset: Math.random() * 200 - 100,
-    }));
+  // Generate particle positions only on client to avoid hydration mismatch
+  const [particles, setParticles] = useState<Array<{
+    id: number;
+    left: number;
+    top: number;
+    xOffset: number;
+    yOffset: number;
+  }>>([]);
+
+  useEffect(() => {
+    setParticles(
+      Array.from({ length: 20 }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        xOffset: Math.random() * 200 - 100,
+        yOffset: Math.random() * 200 - 100,
+      }))
+    );
   }, []);
 
   return (

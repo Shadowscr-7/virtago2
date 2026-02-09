@@ -9,6 +9,7 @@ import { ToastProvider } from "@/components/ui/toast";
 import { ToastIntegration } from "@/components/cart/toast-integration";
 import { Toaster } from "sonner";
 import { ChatSystem } from "@/components/chat";
+import { DebugTools } from "@/components/debug-tools";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -67,6 +68,7 @@ export default function RootLayout({
               <LoadingProvider>
                 <ClientLayout>{children}</ClientLayout>
                 <ChatSystem />
+                <DebugTools />
               </LoadingProvider>
             </ToastProvider>
           </ThemeProvider>

@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { MapPin, Navigation, ExternalLink } from "lucide-react";
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 
 interface ClientLocationData {
   address: string;
@@ -20,13 +20,21 @@ interface ClientLocationMapProps {
 export function ClientLocationMap({ clientData }: ClientLocationMapProps) {
   const hasCoordinates = clientData.latitude && clientData.longitude;
 
-  // Generate grid pattern once to avoid hydration mismatch
-  const gridCells = useMemo(() => {
-    return Array.from({ length: 48 }, (_, i) => ({
-      id: i,
-      backgroundColor: Math.random() > 0.7 ? "#10b981" : "transparent",
-      opacity: Math.random() * 0.3,
-    }));
+  // Generate grid pattern only on client to avoid hydration mismatch
+  const [gridCells, setGridCells] = useState<Array<{
+    id: number;
+    backgroundColor: string;
+    opacity: number;
+  }>>([]);
+
+  useEffect(() => {
+    setGridCells(
+      Array.from({ length: 48 }, (_, i) => ({
+        id: i,
+        backgroundColor: Math.random() > 0.7 ? "#10b981" : "transparent",
+        opacity: Math.random() * 0.3,
+      }))
+    );
   }, []);
 
   const openInGoogleMaps = () => {

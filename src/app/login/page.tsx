@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, ArrowLeft, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,16 +21,24 @@ export default function LoginPage() {
   const { themeColors } = useTheme();
   const router = useRouter();
 
-  // Cachear las posiciones de las partículas para evitar errores de hidratación
-  const particles = useMemo(() => 
-    Array.from({ length: 30 }, () => ({
-      left: Math.random() * 100,
-      top: Math.random() * 100,
-      xOffset: Math.random() * 200 - 100,
-      yOffset: Math.random() * 200 - 100,
-    })),
-    []
-  );
+  // Generate particle positions only on client to avoid hydration errors
+  const [particles, setParticles] = useState<Array<{
+    left: number;
+    top: number;
+    xOffset: number;
+    yOffset: number;
+  }>>([]);
+
+  useEffect(() => {
+    setParticles(
+      Array.from({ length: 30 }, () => ({
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+        xOffset: Math.random() * 200 - 100,
+        yOffset: Math.random() * 200 - 100,
+      }))
+    );
+  }, []);
 
   // Estilos dinámicos para inputs
   const inputStyle = {

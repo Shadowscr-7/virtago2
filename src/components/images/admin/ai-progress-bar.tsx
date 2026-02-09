@@ -48,13 +48,21 @@ export function AIProgressBar({
     ],
   }), []);
 
-  // Generate particle positions once to avoid hydration mismatch
-  const particles = useMemo(() => {
-    return Array.from({ length: 5 }, (_, i) => ({
-      id: i,
-      left: Math.random() * 100,
-      top: Math.random() * 100,
-    }));
+  // Generate particle positions only on client to avoid hydration mismatch
+  const [particles, setParticles] = useState<Array<{
+    id: number;
+    left: number;
+    top: number;
+  }>>([]);
+
+  useEffect(() => {
+    setParticles(
+      Array.from({ length: 5 }, (_, i) => ({
+        id: i,
+        left: Math.random() * 100,
+        top: Math.random() * 100,
+      }))
+    );
   }, []);
 
   // Rotar mensajes cada 2 segundos

@@ -41,6 +41,61 @@ export const registerExample = async (userData: RegisterData) => {
   }
 };
 
+// =====================================================
+// 🆕 ONBOARDING API - Verificar estado del distribuidor
+// =====================================================
+
+// Obtener estado de onboarding
+export const getOnboardingStatusExample = async () => {
+  try {
+    const response = await api.onboarding.getStatus();
+    
+    console.log('📊 Estado de onboarding:', response.data);
+    console.log('¿Tiene datos?', response.data.hasData);
+    console.log('Completitud:', `${response.data.completionPercentage}%`);
+    console.log('Próximos pasos:', response.data.nextSteps);
+    
+    // Verificar qué le falta al usuario
+    if (!response.data.details.products.hasData) {
+      console.log('⚠️ El usuario no tiene productos cargados');
+    }
+    if (!response.data.details.clients.hasData) {
+      console.log('⚠️ El usuario no tiene clientes registrados');
+    }
+    if (!response.data.details.priceLists.hasData) {
+      console.log('⚠️ El usuario no tiene listas de precios configuradas');
+    }
+    
+    return response.data;
+    
+  } catch (error) {
+    const apiError = error as ApiError;
+    console.error('Error obteniendo estado de onboarding:', apiError.message);
+    throw error;
+  }
+};
+
+// Verificar si el endpoint existe en el backend
+export const checkOnboardingEndpointExample = async () => {
+  try {
+    const exists = await api.onboarding.checkEndpointExists();
+    
+    if (exists) {
+      console.log('✅ El backend tiene el endpoint implementado');
+      console.log('   Puedes usar api.onboarding.getStatus()');
+    } else {
+      console.log('❌ El backend NO tiene el endpoint');
+      console.log('   El sistema usará datos mock de localStorage');
+    }
+    
+    return exists;
+    
+  } catch (error) {
+    console.error('Error verificando endpoint:', error);
+    return false;
+  }
+};
+
 // 3. Obtener productos
 export const getProductsExample = async () => {
   try {
