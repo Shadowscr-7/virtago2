@@ -132,7 +132,12 @@ export default function NuevoCliente() {
     
     try {
       // Obtener el distributorCode del usuario
-      const distributorCode = user?.distributorInfo?.distributorCode || "Dist01";
+      const distributorCode = user?.distributorInfo?.distributorCode;
+      if (!distributorCode) {
+        console.error('[NUEVO CLIENTE] ❌ distributorCode es vacío/null/undefined');
+        showToast({ title: "Error", description: "No se pudo obtener el código de distribuidor", type: "error" });
+        return;
+      }
       
       // Separar nombre y apellido
       const nameParts = clientData.name.trim().split(' ');

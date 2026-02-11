@@ -203,6 +203,7 @@ export const useAuthStore = create<AuthState>()(
           console.log("🔵 User recibido:", response.data.user);
           console.log("🔵 Role del user:", response.data.user.role);
           console.log("🔵 distributorCode del user:", response.data.user.distributorCode);
+          console.log("🔵 distributorCode tipo:", typeof response.data.user.distributorCode, "| valor:", JSON.stringify(response.data.user.distributorCode));
 
           const { token, user } = response.data;
 

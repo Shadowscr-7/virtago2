@@ -74,10 +74,16 @@ export default function ListasPreciosAdminPage() {
   const loadPriceLists = useCallback(async () => {
     console.log('[LISTAS_PRECIOS] 🔄 Ejecutando loadPriceLists...');
     
-    const distributorCode = user?.distributorInfo?.distributorCode || 'Dist01';
-    
     if (!user) {
       console.warn('[LISTAS_PRECIOS] ❌ No hay usuario logueado');
+      setIsLoading(false);
+      return;
+    }
+
+    const distributorCode = user?.distributorInfo?.distributorCode;
+    
+    if (!distributorCode) {
+      console.error('[LISTAS_PRECIOS] ❌ distributorCode es vacío/null/undefined. distributorInfo:', JSON.stringify(user?.distributorInfo));
       setIsLoading(false);
       return;
     }

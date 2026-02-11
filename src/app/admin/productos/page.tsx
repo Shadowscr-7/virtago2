@@ -58,16 +58,24 @@ export default function ProductsAdminPage() {
   const loadProducts = useCallback(async () => {
     console.log('[PRODUCTOS] 🔄 Ejecutando loadProducts...');
     console.log('[PRODUCTOS] 🔍 user:', user);
-    
-    const distributorCode = user?.distributorInfo?.distributorCode || 'Dist01';
+    console.log('[PRODUCTOS] 🔍 distributorInfo:', user?.distributorInfo);
+    console.log('[PRODUCTOS] 🔍 distributorCode:', user?.distributorInfo?.distributorCode);
     
     if (!user) {
       console.warn('[PRODUCTOS] ❌ No hay usuario logueado');
       setIsLoading(false);
       return;
     }
+
+    const distributorCode = user?.distributorInfo?.distributorCode;
     
-    console.log('[PRODUCTOS] ⚠️ Usando distributorCode:', distributorCode);
+    if (!distributorCode) {
+      console.error('[PRODUCTOS] ❌ distributorCode es vacío/null/undefined. distributorInfo:', JSON.stringify(user?.distributorInfo));
+      setIsLoading(false);
+      return;
+    }
+    
+    console.log('[PRODUCTOS] ✅ Usando distributorCode:', distributorCode);
 
     setIsLoading(true);
     try {

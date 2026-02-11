@@ -48,7 +48,11 @@ export function ManualAssignModal({
   const loadProducts = async () => {
     setIsLoadingProducts(true);
     try {
-      const distributorCode = user?.distributorInfo?.distributorCode || "Dist01";
+      const distributorCode = user?.distributorInfo?.distributorCode;
+      if (!distributorCode) {
+        console.error('[MANUAL-ASSIGN] ❌ distributorCode es vacío/null/undefined');
+        return;
+      }
 
       const response = await api.admin.products.getAll({
         distributorCode,

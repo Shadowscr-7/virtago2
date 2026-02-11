@@ -90,16 +90,21 @@ export default function ClientesPage() {
     console.log('[CLIENTES] 🔍 user?.distributorInfo:', user?.distributorInfo);
     console.log('[CLIENTES] 🔍 distributorCode:', user?.distributorInfo?.distributorCode);
     
-    // 🔧 TEMPORAL: Usar distributorCode hardcodeado para testing
-    const distributorCode = user?.distributorInfo?.distributorCode || 'Dist01';
-    
     if (!user) {
       console.warn('[CLIENTES] ❌ No hay usuario logueado');
       setIsLoading(false);
       return;
     }
+
+    const distributorCode = user?.distributorInfo?.distributorCode;
     
-    console.log('[CLIENTES] ⚠️ Usando distributorCode:', distributorCode, '(hardcodeado para testing)');
+    if (!distributorCode) {
+      console.error('[CLIENTES] ❌ distributorCode es vacío/null/undefined. distributorInfo:', JSON.stringify(user?.distributorInfo));
+      setIsLoading(false);
+      return;
+    }
+    
+    console.log('[CLIENTES] ✅ Usando distributorCode:', distributorCode);
 
     setIsLoading(true);
     try {
@@ -325,7 +330,7 @@ export default function ClientesPage() {
         email,
         firstName,
         lastName,
-        distributorCode: user?.distributorInfo?.distributorCode || "Dist01", // Usar el distributorCode del usuario actual
+        distributorCode: user?.distributorInfo?.distributorCode || "", // ⚠️ No debe estar vacío
       });
       
       if (response.success) {
@@ -483,7 +488,7 @@ export default function ClientesPage() {
             email: client.email,
             firstName: client.firstName,
             lastName: client.lastName,
-            distributorCode: user?.distributorInfo?.distributorCode || "Dist01",
+            distributorCode: user?.distributorInfo?.distributorCode || "", // ⚠️ No debe estar vacío
           });
 
           if (response.success) {
