@@ -286,9 +286,9 @@ export function ProductsFilters({
                       {getDisplayedItems(
                         filteredCategories,
                         showAllCategories,
-                      ).map((category) => (
+                      ).map((category, idx) => (
                         <label
-                          key={category.id}
+                          key={`cat-${category.id}-${idx}`}
                           className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
                         >
                           <div className="flex items-center gap-3">
@@ -412,9 +412,9 @@ export function ProductsFilters({
 
                     <div className="space-y-2">
                       {getDisplayedItems(filteredBrands, showAllBrands).map(
-                        (brand) => (
+                        (brand, idx) => (
                           <label
-                            key={brand.id}
+                            key={`brand-${brand.id}-${idx}`}
                             className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
                           >
                             <div className="flex items-center gap-3">

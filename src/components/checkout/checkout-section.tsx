@@ -244,12 +244,18 @@ export function CheckoutSection() {
                             className="flex gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl"
                           >
                             <div className="relative w-16 h-16 bg-white dark:bg-slate-700 rounded-lg overflow-hidden flex-shrink-0">
-                              <Image
-                                src={item.image}
-                                alt={item.name}
-                                fill
-                                className="object-cover"
-                              />
+                              {item.image ? (
+                                <Image
+                                  src={item.image}
+                                  alt={item.name || 'Producto'}
+                                  fill
+                                  className="object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <Package2 className="w-8 h-8 text-slate-400" />
+                                </div>
+                              )}
                             </div>
                             <div className="flex-1">
                               <h4 className="font-medium text-slate-900 dark:text-white">

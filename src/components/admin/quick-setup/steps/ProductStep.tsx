@@ -6,7 +6,7 @@ import { CheckCircle2, AlertCircle } from 'lucide-react';
 import { useTheme } from '@/contexts/theme-context';
 import { FileUploadComponent } from '../shared/FileUploadComponent';
 import { parseProductFile } from '@/lib/file-parser';
-import { matchWithAI, type MatchResult } from '@/lib/product-matcher';
+import { type MatchResult } from '@/lib/product-matcher';
 import { api } from '@/api';
 
 interface ProductStepProps {
@@ -74,6 +74,13 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
   // Estado para resultados de matching
   const [matchingResults, setMatchingResults] = useState<ProductMatchResult[]>([]);
   
+  // Estado para ediciones manuales del usuario
+  const [editedMatches, setEditedMatches] = useState<Record<number, {
+    brand?: string;
+    category?: string;
+    subCategory?: string;
+  }>>({});
+  
   // Estado para resumen de creación
   const [creationSummary, setCreationSummary] = useState<{
     brands: string[];
@@ -113,7 +120,7 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
     setError(null);
     
     try {
-      console.log('🔍 [ProductStep] Iniciando matching inteligente...');
+      console.log('🔍 [ProductStep] Iniciando matching inteligente con backend...');
       console.log('📋 [ProductStep] Productos a procesar:', products);
       
       // 1. Primero cargar datos del sistema
@@ -133,8 +140,13 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
       let categories: Array<{ id: string; name: string }> = [];
       let subcategories: Array<{ id: string; name: string }> = [];
 
-      if (brandsRes.success && brandsRes.data?.data) {
-        brands = brandsRes.data.data.map((b: { brandId?: string; id?: number | string; name: string }) => ({
+      // Handle both flat and nested response structures
+      if (brandsRes.success) {
+        const brandsData = Array.isArray(brandsRes.data) 
+          ? brandsRes.data 
+          : (brandsRes.data as any)?.data || [];
+        
+        brands = brandsData.map((b: { brandId?: string; id?: number | string; name: string }) => ({
           id: String(b.brandId || b.id),
           name: b.name,
         }));
@@ -143,8 +155,12 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
         console.warn('⚠️ No se pudieron cargar marcas:', brandsRes);
       }
 
-      if (categoriesRes.success && categoriesRes.data?.data) {
-        categories = categoriesRes.data.data.map((c: { categoryId?: string; id?: number | string; name: string }) => ({
+      if (categoriesRes.success) {
+        const categoriesData = Array.isArray(categoriesRes.data)
+          ? categoriesRes.data
+          : (categoriesRes.data as any)?.data || [];
+        
+        categories = categoriesData.map((c: { categoryId?: string; id?: number | string; name: string }) => ({
           id: String(c.categoryId || c.id),
           name: c.name,
         }));
@@ -153,8 +169,12 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
         console.warn('⚠️ No se pudieron cargar categorías:', categoriesRes);
       }
 
-      if (subcategoriesRes.success && subcategoriesRes.data?.data) {
-        subcategories = subcategoriesRes.data.data.map((s: { subCategoryId?: string; id?: number | string; name: string }) => ({
+      if (subcategoriesRes.success) {
+        const subcategoriesData = Array.isArray(subcategoriesRes.data)
+          ? subcategoriesRes.data
+          : (subcategoriesRes.data as any)?.data || [];
+        
+        subcategories = subcategoriesData.map((s: { subCategoryId?: string; id?: number | string; name: string }) => ({
           id: String(s.subCategoryId || s.id),
           name: s.name,
         }));
@@ -163,68 +183,35 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
         console.warn('⚠️ No se pudieron cargar subcategorías:', subcategoriesRes);
       }
 
-      // 2. Hacer matching producto por producto
-      const results: ProductMatchResult[] = [];
-      
-      for (let i = 0; i < products.length; i++) {
-        const product = products[i];
-        console.log(`\n🔄 [${i + 1}/${products.length}] Matching producto:`, {
-          name: product.name,
-          brand: product.brand,
-          category: product.category,
-          subCategory: product.subCategory,
-        });
-        
-        // Hacer matching con IA solo si el campo existe
-        let brandMatch: MatchResult;
-        if (product.brand) {
-          console.log(`  🔍 Buscando brand "${product.brand}" en:`, brands.map(b => b.name));
-          brandMatch = await matchWithAI(product.brand, brands, 'brand');
-          console.log('  🏷️  Brand match resultado:', brandMatch);
-        } else {
-          console.log('  ⚠️  Sin brand para matchear');
-          brandMatch = { matched: false, confidence: 0, shouldCreate: false, reason: 'No brand provided in file' };
-        }
-        
-        let categoryMatch: MatchResult;
-        if (product.category) {
-          console.log(`  🔍 Buscando category "${product.category}" en:`, categories.map(c => c.name));
-          categoryMatch = await matchWithAI(product.category, categories, 'category');
-          console.log('  📁 Category match resultado:', categoryMatch);
-        } else {
-          console.log('  ⚠️  Sin category para matchear');
-          categoryMatch = { matched: false, confidence: 0, shouldCreate: false, reason: 'No category provided in file' };
-        }
-        
-        let subcategoryMatch: MatchResult;
-        if (product.subCategory) {
-          console.log(`  🔍 Buscando subcategory "${product.subCategory}" en:`, subcategories.map(s => s.name));
-          subcategoryMatch = await matchWithAI(product.subCategory, subcategories, 'subcategory');
-          console.log('  📂 Subcategory match resultado:', subcategoryMatch);
-        } else {
-          console.log('  ⚠️  Sin subcategory para matchear');
-          subcategoryMatch = { matched: false, confidence: 0, shouldCreate: false, reason: 'No subcategory provided in file' };
-        }
-        
-        // IMPORTANTE: NO crear aquí, solo marcar para crear
-        // La creación real se hará cuando el usuario confirme
-        
-        results.push({
-          product,
-          brandMatch,
-          categoryMatch,
-          subcategoryMatch,
-        });
+      // 2. Llamar al endpoint de backend para hacer matching en batch
+      console.log('🤖 [ProductStep] Llamando a /api/products/match...');
+      const matchResponse = await fetch('/api/products/match', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          products,
+          existingBrands: brands,
+          existingCategories: categories,
+          existingSubcategories: subcategories,
+        }),
+      });
+
+      if (!matchResponse.ok) {
+        throw new Error(`Error en matching: ${matchResponse.statusText}`);
       }
+
+      const matchData = await matchResponse.json();
+      
+      if (!matchData.success) {
+        throw new Error(matchData.error || 'Error desconocido en matching');
+      }
+
+      const results: ProductMatchResult[] = matchData.data.results;
       
       console.log('✅ [ProductStep] Matching completado:', results.length, 'productos procesados');
-      console.log('📊 [ProductStep] Resumen de matching:', {
-        total: results.length,
-        brandsToCreate: results.filter(r => r.brandMatch.shouldCreate && !r.brandMatch.matched).length,
-        categoriesToCreate: results.filter(r => r.categoryMatch.shouldCreate && !r.categoryMatch.matched).length,
-        subcategoriesToCreate: results.filter(r => r.subcategoryMatch.shouldCreate && !r.subcategoryMatch.matched).length,
-        results: results,
-      });
+      console.log('📊 [ProductStep] Resumen de matching:', matchData.data.summary);
       
       setMatchingResults(results);
       setIsMatching(false);
@@ -248,7 +235,47 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
     
     try {
       console.log('🚀 [ProductStep] Creando marcas, categorías y subcategorías nuevas...');
-      console.log('🚀 [ProductStep] Matching results:', matchingResults);
+      console.log('� [ProductStep] Ediciones manuales del usuario:', editedMatches);
+      console.log('🚀 [ProductStep] Matching results originales:', matchingResults);
+      
+      // Aplicar las ediciones manuales a los resultados
+      const updatedResults = matchingResults.map((result, index) => {
+        if (editedMatches[index]) {
+          const edits = editedMatches[index];
+          console.log(`  ✏️ Aplicando ediciones al producto ${index}:`, edits);
+          return {
+            ...result,
+            product: {
+              ...result.product,
+              brand: edits.brand || result.product.brand,
+              category: edits.category || result.product.category,
+              subCategory: edits.subCategory || result.product.subCategory,
+            },
+            // Si fue editado, marcar para creación
+            brandMatch: edits.brand ? { 
+              ...result.brandMatch, 
+              shouldCreate: true, 
+              matched: false,
+              reason: 'Editado manualmente por el usuario'
+            } : result.brandMatch,
+            categoryMatch: edits.category ? { 
+              ...result.categoryMatch, 
+              shouldCreate: true, 
+              matched: false,
+              reason: 'Editado manualmente por el usuario'
+            } : result.categoryMatch,
+            subcategoryMatch: edits.subCategory ? { 
+              ...result.subcategoryMatch, 
+              shouldCreate: true, 
+              matched: false,
+              reason: 'Editado manualmente por el usuario'
+            } : result.subcategoryMatch,
+          };
+        }
+        return result;
+      });
+      
+      console.log('🔄 [ProductStep] Matching results actualizados con ediciones:', updatedResults);
       
       const createdEntities = {
         brands: [] as string[],
@@ -257,7 +284,7 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
       };
       
       // Crear marcas nuevas
-      for (const result of matchingResults) {
+      for (const result of updatedResults) {
         console.log('🔍 [ProductStep] Procesando resultado:', {
           product: result.product.name,
           brandMatch: result.brandMatch,
@@ -295,7 +322,7 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
       }
       
       // Crear categorías nuevas
-      for (const result of matchingResults) {
+      for (const result of updatedResults) {
         if (result.categoryMatch.shouldCreate && !result.categoryMatch.matched && result.product.category) {
           try {
             console.log(`  ✨ Creando categoría: ${result.product.category}`);
@@ -315,7 +342,7 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
       }
       
       // Crear subcategorías nuevas
-      for (const result of matchingResults) {
+      for (const result of updatedResults) {
         if (result.subcategoryMatch.shouldCreate && !result.subcategoryMatch.matched && result.product.subCategory) {
           try {
             console.log(`  ✨ Creando subcategoría: ${result.product.subCategory}`);
@@ -342,7 +369,7 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
       // 🆕 CREAR LOS PRODUCTOS CON LOS IDs CORRECTOS
       console.log('\n🚀 [ProductStep] Creando productos con IDs asignados...');
       
-      const productsToCreate = matchingResults.map((result, index) => {
+      const productsToCreate = updatedResults.map((result, index) => {
         const product = result.product;
         
         // Construir el objeto producto con los IDs del matching
@@ -448,8 +475,25 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
   const handleContinueAfterCreation = () => {
     if (!creationSummary) return;
     
+    // Actualizar matchingResults con los valores editados antes de pasar al siguiente paso
+    const finalResults = matchingResults.map((result, index) => {
+      if (editedMatches[index]) {
+        const edits = editedMatches[index];
+        return {
+          ...result,
+          product: {
+            ...result.product,
+            brand: edits.brand || result.product.brand,
+            category: edits.category || result.product.category,
+            subCategory: edits.subCategory || result.product.subCategory,
+          }
+        };
+      }
+      return result;
+    });
+    
     onNext({ 
-      matchedProducts: matchingResults,
+      matchedProducts: finalResults,
       createdEntities: {
         brands: creationSummary.brands,
         categories: creationSummary.categories,
@@ -458,8 +502,11 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
     });
   };
 
-  // Si estamos haciendo matching
+  // Si estamos haciendo matching o creando productos
   if (isMatching) {
+    // Distinguir entre matching inicial y creación de productos
+    const isCreatingProducts = matchingResults.length > 0;
+    
     return (
       <div className="text-center space-y-6">
         <div 
@@ -476,15 +523,32 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
             }}
           />
         </div>
-        <h4 className="text-lg font-semibold" style={{ color: themeColors.text.primary }}>
-          🤖 Matching inteligente con IA...
-        </h4>
-        <p className="text-sm" style={{ color: themeColors.text.secondary }}>
-          Analizando {uploadedData.length} productos con OpenAI
-        </p>
-        <div className="text-xs" style={{ color: themeColors.text.secondary }}>
-          Verificando marcas, categorías y subcategorías...
-        </div>
+        
+        {isCreatingProducts ? (
+          <>
+            <h4 className="text-lg font-semibold" style={{ color: themeColors.text.primary }}>
+              ⚙️ Creando marcas, categorías y productos...
+            </h4>
+            <p className="text-sm" style={{ color: themeColors.text.secondary }}>
+              Importando {uploadedData.length} productos a la base de datos
+            </p>
+            <div className="text-xs" style={{ color: themeColors.text.secondary }}>
+              Creando entidades necesarias y guardando productos...
+            </div>
+          </>
+        ) : (
+          <>
+            <h4 className="text-lg font-semibold" style={{ color: themeColors.text.primary }}>
+              🔍 Analizando productos con algoritmo local...
+            </h4>
+            <p className="text-sm" style={{ color: themeColors.text.secondary }}>
+              Analizando {uploadedData.length} productos con sistema ultra-rápido
+            </p>
+            <div className="text-xs" style={{ color: themeColors.text.secondary }}>
+              ⚡ Sin OpenAI | $0.00 costo | 100% seguro
+            </div>
+          </>
+        )}
       </div>
     );
   }
@@ -649,10 +713,10 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-xl font-semibold" style={{ color: themeColors.text.primary }}>
-              Productos Procesados con IA
+              ⚡ Productos Procesados con Sistema Local
             </h3>
             <p className="text-sm mt-1" style={{ color: themeColors.text.secondary }}>
-              Revisa el matching inteligente antes de importar
+              Revisa el matching ANTES de importar. Puedes editar marcas/categorías si es necesario.
             </p>
           </div>
           <motion.button
@@ -734,23 +798,48 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
                 {/* Marca */}
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium" style={{ color: themeColors.text.secondary }}>
-                      🏷️ Marca:
-                    </span>
-                    {result.brandMatch.shouldCreate && !result.brandMatch.matched && (
-                      <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700">
-                        ✨ Se creará
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium" style={{ color: themeColors.text.secondary }}>
+                        🏷️ Marca:
                       </span>
-                    )}
-                    {result.brandMatch.wasCreated && (
-                      <span className="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700">
-                        🆕 Creada
-                      </span>
+                      {result.brandMatch.shouldCreate && !result.brandMatch.matched && (
+                        <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700">
+                          ✨ Se creará
+                        </span>
+                      )}
+                      {result.brandMatch.wasCreated && (
+                        <span className="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700">
+                          🆕 Creada
+                        </span>
+                      )}
+                    </div>
+                    {result.product.brand && (
+                      <button
+                        onClick={() => {
+                          const newValue = prompt('Editar marca:', editedMatches[index]?.brand || result.product.brand || '');
+                          if (newValue !== null) {
+                            setEditedMatches(prev => ({
+                              ...prev,
+                              [index]: {
+                                ...prev[index],
+                                brand: newValue,
+                              }
+                            }));
+                          }
+                        }}
+                        className="text-xs px-2 py-1 rounded hover:opacity-80 transition-opacity"
+                        style={{
+                          backgroundColor: `${themeColors.primary}20`,
+                          color: themeColors.primary,
+                        }}
+                      >
+                        ✏️
+                      </button>
                     )}
                   </div>
                   <div style={{ color: themeColors.text.primary }}>
-                    {result.brandMatch.matchedName || result.product.brand || 'Sin marca'}
+                    {editedMatches[index]?.brand || result.brandMatch.matchedName || result.product.brand || 'Sin marca'}
                   </div>
                   {result.brandMatch.confidence < 0.8 && (
                     <div className="text-xs text-yellow-600 flex items-center gap-1 mt-1">
@@ -758,27 +847,57 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
                       Confianza: {(result.brandMatch.confidence * 100).toFixed(0)}%
                     </div>
                   )}
+                  {editedMatches[index]?.brand && (
+                    <div className="text-xs text-blue-600 mt-1">
+                      ✍️ Editado manualmente
+                    </div>
+                  )}
                 </div>
                 
                 {/* Categoría */}
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium" style={{ color: themeColors.text.secondary }}>
-                      📁 Categoría:
-                    </span>
-                    {result.categoryMatch.shouldCreate && !result.categoryMatch.matched && (
-                      <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700">
-                        ✨ Se creará
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium" style={{ color: themeColors.text.secondary }}>
+                        📁 Categoría:
                       </span>
-                    )}
-                    {result.categoryMatch.wasCreated && (
-                      <span className="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700">
-                        🆕 Creada
-                      </span>
+                      {result.categoryMatch.shouldCreate && !result.categoryMatch.matched && (
+                        <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700">
+                          ✨ Se creará
+                        </span>
+                      )}
+                      {result.categoryMatch.wasCreated && (
+                        <span className="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700">
+                          🆕 Creada
+                        </span>
+                      )}
+                    </div>
+                    {result.product.category && (
+                      <button
+                        onClick={() => {
+                          const newValue = prompt('Editar categoría:', editedMatches[index]?.category || result.product.category || '');
+                          if (newValue !== null) {
+                            setEditedMatches(prev => ({
+                              ...prev,
+                              [index]: {
+                                ...prev[index],
+                                category: newValue,
+                              }
+                            }));
+                          }
+                        }}
+                        className="text-xs px-2 py-1 rounded hover:opacity-80 transition-opacity"
+                        style={{
+                          backgroundColor: `${themeColors.primary}20`,
+                          color: themeColors.primary,
+                        }}
+                      >
+                        ✏️
+                      </button>
                     )}
                   </div>
                   <div style={{ color: themeColors.text.primary }}>
-                    {result.categoryMatch.matchedName || result.product.category || 'Sin categoría'}
+                    {editedMatches[index]?.category || result.categoryMatch.matchedName || result.product.category || 'Sin categoría'}
                   </div>
                   {result.categoryMatch.confidence < 0.8 && (
                     <div className="text-xs text-yellow-600 flex items-center gap-1 mt-1">
@@ -786,32 +905,67 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
                       Confianza: {(result.categoryMatch.confidence * 100).toFixed(0)}%
                     </div>
                   )}
+                  {editedMatches[index]?.category && (
+                    <div className="text-xs text-blue-600 mt-1">
+                      ✍️ Editado manualmente
+                    </div>
+                  )}
                 </div>
                 
                 {/* Subcategoría */}
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium" style={{ color: themeColors.text.secondary }}>
-                      📂 Subcategoría:
-                    </span>
-                    {result.subcategoryMatch.shouldCreate && !result.subcategoryMatch.matched && (
-                      <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700">
-                        ✨ Se creará
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium" style={{ color: themeColors.text.secondary }}>
+                        📂 Subcategoría:
                       </span>
-                    )}
-                    {result.subcategoryMatch.wasCreated && (
-                      <span className="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700">
-                        🆕 Creada
-                      </span>
+                      {result.subcategoryMatch.shouldCreate && !result.subcategoryMatch.matched && (
+                        <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700">
+                          ✨ Se creará
+                        </span>
+                      )}
+                      {result.subcategoryMatch.wasCreated && (
+                        <span className="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700">
+                          🆕 Creada
+                        </span>
+                      )}
+                    </div>
+                    {result.product.subCategory && (
+                      <button
+                        onClick={() => {
+                          const newValue = prompt('Editar subcategoría:', editedMatches[index]?.subCategory || result.product.subCategory || '');
+                          if (newValue !== null) {
+                            setEditedMatches(prev => ({
+                              ...prev,
+                              [index]: {
+                                ...prev[index],
+                                subCategory: newValue,
+                              }
+                            }));
+                          }
+                        }}
+                        className="text-xs px-2 py-1 rounded hover:opacity-80 transition-opacity"
+                        style={{
+                          backgroundColor: `${themeColors.primary}20`,
+                          color: themeColors.primary,
+                        }}
+                      >
+                        ✏️
+                      </button>
                     )}
                   </div>
                   <div style={{ color: themeColors.text.primary }}>
-                    {result.subcategoryMatch.matchedName || result.product.subCategory || 'Sin subcategoría'}
+                    {editedMatches[index]?.subCategory || result.subcategoryMatch.matchedName || result.product.subCategory || 'Sin subcategoría'}
                   </div>
                   {result.subcategoryMatch.confidence < 0.8 && (
                     <div className="text-xs text-yellow-600 flex items-center gap-1 mt-1">
                       <AlertCircle className="w-3 h-3" />
                       Confianza: {(result.subcategoryMatch.confidence * 100).toFixed(0)}%
+                    </div>
+                  )}
+                  {editedMatches[index]?.subCategory && (
+                    <div className="text-xs text-blue-600 mt-1">
+                      ✍️ Editado manualmente
                     </div>
                   )}
                 </div>
@@ -880,7 +1034,7 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
           📦 Paso 2: Carga de Productos
         </h2>
         <p className="text-sm" style={{ color: themeColors.text.secondary }}>
-          Sube tu archivo Excel o CSV con los productos. Usaremos IA para hacer matching inteligente.
+          Sube tu archivo Excel o CSV con los productos. Sistema inteligente ultra-rápido sin OpenAI.
         </p>
       </div>
 
@@ -926,12 +1080,12 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
         </h4>
         <ul className="space-y-2 text-sm" style={{ color: themeColors.text.secondary }}>
           <li className="flex items-start gap-2">
-            <span className="text-base">🤖</span>
-            <span>Usa OpenAI GPT-4 para encontrar la mejor coincidencia de marcas, categorías y subcategorías</span>
+            <span className="text-base">⚡</span>
+            <span>Sistema local ultra-rápido (0.02s para 20 productos) sin necesidad de OpenAI</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-base">✨</span>
-            <span>Detecta variaciones (Sony/SONY/sony), abreviaturas (HP/Hewlett Packard) y errores tipográficos</span>
+            <span>Detecta variaciones (Sony/SONY/sony), sinónimos (HP/Hewlett Packard) y errores tipográficos</span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-base">🆕</span>
@@ -940,6 +1094,10 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
           <li className="flex items-start gap-2">
             <span className="text-base">📊</span>
             <span>Muestra el nivel de confianza del matching para cada producto</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-base">🔒</span>
+            <span>100% seguro y gratis - no expone API keys ni genera costos</span>
           </li>
         </ul>
       </div>

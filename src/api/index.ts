@@ -156,9 +156,10 @@ export interface ProductPricing {
   base_price: number;
   final_price: number;
   total_savings: number;
-  percentage_saved: number;
+  percentage_saved: string | number;
   has_discount: boolean;
-  stacking_info: {
+  price_source?: string; // 'product' | 'price_list'
+  stacking_info?: {
     method: string;
     discounts_applied_count: number;
     is_stacked: boolean;
@@ -167,31 +168,42 @@ export interface ProductPricing {
       name: string;
       type: string;
       value: number;
-      applied_value: number;
+      amount?: number;
+      applied_value?: number;
+      price_after?: number;
     }>;
   };
 }
 
 export interface ProductDiscount {
-  id: string;
+  id?: string;
+  discount_id?: string;
   name: string;
-  type: string; // 'percentage', 'fixed', 'bogo', 'bundle', etc.
-  value: number;
+  type?: string; // 'percentage', 'fixed', 'bogo', 'bundle', etc.
+  discount_type?: string;
+  value?: number;
+  discount_value?: number;
   description?: string;
+  campaign?: string;
   min_quantity?: number;
   min_purchase_amount?: number;
   potential_savings?: number;
   potential_final_price?: number;
+  _canAutoApply?: boolean;
+  _autoApplyBlocked?: boolean;
+  _blockReasons?: string[];
 }
 
 export interface ProductDiscounts {
   total_applicable: number;
+  auto_applicable: number;
+  conditional: number;
   direct_discounts: ProductDiscount[];
-  promotional_discounts: ProductDiscount[];
-  min_purchase_discounts: ProductDiscount[];
-  tiered_volume_discounts: ProductDiscount[];
-  loyalty_discounts: ProductDiscount[];
-  shipping_discounts: ProductDiscount[];
+  promotional_discounts?: ProductDiscount[];
+  min_purchase_discounts?: ProductDiscount[];
+  tiered_volume_discounts?: ProductDiscount[];
+  loyalty_discounts?: ProductDiscount[];
+  shipping_discounts?: ProductDiscount[];
 }
 
 export interface ProductWithDiscounts {
@@ -321,6 +333,11 @@ export interface Category {
   slug: string;
   image?: string;
   productCount: number;
+  // Campos alternativos que puede devolver el backend
+  categoryId?: string;
+  categoryCode?: string;
+  _id?: string;
+  [key: string]: unknown;
 }
 
 export interface Brand {
@@ -329,6 +346,10 @@ export interface Brand {
   slug: string;
   logo?: string;
   productCount: number;
+  // Campos alternativos que puede devolver el backend
+  brandId?: string;
+  _id?: string;
+  [key: string]: unknown;
 }
 
 export interface PriceList {
@@ -1107,12 +1128,12 @@ export const productApi = {
   getProductsWithDiscounts: async (params?: {
     page?: number;
     limit?: number;
-    category?: string;
-    brand?: string;
+    sortBy?: string;      // 'price' | 'name' | 'createdAt'
+    sortOrder?: string;   // 'asc' | 'desc'
+    category_id?: string;
+    subcategory_id?: string;
+    brand_id?: string;
     search?: string;
-    minPrice?: number;
-    maxPrice?: number;
-    inStock?: boolean;
   }): Promise<ApiResponse<ProductWithDiscounts[] | ProductsWithDiscountsResponse | NestedProductsResponse>> => {
     const queryString = params 
       ? "?" + new URLSearchParams(

@@ -64,7 +64,7 @@ export default function ProductsAdminPage() {
     if (!user) {
       console.warn('[PRODUCTOS] ❌ No hay usuario logueado');
       setIsLoading(false);
-      return;
+      return; 
     }
 
     const distributorCode = user?.distributorInfo?.distributorCode;
@@ -530,7 +530,7 @@ export default function ProductsAdminPage() {
                                 className="text-xs"
                                 style={{ color: themeColors.text.secondary }}
                               >
-                                {product.brand}
+                                {typeof product.brand === 'object' && product.brand !== null ? (product.brand as any).name : product.brand}
                               </div>
                             </div>
                           </div>
@@ -555,7 +555,7 @@ export default function ProductsAdminPage() {
                               color: themeColors.text.primary 
                             }}
                           >
-                            {product.category}
+                            {typeof product.category === 'object' && product.category !== null ? (product.category as any).name : product.category}
                           </span>
                         </td>
                         <td className="px-6 py-5">

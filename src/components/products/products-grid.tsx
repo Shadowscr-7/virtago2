@@ -22,7 +22,7 @@ import { useCartStore } from "@/components/cart/cart-store";
 
 interface Product {
   id: string;
-  prodVirtaId?: string; // Identificador principal del backend
+  prodVirtaId?: string;
   name: string;
   brand: string;
   supplier: string;
@@ -38,16 +38,24 @@ interface Product {
   reviews?: number;
   tags: string[];
   specifications: Record<string, string>;
-  // Campos adicionales para mostrar descuentos
   pricing?: {
     base_price: number;
     final_price: number;
     total_savings: number;
-    percentage_saved: number;
+    percentage_saved: string | number;
     has_discount: boolean;
   };
   discounts?: {
     total_applicable: number;
+    auto_applicable?: number;
+    conditional?: number;
+    direct_discounts?: Array<{
+      name: string;
+      discount_type?: string;
+      discount_value?: number;
+      _canAutoApply?: boolean;
+      _blockReasons?: string[];
+    }>;
   };
   bestAdditionalDiscount?: {
     type: string;
@@ -55,7 +63,6 @@ interface Product {
     potentialSavings: number;
     badge: string;
   } | null;
-  // Imágenes del producto desde el API
   productImages?: Array<{
     url: string;
     blurDataURL?: string;
@@ -155,11 +162,9 @@ export function ProductsGrid({
   const currentProducts = products.slice(startIndex, endIndex);
 
   const ProductCard = ({ product }: { product: Product }) => {
-    const isOnSale =
-      product.originalPrice && product.originalPrice > product.price;
-    const discount = isOnSale
-      ? calculateDiscount(product.originalPrice!, product.price)
-      : 0;
+    const discountPercent = Math.round(Number(product.pricing?.percentage_saved || 0));
+    const isOnSale = product.pricing?.has_discount && discountPercent > 0;
+    const discount = discountPercent;
 
     // Obtener la imagen principal o usar fallback
     const primaryImage = product.productImages?.find(img => img.isPrimary) || product.productImages?.[0];
@@ -175,7 +180,7 @@ export function ProductsGrid({
         className="group bg-white dark:bg-slate-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-slate-200/50 dark:border-slate-600/50 overflow-hidden"
       >
         {/* Image */}
-        <div className="relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-700">
+        <Link href={`/producto/${product.prodVirtaId || product.id}`} className="block relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-700 cursor-pointer">
           {hasImage ? (
             <Image
               src={primaryImage!.url}
@@ -196,7 +201,7 @@ export function ProductsGrid({
 
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-2">
-            {isOnSale && (
+            {isOnSale && discount > 0 && (
               <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                 -{discount}%
               </span>
@@ -216,7 +221,7 @@ export function ProductsGrid({
           {/* Action Buttons */}
           <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <button
-              onClick={() => toggleFavorite(product.id)}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(product.id); }}
               className={`p-2 rounded-full backdrop-blur-sm transition-colors ${
                 favorites.has(product.id)
                   ? "bg-red-500 text-white"
@@ -236,7 +241,7 @@ export function ProductsGrid({
           {/* Quick Add */}
           <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <button
-              onClick={() => handleAddToCart(product)}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAddToCart(product); }}
               disabled={!product.inStock}
               className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
             >
@@ -244,19 +249,16 @@ export function ProductsGrid({
               {product.inStock ? "Agregar al Carrito" : "Sin Stock"}
             </button>
           </div>
-        </div>
+        </Link>
 
         {/* Content */}
         <div className="p-4">
-          {/* Brand */}
-          <div className="text-sm text-slate-500 dark:text-slate-400 mb-1">
-            {product.brand}
-          </div>
-
           {/* Title */}
-          <h3 className="font-semibold text-slate-900 dark:text-white mb-2 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-            {product.name}
-          </h3>
+          <Link href={`/producto/${product.prodVirtaId || product.id}`}>
+            <h3 className="font-semibold text-slate-900 dark:text-white mb-2 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors cursor-pointer">
+              {product.name}
+            </h3>
+          </Link>
 
           {/* Rating */}
           {product.rating && (
@@ -286,22 +288,17 @@ export function ProductsGrid({
               <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 {formatPrice(product.price)}
               </span>
-              {isOnSale && product.pricing?.percentage_saved && (
-                <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                  -{Math.round(product.pricing.percentage_saved)}%
-                </span>
-              )}
             </div>
 
-            {/* Precio Base (tachado) */}
-            {isOnSale && (
+            {/* Precio Base (tachado) + Ahorro */}
+            {isOnSale && product.originalPrice && (
               <div className="flex items-center gap-2">
                 <span className="text-sm text-slate-500 dark:text-slate-400 line-through">
-                  {formatPrice(product.originalPrice!)}
+                  {formatPrice(product.originalPrice)}
                 </span>
                 {product.pricing?.total_savings && product.pricing.total_savings > 0 && (
                   <span className="text-xs text-green-600 dark:text-green-400 font-medium">
-                    Ahorras ${product.pricing.total_savings.toLocaleString()}
+                    Ahorras {formatPrice(product.pricing.total_savings)}
                   </span>
                 )}
               </div>
@@ -319,8 +316,18 @@ export function ProductsGrid({
                   </span>
                 </div>
                 <div className="text-xs text-purple-700 dark:text-purple-300 font-medium mt-1">
-                  Ahorro extra: ${product.bestAdditionalDiscount.potentialSavings.toLocaleString()}
+                  Ahorro extra: {formatPrice(product.bestAdditionalDiscount.potentialSavings)}
                 </div>
+              </div>
+            )}
+
+            {/* Promociones condicionales disponibles */}
+            {product.discounts?.conditional && product.discounts.conditional > 0 && (
+              <div className="mt-2 flex items-center gap-1 text-xs text-green-700 dark:text-green-400">
+                <span>🏷️</span>
+                <span className="font-medium">
+                  {product.discounts.conditional} promoción(es) disponible(s)
+                </span>
               </div>
             )}
           </div>
@@ -357,11 +364,9 @@ export function ProductsGrid({
   };
 
   const ProductListItem = ({ product }: { product: Product }) => {
-    const isOnSale =
-      product.originalPrice && product.originalPrice > product.price;
-    const discount = isOnSale
-      ? calculateDiscount(product.originalPrice!, product.price)
-      : 0;
+    const discountPercent = Math.round(Number(product.pricing?.percentage_saved || 0));
+    const isOnSale = product.pricing?.has_discount && discountPercent > 0;
+    const discount = discountPercent;
 
     // Obtener la imagen principal o usar fallback
     const primaryImage = product.productImages?.find(img => img.isPrimary) || product.productImages?.[0];
@@ -378,7 +383,7 @@ export function ProductsGrid({
       >
         <div className="flex">
           {/* Image */}
-          <div className="relative w-48 h-32 flex-shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-700">
+          <Link href={`/producto/${product.prodVirtaId || product.id}`} className="block relative w-48 h-32 flex-shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-700 cursor-pointer">
             {hasImage ? (
               <Image
                 src={primaryImage!.url}
@@ -399,7 +404,7 @@ export function ProductsGrid({
 
             {/* Badges */}
             <div className="absolute top-2 left-2 flex flex-col gap-1">
-              {isOnSale && (
+              {isOnSale && discount > 0 && (
                 <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                   -{discount}%
                 </span>
@@ -410,21 +415,23 @@ export function ProductsGrid({
                 </span>
               )}
             </div>
-          </div>
+          </Link>
 
           {/* Content */}
           <div className="flex-1 p-4">
             <div className="flex justify-between">
               <div className="flex-1">
-                {/* Brand */}
+                {/* Category */}
                 <div className="text-sm text-slate-500 dark:text-slate-400 mb-1">
-                  {product.brand} • {product.category}
+                  {product.category}
                 </div>
 
                 {/* Title */}
-                <h3 className="font-semibold text-lg text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                  {product.name}
-                </h3>
+                <Link href={`/producto/${product.prodVirtaId || product.id}`}>
+                  <h3 className="font-semibold text-lg text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors cursor-pointer">
+                    {product.name}
+                  </h3>
+                </Link>
 
                 {/* Description */}
                 <p className="text-slate-600 dark:text-slate-300 text-sm mb-3 line-clamp-2">
@@ -474,22 +481,17 @@ export function ProductsGrid({
                     <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                       {formatPrice(product.price)}
                     </span>
-                    {isOnSale && product.pricing?.percentage_saved && (
-                      <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                        -{Math.round(product.pricing.percentage_saved)}%
-                      </span>
-                    )}
                   </div>
 
                   {/* Precio Base (tachado) */}
-                  {isOnSale && (
+                  {isOnSale && product.originalPrice && (
                     <div className="flex items-center justify-end gap-2 mb-1">
                       <span className="text-sm text-slate-500 dark:text-slate-400 line-through">
-                        {formatPrice(product.originalPrice!)}
+                        {formatPrice(product.originalPrice)}
                       </span>
                       {product.pricing?.total_savings && product.pricing.total_savings > 0 && (
                         <span className="text-xs text-green-600 dark:text-green-400 font-medium">
-                          Ahorras ${product.pricing.total_savings.toLocaleString()}
+                          Ahorras {formatPrice(product.pricing.total_savings)}
                         </span>
                       )}
                     </div>
@@ -507,8 +509,15 @@ export function ProductsGrid({
                         </span>
                       </div>
                       <div className="text-xs text-purple-700 dark:text-purple-300 font-medium mt-1 text-right">
-                        Ahorro extra: ${product.bestAdditionalDiscount.potentialSavings.toLocaleString()}
+                        Ahorro extra: {formatPrice(product.bestAdditionalDiscount.potentialSavings)}
                       </div>
+                    </div>
+                  )}
+
+                  {/* Promociones condicionales */}
+                  {product.discounts?.conditional && product.discounts.conditional > 0 && (
+                    <div className="mt-1 text-xs text-green-700 dark:text-green-400 text-right">
+                      🏷️ {product.discounts.conditional} promoción(es) disponible(s)
                     </div>
                   )}
                 </div>

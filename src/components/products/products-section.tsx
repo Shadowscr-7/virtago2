@@ -1,333 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { toast } from "sonner";
-import { api, ProductWithDiscounts, ProductDiscount } from "@/api";
+import { api, ProductWithDiscounts, ProductDiscount, Category, Brand } from "@/api";
 import { ProductsHero } from "./products-hero";
 import { ProductsFilters } from "./products-filters";
 import { ProductsGrid } from "./products-grid";
 import { ProductsStats } from "./products-stats";
-
-// Mock data expandido para productos
-const mockProducts = [
-  {
-    id: "1",
-    name: "iPhone 15 Pro Max 256GB",
-    brand: "Apple",
-    supplier: "Tech Distribution SA",
-    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400",
-    price: 24999,
-    originalPrice: 27999,
-    description:
-      "El smartphone más avanzado con chip A17 Pro y cámara profesional",
-    category: "Electrónicos",
-    subcategory: "Smartphones",
-    inStock: true,
-    stockQuantity: 150,
-    rating: 4.8,
-    reviews: 324,
-    tags: ["5G", "Pro", "Premium", "iOS"],
-    specifications: {
-      pantalla: "6.1 pulgadas Super Retina XDR",
-      almacenamiento: "256GB",
-      ram: "8GB",
-      bateria: "Hasta 29 horas de video",
-    } as Record<string, string>,
-  },
-  {
-    id: "2",
-    name: 'MacBook Pro 16" M3',
-    brand: "Apple",
-    supplier: "Apple Authorized",
-    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400",
-    price: 45999,
-    originalPrice: 49999,
-    description: "Laptop profesional con chip M3 para máximo rendimiento",
-    category: "Informática",
-    subcategory: "Laptops",
-    inStock: true,
-    stockQuantity: 45,
-    rating: 4.9,
-    reviews: 187,
-    tags: ["M3", "Pro", "macOS", "16 pulgadas"],
-    specifications: {
-      procesador: "Apple M3",
-      ram: "16GB",
-      almacenamiento: "512GB SSD",
-      pantalla: "16.2 pulgadas",
-    } as Record<string, string>,
-  },
-  {
-    id: "3",
-    name: "Samsung Galaxy S24 Ultra",
-    brand: "Samsung",
-    supplier: "Samsung Electronics",
-    image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400",
-    price: 22999,
-    description: "Smartphone premium con S Pen y cámara de 200MP",
-    category: "Electrónicos",
-    subcategory: "Smartphones",
-    inStock: true,
-    stockQuantity: 89,
-    rating: 4.7,
-    reviews: 256,
-    tags: ["Android", "S Pen", "200MP", "Ultra"],
-    specifications: {
-      pantalla: "6.8 pulgadas",
-      almacenamiento: "256GB",
-      ram: "12GB",
-      bateria: "5000 mAh",
-    } as Record<string, string>,
-  },
-  {
-    id: "4",
-    name: "AirPods Pro 2da Gen",
-    brand: "Apple",
-    supplier: "Tech Distribution SA",
-    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400",
-    price: 5999,
-    originalPrice: 6499,
-    description: "Auriculares inalámbricos con cancelación activa de ruido",
-    category: "Electrónicos",
-    subcategory: "Audio",
-    inStock: true,
-    stockQuantity: 234,
-    rating: 4.6,
-    reviews: 412,
-    tags: ["Bluetooth", "ANC", "iOS", "Premium"],
-    specifications: {
-      conectividad: "Bluetooth 5.3",
-      bateria: "30 horas",
-      resistencia: "IPX4",
-      cancelacion: "Activa",
-    } as Record<string, string>,
-  },
-  {
-    id: "5",
-    name: "Dell XPS 13 Plus",
-    brand: "Dell",
-    supplier: "Dell Business",
-    image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400",
-    price: 28999,
-    description: "Ultrabook premium para profesionales exigentes",
-    category: "Informática",
-    subcategory: "Laptops",
-    inStock: true,
-    stockQuantity: 67,
-    rating: 4.5,
-    reviews: 143,
-    tags: ["Intel", "Windows", "Ultrabook", "Business"],
-    specifications: {
-      procesador: "Intel i7-1360P",
-      ram: "16GB",
-      almacenamiento: "512GB SSD",
-      pantalla: "13.4 pulgadas",
-    } as Record<string, string>,
-  },
-  {
-    id: "6",
-    name: "LG UltraWide 34WP65C",
-    brand: "LG",
-    supplier: "LG Electronics",
-    image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400",
-    price: 8999,
-    originalPrice: 9999,
-    description: "Monitor ultrawide curvo para máxima productividad",
-    category: "Informática",
-    subcategory: "Monitores",
-    inStock: true,
-    stockQuantity: 78,
-    rating: 4.4,
-    reviews: 89,
-    tags: ["Ultrawide", "Curvo", "USB-C", "HDR"],
-    specifications: {
-      tamano: "34 pulgadas",
-      resolucion: "3440 x 1440",
-      curvatura: "1000R",
-      conectividad: "USB-C, HDMI",
-    } as Record<string, string>,
-  },
-  {
-    id: "7",
-    name: "Herman Miller Aeron",
-    brand: "Herman Miller",
-    supplier: "Office Premium",
-    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400",
-    price: 15999,
-    originalPrice: 17999,
-    description: "Silla ergonómica de oficina premium para ejecutivos",
-    category: "Oficina",
-    subcategory: "Mobiliario",
-    inStock: true,
-    stockQuantity: 23,
-    rating: 4.9,
-    reviews: 76,
-    tags: ["Ergonómica", "Premium", "Ejecutiva", "Ajustable"],
-    specifications: {
-      material: "Malla transpirable",
-      peso_max: "150 kg",
-      garantia: "12 años",
-      ajustes: "8 puntos",
-    } as Record<string, string>,
-  },
-  {
-    id: "8",
-    name: "Canon EOS R5",
-    brand: "Canon",
-    supplier: "Canon Professional",
-    image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400",
-    price: 67999,
-    description: "Cámara profesional sin espejo de 45MP con video 8K",
-    category: "Fotografía",
-    subcategory: "Cámaras",
-    inStock: true,
-    stockQuantity: 12,
-    rating: 4.8,
-    reviews: 54,
-    tags: ["Profesional", "8K", "45MP", "Sin espejo"],
-    specifications: {
-      sensor: "45MP CMOS",
-      video: "8K RAW",
-      estabilizacion: "IBIS 8 pasos",
-      conectividad: "WiFi 6, USB-C",
-    } as Record<string, string>,
-  },
-  {
-    id: "9",
-    name: "Sony WH-1000XM5",
-    brand: "Sony",
-    supplier: "Sony Audio",
-    image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400",
-    price: 7999,
-    originalPrice: 8499,
-    description: "Auriculares over-ear con la mejor cancelación de ruido",
-    category: "Electrónicos",
-    subcategory: "Audio",
-    inStock: true,
-    stockQuantity: 156,
-    rating: 4.7,
-    reviews: 298,
-    tags: ["Bluetooth", "ANC", "Hi-Res", "Premium"],
-    specifications: {
-      bateria: "30 horas",
-      cancelacion: "V1 + QN1",
-      codecs: "LDAC, Hi-Res",
-      peso: "250g",
-    } as Record<string, string>,
-  },
-  {
-    id: "10",
-    name: 'iPad Pro 12.9" M2',
-    brand: "Apple",
-    supplier: "Tech Distribution SA",
-    image: "https://images.unsplash.com/photo-1561154464-82e9adf32764?w=400",
-    price: 21999,
-    description: "Tablet profesional con chip M2 y pantalla Liquid Retina XDR",
-    category: "Informática",
-    subcategory: "Tablets",
-    inStock: true,
-    stockQuantity: 91,
-    rating: 4.6,
-    reviews: 167,
-    tags: ["M2", "Pro", "iPadOS", "Apple Pencil"],
-    specifications: {
-      procesador: "Apple M2",
-      pantalla: "12.9 pulgadas",
-      almacenamiento: "256GB",
-      conectividad: "USB-C, 5G",
-    } as Record<string, string>,
-  },
-];
-
-// Datos para filtros
-export const filterData = {
-  categories: [
-    { id: "all", name: "Todas las categorías", count: mockProducts.length },
-    {
-      id: "electronics",
-      name: "Electrónicos",
-      count: mockProducts.filter((p) => p.category === "Electrónicos").length,
-    },
-    {
-      id: "computing",
-      name: "Informática",
-      count: mockProducts.filter((p) => p.category === "Informática").length,
-    },
-    {
-      id: "office",
-      name: "Oficina",
-      count: mockProducts.filter((p) => p.category === "Oficina").length,
-    },
-    {
-      id: "photography",
-      name: "Fotografía",
-      count: mockProducts.filter((p) => p.category === "Fotografía").length,
-    },
-  ],
-  subcategories: {
-    electronics: ["Smartphones", "Audio", "Accesorios"],
-    computing: ["Laptops", "Monitores", "Tablets", "Periféricos"],
-    office: ["Mobiliario", "Impresoras", "Suministros"],
-    photography: ["Cámaras", "Lentes", "Accesorios"],
-  },
-  brands: [
-    { id: "all", name: "Todas las marcas", count: mockProducts.length },
-    {
-      id: "apple",
-      name: "Apple",
-      count: mockProducts.filter((p) => p.brand === "Apple").length,
-    },
-    {
-      id: "samsung",
-      name: "Samsung",
-      count: mockProducts.filter((p) => p.brand === "Samsung").length,
-    },
-    {
-      id: "dell",
-      name: "Dell",
-      count: mockProducts.filter((p) => p.brand === "Dell").length,
-    },
-    {
-      id: "lg",
-      name: "LG",
-      count: mockProducts.filter((p) => p.brand === "LG").length,
-    },
-    {
-      id: "canon",
-      name: "Canon",
-      count: mockProducts.filter((p) => p.brand === "Canon").length,
-    },
-    {
-      id: "sony",
-      name: "Sony",
-      count: mockProducts.filter((p) => p.brand === "Sony").length,
-    },
-    {
-      id: "herman-miller",
-      name: "Herman Miller",
-      count: mockProducts.filter((p) => p.brand === "Herman Miller").length,
-    },
-  ],
-  suppliers: [
-    { id: "all", name: "Todos los proveedores" },
-    { id: "tech-distribution", name: "Tech Distribution SA" },
-    { id: "apple-authorized", name: "Apple Authorized" },
-    { id: "samsung-electronics", name: "Samsung Electronics" },
-    { id: "dell-business", name: "Dell Business" },
-    { id: "lg-electronics", name: "LG Electronics" },
-    { id: "office-premium", name: "Office Premium" },
-    { id: "canon-professional", name: "Canon Professional" },
-    { id: "sony-audio", name: "Sony Audio" },
-  ],
-  priceRanges: [
-    { id: "all", name: "Todos los precios", min: 0, max: Infinity },
-    { id: "under-5k", name: "Menos de $5,000", min: 0, max: 5000 },
-    { id: "5k-15k", name: "$5,000 - $15,000", min: 5000, max: 15000 },
-    { id: "15k-30k", name: "$15,000 - $30,000", min: 15000, max: 30000 },
-    { id: "30k-50k", name: "$30,000 - $50,000", min: 30000, max: 50000 },
-    { id: "over-50k", name: "Más de $50,000", min: 50000, max: Infinity },
-  ],
-};
 
 export interface ProductFilters {
   search: string;
@@ -341,10 +20,10 @@ export interface ProductFilters {
   onSaleOnly: boolean;
 }
 
-// Tipo local para ProductsGrid (temporalmente, hasta tener todos los campos del backend)
+// Tipo local para ProductsGrid
 interface GridProduct {
   id: string;
-  prodVirtaId?: string; // Identificador principal del backend
+  prodVirtaId?: string;
   name: string;
   brand: string;
   supplier: string;
@@ -360,16 +39,24 @@ interface GridProduct {
   reviews?: number;
   tags: string[];
   specifications: Record<string, string>;
-  // Campos adicionales para mostrar descuentos
   pricing?: {
     base_price: number;
     final_price: number;
     total_savings: number;
-    percentage_saved: number;
+    percentage_saved: string | number;
     has_discount: boolean;
   };
   discounts?: {
     total_applicable: number;
+    auto_applicable?: number;
+    conditional?: number;
+    direct_discounts?: Array<{
+      name: string;
+      discount_type?: string;
+      discount_value?: number;
+      _canAutoApply?: boolean;
+      _blockReasons?: string[];
+    }>;
   };
   bestAdditionalDiscount?: {
     type: string;
@@ -377,7 +64,6 @@ interface GridProduct {
     potentialSavings: number;
     badge: string;
   } | null;
-  // Imágenes del producto
   productImages?: Array<{
     url: string;
     blurDataURL?: string;
@@ -395,6 +81,10 @@ export function ProductsSection() {
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const PRODUCTS_PER_PAGE = 20;
 
+  // Estado para categorías y marcas reales del backend
+  const [apiCategories, setApiCategories] = useState<Category[]>([]);
+  const [apiBrands, setApiBrands] = useState<Brand[]>([]);
+
   // Estado para filtros UI
   const [filters, setFilters] = useState<ProductFilters>({
     search: "",
@@ -410,50 +100,172 @@ export function ProductsSection() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Adaptar ProductWithDiscounts al formato esperado por ProductsGrid
-  const adaptProducts = (products: ProductWithDiscounts[]): GridProduct[] => {
-    return products.map((p) => {
-      // Calcular el mejor descuento adicional disponible
-      const bestAdditionalDiscount = getBestAdditionalDiscount(p);
+  // Extraer el ID real de una categoría (el backend puede usar distintos campos)
+  const getCategoryId = useCallback((c: Category): string => {
+    return c.id || c.categoryId || c.categoryCode || c._id || '';
+  }, []);
 
+  // Extraer el ID real de una marca (el backend puede usar distintos campos)
+  const getBrandId = useCallback((b: Brand): string => {
+    return b.id || b.brandId || b._id || '';
+  }, []);
+
+  // Construir filterData desde los datos del backend (productCount viene de /categories y /brands)
+  // Se deduplican por ID para evitar keys duplicados en React y problemas de selección
+  const filterData = useMemo(() => {
+    // Deduplicar categorías por ID real
+    const seenCatIds = new Set<string>();
+    const uniqueCategories = apiCategories
+      .map((c, idx) => {
+        const realId = getCategoryId(c);
+        return {
+          id: realId || `cat-${idx}`,
+          name: c.name,
+          count: c.productCount || 0,
+        };
+      })
+      .filter(c => {
+        if (seenCatIds.has(c.id)) return false;
+        seenCatIds.add(c.id);
+        return true;
+      });
+
+    // Deduplicar marcas por ID real
+    const seenBrandIds = new Set<string>();
+    const uniqueBrands = apiBrands
+      .map((b, idx) => {
+        const realId = getBrandId(b);
+        return {
+          id: realId || `brand-${idx}`,
+          name: b.name,
+          count: b.productCount || 0,
+        };
+      })
+      .filter(b => {
+        if (seenBrandIds.has(b.id)) return false;
+        seenBrandIds.add(b.id);
+        return true;
+      });
+
+    return {
+      categories: [
+        { id: "all", name: "Todas las categorías", count: totalProducts },
+        ...uniqueCategories,
+      ],
+      subcategories: {} as Record<string, string[]>,
+      brands: [
+        { id: "all", name: "Todas las marcas", count: totalProducts },
+        ...uniqueBrands,
+      ],
+      suppliers: [] as Array<{ id: string; name: string }>,
+      priceRanges: [
+        { id: "all", name: "Todos los precios", min: 0, max: Infinity },
+        { id: "under-100", name: "Menos de $100", min: 0, max: 100 },
+        { id: "100-500", name: "$100 - $500", min: 100, max: 500 },
+        { id: "500-1000", name: "$500 - $1,000", min: 500, max: 1000 },
+        { id: "1000-5000", name: "$1,000 - $5,000", min: 1000, max: 5000 },
+        { id: "over-5000", name: "Más de $5,000", min: 5000, max: Infinity },
+      ],
+    };
+  }, [apiCategories, apiBrands, totalProducts]);
+
+  // Cargar categorías y marcas reales del backend
+  useEffect(() => {
+    const loadFiltersData = async () => {
+      try {
+        const [categoriesRes, brandsRes] = await Promise.all([
+          api.product.getCategories(),
+          api.product.getBrands(),
+        ]);
+
+        if (categoriesRes.success && categoriesRes.data) {
+          const cats = Array.isArray(categoriesRes.data)
+            ? categoriesRes.data
+            : (categoriesRes.data as any)?.data || [];
+          console.log("📂 Categorías cargadas:", cats.length, "- Primera:", JSON.stringify(cats[0]));
+          setApiCategories(cats);
+        }
+
+        if (brandsRes.success && brandsRes.data) {
+          const brands = Array.isArray(brandsRes.data)
+            ? brandsRes.data
+            : (brandsRes.data as any)?.data || [];
+          console.log("🏷️ Marcas cargadas:", brands.length, "- Primera:", JSON.stringify(brands[0]));
+          setApiBrands(brands);
+        }
+      } catch (error) {
+        console.error("❌ Error cargando filtros:", error);
+      }
+    };
+
+    loadFiltersData();
+  }, []);
+
+  // Adaptar ProductWithDiscounts al formato esperado por ProductsGrid
+  const adaptProducts = useCallback((products: ProductWithDiscounts[]): GridProduct[] => {
+    return products.map((p) => {
       // Obtener la imagen principal
       const primaryImage = p.productImages?.find(img => img.isPrimary) || p.productImages?.[0];
 
+      // Extraer brand name (puede ser string o objeto)
+      const brandName = typeof p.brandId === 'object' && p.brandId !== null
+        ? (p.brandId as any).name || 'Sin marca'
+        : (p.brandId || 'Sin marca');
+
+      // Extraer category name (puede ser string o objeto)
+      const categoryName = typeof p.categoryCode === 'object' && p.categoryCode !== null
+        ? (p.categoryCode as any).name || 'General'
+        : (p.categoryCode || 'General');
+
+      // Calcular el mejor descuento adicional
+      const bestAdditionalDiscount = getBestAdditionalDiscount(p);
+
       return {
-        id: p.id,
-        prodVirtaId: p.prodVirtaId, // Identificador principal del backend
-        name: p.name || p.title,
-        brand: p.brandId || "Sin marca",
+        id: p.id || p.prodVirtaId,
+        prodVirtaId: p.prodVirtaId,
+        name: p.name || p.title || 'Producto sin nombre',
+        brand: brandName,
         supplier: p.distributorCode || "Proveedor",
-        image: primaryImage?.url || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400",
-        price: p.pricing.final_price, // Precio con descuento aplicado
-        originalPrice: p.pricing.has_discount ? p.pricing.base_price : undefined,
+        image: primaryImage?.url || "",
+        price: p.pricing?.final_price ?? p.pricing?.base_price ?? 0,
+        originalPrice: p.pricing?.has_discount ? p.pricing.base_price : undefined,
         description: p.shortDescription || p.fullDescription || "",
-        category: p.categoryCode || "General",
-        subcategory: p.categoryCode || "General",
-        inStock: p.stockQuantity > 0,
-        stockQuantity: p.stockQuantity,
-        rating: 4.5, // Placeholder
-        reviews: 0, // Placeholder
+        category: categoryName,
+        subcategory: categoryName,
+        inStock: (p.stockQuantity ?? 0) > 0,
+        stockQuantity: p.stockQuantity ?? 0,
+        rating: 4.5,
+        reviews: 0,
         tags: [],
         specifications: {},
-        // Campos adicionales para descuentos
-        pricing: p.pricing,
-        discounts: p.discounts,
+        pricing: p.pricing ? {
+          base_price: p.pricing.base_price,
+          final_price: p.pricing.final_price,
+          total_savings: p.pricing.total_savings,
+          percentage_saved: p.pricing.percentage_saved,
+          has_discount: p.pricing.has_discount,
+        } : undefined,
+        discounts: p.discounts ? {
+          total_applicable: p.discounts.total_applicable || 0,
+          auto_applicable: p.discounts.auto_applicable || 0,
+          conditional: p.discounts.conditional || 0,
+          direct_discounts: p.discounts.direct_discounts || [],
+        } : undefined,
         bestAdditionalDiscount,
-        // Agregar las imágenes del producto
         productImages: p.productImages || [],
       };
     });
-  };
+  }, []);
 
-  // Analizar todos los descuentos disponibles y retornar el mejor
+  // Analizar descuentos disponibles y retornar el mejor adicional (no auto-aplicado)
   const getBestAdditionalDiscount = (product: ProductWithDiscounts): {
     type: string;
     description: string;
     potentialSavings: number;
     badge: string;
   } | null => {
+    if (!product.discounts) return null;
+
     const allDiscounts: ProductDiscount[] = [
       ...(product.discounts.direct_discounts || []),
       ...(product.discounts.promotional_discounts || []),
@@ -464,11 +276,16 @@ export function ProductsSection() {
 
     if (allDiscounts.length === 0) return null;
 
+    // Filtrar solo descuentos que NO se auto-aplican (son condicionales)
+    const conditionalDiscounts = allDiscounts.filter(d => !d._canAutoApply);
+
+    if (conditionalDiscounts.length === 0) return null;
+
     // Encontrar el descuento con mayor ahorro potencial
     let bestDiscount: ProductDiscount | undefined;
     let maxSavings = 0;
 
-    allDiscounts.forEach((discount) => {
+    conditionalDiscounts.forEach((discount) => {
       const potentialSavings = discount.potential_savings || 0;
       if (potentialSavings > maxSavings) {
         maxSavings = potentialSavings;
@@ -478,47 +295,42 @@ export function ProductsSection() {
 
     if (!bestDiscount) return null;
 
-    // Generar descripción y badge según el tipo de descuento
+    const discountType = bestDiscount.type || bestDiscount.discount_type || '';
     let description = "";
     let badge = "";
 
-    switch (bestDiscount.type) {
+    switch (discountType) {
       case "bogo":
       case "buy_x_get_y":
         description = bestDiscount.name || "Oferta especial";
         badge = "🎁 PROMO";
         break;
-      
       case "bundle":
         description = bestDiscount.name || "Compra en pack";
         badge = "📦 PACK";
         break;
-      
       case "tiered_volume":
       case "volume":
         const minQty = bestDiscount.min_quantity || 2;
         description = `Comprando ${minQty}+ unidades`;
         badge = `🔢 x${minQty}`;
         break;
-      
       case "min_purchase":
         const minAmount = bestDiscount.min_purchase_amount || 0;
         description = `Comprando por $${minAmount.toLocaleString()}+`;
         badge = "💰 MIN";
         break;
-      
       case "loyalty":
         description = bestDiscount.name || "Descuento por fidelidad";
         badge = "⭐ LOYALTY";
         break;
-      
       default:
         description = bestDiscount.name || "Descuento adicional";
         badge = "🏷️ OFERTA";
     }
 
     return {
-      type: bestDiscount.type,
+      type: discountType,
       description,
       potentialSavings: maxSavings,
       badge,
@@ -535,32 +347,46 @@ export function ProductsSection() {
         const params: {
           page: number;
           limit: number;
-          category?: string;
-          brand?: string;
+          sortBy?: string;
+          sortOrder?: string;
+          category_id?: string;
+          brand_id?: string;
           search?: string;
-          minPrice?: number;
-          maxPrice?: number;
-          inStock?: boolean;
         } = {
           page: currentPage,
           limit: PRODUCTS_PER_PAGE,
         };
 
-        // Aplicar filtros a la API si están activos
+        // Aplicar filtros al backend
         if (filters.search) params.search = filters.search;
-        if (filters.category !== "all") params.category = filters.category;
-        if (filters.brand !== "all") params.brand = filters.brand;
-        if (filters.inStockOnly) params.inStock = true;
+        if (filters.category !== "all") params.category_id = filters.category;
+        if (filters.brand !== "all") params.brand_id = filters.brand;
 
-        // Filtro de precio
-        if (filters.priceRange !== "all") {
-          const range = filterData.priceRanges.find(
-            (r) => r.id === filters.priceRange,
-          );
-          if (range) {
-            if (range.min > 0) params.minPrice = range.min;
-            if (range.max < Infinity) params.maxPrice = range.max;
-          }
+        // Mapear sortBy a los valores que acepta el backend
+        switch (filters.sortBy) {
+          case "price-asc":
+            params.sortBy = "price";
+            params.sortOrder = "asc";
+            break;
+          case "price-desc":
+            params.sortBy = "price";
+            params.sortOrder = "desc";
+            break;
+          case "name-asc":
+            params.sortBy = "name";
+            params.sortOrder = "asc";
+            break;
+          case "name-desc":
+            params.sortBy = "name";
+            params.sortOrder = "desc";
+            break;
+          case "newest":
+            params.sortBy = "createdAt";
+            params.sortOrder = "desc";
+            break;
+          default:
+            // "relevance" - dejar que el backend decida el orden por defecto
+            break;
         }
 
         const response = await api.product.getProductsWithDiscounts(params);
@@ -568,33 +394,28 @@ export function ProductsSection() {
         console.log("📦 Respuesta completa de la API:", response);
 
         if (response.success && response.data) {
-          // La respuesta tiene estructura: { data: { data: Array(20) } }
-          // Necesitamos acceder a response.data.data
           let productsArray: ProductWithDiscounts[] = [];
           let totalCount = 0;
 
-          // Type assertion para manejar múltiples estructuras posibles
-          const data = response.data as ProductWithDiscounts[] | { data?: ProductWithDiscounts[]; products?: ProductWithDiscounts[]; total?: number };
+          const data = response.data as ProductWithDiscounts[] | { data?: ProductWithDiscounts[]; products?: ProductWithDiscounts[]; total?: number; pagination?: { totalPages?: number; total?: number } };
 
           if (Array.isArray(data)) {
-            // Caso 1: response.data es directamente un array
             productsArray = data;
             totalCount = data.length;
           } else if (data.data && Array.isArray(data.data)) {
-            // Caso 2: response.data.data contiene el array (caso actual del backend)
             productsArray = data.data;
-            totalCount = data.data.length;
+            totalCount = data.total || (data.pagination?.total) || data.data.length;
           } else if (data.products && Array.isArray(data.products)) {
-            // Caso 3: response.data.products contiene el array
             productsArray = data.products;
             totalCount = data.total || data.products.length;
           }
 
-          console.log("✅ Productos cargados:", productsArray.length);
-          console.log("📊 Primer producto:", productsArray[0]);
+          console.log("✅ Productos cargados:", productsArray.length, "de", totalCount);
+          if (productsArray.length > 0) {
+            console.log("📊 Primer producto:", productsArray[0]?.name, "- pricing:", productsArray[0]?.pricing);
+          }
           
           setApiProducts(productsArray);
-          setDisplayProducts(adaptProducts(productsArray));
           setTotalProducts(totalCount);
         } else {
           console.error("❌ Error al cargar productos:", response.message);
@@ -620,9 +441,9 @@ export function ProductsSection() {
 
     loadProducts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, filters.search, filters.category, filters.brand, filters.priceRange, filters.inStockOnly]);
+  }, [currentPage, filters.search, filters.category, filters.brand, filters.sortBy]);
 
-  // Aplicar filtros locales (los que no se envían a la API)
+  // Aplicar filtros locales y ordenamiento (único punto que establece displayProducts)
   useEffect(() => {
     if (apiProducts.length === 0) {
       setDisplayProducts([]);
@@ -630,50 +451,39 @@ export function ProductsSection() {
       return;
     }
 
-    setIsLoading(true);
+    let filtered = [...apiProducts];
 
-    setTimeout(() => {
-      let filtered = [...apiProducts];
+    // Solo productos en oferta (filtro local)
+    if (filters.onSaleOnly) {
+      filtered = filtered.filter(
+        (product) => product.pricing?.has_discount,
+      );
+    }
 
-      // Solo productos en oferta (local)
-      if (filters.onSaleOnly) {
-        filtered = filtered.filter(
-          (product) => product.pricing.has_discount,
-        );
+    // Filtro de rango de precio (local)
+    if (filters.priceRange !== "all") {
+      const range = filterData.priceRanges.find(r => r.id === filters.priceRange);
+      if (range) {
+        filtered = filtered.filter(p => {
+          const price = p.pricing?.final_price ?? 0;
+          return price >= range.min && price <= range.max;
+        });
       }
+    }
 
-      // Ordenamiento
-      switch (filters.sortBy) {
-        case "price-asc":
-          filtered.sort((a, b) => a.pricing.final_price - b.pricing.final_price);
-          break;
-        case "price-desc":
-          filtered.sort((a, b) => b.pricing.final_price - a.pricing.final_price);
-          break;
-        case "name-asc":
-          filtered.sort((a, b) => a.name.localeCompare(b.name));
-          break;
-        case "name-desc":
-          filtered.sort((a, b) => b.name.localeCompare(a.name));
-          break;
-        case "newest":
-          // Ordenar por fecha de creación
-          filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-          break;
-        default:
-          // Relevancia (productos con descuento primero)
-          filtered.sort((a, b) => {
-            const aOnSale = a.pricing.has_discount ? 1 : 0;
-            const bOnSale = b.pricing.has_discount ? 1 : 0;
-            return bOnSale - aOnSale;
-          });
-      }
+    // Ordenamiento por relevancia: productos con descuento primero
+    if (filters.sortBy === "relevance") {
+      filtered.sort((a, b) => {
+        const aOnSale = a.pricing?.has_discount ? 1 : 0;
+        const bOnSale = b.pricing?.has_discount ? 1 : 0;
+        return bOnSale - aOnSale;
+      });
+    }
 
-      setDisplayProducts(adaptProducts(filtered));
-      setIsLoading(false);
-    }, 100);
+    setDisplayProducts(adaptProducts(filtered));
+    setIsLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiProducts.length, filters.onSaleOnly, filters.sortBy]);
+  }, [apiProducts, filters.onSaleOnly, filters.sortBy, filters.priceRange]);
 
   // Manejar cambio de página
   const handlePageChange = (newPage: number) => {

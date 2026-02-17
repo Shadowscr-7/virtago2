@@ -58,6 +58,10 @@ export default function ProductPage() {
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
@@ -148,7 +152,10 @@ export default function ProductPage() {
           tags: apiProduct.productTagsList || [],
           specifications: {
             'SKU': apiProduct.sku || 'N/A',
-            'Código': apiProduct.productId || 'N/A',
+            // ⚠️ No mostrar prodVirtaId ni IDs internos UUID al usuario
+            ...(apiProduct.productId && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(apiProduct.productId)
+              ? { 'Código': apiProduct.productId }
+              : {}),
             'Categoría': apiProduct.category?.categoryCode || apiProduct.category?.name || 'N/A',
             'Marca': apiProduct.brand?.name || 'N/A',
             'Stock': `${apiProduct.stockQuantity || 0} unidades`,

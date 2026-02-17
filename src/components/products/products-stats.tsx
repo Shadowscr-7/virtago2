@@ -110,22 +110,7 @@ export function ProductsStats({ totalProducts }: ProductsStatsProps) {
           ))}
         </div>
 
-        {/* Additional Info */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          viewport={{ once: true }}
-          className="mt-12 text-center"
-        >
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200/50 dark:border-blue-600/30 rounded-full px-6 py-3">
-            <Award className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-            <span className="text-slate-700 dark:text-slate-300 font-medium">
-              Certificados como Distribuidor Premium por más de 30 marcas
-              líderes
-            </span>
-          </div>
-        </motion.div>
+
       </div>
     </section>
   );

@@ -309,14 +309,20 @@ export default function ProductDetailPage() {
     loadProduct();
   }, [params.id]);
 
+  // Helper para detectar si un valor parece un UUID (no mostrar IDs internos)
+  const isUUID = (value: string): boolean => {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+  };
+
   // Función helper para construir especificaciones dinámicamente
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const buildSpecifications = (product: any): Record<string, string> => {
     const specs: Record<string, string> = {};
 
     // Solo agregar campos que tienen valor
+    // ⚠️ NUNCA mostrar prodVirtaId ni IDs internos tipo UUID
     if (product.sku) specs['SKU'] = product.sku;
-    if (product.productId) specs['Código de producto'] = product.productId;
+    if (product.productId && !isUUID(product.productId)) specs['Código de producto'] = product.productId;
     if (product.brandId || product.brand) specs['Marca'] = product.brandId || product.brand;
     if (product.manufacturerCode) specs['Fabricante'] = product.manufacturerCode;
     if (product.categoryId || product.categoryCode) specs['Categoría'] = product.categoryId || product.categoryCode;

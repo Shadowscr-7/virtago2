@@ -199,13 +199,18 @@ export const useAuthStore = create<AuthState>()(
           const response = await apiHelpers.login({ email, password });
 
           console.log("🔵 Login exitoso:", response.data);
-          console.log("🔵 Token recibido:", response.data.token);
-          console.log("🔵 User recibido:", response.data.user);
-          console.log("🔵 Role del user:", response.data.user.role);
-          console.log("🔵 distributorCode del user:", response.data.user.distributorCode);
-          console.log("🔵 distributorCode tipo:", typeof response.data.user.distributorCode, "| valor:", JSON.stringify(response.data.user.distributorCode));
+          
+          // 🔧 El backend devuelve: { success, message, data: { token, user } }
+          // Necesitamos acceder a response.data.data para obtener token y user
+          const loginData = (response.data as any).data || response.data;
+          
+          console.log("🔵 Token recibido:", loginData.token);
+          console.log("🔵 User recibido:", loginData.user);
+          console.log("🔵 Role del user:", loginData.user?.role);
+          console.log("🔵 distributorCode del user:", loginData.user?.distributorCode);
+          console.log("🔵 distributorCode tipo:", typeof loginData.user?.distributorCode, "| valor:", JSON.stringify(loginData.user?.distributorCode));
 
-          const { token, user } = response.data;
+          const { token, user } = loginData;
 
           // Determinar userType basado en múltiples criterios
           const userType: 'client' | 'distributor' = 
@@ -331,8 +336,9 @@ export const useAuthStore = create<AuthState>()(
           // Llamar a la API real
           const response = await apiHelpers.register(registerData);
 
-          // La API devuelve: { success, message, otp, token, user }
-          const { user, token, otp } = response.data;
+          // 🔧 El backend devuelve: { success, message, data: { otp, token, user } }
+          const registerResponse = (response.data as any).data || response.data;
+          const { user, token, otp } = registerResponse;
 
           // Guardar el token temporal para verificación
           if (token) {
@@ -418,7 +424,9 @@ export const useAuthStore = create<AuthState>()(
             otp: otp,
           });
 
-          console.log("OTP verificado:", response.data);
+          // 🔧 El backend devuelve: { success, message, data: {...} }
+          const verifyData = (response.data as any).data || response.data;
+          console.log("OTP verificado:", verifyData);
 
           set({
             otpVerified: true,
@@ -463,6 +471,18 @@ export const useAuthStore = create<AuthState>()(
           const { registrationData } = get();
 
           if (userType === "client") {
+            // 🔐 Obtener el token temporal y moverlo a auth_token permanente
+            const tempToken = localStorage.getItem('temp_auth_token');
+            if (tempToken) {
+              localStorage.removeItem('temp_auth_token');
+              
+              // Usar setToken para guardar correctamente en ambas claves
+              get().setToken(tempToken);
+              console.log("✅ Token movido de temp_auth_token a auth_token para cliente usando setToken");
+            } else {
+              console.warn("⚠️ No se encontró temp_auth_token al completar registro de cliente");
+            }
+
             // Si es cliente, completar registro automáticamente
             const newUser: User = {
               id: Date.now().toString(),
@@ -476,6 +496,7 @@ export const useAuthStore = create<AuthState>()(
 
             set({
               user: newUser,
+              token: tempToken || null,
               isAuthenticated: true,
               registrationStep: "completed",
               isLoading: false,
@@ -605,10 +626,12 @@ export const useAuthStore = create<AuthState>()(
           // Reenviar OTP con la API real
           const response = await apiHelpers.resendOTP(registrationData.email);
 
-          console.log("OTP reenviado:", response.data);
+          // 🔧 El backend devuelve: { success, message, data: { otp, token, user } }
+          const resendData = (response.data as any).data || response.data;
+          console.log("OTP reenviado:", resendData);
 
-          // La API devuelve: { success, message, otp, token, user }
-          const { otp } = response.data;
+          // La API devuelve: { success, message, data: { otp, token, user } }
+          const { otp } = resendData;
 
           set({
             otpSent: true,
@@ -792,9 +815,15 @@ export const useAuthStore = create<AuthState>()(
           console.log("🟡 Store: Llamando a apiHelpers.createDistributor...");
           console.log("🟡 Store: Payload enviado:", distributorPayload);
           
+          let apiResult;
           try {
-            const result = await apiHelpers.createDistributor(distributorPayload);
-            console.log("✅ Store: createDistributor exitoso, respuesta:", result);
+            apiResult = await apiHelpers.createDistributor(distributorPayload);
+            console.log("✅ Store: createDistributor exitoso, respuesta:", apiResult);
+            
+            // 🔧 El backend devuelve: { success, message, data: { distributor } }
+            const distributorData = (apiResult.data as any).data || apiResult.data;
+            
+            console.log("✅ Store: distributorCode recibido del backend:", distributorData.distributor?.distributorCode);
             console.log("✅ Store: Actualizando estado...");
           } catch (apiError) {
             console.error("❌ Store: Error específico de la API:", apiError);
@@ -805,12 +834,17 @@ export const useAuthStore = create<AuthState>()(
 
           // SOLO si la API fue exitosa, actualizar el estado
           
-          // Actualizar usuario con el plan seleccionado preservando userType y role
-          if (user) {
+          // 🔧 Extraer el objeto distributor de la respuesta correcta
+          const distributorData = (apiResult.data as any).data || apiResult.data;
+          
+          // Actualizar usuario con el plan seleccionado, role, userType Y distributorCode del backend
+          if (user && distributorData?.distributor) {
+            const backendDistributor = distributorData.distributor;
             const updatedUser: User = {
               ...user,
-              userType: user.userType || "distributor",
-              role: user.role || "distributor",
+              id: backendDistributor.id || user.id,
+              userType: "distributor",
+              role: "distributor",
               plan: {
                 id: plan.id,
                 name: plan.name,
@@ -819,18 +853,26 @@ export const useAuthStore = create<AuthState>()(
                 currency: plan.currency,
                 billingCycle: plan.billingCycle,
               },
+              distributorInfo: {
+                ...user.distributorInfo,
+                distributorCode: backendDistributor.distributorCode, // 🔥 GUARDAR el distributorCode del backend
+              },
             };
+            console.log("✅ Store: Usuario actualizado con distributorCode:", updatedUser.distributorInfo?.distributorCode);
             set({ user: updatedUser });
           }
 
           // IMPORTANTE: Usar el token existente (del registro), no crear uno mock
           const finalToken = currentToken;
           
-          // Si había un temp_auth_token, moverlo a auth_token permanente
+          // Si había un temp_auth_token, moverlo a auth_token permanente usando setToken
           if (localStorage.getItem('temp_auth_token')) {
-            localStorage.setItem('auth_token', localStorage.getItem('temp_auth_token')!);
+            const tempToken = localStorage.getItem('temp_auth_token')!;
             localStorage.removeItem('temp_auth_token');
-            console.log("✅ Store: Token temporal movido a auth_token permanente");
+            
+            // Usar setToken para guardar correctamente en ambas claves
+            get().setToken(tempToken);
+            console.log("✅ Store: Token temporal movido a auth_token permanente usando setToken");
           }
 
           // Pasar al paso final
@@ -896,10 +938,14 @@ export const useAuthStore = create<AuthState>()(
             throw new Error('No se encontró un token de autenticación válido. Por favor inicia sesión nuevamente.');
           }
 
-          // Si había un temp_auth_token, moverlo a auth_token permanente
+          // Si había un temp_auth_token, moverlo a auth_token permanente usando setToken
           if (localStorage.getItem('temp_auth_token')) {
-            localStorage.setItem('auth_token', localStorage.getItem('temp_auth_token')!);
+            const tempToken = localStorage.getItem('temp_auth_token')!;
             localStorage.removeItem('temp_auth_token');
+            
+            // Usar setToken para guardar correctamente en ambas claves
+            get().setToken(tempToken);
+            console.log("✅ Store: Token temporal movido a auth_token permanente en completeRegistration");
           }
 
           set({
