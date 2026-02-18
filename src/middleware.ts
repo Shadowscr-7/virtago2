@@ -22,6 +22,9 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Registrar intento bloqueado en los logs de Vercel
+  console.warn(`[GEO-BLOCK] 🚫 Acceso bloqueado | País: ${country} | IP: ${request.headers.get('x-forwarded-for') || 'unknown'} | Ruta: ${request.nextUrl.pathname} | UA: ${request.headers.get('user-agent')?.substring(0, 100) || 'unknown'}`);
+
   // Bloquear: redirigir a página de "no disponible"
   const url = request.nextUrl.clone();
   url.pathname = '/geo-blocked';
