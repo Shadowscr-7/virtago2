@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     });
 
     // URL del backend (ajustar según tu configuración)
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "https://virtago-backend.vercel.app/api";
     
     try {
       // Llamada al backend
@@ -160,7 +160,7 @@ export async function GET() {
     backendEndpoint: {
       url: process.env.NEXT_PUBLIC_API_URL
         ? `${process.env.NEXT_PUBLIC_API_URL}/images/check-image`
-        : "http://localhost:3001/api/images/check-image",
+        : "https://virtago-backend.vercel.app/api/images/check-image",
       note: "Este endpoint redirige la petición al backend configurado en NEXT_PUBLIC_API_URL",
     },
   });

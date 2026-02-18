@@ -395,7 +395,7 @@ export function ClientStep({ onNext, onBack, themeColors, stepData }: ClientStep
         
         // Detectar errores comunes
         if (errorMessage.includes('Network Error') || errorMessage.includes('ERR_CONNECTION_REFUSED')) {
-          errorMessage = '🔴 No se puede conectar con el servidor. Verifica que el backend esté corriendo en http://localhost:3001';
+          errorMessage = '🔴 No se puede conectar con el servidor. Verifica tu conexión a internet e intenta de nuevo.';
         } else if (errorMessage.includes('timeout')) {
           errorMessage = '⏱️ La solicitud tardó demasiado. El servidor puede estar sobrecargado o no responde.';
         } else if (errorMessage.includes('401') || errorMessage.includes('Unauthorized') || errorMessage.includes('No Token Provided')) {

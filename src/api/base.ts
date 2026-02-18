@@ -1,6 +1,6 @@
 // Configuración base para las APIs
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+  process.env.NEXT_PUBLIC_API_URL || "https://virtago-backend.vercel.app/api";
 
 // Configuración de headers por defecto
 const defaultHeaders = {
