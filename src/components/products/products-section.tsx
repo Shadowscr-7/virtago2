@@ -223,6 +223,7 @@ export function ProductsSection() {
       return {
         id: p.id || p.prodVirtaId,
         prodVirtaId: p.prodVirtaId,
+        sku: p.sku || "",
         name: p.name || p.title || 'Producto sin nombre',
         brand: brandName,
         supplier: p.distributorCode || "Proveedor",

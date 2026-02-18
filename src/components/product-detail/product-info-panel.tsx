@@ -22,6 +22,8 @@ import { calculatePrice, type DiscountRule } from "@/lib/price-calculator";
 
 interface ProductInfo {
   id: string;
+  prodVirtaId?: string;
+  sku?: string;
   name: string;
   brand: string;
   supplier: string;
@@ -96,6 +98,8 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
   const handleAddToCart = () => {
     addItem({
       productId: product.id,
+      prodVirtaId: product.prodVirtaId || product.id,
+      sku: product.sku || "",
       name: product.name,
       brand: product.brand,
       supplier: product.supplier_info.name,

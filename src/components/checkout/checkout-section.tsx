@@ -22,10 +22,11 @@ import {
   Home,
 } from "lucide-react";
 import { useCartStore } from "@/components/cart/cart-store";
-import { api, AddressData, CreateAddressData } from "@/api";
+import { api, AddressData, CreateAddressData, CreateOrderRequest, CreateOrderResponse, Order as ApiOrder } from "@/api";
 import { useAuthStore } from "@/store/auth";
 import Image from "next/image";
 import Link from "next/link";
+import { toast } from "sonner";
 
 interface PaymentMethod {
   id: string;
@@ -60,7 +61,6 @@ export function CheckoutSection() {
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState<string>("");
-  const [orderNumber] = useState(() => `VTG${Date.now().toString().slice(-6)}`);
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
     fullName: "",
     email: "",
@@ -73,6 +73,17 @@ export function CheckoutSection() {
     country: "Uruguay",
   });
   const [isProcessing, setIsProcessing] = useState(false);
+  const [observations, setObservations] = useState("");
+  
+  // Order results after placing
+  const [orderResults, setOrderResults] = useState<Array<{
+    distributorCode: string;
+    orderId: string;
+    orderNo?: string;
+    success: boolean;
+    error?: string;
+    order?: ApiOrder;
+  }>>([]);
 
   // Address management state
   const [savedAddresses, setSavedAddresses] = useState<AddressData[]>([]);
@@ -219,8 +230,7 @@ export function CheckoutSection() {
   const supplierTotals = getSupplierTotals();
   const totalPrice = getTotalPrice();
   const shippingCost = 0; // Free shipping
-  const taxes = Math.round(totalPrice * 0.21); // 21% IVA
-  const finalTotal = totalPrice + shippingCost + taxes;
+  const distributorCount = Object.keys(itemsBySupplier).length;
 
   const paymentMethods: PaymentMethod[] = [
     {
@@ -268,13 +278,102 @@ export function CheckoutSection() {
   const handlePlaceOrder = async () => {
     setIsProcessing(true);
 
-    // Simulate order processing
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      // Group items by supplier/distributorCode
+      const results: typeof orderResults = [];
+      
+      for (const [supplier, supplierItems] of Object.entries(itemsBySupplier)) {
+        try {
+          const paymentMethodName = selectedPaymentMethod === "cash_on_delivery" 
+            ? "cash" 
+            : "online";
+          
+          const orderData: CreateOrderRequest = {
+            items: supplierItems.map(item => ({
+              pid: item.prodVirtaId || item.productId,
+              name: item.name,
+              sku: item.sku || "",
+              quantity: item.quantity,
+            })),
+            user: {
+              fullName: shippingInfo.fullName,
+              email: shippingInfo.email,
+              phone: shippingInfo.phone,
+              company: shippingInfo.company || undefined,
+              address: shippingInfo.address,
+              city: shippingInfo.city,
+              state: shippingInfo.state,
+              postalCode: shippingInfo.zipCode,
+              country: shippingInfo.country,
+            },
+            currency: "USD",
+            conversionRate: 1,
+            paymentMethod: paymentMethodName,
+            paymentId: `cod_${Date.now()}`,
+            couponCode: "",
+            totalItems: supplierItems.reduce((sum, it) => sum + it.quantity, 0),
+            shipping: 0,
+            description: `Pedido desde app – ${paymentMethodName === "cash" ? "Pago en Entrega" : "Pago Online"}`,
+            observations: observations,
+          };
 
-    // Clear cart and redirect
-    clearCart();
-    setCurrentStep(4);
-    setIsProcessing(false);
+          console.log(`[CHECKOUT] 📦 Creando orden para distribuidor ${supplier}:`, orderData);
+
+          const response = await api.order.createOrder(orderData);
+          const data = response.data as any;
+          
+          if (data?.success) {
+            results.push({
+              distributorCode: supplier,
+              orderId: data.orderId || data.order?.id || "",
+              orderNo: data.order?.orderNo || data.orderNo,
+              success: true,
+              order: data.order,
+            });
+            console.log(`[CHECKOUT] ✅ Orden creada para ${supplier}:`, data.orderId);
+          } else {
+            results.push({
+              distributorCode: supplier,
+              orderId: "",
+              success: false,
+              error: data?.message || "Error al crear orden",
+            });
+            console.error(`[CHECKOUT] ❌ Error para ${supplier}:`, data?.message);
+          }
+        } catch (error) {
+          console.error(`[CHECKOUT] ❌ Error creando orden para ${supplier}:`, error);
+          results.push({
+            distributorCode: supplier,
+            orderId: "",
+            success: false,
+            error: error instanceof Error ? error.message : "Error desconocido",
+          });
+        }
+      }
+
+      setOrderResults(results);
+      
+      const successCount = results.filter(r => r.success).length;
+      const totalCount = results.length;
+
+      if (successCount > 0) {
+        clearCart();
+        setCurrentStep(4);
+        
+        if (successCount === totalCount) {
+          toast.success(`${successCount === 1 ? "Pedido creado" : `${successCount} pedidos creados`} exitosamente`);
+        } else {
+          toast.warning(`${successCount} de ${totalCount} pedidos creados. Algunos tuvieron error.`);
+        }
+      } else {
+        toast.error("No se pudo crear ningún pedido. Intenta de nuevo.");
+      }
+    } catch (error) {
+      console.error("[CHECKOUT] Error general:", error);
+      toast.error("Error al procesar el pedido");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (items.length === 0 && currentStep !== 4) {
@@ -845,6 +944,39 @@ export function CheckoutSection() {
                   </div>
                 </motion.div>
               )}
+
+              {/* Observations / Notes */}
+              <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
+                <h3 className="font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                  📝 Observaciones
+                </h3>
+                <textarea
+                  value={observations}
+                  onChange={(e) => setObservations(e.target.value)}
+                  placeholder="Ej: Entregar después de las 14hs, timbre 3B..."
+                  rows={3}
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 resize-none text-sm"
+                />
+                <p className="text-xs text-slate-400 mt-1">
+                  Notas adicionales para la entrega de tu pedido (opcional)
+                </p>
+              </div>
+
+              {/* Multi-distributor notice */}
+              {distributorCount > 1 && (
+                <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-700">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Package2 className="w-4 h-4 text-amber-600" />
+                    <span className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                      Pedido múltiple
+                    </span>
+                  </div>
+                  <p className="text-xs text-amber-700 dark:text-amber-400">
+                    Tu carrito tiene productos de {distributorCount} distribuidores distintos.
+                    Se generarán {distributorCount} pedidos separados, uno por cada distribuidor.
+                  </p>
+                </div>
+              )}
             </motion.div>
           )}
 
@@ -913,7 +1045,7 @@ export function CheckoutSection() {
                 className="relative z-10"
               >
                 <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
-                  ¡Pedido Confirmado!
+                  {orderResults.length > 1 ? "¡Pedidos Confirmados!" : "¡Pedido Confirmado!"}
                 </h2>
                 <motion.p
                   initial={{ opacity: 0 }}
@@ -921,56 +1053,121 @@ export function CheckoutSection() {
                   transition={{ duration: 0.6, delay: 0.6 }}
                   className="text-lg text-slate-600 dark:text-slate-400 mb-8"
                 >
-                  Tu pedido ha sido procesado exitosamente. Te enviaremos un
-                  email con los detalles y el seguimiento.
+                  {orderResults.length > 1
+                    ? `Se generaron ${orderResults.filter(r => r.success).length} pedidos separados por distribuidor. Te enviaremos un email con los detalles.`
+                    : "Tu pedido ha sido procesado exitosamente. Te enviaremos un email con los detalles y el seguimiento."}
                 </motion.p>
               </motion.div>
 
-              {/* Order Details Card */}
+              {/* Order Details Cards — one per distributor */}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.8 }}
-                className="relative z-10 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-xl p-6 mb-8 border border-green-200 dark:border-green-700"
+                className="relative z-10 space-y-4 mb-8"
               >
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-slate-600 dark:text-slate-400">
-                      Número de Pedido:
-                    </span>
-                    <p className="font-bold text-slate-900 dark:text-white">
-                      #{orderNumber}
-                    </p>
+                {orderResults.map((result, idx) => (
+                  <div
+                    key={idx}
+                    className={`rounded-xl p-6 border ${
+                      result.success
+                        ? "bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border-green-200 dark:border-green-700"
+                        : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <Package2 className={`w-5 h-5 ${result.success ? "text-green-600" : "text-red-500"}`} />
+                      <h4 className="font-bold text-slate-900 dark:text-white">
+                        {result.distributorCode}
+                      </h4>
+                      {result.success ? (
+                        <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
+                      ) : (
+                        <span className="text-xs text-red-500 ml-auto">{result.error}</span>
+                      )}
+                    </div>
+                    
+                    {result.success && (
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                          <span className="text-slate-500 dark:text-slate-400">Nº Pedido:</span>
+                          <p className="font-bold text-slate-900 dark:text-white">
+                            #{result.orderNo || result.orderId?.slice(0, 8)}
+                          </p>
+                        </div>
+                        {result.order && (
+                          <>
+                            <div>
+                              <span className="text-slate-500 dark:text-slate-400">Total:</span>
+                              <p className="font-bold text-green-600 dark:text-green-400">
+                                ${result.order.total?.toLocaleString()}
+                              </p>
+                            </div>
+                            {result.order.itemDiscountTotal > 0 && (
+                              <div>
+                                <span className="text-slate-500 dark:text-slate-400">Ahorraste:</span>
+                                <p className="font-semibold text-orange-600 dark:text-orange-400">
+                                  -${result.order.itemDiscountTotal.toLocaleString()}
+                                </p>
+                              </div>
+                            )}
+                            <div>
+                              <span className="text-slate-500 dark:text-slate-400">Artículos:</span>
+                              <p className="font-medium text-slate-900 dark:text-white">
+                                {result.order.totalItems}
+                              </p>
+                            </div>
+                            
+                            {/* Per-item breakdown */}
+                            {result.order.items && result.order.items.length > 0 && (
+                              <div className="col-span-2 mt-2 pt-2 border-t border-slate-200 dark:border-slate-600">
+                                {result.order.items.map((item, iIdx) => (
+                                  <div key={iIdx} className="flex items-center justify-between py-1">
+                                    <div className="flex-1">
+                                      <span className="text-xs text-slate-700 dark:text-slate-300">
+                                        {item.name} x{item.quantity}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      {item.discountPercentage > 0 && (
+                                        <>
+                                          <span className="text-xs line-through text-slate-400">
+                                            ${item.originalPrice?.toLocaleString()}
+                                          </span>
+                                          <span className="text-[10px] font-bold text-red-500 bg-red-100 dark:bg-red-900/30 px-1 rounded">
+                                            -{item.discountPercentage}%
+                                          </span>
+                                        </>
+                                      )}
+                                      <span className="text-xs font-semibold text-slate-900 dark:text-white">
+                                        ${item.total?.toLocaleString()}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <span className="text-slate-600 dark:text-slate-400">
-                      Total Pagado:
-                    </span>
-                    <p className="font-bold text-green-600 dark:text-green-400">
-                      ${finalTotal.toLocaleString()}
-                    </p>
+                ))}
+                
+                {/* Grand Total */}
+                {orderResults.filter(r => r.success && r.order).length > 1 && (
+                  <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-4 text-white">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-blue-100">Total General:</span>
+                      <span className="text-xl font-bold">
+                        ${orderResults
+                          .filter(r => r.success && r.order)
+                          .reduce((sum, r) => sum + (r.order?.total || 0), 0)
+                          .toLocaleString()}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-slate-600 dark:text-slate-400">
-                      Método de Pago:
-                    </span>
-                    <p className="font-medium text-slate-900 dark:text-white">
-                      {
-                        paymentMethods.find(
-                          (p) => p.id === selectedPaymentMethod,
-                        )?.name
-                      }
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-slate-600 dark:text-slate-400">
-                      Entrega Estimada:
-                    </span>
-                    <p className="font-medium text-slate-900 dark:text-white">
-                      3-5 días hábiles
-                    </p>
-                  </div>
-                </div>
+                )}
               </motion.div>
 
               {/* Action Buttons */}
@@ -1041,6 +1238,26 @@ export function CheckoutSection() {
                 Resumen del Pedido
               </h3>
 
+              {/* Per-distributor subtotals */}
+              {distributorCount > 1 && (
+                <div className="space-y-2 mb-4 pb-4 border-b border-slate-200 dark:border-slate-700">
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
+                    {distributorCount} distribuidores • {distributorCount} pedidos
+                  </p>
+                  {Object.entries(supplierTotals).map(([supplier, data]) => (
+                    <div key={supplier} className="flex items-center justify-between text-sm">
+                      <span className="text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
+                        <Package2 className="w-3.5 h-3.5" />
+                        {supplier}
+                      </span>
+                      <span className="font-medium text-slate-900 dark:text-white">
+                        ${data.total.toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <div className="space-y-3 mb-6">
                 <div className="flex items-center justify-between">
                   <span className="text-slate-600 dark:text-slate-400">
@@ -1058,21 +1275,16 @@ export function CheckoutSection() {
                     {shippingCost === 0 ? "Gratis" : `$${shippingCost}`}
                   </span>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-600 dark:text-slate-400">
-                    IVA (21%):
-                  </span>
-                  <span className="font-medium text-slate-900 dark:text-white">
-                    ${taxes.toLocaleString()}
-                  </span>
+                <div className="text-xs text-slate-500 dark:text-slate-500 italic">
+                  Los descuentos se calcularán al confirmar
                 </div>
                 <div className="border-t border-slate-200 dark:border-slate-700 pt-3">
                   <div className="flex items-center justify-between">
                     <span className="text-lg font-bold text-slate-900 dark:text-white">
-                      Total:
+                      Estimado:
                     </span>
                     <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                      ${finalTotal.toLocaleString()}
+                      ${totalPrice.toLocaleString()}
                     </span>
                   </div>
                 </div>

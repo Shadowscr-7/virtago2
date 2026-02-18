@@ -8,6 +8,8 @@ import type { DiscountRule } from "@/lib/price-calculator";
 
 interface AdaptedProduct {
   id: string;
+  prodVirtaId?: string;
+  sku?: string;
   name: string;
   brand: string;
   supplier: string;
@@ -134,6 +136,8 @@ export default function ProductPage() {
         // Adapt API product to component format
         const adaptedProduct: AdaptedProduct = {
           id: apiProduct.prodVirtaId || apiProduct.productId || '',
+          prodVirtaId: apiProduct.prodVirtaId || '',
+          sku: apiProduct.sku || '',
           name: apiProduct.name || apiProduct.title || "Producto sin nombre",
           brand: apiProduct.brand?.name || apiProduct.brand?.brandId || "Sin marca",
           supplier: apiProduct.distributorCode || "Proveedor",

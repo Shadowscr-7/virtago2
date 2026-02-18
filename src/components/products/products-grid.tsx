@@ -23,6 +23,7 @@ import { useCartStore } from "@/components/cart/cart-store";
 interface Product {
   id: string;
   prodVirtaId?: string;
+  sku?: string;
   name: string;
   brand: string;
   supplier: string;
@@ -139,6 +140,8 @@ export function ProductsGrid({
   const handleCartConfirm = (product: Product, quantity: number) => {
     addItem({
       productId: product.id,
+      prodVirtaId: product.prodVirtaId || product.id,
+      sku: product.sku || product.specifications?.SKU || "",
       name: product.name,
       brand: product.brand,
       supplier: product.supplier,

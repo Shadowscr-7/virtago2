@@ -25,9 +25,11 @@ export const setToastFunction = (
 export interface CartItem {
   id: string;
   productId: string;
+  prodVirtaId?: string;
+  sku?: string;
   name: string;
   brand: string;
-  supplier: string;
+  supplier: string; // distributorCode (e.g., "DIST001")
   supplierId: string;
   image: string;
   price: number;

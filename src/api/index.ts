@@ -396,13 +396,113 @@ export interface Cart {
 
 export interface Order {
   id: string;
-  orderNumber: string;
+  orderNo: string;
+  orderNumber?: string; // backward compat
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  items: CartItem[];
+  distributorCode: string;
+  userId: string;
+  paymentMethod: string;
+  paymentId: string;
+  currency: string;
+  conversionRate: number;
+  description: string;
+  observations: string;
+  
+  // Price breakdown from backend
+  subTotal: number;
+  itemDiscountTotal: number;
+  couponDiscount: number;
+  coupon: {
+    code: string;
+    type: string;
+    value: number;
+    discountAmount: number;
+  } | null;
+  shipping: number;
   total: number;
+  
+  totalItems: number;
+  items: OrderItem[];
+  
+  user: {
+    fullName: string;
+    email: string;
+    id: string;
+    phone?: string;
+    company?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+  };
+  
   createdAt: string;
-  shippingAddress: unknown;
-  paymentMethod: unknown;
+}
+
+export interface OrderItem {
+  pid: string;
+  name: string;
+  sku: string;
+  quantity: number;
+  originalPrice: number;
+  discountPercentage: number;
+  finalPrice: number;
+  total: number;
+  savings: number;
+  shop?: string;
+  distributorCode?: string;
+  appliedDiscounts: Array<{
+    discountId: string;
+    name: string;
+    type: string;
+    value: number;
+    apply_mode: string;
+  }>;
+}
+
+// Request body para crear orden
+export interface CreateOrderRequest {
+  items: Array<{
+    pid: string;
+    name: string;
+    sku: string;
+    quantity: number;
+  }>;
+  user: {
+    fullName: string;
+    email: string;
+    phone: string;
+    company?: string;
+    address: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+  currency: string;
+  conversionRate: number;
+  paymentMethod: string;
+  paymentId: string;
+  couponCode?: string;
+  totalItems: number;
+  shipping: number;
+  description: string;
+  observations: string;
+}
+
+export interface CreateOrderResponse {
+  success: boolean;
+  message: string;
+  orderId: string;
+  order?: Order;
+}
+
+export interface MyOrdersResponse {
+  data: Order[];
+  total: number;
+  count: number;
+  currentPage: number;
 }
 
 export interface Country {
@@ -1237,10 +1337,23 @@ export const cartApi = {
 // Repositorio de APIs de Pedidos
 export const orderApi = {
   // Crear pedido
-  createOrder: async (orderData: unknown): Promise<ApiResponse<Order>> =>
+  createOrder: async (orderData: CreateOrderRequest): Promise<ApiResponse<CreateOrderResponse>> =>
     http.post("/orders", orderData),
 
-  // Obtener pedidos del usuario
+  // Obtener MIS pedidos (usuario logueado)
+  getMyOrders: async (params?: { page?: number; limit?: number; status?: string }): Promise<ApiResponse<MyOrdersResponse>> => {
+    const queryString = params 
+      ? "?" + new URLSearchParams(
+          Object.entries(params).reduce((acc, [key, value]) => {
+            if (value !== undefined) acc[key] = String(value);
+            return acc;
+          }, {} as Record<string, string>)
+        ).toString()
+      : "";
+    return http.get(`/orders/mine${queryString}`);
+  },
+
+  // Obtener pedidos del usuario (legacy)
   getOrders: async (params?: { page?: number; limit?: number }): Promise<ApiResponse<{ orders: Order[]; total: number; pages: number }>> => {
     const queryString = params 
       ? "?" + new URLSearchParams(
