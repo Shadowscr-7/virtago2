@@ -333,17 +333,49 @@ export default function ClientesPage() {
         distributorCode: user?.distributorInfo?.distributorCode || "", // ⚠️ No debe estar vacío
       });
       
+      // Extraer datos de la respuesta (puede venir envuelto en .data)
+      const responseData = (response.data as any)?.action ? response.data : (response.data as any)?.data || response.data;
+      const action = (responseData as any)?.action;
+      
       if (response.success) {
-        console.log(`[CLIENTES] ✅ Invitación enviada correctamente`);
+        console.log(`[CLIENTES] ✅ Respuesta de invitación:`, responseData);
         
-        showToast({
-          title: "Invitación enviada",
-          description: `Se ha enviado la invitación a ${email} correctamente`,
-          type: "success"
-        });
+        // Mostrar mensaje diferente según la acción del backend
+        switch (action) {
+          case 'invitation_sent':
+            showToast({
+              title: "Invitación enviada",
+              description: `Se ha enviado el email de invitación a ${email} correctamente`,
+              type: "success"
+            });
+            break;
+          case 'already_invited':
+            showToast({
+              title: "Invitación ya existente",
+              description: `Ya existe una invitación pendiente para ${email} con este distribuidor`,
+              type: "warning"
+            });
+            break;
+          case 'code_added':
+            showToast({
+              title: "Código agregado",
+              description: `${email} ya tiene cuenta. Se le agregó el código de distribuidor`,
+              type: "success"
+            });
+            break;
+          default:
+            showToast({
+              title: "Invitación procesada",
+              description: (responseData as any)?.message || `Invitación procesada para ${email}`,
+              type: "success"
+            });
+        }
         
         // Cerrar el diálogo
         setShowInviteDialog({ show: false, clientId: "", email: "", firstName: "", lastName: "" });
+        
+        // Recargar lista de clientes para reflejar cambios
+        loadClients();
       } else {
         console.error('[CLIENTES] ❌ Error en la respuesta:', response);
         showToast({
@@ -477,7 +509,9 @@ export default function ClientesPage() {
     console.log(`[CLIENTES] 📧 Enviando ${clientsWithoutUser.length} invitaciones...`);
     setIsSendingBulkInvitations(true);
 
-    let successCount = 0;
+    let sentCount = 0;
+    let alreadyInvitedCount = 0;
+    let codeAddedCount = 0;
     let errorCount = 0;
 
     try {
@@ -488,12 +522,30 @@ export default function ClientesPage() {
             email: client.email,
             firstName: client.firstName,
             lastName: client.lastName,
-            distributorCode: user?.distributorInfo?.distributorCode || "", // ⚠️ No debe estar vacío
+            distributorCode: user?.distributorInfo?.distributorCode || "",
           });
 
           if (response.success) {
-            successCount++;
-            console.log(`[CLIENTES] ✅ Invitación enviada a ${client.email}`);
+            const responseData = (response.data as any)?.action ? response.data : (response.data as any)?.data || response.data;
+            const action = (responseData as any)?.action;
+            
+            switch (action) {
+              case 'invitation_sent':
+                sentCount++;
+                console.log(`[CLIENTES] ✅ Invitación enviada a ${client.email}`);
+                break;
+              case 'already_invited':
+                alreadyInvitedCount++;
+                console.log(`[CLIENTES] ⚠️ Ya invitado: ${client.email}`);
+                break;
+              case 'code_added':
+                codeAddedCount++;
+                console.log(`[CLIENTES] ✅ Código agregado a ${client.email}`);
+                break;
+              default:
+                sentCount++;
+                console.log(`[CLIENTES] ✅ Procesado: ${client.email}`);
+            }
           } else {
             errorCount++;
             console.error(`[CLIENTES] ❌ Error al enviar a ${client.email}:`, response.message);
@@ -504,18 +556,32 @@ export default function ClientesPage() {
         }
       }
 
-      // Mostrar resultado
-      if (errorCount === 0) {
+      // Construir resumen detallado
+      const totalSuccess = sentCount + codeAddedCount;
+      const parts: string[] = [];
+      if (sentCount > 0) parts.push(`${sentCount} invitación(es) enviada(s)`);
+      if (codeAddedCount > 0) parts.push(`${codeAddedCount} código(s) agregado(s)`);
+      if (alreadyInvitedCount > 0) parts.push(`${alreadyInvitedCount} ya invitado(s)`);
+      if (errorCount > 0) parts.push(`${errorCount} fallida(s)`);
+      const summary = parts.join(', ');
+
+      if (errorCount === 0 && alreadyInvitedCount === 0) {
         showToast({
           title: "Invitaciones enviadas",
-          description: `Se enviaron ${successCount} invitaciones correctamente`,
+          description: summary,
           type: "success"
         });
-      } else if (successCount > 0) {
+      } else if (totalSuccess > 0) {
         showToast({
-          title: "Invitaciones parciales",
-          description: `${successCount} enviadas, ${errorCount} fallidas`,
+          title: "Invitaciones procesadas",
+          description: summary,
           type: "warning"
+        });
+      } else if (alreadyInvitedCount > 0 && errorCount === 0) {
+        showToast({
+          title: "Ya invitados",
+          description: `Todos los clientes seleccionados ya tienen invitación pendiente`,
+          type: "info"
         });
       } else {
         showToast({
@@ -525,8 +591,9 @@ export default function ClientesPage() {
         });
       }
 
-      // Limpiar selección
+      // Limpiar selección y recargar lista
       setSelectedClients([]);
+      loadClients();
     } catch (error) {
       console.error("[CLIENTES] ❌ Error general:", error);
       showToast({

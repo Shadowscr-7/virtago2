@@ -951,6 +951,15 @@ export interface ClientBulkCreateResponse {
   };
 }
 
+// Tipos para respuesta de envío de invitación/mail de creación
+export interface SendCreationMailResponse {
+  success: boolean;
+  message: string;
+  action: 'invitation_sent' | 'already_invited' | 'code_added';
+  emailSent: boolean;
+  invitationId: string;
+}
+
 export interface PriceListBulkCreateResponse {
   success: boolean;
   message: string;
@@ -1425,7 +1434,7 @@ export const adminApi = {
       firstName: string;
       lastName: string;
       distributorCode: string;
-    }): Promise<ApiResponse<{ message: string }>> => {
+    }): Promise<ApiResponse<SendCreationMailResponse>> => {
       console.log('[API] Enviando invitación a:', data.email);
       return http.post("/clients/sendCreationMail", data);
     },
