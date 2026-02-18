@@ -19,6 +19,10 @@
     {
       "source": "/docs/:path*",
       "destination": "https://virtago-backend.vercel.app/api/docs/:path*"
+    },
+    {
+      "source": "/download/:path*",
+      "destination": "https://virtago-backend.vercel.app/download/:path*"
     }
   ],
   "headers": [
