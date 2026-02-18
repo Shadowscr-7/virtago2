@@ -722,33 +722,47 @@ export function CheckoutSection() {
                 </div>
               </div>
 
-                    {/* Save address checkbox + button */}
-                    <div className="mt-6 flex items-center justify-between">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={saveAsNew}
-                          onChange={(e) => setSaveAsNew(e.target.checked)}
-                          className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                        />
-                        <span className="text-sm text-slate-600 dark:text-slate-400">
-                          Guardar esta dirección para futuras compras
-                        </span>
-                      </label>
-                      {saveAsNew && (
-                        <button
-                          onClick={handleSaveAddress}
-                          disabled={isSavingAddress || !shippingInfo.fullName || !shippingInfo.address}
-                          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed rounded-lg transition-colors"
-                        >
-                          {isSavingAddress ? (
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                          ) : (
-                            <CheckCircle className="w-4 h-4" />
-                          )}
-                          Guardar
-                        </button>
-                      )}
+                    {/* Save address switch + button */}
+                    <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            role="switch"
+                            aria-checked={saveAsNew}
+                            onClick={() => setSaveAsNew(!saveAsNew)}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                              saveAsNew ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-600'
+                            }`}
+                          >
+                            <span
+                              className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-md transition-transform duration-200 ${
+                                saveAsNew ? 'translate-x-6' : 'translate-x-1'
+                              }`}
+                            />
+                          </button>
+                          <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                            Guardar dirección para futuras compras
+                          </span>
+                        </div>
+
+                        {saveAsNew && (
+                          <motion.button
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            onClick={handleSaveAddress}
+                            disabled={isSavingAddress || !shippingInfo.fullName || !shippingInfo.address}
+                            className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-slate-400 disabled:to-slate-500 disabled:cursor-not-allowed rounded-xl shadow-lg hover:shadow-xl transition-all"
+                          >
+                            {isSavingAddress ? (
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                            ) : (
+                              <CheckCircle className="w-4 h-4" />
+                            )}
+                            Guardar dirección
+                          </motion.button>
+                        )}
+                      </div>
                     </div>
                   </motion.div>
                 )}
