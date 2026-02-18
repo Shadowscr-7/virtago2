@@ -408,6 +408,42 @@ export function ImageUploadModal({
     });
   };
 
+  // ✅ Seleccionar un producto de las coincidencias parciales
+  const handleSelectProduct = (imageIndex: number, productId: string) => {
+    setImages((prev) => {
+      const newImages = [...prev];
+      const img = newImages[imageIndex];
+      if (!img.analysisResult) return newImages;
+
+      const result = img.analysisResult as Record<string, unknown>;
+      const allMatches = (result.allMatches || []) as Array<{
+        product: Record<string, unknown>;
+        score: number;
+        matchReasons?: string[];
+      }>;
+
+      // Encontrar el producto seleccionado en allMatches
+      const selectedMatch = allMatches.find(
+        (m) => (m.product.id || m.product.prodVirtaId) === productId
+      );
+
+      if (selectedMatch) {
+        newImages[imageIndex] = {
+          ...img,
+          analysisResult: {
+            ...result,
+            matchedProduct: selectedMatch.product,
+            matchScore: selectedMatch.score,
+          },
+          isApproved: true, // Auto-aprobar al seleccionar
+        };
+        toast.success(`Producto seleccionado: ${selectedMatch.product.nombre || 'Sin nombre'}`);
+      }
+
+      return newImages;
+    });
+  };
+
   // ✅ Asignar imágenes aprobadas a productos
   const handleAssignImages = async () => {
     const approvedImages = images.filter((img) => img.isApproved && img.analysisResult);
@@ -848,11 +884,13 @@ export function ImageUploadModal({
                                   imagen?: string;
                                 };
                                 score: number;
+                                matchReasons?: string[];
                               }>;
                               processingTime: number;
                             }}
                             isApproved={img.isApproved}
                             onToggleApproval={() => toggleApproval(realIndex)}
+                            onSelectProduct={(productId) => handleSelectProduct(realIndex, productId)}
                           />
                         );
                       })}

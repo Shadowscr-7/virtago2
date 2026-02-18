@@ -6,7 +6,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle, TrendingUp, Package, AlertCircle } from "lucide-react";
+import { CheckCircle, TrendingUp, Package, AlertCircle, Search } from "lucide-react";
 import { useTheme } from "@/contexts/theme-context";
 
 interface MatchResult {
@@ -253,15 +253,28 @@ export function ImageMatchResults({
           )}
         </div>
       ) : (
-        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30">
+        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30">
           <div className="flex items-center gap-2 mb-2">
-            <AlertCircle className="w-5 h-5 text-red-500" />
-            <h4 className="text-sm font-bold text-red-700 dark:text-red-300">
-              No se encontró coincidencia
-            </h4>
+            {result.allMatches && result.allMatches.length > 0 ? (
+              <>
+                <Search className="w-5 h-5 text-amber-500" />
+                <h4 className="text-sm font-bold text-amber-700 dark:text-amber-300">
+                  Coincidencias parciales encontradas
+                </h4>
+              </>
+            ) : (
+              <>
+                <AlertCircle className="w-5 h-5 text-red-500" />
+                <h4 className="text-sm font-bold text-red-700 dark:text-red-300">
+                  No se encontró coincidencia
+                </h4>
+              </>
+            )}
           </div>
           <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-            La IA detectó el producto pero no se encontró en el inventario.
+            {result.allMatches && result.allMatches.length > 0
+              ? "No se encontró coincidencia exacta, pero se encontraron productos similares por marca/nombre."
+              : "La IA detectó el producto pero no se encontró en el inventario."}
           </p>
           {result.visionData.productName && (
             <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -272,16 +285,27 @@ export function ImageMatchResults({
         </div>
       )}
 
-      {/* Todos los candidatos */}
-      {result.allMatches && result.allMatches.length > 1 && (
+      {/* Todos los candidatos - mostrar cuando hay más de 1 match, o cuando NO hay match principal pero sí parciales */}
+      {result.allMatches && result.allMatches.length > 0 && (
         <div className="space-y-3">
           <h4 className="text-sm font-bold text-gray-700 dark:text-gray-200 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4" />
-            Otras Coincidencias ({result.allMatches.length - 1})
+            {result.matchedProduct ? (
+              <>
+                <TrendingUp className="w-4 h-4" />
+                Otras Coincidencias ({result.allMatches.length - 1})
+              </>
+            ) : (
+              <>
+                <Search className="w-4 h-4 text-amber-500" />
+                Posibles Coincidencias ({result.allMatches.length})
+              </>
+            )}
           </h4>
 
           <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
-            {result.allMatches.slice(1, 5).map((match, idx) => (
+            {result.allMatches
+              .slice(result.matchedProduct ? 1 : 0, result.matchedProduct ? 5 : 10)
+              .map((match, idx) => (
               <motion.div
                 key={match.product.id}
                 initial={{ opacity: 0, x: -20 }}
