@@ -1950,6 +1950,71 @@ const onboardingApi = {
   }
 };
 
+// ========================
+// 📍 ADDRESSES API
+// ========================
+export interface AddressData {
+  id: string;
+  userEmail: string;
+  alias: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  company?: string;
+  street: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateAddressData {
+  alias?: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  company?: string;
+  street: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  isDefault?: boolean;
+}
+
+const addressApi = {
+  // Listar todas las direcciones del usuario
+  getAll: async (userEmail: string): Promise<ApiResponse<AddressData[]>> =>
+    http.get(`/addresses/${encodeURIComponent(userEmail)}`),
+
+  // Obtener dirección por defecto
+  getDefault: async (userEmail: string): Promise<ApiResponse<AddressData>> =>
+    http.get(`/addresses/${encodeURIComponent(userEmail)}/default`),
+
+  // Obtener dirección por ID
+  getById: async (addressId: string): Promise<ApiResponse<AddressData>> =>
+    http.get(`/addresses/detail/${addressId}`),
+
+  // Crear nueva dirección
+  create: async (data: CreateAddressData): Promise<ApiResponse<AddressData>> =>
+    http.post('/addresses', data),
+
+  // Actualizar dirección
+  update: async (addressId: string, data: Partial<CreateAddressData>): Promise<ApiResponse<AddressData>> =>
+    http.put(`/addresses/${addressId}`, data),
+
+  // Marcar como default
+  setDefault: async (addressId: string): Promise<ApiResponse<AddressData>> =>
+    http.patch(`/addresses/${addressId}/default`),
+
+  // Eliminar dirección
+  delete: async (addressId: string): Promise<ApiResponse<{ message: string }>> =>
+    http.delete(`/addresses/${addressId}`),
+};
+
 // Objeto principal API - para usar como api.auth.login(), api.user.getProfile(), etc.
 export const api = {
   auth: authApi,
@@ -1963,6 +2028,7 @@ export const api = {
   distributors: distributorApi,
   admin: adminApi,
   onboarding: onboardingApi,
+  addresses: addressApi,
 };
 
 // Exportar también el cliente HTTP para casos especiales
