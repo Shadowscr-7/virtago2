@@ -90,7 +90,7 @@ export default function ImagenesAdminPage() {
   const [images, setImages] = useState<ImageData[]>([]);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("unassigned"); // 🎯 Por defecto: sin producto
+  const [statusFilter, setStatusFilter] = useState("all"); // 🎯 Por defecto: todos
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [isAutoAssignModalOpen, setIsAutoAssignModalOpen] = useState(false);
   const [isManualAssignModalOpen, setIsManualAssignModalOpen] = useState(false);
