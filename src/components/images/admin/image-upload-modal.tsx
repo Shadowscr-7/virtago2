@@ -583,7 +583,7 @@ export function ImageUploadModal({
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="relative w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-2xl shadow-2xl"
+          className="relative w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden rounded-2xl shadow-2xl"
           style={{
             background: `linear-gradient(135deg, ${themeColors.surface}f0, ${themeColors.surface}e0)`,
           }}
@@ -652,7 +652,7 @@ export function ImageUploadModal({
           </div>
 
           {/* Content */}
-          <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+          <div className="p-6 overflow-y-auto flex-1 min-h-0">
             {/* Drop Zone */}
             {images.length === 0 && (
               <div
@@ -904,7 +904,7 @@ export function ImageUploadModal({
 
           {/* Footer */}
           {images.length > 0 && (
-            <div className="p-6 border-t border-white/10 flex justify-between items-center gap-4">
+            <div className="p-6 border-t border-white/10 flex justify-between items-center gap-4 flex-shrink-0">
               <div className="text-sm text-gray-600 dark:text-gray-300">
                 {images.filter((img) => img.status === "completed").length} /{" "}
                 {images.length} completadas
