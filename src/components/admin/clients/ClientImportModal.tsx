@@ -490,6 +490,36 @@ export function ClientImportModal({ isOpen, onClose, onSuccess }: ClientImportMo
       }
     } catch (error) {
       console.error('[CLIENT IMPORT] ❌ Error:', error);
+      
+      // Extraer datos detallados del error del backend
+      const errorWithData = error as Error & { data?: Record<string, unknown> };
+      if (errorWithData.data) {
+        console.error('[CLIENT IMPORT] 📋 Respuesta completa del backend:', JSON.stringify(errorWithData.data, null, 2));
+        
+        const backendData = errorWithData.data as Record<string, unknown>;
+        const results = backendData.results as Record<string, unknown> | undefined;
+        
+        if (results) {
+          console.error('[CLIENT IMPORT] 📋 Results:', JSON.stringify(results, null, 2));
+          
+          if (Array.isArray(results.errors)) {
+            console.error(`[CLIENT IMPORT] ❌ ${results.errors.length} error(es) detallados:`);
+            results.errors.forEach((err: Record<string, unknown>, i: number) => {
+              console.error(`  [${i + 1}] Cliente: ${JSON.stringify(err.client)}, Error: ${err.error}`);
+            });
+          }
+          
+          // Mostrar la tabla de resultados con los errores detallados
+          processImportResponse(backendData as unknown as ClientBulkCreateResponse);
+          showToast({
+            title: "Error al importar",
+            description: `${results.successCount || 0} importados, ${results.errorCount || 0} con errores. Revisa el detalle.`,
+            type: "error"
+          });
+          return;
+        }
+      }
+      
       showToast({
         title: "Error al importar",
         description: error instanceof Error ? error.message : "Ocurrió un error inesperado",
@@ -509,8 +539,10 @@ export function ClientImportModal({ isOpen, onClose, onSuccess }: ClientImportMo
 
     try {
       console.log(`[CLIENT IMPORT] 📤 Importando ${mappedData.length} clientes con mapeo personalizado...`);
+      console.log('[CLIENT IMPORT] 📋 Datos mapeados (raw):', JSON.stringify(mappedData, null, 2));
       
       const clientsForAPI = transformToAPIFormat(mappedData);
+      console.log('[CLIENT IMPORT] 📋 Datos para API:', JSON.stringify(clientsForAPI, null, 2));
       const apiResponse = await api.admin.clients.bulkCreate(clientsForAPI);
       
       if (apiResponse.success) {
@@ -538,6 +570,36 @@ export function ClientImportModal({ isOpen, onClose, onSuccess }: ClientImportMo
       }
     } catch (error) {
       console.error('[CLIENT IMPORT] ❌ Error con mapeo:', error);
+      
+      // Extraer datos detallados del error del backend
+      const errorWithData = error as Error & { data?: Record<string, unknown> };
+      if (errorWithData.data) {
+        console.error('[CLIENT IMPORT] 📋 Respuesta completa del backend:', JSON.stringify(errorWithData.data, null, 2));
+        
+        const backendData = errorWithData.data as Record<string, unknown>;
+        const results = backendData.results as Record<string, unknown> | undefined;
+        
+        if (results) {
+          console.error('[CLIENT IMPORT] 📋 Results:', JSON.stringify(results, null, 2));
+          
+          if (Array.isArray(results.errors)) {
+            console.error(`[CLIENT IMPORT] ❌ ${results.errors.length} error(es) detallados:`);
+            results.errors.forEach((err: Record<string, unknown>, i: number) => {
+              console.error(`  [${i + 1}] Cliente: ${JSON.stringify(err.client)}, Error: ${err.error}`);
+            });
+          }
+          
+          // Mostrar la tabla de resultados con los errores detallados
+          processImportResponse(backendData as unknown as ClientBulkCreateResponse);
+          showToast({
+            title: "Error al importar",
+            description: `${results.successCount || 0} importados, ${results.errorCount || 0} con errores. Revisa el detalle.`,
+            type: "error"
+          });
+          return;
+        }
+      }
+      
       showToast({
         title: "Error al importar",
         description: error instanceof Error ? error.message : "Ocurrió un error inesperado",
