@@ -424,7 +424,7 @@ export function ImageUploadModal({
 
       // Encontrar el producto seleccionado en allMatches
       const selectedMatch = allMatches.find(
-        (m) => (m.product.id || m.product.prodVirtaId) === productId
+        (m) => m.product && (m.product.id || m.product.prodVirtaId) === productId
       );
 
       if (selectedMatch) {
@@ -861,7 +861,8 @@ export function ImageUploadModal({
                               imageUrl: string;
                               matchScore: number;
                               matchedProduct: {
-                                id: string;
+                                id?: string;
+                                prodVirtaId?: string;
                                 nombre: string;
                                 codigo?: string;
                                 precio?: number;
@@ -876,7 +877,8 @@ export function ImageUploadModal({
                               };
                               allMatches?: Array<{
                                 product: {
-                                  id: string;
+                                  id?: string;
+                                  prodVirtaId?: string;
                                   nombre: string;
                                   codigo?: string;
                                   precio?: number;

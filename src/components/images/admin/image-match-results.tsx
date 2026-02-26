@@ -13,7 +13,8 @@ interface MatchResult {
   imageUrl: string;
   matchScore: number;
   matchedProduct: {
-    id: string;
+    id?: string;
+    prodVirtaId?: string;
     nombre: string;
     codigo?: string;
     precio?: number;
@@ -36,7 +37,8 @@ interface MatchResult {
   };
   allMatches?: Array<{
     product: {
-      id: string;
+      id?: string;
+      prodVirtaId?: string;
       nombre: string;
       codigo?: string;
       precio?: number;
@@ -230,10 +232,10 @@ export function ImageMatchResults({
             </div>
           )}
 
-          {onSelectProduct && (
+          {onSelectProduct && (result.matchedProduct?.id || result.matchedProduct?.prodVirtaId) && (
             <div className="flex gap-2 mt-4">
               <button
-                onClick={() => onSelectProduct(result.matchedProduct!.id)}
+                onClick={() => onSelectProduct((result.matchedProduct?.id || result.matchedProduct?.prodVirtaId)!)}
                 className="flex-1 px-4 py-2 text-sm font-medium text-white rounded-lg transition-all"
                 style={{
                   background: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
@@ -307,12 +309,15 @@ export function ImageMatchResults({
               .slice(result.matchedProduct ? 1 : 0, result.matchedProduct ? 5 : 10)
               .map((match, idx) => (
               <motion.div
-                key={match.product.id}
+                key={match.product.id || match.product.prodVirtaId || idx}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.1 }}
                 className="flex items-start gap-3 p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all cursor-pointer"
-                onClick={() => onSelectProduct?.(match.product.id)}
+                onClick={() => {
+                  const pid = match.product?.id || match.product?.prodVirtaId;
+                  if (pid) onSelectProduct?.(pid);
+                }}
               >
                 {match.product.imagen && (
                   // eslint-disable-next-line @next/next/no-img-element
