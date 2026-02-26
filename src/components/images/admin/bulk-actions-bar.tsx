@@ -16,6 +16,7 @@ import { useTheme } from "@/contexts/theme-context";
 
 interface BulkActionsBarProps {
   selectedCount: number;
+  allAssigned?: boolean;
   onAutoAssign: () => void;
   onManualAssign: () => void;
   onDelete: () => void;
@@ -27,6 +28,7 @@ interface BulkActionsBarProps {
 
 export function BulkActionsBar({
   selectedCount,
+  allAssigned = false,
   onAutoAssign,
   onManualAssign,
   onDelete,
@@ -77,7 +79,8 @@ export function BulkActionsBar({
 
           {/* Acciones principales */}
           <div className="flex items-center gap-2">
-            {/* Auto-asignar con IA */}
+            {/* Auto-asignar con IA - solo si hay imágenes sin asignar */}
+            {!allAssigned && (
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -90,8 +93,10 @@ export function BulkActionsBar({
               <Sparkles className="w-4 h-4" />
               <span className="hidden sm:inline">Auto-Asignar</span>
             </motion.button>
+            )}
 
-            {/* Asignar manualmente */}
+            {/* Asignar manualmente - solo si hay imágenes sin asignar */}
+            {!allAssigned && (
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -104,6 +109,7 @@ export function BulkActionsBar({
               <ExternalLink className="w-4 h-4" />
               <span className="hidden sm:inline">Asignar</span>
             </motion.button>
+            )}
 
             {/* Agregar tags */}
             {onAddTags && (

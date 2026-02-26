@@ -483,6 +483,10 @@ export default function ImagenesAdminPage() {
         {selectedImages.length > 0 && (
           <BulkActionsBar
             selectedCount={selectedImages.length}
+            allAssigned={selectedImages.every(id => {
+              const img = images.find(i => i.id === id);
+              return img?.status === 'ASSIGNED';
+            })}
             onAutoAssign={() => setIsAutoAssignModalOpen(true)}
             onManualAssign={() => setIsManualAssignModalOpen(true)}
             onDelete={handleDeleteImages}
