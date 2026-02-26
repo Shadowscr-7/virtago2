@@ -1067,6 +1067,7 @@ export default function ProductStep({ onNext, onBack }: ProductStepProps) {
         fileExtensions={['xlsx', 'xls', 'csv']}
         isProcessing={isMatching}
         parseFile={parseProductFile}
+        templateEndpoint="/api/product/format"
       />
 
       {/* Información sobre el proceso */}

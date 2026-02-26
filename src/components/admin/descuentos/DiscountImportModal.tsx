@@ -4,13 +4,13 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Upload, FileJson, FileSpreadsheet, Download, AlertCircle, CheckCircle, Loader2, Table } from 'lucide-react';
 import { useTheme } from '@/contexts/theme-context';
-import { api, PriceBulkData, PriceBulkCreateResponse } from '@/api';
+import { api, DiscountBulkData, DiscountBulkCreateResponse } from '@/api';
 import { showToast } from '@/store/toast-helpers';
 import { useAuthStore } from '@/store/auth';
 import { ColumnMappingModal, ColumnMapping, ImportSchema, SchemaColumn } from '../shared/ColumnMappingModal';
 import { parseFile } from '@/lib/file-parser';
 
-interface PriceImportModalProps {
+interface DiscountImportModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
@@ -19,14 +19,14 @@ interface PriceImportModalProps {
 type UploadMethod = 'file' | 'json';
 
 interface ImportResultRow {
-  productName: string;
-  productSku: string;
-  basePrice: string;
+  name: string;
+  discountId: string;
+  type: string;
   status: 'success' | 'error';
   message?: string;
 }
 
-export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModalProps) {
+export function DiscountImportModal({ isOpen, onClose, onSuccess }: DiscountImportModalProps) {
   const { themeColors } = useTheme();
   const { token } = useAuthStore();
   const [uploadMethod, setUploadMethod] = useState<UploadMethod>('file');
@@ -59,25 +59,36 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
   };
 
   // Transformar datos al formato de la API
-  const transformToAPIFormat = (data: Record<string, unknown>[]): PriceBulkData[] => {
-    return data.map((row, index) => ({
-      name: getValue(row, 'name') || getValue(row, 'productName') || `Precio ${index + 1}`,
-      priceId: getValue(row, 'priceId') || getValue(row, 'priceListId') || `PRICE_${Date.now()}_${index}`,
-      productSku: getValue(row, 'productSku'),
-      productName: getValue(row, 'productName'),
-      basePrice: Number(row.basePrice || row.salePrice || 0),
-      salePrice: row.salePrice != null ? Number(row.salePrice) : undefined,
-      minQuantity: row.minQuantity != null ? Number(row.minQuantity) : undefined,
-      currency: (getValue(row, 'currency', 'USD')).toUpperCase(),
-      validFrom: getValue(row, 'validFrom') || new Date().toISOString(),
-      validUntil: getValue(row, 'validTo') || getValue(row, 'validUntil') || undefined,
-      taxIncluded: typeof row.taxIncluded === 'boolean' ? row.taxIncluded : undefined,
-      status: (['active', 'inactive', 'draft'].includes(getValue(row, 'status', ''))
-        ? getValue(row, 'status') as 'active' | 'inactive' | 'draft'
-        : 'active'),
-      costPrice: row.costPrice != null ? Number(row.costPrice) : undefined,
-      margin: row.margin != null ? Number(row.margin) : undefined,
-    }));
+  const transformToAPIFormat = (data: Record<string, unknown>[]): DiscountBulkData[] => {
+    return data.map((row, index) => {
+      const typeValue = getValue(row, 'type', 'percentage');
+      const validTypes = ['percentage', 'fixed_amount', 'tiered_percentage', 'progressive_percentage'];
+      return {
+        discount_id: getValue(row, 'discount_id') || getValue(row, 'discountId') || `DISC_${Date.now()}_${index}`,
+        name: getValue(row, 'name'),
+        description: getValue(row, 'description', '') || undefined,
+        type: (validTypes.includes(typeValue) ? typeValue : 'percentage') as DiscountBulkData['type'],
+        discount_value: Number(row.discount_value || row.discountValue || 0),
+        currency: (getValue(row, 'currency', 'USD')).toUpperCase(),
+        valid_from: getValue(row, 'valid_from') || getValue(row, 'validFrom') || new Date().toISOString(),
+        valid_to: getValue(row, 'valid_to') || getValue(row, 'validTo') || undefined,
+        status: (['active', 'inactive', 'draft'].includes(getValue(row, 'status', ''))
+          ? getValue(row, 'status') as 'active' | 'inactive' | 'draft'
+          : 'active'),
+        priority: row.priority != null ? Number(row.priority) : undefined,
+        is_cumulative: typeof row.is_cumulative === 'boolean' ? row.is_cumulative : undefined,
+        max_discount_amount: row.max_discount_amount != null ? Number(row.max_discount_amount) : undefined,
+        min_purchase_amount: row.min_purchase_amount != null ? Number(row.min_purchase_amount) : undefined,
+        customer_type: (['all', 'retail', 'wholesale', 'vip'].includes(getValue(row, 'customer_type', ''))
+          ? getValue(row, 'customer_type') as DiscountBulkData['customer_type']
+          : undefined),
+        channel: (['online', 'offline', 'omnichannel', 'b2b', 'all'].includes(getValue(row, 'channel', ''))
+          ? getValue(row, 'channel') as DiscountBulkData['channel']
+          : undefined),
+        region: getValue(row, 'region', '') || undefined,
+        category: getValue(row, 'category', '') || undefined,
+      };
+    });
   };
 
   // Validar JSON
@@ -92,9 +103,11 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
         return { isValid: false, errors };
       }
 
-      parsed.forEach((price: Record<string, unknown>, index: number) => {
-        if (!price.productSku && !price.productName) errors.push(`Precio ${index + 1}: Se requiere productSku o productName`);
-        if (price.basePrice == null || isNaN(Number(price.basePrice))) errors.push(`Precio ${index + 1}: basePrice es requerido y debe ser un número`);
+      parsed.forEach((discount: Record<string, unknown>, index: number) => {
+        if (!discount.name) errors.push(`Descuento ${index + 1}: El nombre es requerido`);
+        if (!discount.type) errors.push(`Descuento ${index + 1}: El tipo es requerido (percentage, fixed_amount, etc.)`);
+        if (discount.discount_value == null && discount.discountValue == null) errors.push(`Descuento ${index + 1}: El valor del descuento es requerido`);
+        if (!discount.currency) errors.push(`Descuento ${index + 1}: La moneda es requerida`);
       });
 
       return { isValid: errors.length === 0, data: parsed, errors };
@@ -134,12 +147,12 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
       setFileColumns(columnList);
       setFileRawData(rawData);
 
-      console.log(`[PriceImport] Archivo parseado: ${rawData.length} filas, ${columns.size} columnas:`, columnList);
+      console.log(`[DiscountImport] Archivo parseado: ${rawData.length} filas, ${columns.size} columnas:`, columnList);
 
       try {
         const schemaHeaders: Record<string, string> = {};
         if (token) schemaHeaders['Authorization'] = `Bearer ${token}`;
-        const schemaResponse = await fetch('/api/imports/schema/prices', { headers: schemaHeaders });
+        const schemaResponse = await fetch('/api/imports/schema/discounts', { headers: schemaHeaders });
 
         if (schemaResponse.ok) {
           const schemaData: ImportSchema = await schemaResponse.json();
@@ -177,14 +190,14 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
             setShowColumnMapping(true);
           }
 
-          console.log(`[PriceImport] Auto-match: ${allRequiredMapped ? 'TODAS las columnas obligatorias coinciden' : 'Faltan columnas obligatorias'}`, mapping);
+          console.log(`[DiscountImport] Auto-match: ${allRequiredMapped ? 'TODAS las columnas obligatorias coinciden' : 'Faltan columnas obligatorias'}`, mapping);
         }
       } catch (schemaErr) {
-        console.warn('[PriceImport] No se pudo verificar esquema:', schemaErr);
+        console.warn('[DiscountImport] No se pudo verificar esquema:', schemaErr);
         setColumnsMatch(true);
       }
     } catch (err) {
-      console.error('[PriceImport] Error parseando archivo:', err);
+      console.error('[DiscountImport] Error parseando archivo:', err);
       setError(err instanceof Error ? err.message : 'Error al leer el archivo');
     } finally {
       setIsParsingFile(false);
@@ -212,7 +225,7 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
     try {
       const headers: Record<string, string> = {};
       if (token) headers['Authorization'] = `Bearer ${token}`;
-      const response = await fetch('/api/price/format', { method: 'GET', headers });
+      const response = await fetch('/api/discounts/format', { method: 'GET', headers });
 
       if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
 
@@ -224,7 +237,7 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
       const contentDisposition = response.headers.get('content-disposition');
       const fileName = contentDisposition
         ? contentDisposition.split('filename=')[1]?.replace(/"/g, '')
-        : 'Precios_Plantilla_Importacion.xlsx';
+        : 'Descuentos_Plantilla_Importacion.xlsx';
 
       link.setAttribute('download', fileName);
       document.body.appendChild(link);
@@ -241,18 +254,18 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
     }
   };
 
-  const processImportResponse = (response: PriceBulkCreateResponse) => {
+  const processImportResponse = (response: DiscountBulkCreateResponse) => {
     const results: ImportResultRow[] = [];
 
-    if (response.results.prices) {
-      response.results.prices.forEach((price) => {
-        results.push({ productName: price.productName || '—', productSku: price.productSku || '—', basePrice: String(price.basePrice), status: 'success' });
+    if (response.results.discounts) {
+      response.results.discounts.forEach((disc) => {
+        results.push({ name: disc.name || '—', discountId: disc.discount_id || '—', type: disc.type || '—', status: 'success' });
       });
     }
 
     if (response.results.errors) {
       response.results.errors.forEach((err) => {
-        results.push({ productName: err.price?.productName || '—', productSku: err.price?.productSku || '—', basePrice: String(err.price?.basePrice || '—'), status: 'error', message: err.error });
+        results.push({ name: err.discount?.name || '—', discountId: err.discount?.discount_id || '—', type: err.discount?.type || '—', status: 'error', message: err.error });
       });
     }
 
@@ -275,25 +288,25 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
       if (uploadMethod === 'json') {
         if (uploadedData.length === 0) { setError('No hay datos para importar'); setIsProcessing(false); return; }
 
-        console.log('[PRICE IMPORT] 📤 Enviando precios vía JSON...');
+        console.log('[DISCOUNT IMPORT] 📤 Enviando descuentos vía JSON...');
         const dataForAPI = transformToAPIFormat(uploadedData);
-        const apiResponse = await api.admin.prices.bulkCreate(dataForAPI);
+        const apiResponse = await api.admin.discounts.bulkCreate(dataForAPI);
 
         if (apiResponse.success) {
-          const response = apiResponse.data as PriceBulkCreateResponse;
+          const response = apiResponse.data as DiscountBulkCreateResponse;
           processImportResponse(response);
           if (response.results.errorCount > 0) {
-            showToast({ title: "Importación parcial", description: `${response.results.successCount} precios importados, ${response.results.errorCount} con errores`, type: "warning" });
+            showToast({ title: "Importación parcial", description: `${response.results.successCount} descuentos importados, ${response.results.errorCount} con errores`, type: "warning" });
           } else {
-            showToast({ title: "Importación exitosa", description: `${response.results.successCount} precios importados correctamente`, type: "success" });
+            showToast({ title: "Importación exitosa", description: `${response.results.successCount} descuentos importados correctamente`, type: "success" });
           }
           onSuccess?.();
         } else {
-          throw new Error(apiResponse.message || 'Error al importar precios');
+          throw new Error(apiResponse.message || 'Error al importar descuentos');
         }
       } else if (uploadMethod === 'file' && uploadedFile) {
         if (columnsMatch && fileRawData.length > 0) {
-          console.log('[PRICE IMPORT] ✅ Columnas coinciden, importando con mapeo automático...');
+          console.log('[DISCOUNT IMPORT] ✅ Columnas coinciden, importando con mapeo automático...');
           const mappedData = fileRawData.map(row => {
             const mappedRow: Record<string, unknown> = {};
             Object.entries(autoMapping).forEach(([schemaCol, fileCol]) => { mappedRow[schemaCol] = row[fileCol]; });
@@ -301,19 +314,19 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
           });
 
           const dataForAPI = transformToAPIFormat(mappedData);
-          const apiResponse = await api.admin.prices.bulkCreate(dataForAPI);
+          const apiResponse = await api.admin.discounts.bulkCreate(dataForAPI);
 
           if (apiResponse.success) {
-            const response = apiResponse.data as PriceBulkCreateResponse;
+            const response = apiResponse.data as DiscountBulkCreateResponse;
             processImportResponse(response);
             if (response.results.errorCount > 0) {
-              showToast({ title: "Importación parcial", description: `${response.results.successCount} precios importados, ${response.results.errorCount} con errores`, type: "warning" });
+              showToast({ title: "Importación parcial", description: `${response.results.successCount} descuentos importados, ${response.results.errorCount} con errores`, type: "warning" });
             } else {
-              showToast({ title: "Importación exitosa", description: `${response.results.successCount} precios importados correctamente`, type: "success" });
+              showToast({ title: "Importación exitosa", description: `${response.results.successCount} descuentos importados correctamente`, type: "success" });
             }
             onSuccess?.();
           } else {
-            throw new Error(apiResponse.message || 'Error al importar precios');
+            throw new Error(apiResponse.message || 'Error al importar descuentos');
           }
         } else if (fileColumns.length > 0 && fileRawData.length > 0) {
           setFormatWarning('El formato del archivo no coincide con el esperado. Por favor, verifique la correspondencia de los datos con los campos requeridos por el sistema para poder importar.');
@@ -321,14 +334,14 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
           setShowColumnMapping(true);
           return;
         } else {
-          console.log('[PRICE IMPORT] 📁 Enviando archivo directamente...');
+          console.log('[DISCOUNT IMPORT] 📁 Enviando archivo directamente...');
           const formData = new FormData();
           formData.append('file', uploadedFile);
-          const apiResponse = await api.admin.prices.bulkCreate(formData);
+          const apiResponse = await api.admin.discounts.bulkCreate(formData);
           if (apiResponse.success) {
-            const response = apiResponse.data as PriceBulkCreateResponse;
+            const response = apiResponse.data as DiscountBulkCreateResponse;
             processImportResponse(response);
-            showToast({ title: "Importación exitosa", description: "Los precios se han importado correctamente", type: "success" });
+            showToast({ title: "Importación exitosa", description: "Los descuentos se han importado correctamente", type: "success" });
             onSuccess?.();
           } else {
             throw new Error(apiResponse.message || 'Error al importar');
@@ -338,9 +351,9 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
         setError('Selecciona un archivo o ingresa un JSON válido');
       }
     } catch (error) {
-      console.error('[PRICE IMPORT] ❌ Error:', error);
+      console.error('[DISCOUNT IMPORT] ❌ Error:', error);
       showToast({ title: "Error al importar", description: error instanceof Error ? error.message : "Ocurrió un error inesperado", type: "error" });
-      setError(error instanceof Error ? error.message : "Error al importar precios");
+      setError(error instanceof Error ? error.message : "Error al importar descuentos");
     } finally {
       setIsProcessing(false);
     }
@@ -352,26 +365,26 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
     setError(null);
 
     try {
-      console.log(`[PRICE IMPORT] 📤 Importando ${mappedData.length} precios con mapeo personalizado...`);
+      console.log(`[DISCOUNT IMPORT] 📤 Importando ${mappedData.length} descuentos con mapeo personalizado...`);
       const dataForAPI = transformToAPIFormat(mappedData);
-      const apiResponse = await api.admin.prices.bulkCreate(dataForAPI);
+      const apiResponse = await api.admin.discounts.bulkCreate(dataForAPI);
 
       if (apiResponse.success) {
-        const response = apiResponse.data as PriceBulkCreateResponse;
+        const response = apiResponse.data as DiscountBulkCreateResponse;
         processImportResponse(response);
         if (response.results.errorCount > 0) {
-          showToast({ title: "Importación parcial", description: `${response.results.successCount} precios importados, ${response.results.errorCount} con errores`, type: "warning" });
+          showToast({ title: "Importación parcial", description: `${response.results.successCount} descuentos importados, ${response.results.errorCount} con errores`, type: "warning" });
         } else {
-          showToast({ title: "Importación exitosa", description: `${response.results.successCount} precios importados correctamente`, type: "success" });
+          showToast({ title: "Importación exitosa", description: `${response.results.successCount} descuentos importados correctamente`, type: "success" });
         }
         onSuccess?.();
       } else {
-        throw new Error(apiResponse.message || 'Error al importar precios');
+        throw new Error(apiResponse.message || 'Error al importar descuentos');
       }
     } catch (error) {
-      console.error('[PRICE IMPORT] ❌ Error con mapeo:', error);
+      console.error('[DISCOUNT IMPORT] ❌ Error con mapeo:', error);
       showToast({ title: "Error al importar", description: error instanceof Error ? error.message : "Ocurrió un error inesperado", type: "error" });
-      setError(error instanceof Error ? error.message : "Error al importar precios");
+      setError(error instanceof Error ? error.message : "Error al importar descuentos");
     } finally {
       setIsProcessing(false);
     }
@@ -429,9 +442,9 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
                     <thead>
                       <tr style={{ backgroundColor: `${themeColors.primary}10` }}>
                         <th className="px-4 py-3 text-left font-medium" style={{ color: themeColors.text.primary }}>Estado</th>
-                        <th className="px-4 py-3 text-left font-medium" style={{ color: themeColors.text.primary }}>Producto</th>
-                        <th className="px-4 py-3 text-left font-medium" style={{ color: themeColors.text.primary }}>SKU</th>
-                        <th className="px-4 py-3 text-left font-medium" style={{ color: themeColors.text.primary }}>Precio Base</th>
+                        <th className="px-4 py-3 text-left font-medium" style={{ color: themeColors.text.primary }}>Nombre</th>
+                        <th className="px-4 py-3 text-left font-medium" style={{ color: themeColors.text.primary }}>ID</th>
+                        <th className="px-4 py-3 text-left font-medium" style={{ color: themeColors.text.primary }}>Tipo</th>
                         <th className="px-4 py-3 text-left font-medium" style={{ color: themeColors.text.primary }}>Detalle</th>
                       </tr>
                     </thead>
@@ -439,9 +452,9 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
                       {importResults.map((row, i) => (
                         <tr key={i} className="border-t" style={{ borderColor: themeColors.primary + '10', backgroundColor: row.status === 'error' ? '#fee2e210' : 'transparent' }}>
                           <td className="px-4 py-3">{row.status === 'success' ? <CheckCircle className="w-5 h-5 text-green-500" /> : <AlertCircle className="w-5 h-5 text-red-500" />}</td>
-                          <td className="px-4 py-3" style={{ color: themeColors.text.primary }}>{row.productName}</td>
-                          <td className="px-4 py-3" style={{ color: themeColors.text.primary }}>{row.productSku}</td>
-                          <td className="px-4 py-3" style={{ color: themeColors.text.primary }}>{row.basePrice}</td>
+                          <td className="px-4 py-3" style={{ color: themeColors.text.primary }}>{row.name}</td>
+                          <td className="px-4 py-3" style={{ color: themeColors.text.primary }}>{row.discountId}</td>
+                          <td className="px-4 py-3" style={{ color: themeColors.text.primary }}>{row.type}</td>
                           <td className="px-4 py-3 text-xs" style={{ color: row.status === 'error' ? '#ef4444' : themeColors.text.secondary }}>{row.status === 'success' ? 'Importado correctamente' : row.message || 'Error'}</td>
                         </tr>
                       ))}
@@ -453,7 +466,7 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
                   <CheckCircle className="w-16 h-16 mx-auto mb-4 text-green-500" />
                   <p className="text-lg font-medium" style={{ color: themeColors.text.primary }}>Importación completada</p>
                   <p className="text-sm mt-2" style={{ color: themeColors.text.secondary }}>
-                    {importSummary.success} precio(s) importado(s) exitosamente{importSummary.errors > 0 && `, ${importSummary.errors} con errores`}
+                    {importSummary.success} descuento(s) importado(s) exitosamente{importSummary.errors > 0 && `, ${importSummary.errors} con errores`}
                   </p>
                 </div>
               ) : null}
@@ -479,8 +492,8 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-2xl font-bold" style={{ color: themeColors.text.primary }}>Importar Precios</h2>
-                <p className="text-sm mt-1" style={{ color: themeColors.text.secondary }}>Sube un archivo o pega JSON con los datos de los precios</p>
+                <h2 className="text-2xl font-bold" style={{ color: themeColors.text.primary }}>Importar Descuentos</h2>
+                <p className="text-sm mt-1" style={{ color: themeColors.text.secondary }}>Sube un archivo o pega JSON con los datos de los descuentos</p>
               </div>
               <button onClick={handleClose} className="p-2 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800" style={{ color: themeColors.text.secondary }}><X className="w-6 h-6" /></button>
             </div>
@@ -514,8 +527,8 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
                     <p className="mb-4" style={{ color: themeColors.text.primary }}>Arrastra tu archivo aquí</p>
                     <p className="text-sm mb-4" style={{ color: themeColors.text.secondary }}>o haz clic para seleccionar</p>
                     <p className="text-xs mb-4" style={{ color: themeColors.text.secondary }}>CSV, XLSX, JSON</p>
-                    <input type="file" accept=".csv,.xlsx,.json" onChange={handleFileChange} className="hidden" id="file-upload-price" />
-                    <label htmlFor="file-upload-price" className="inline-block px-6 py-3 rounded-lg cursor-pointer transition-all text-white"
+                    <input type="file" accept=".csv,.xlsx,.json" onChange={handleFileChange} className="hidden" id="file-upload-discount" />
+                    <label htmlFor="file-upload-discount" className="inline-block px-6 py-3 rounded-lg cursor-pointer transition-all text-white"
                       style={{ background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})` }}>Seleccionar Archivo</label>
                     {isParsingFile && (
                       <div className="mt-4 flex items-center justify-center gap-2">
@@ -532,7 +545,7 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
                       {columnsMatch ? (
                         <div className="flex items-center gap-2">
                           <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                          <p className="text-sm font-medium" style={{ color: themeColors.text.primary }}>{fileRawData.length} precio(s) listo(s) para importar</p>
+                          <p className="text-sm font-medium" style={{ color: themeColors.text.primary }}>{fileRawData.length} descuento(s) listo(s) para importar</p>
                         </div>
                       ) : (
                         <div>
@@ -557,11 +570,13 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
                     placeholder='Ejemplo:
 [
   {
-    "productSku": "LAP001",
-    "productName": "Laptop Gaming",
-    "basePrice": 1299.99,
-    "salePrice": 1199.99,
+    "discount_id": "DISC_001",
+    "name": "Descuento Verano",
+    "type": "percentage",
+    "discount_value": 15,
     "currency": "USD",
+    "valid_from": "2024-01-01",
+    "valid_to": "2024-03-31",
     "status": "active"
   }
 ]'
@@ -571,7 +586,7 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
                   {jsonInput && (
                     <div className="mt-4">
                       {validationErrors.length === 0 ? (
-                        <div className="flex items-center gap-2 text-green-600"><CheckCircle className="w-5 h-5" /><span>JSON válido - {uploadedData.length} precio(s) detectado(s)</span></div>
+                        <div className="flex items-center gap-2 text-green-600"><CheckCircle className="w-5 h-5" /><span>JSON válido - {uploadedData.length} descuento(s) detectado(s)</span></div>
                       ) : (
                         <div>
                           <div className="flex items-center gap-2 text-red-600 mb-2"><AlertCircle className="w-5 h-5" /><span className="font-semibold">Errores encontrados:</span></div>
@@ -607,7 +622,7 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
                 disabled={isProcessing || isParsingFile || (uploadMethod === 'json' && validationErrors.length > 0) || (uploadMethod === 'file' && !uploadedFile)}
                 className="px-6 py-3 rounded-lg transition-all text-white flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})` }}>
-                {isProcessing ? (<><Loader2 className="w-5 h-5 animate-spin" />Procesando...</>) : (<><Upload className="w-5 h-5" />Importar Precios</>)}
+                {isProcessing ? (<><Loader2 className="w-5 h-5 animate-spin" />Procesando...</>) : (<><Upload className="w-5 h-5" />Importar Descuentos</>)}
               </button>
             </div>
           </motion.div>
@@ -618,7 +633,7 @@ export function PriceImportModal({ isOpen, onClose, onSuccess }: PriceImportModa
         isOpen={showColumnMapping}
         onClose={() => setShowColumnMapping(false)}
         onConfirm={handleMappingConfirm}
-        entityType="prices"
+        entityType="discounts"
         fileColumns={fileColumns}
         fileData={fileRawData}
         fileName={uploadedFile?.name || 'archivo'}

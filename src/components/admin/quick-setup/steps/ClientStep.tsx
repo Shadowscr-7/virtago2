@@ -869,6 +869,7 @@ export function ClientStep({ onNext, onBack, themeColors, stepData }: ClientStep
         fileExtensions={["csv", "xlsx", "json"]}
         isProcessing={isProcessing}
         parseFile={parseClientFile}
+        templateEndpoint="/api/clients/format"
       />
     </div>
   );

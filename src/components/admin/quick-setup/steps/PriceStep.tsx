@@ -778,6 +778,7 @@ export function PriceStep({ onNext, onBack, themeColors, stepData }: PriceStepPr
         acceptedFileTypes=".csv,.xlsx,.json"
         fileExtensions={["csv", "xlsx", "json"]}
         isProcessing={isProcessing}
+        templateEndpoint="/api/price/format"
       />
     </div>
   );

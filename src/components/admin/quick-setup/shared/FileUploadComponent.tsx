@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Upload, Download, X } from 'lucide-react';
+import { Upload, Download, X, Loader2 } from 'lucide-react';
 import { ThemeColors, UploadMethod, UploadResult } from '../shared/types';
+import { useAuthStore } from '@/store/auth';
 
 interface FileUploadProps<T> {
   method: UploadMethod;
@@ -15,6 +16,7 @@ interface FileUploadProps<T> {
   fileExtensions: string[];
   isProcessing?: boolean;
   parseFile?: (file: File) => Promise<T[]>; // Optional file parser function
+  templateEndpoint?: string; // Backend endpoint to download Excel template (e.g. '/api/clients/format')
 }
 
 export function FileUploadComponent<T>({
@@ -28,11 +30,14 @@ export function FileUploadComponent<T>({
   acceptedFileTypes,
   fileExtensions,
   isProcessing = false,
-  parseFile: parseFileFn
+  parseFile: parseFileFn,
+  templateEndpoint
 }: FileUploadProps<T>) {
   const [dragActive, setDragActive] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [jsonInput, setJsonInput] = useState('');
+  const [isDownloadingTemplate, setIsDownloadingTemplate] = useState(false);
+  const { token } = useAuthStore();
   const [validationMessage, setValidationMessage] = useState<{
     type: 'success' | 'error' | null;
     message: string;
@@ -253,7 +258,51 @@ export function FileUploadComponent<T>({
     }
   };
 
-  const downloadSample = () => {
+  const downloadTemplateFromBackend = async () => {
+    if (!templateEndpoint) return;
+    setIsDownloadingTemplate(true);
+    console.log(`[FileUpload] Descargando plantilla desde backend: ${templateEndpoint}`);
+    try {
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      const response = await fetch(templateEndpoint, {
+        method: 'GET',
+        headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+
+      const blob = await response.blob();
+      console.log(`[FileUpload] Plantilla descargada: ${blob.size} bytes, tipo: ${blob.type}`);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+
+      // Get filename from Content-Disposition header or use fallback
+      const contentDisposition = response.headers.get('content-disposition');
+      const fileName = contentDisposition
+        ? contentDisposition.split('filename=')[1]?.replace(/"/g, '')
+        : `plantilla_${title.toLowerCase().replace(/\s+/g, '_')}.xlsx`;
+
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('[FileUpload] Error descargando plantilla del backend, usando fallback:', error);
+      // Fallback: download from sampleData if backend fails
+      downloadSampleFallback();
+    } finally {
+      setIsDownloadingTemplate(false);
+    }
+  };
+
+  const downloadSampleFallback = () => {
     if (method === "json") {
       const jsonContent = JSON.stringify(sampleData, null, 2);
       const blob = new Blob([jsonContent], { type: 'application/json' });
@@ -264,7 +313,6 @@ export function FileUploadComponent<T>({
       a.click();
       window.URL.revokeObjectURL(url);
     } else {
-      // Generar CSV basado en las claves del primer objeto
       if (sampleData.length > 0) {
         const headers = Object.keys(sampleData[0] as object);
         const csvContent = headers.join(',') + '\n' +
@@ -281,6 +329,17 @@ export function FileUploadComponent<T>({
         window.URL.revokeObjectURL(url);
       }
     }
+  };
+
+  const downloadSample = () => {
+    // If we have a backend endpoint, use it (for file mode or always)
+    if (templateEndpoint && method !== "json") {
+      console.log(`[FileUpload] Usando backend endpoint: ${templateEndpoint} (method: ${method})`);
+      downloadTemplateFromBackend();
+      return;
+    }
+    console.log(`[FileUpload] Usando fallback local (method: ${method}, templateEndpoint: ${templateEndpoint})`);
+    downloadSampleFallback();
   };
 
   if (isProcessing) {
@@ -362,16 +421,24 @@ export function FileUploadComponent<T>({
       <div className="text-center">
         <motion.button
           onClick={downloadSample}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-medium"
+          disabled={isDownloadingTemplate}
+          whileHover={{ scale: isDownloadingTemplate ? 1 : 1.02 }}
+          whileTap={{ scale: isDownloadingTemplate ? 1 : 0.98 }}
+          className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl font-medium ${isDownloadingTemplate ? 'opacity-70 cursor-wait' : ''}`}
           style={{
             backgroundColor: `${themeColors.secondary}20`,
             color: themeColors.secondary,
           }}
         >
-          <Download className="w-4 h-4" />
-          Descargar {method === "json" ? "JSON" : "archivo"} de Ejemplo
+          {isDownloadingTemplate ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Download className="w-4 h-4" />
+          )}
+          {isDownloadingTemplate 
+            ? 'Descargando...' 
+            : `Descargar ${method === "json" ? "JSON" : "archivo"} de Ejemplo`
+          }
         </motion.button>
       </div>
 

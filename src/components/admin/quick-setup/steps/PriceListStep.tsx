@@ -420,6 +420,7 @@ export function PriceListStep({ onNext, onBack, themeColors }: PriceListStepProp
         description="Sube un archivo CSV o XLSX con las listas de precios"
         acceptedFileTypes=".csv,.xlsx"
         fileExtensions={["csv", "xlsx"]}
+        templateEndpoint="/api/listprice/format"
       />
     </div>
   );

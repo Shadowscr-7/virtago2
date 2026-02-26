@@ -7,6 +7,7 @@ import { Download, Upload, Plus, Loader2 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/admin-layout";
 import { useTheme } from "@/contexts/theme-context";
 import { DiscountStatistics, DiscountFilters, DiscountTable } from "@/components/admin/descuentos";
+import { DiscountImportModal } from "@/components/admin/descuentos/DiscountImportModal";
 import { toast } from "sonner";
 import http from "@/api/http-client";
 
@@ -201,6 +202,7 @@ export default function DescuentosAdminPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
   const [totalDiscounts, setTotalDiscounts] = useState(0);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   // Cargar descuentos desde la API
   const loadDiscounts = async (page = 1) => {
@@ -364,6 +366,7 @@ export default function DescuentosAdminPage() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              onClick={() => setIsImportModalOpen(true)}
               className="px-4 py-2 text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-lg"
               style={{
                 backgroundImage: `linear-gradient(to right, ${themeColors.secondary}, ${themeColors.accent})`,
@@ -477,6 +480,12 @@ export default function DescuentosAdminPage() {
           />
         )}
       </div>
+
+      <DiscountImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onSuccess={() => { loadDiscounts(currentPage); }}
+      />
     </AdminLayout>
   );
 }

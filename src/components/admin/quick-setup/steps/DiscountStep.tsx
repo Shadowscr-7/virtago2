@@ -1271,6 +1271,7 @@ export function DiscountStep({ onNext, onBack, themeColors, stepData }: Discount
         fileExtensions={["csv", "xlsx", "json"]}
         isProcessing={isProcessing}
         parseFile={parseDiscountFile}
+        templateEndpoint="/api/discounts/format"
       />
     </div>
   );
