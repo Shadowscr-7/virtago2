@@ -1,11 +1,20 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 export interface ChatUIState {
   isOpen: boolean;
   isMinimized: boolean;
   unreadCount: number;
+}
+
+// ── Module-level bridge para abrir el chat desde fuera de React ──
+type OpenChatFn = () => void;
+let registeredOpenChat: OpenChatFn | null = null;
+
+/** Llamar desde cualquier lugar para abrir el chat programáticamente. */
+export function openChatExternally(): void {
+  registeredOpenChat?.();
 }
 
 export function useChatUI() {
@@ -15,11 +24,28 @@ export function useChatUI() {
     unreadCount: 0,
   });
 
+  const openChat = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      isOpen: true,
+      isMinimized: false,
+      unreadCount: 0,
+    }));
+  }, []);
+
+  // Registrar esta instancia como el handler global
+  useEffect(() => {
+    registeredOpenChat = openChat;
+    return () => {
+      if (registeredOpenChat === openChat) registeredOpenChat = null;
+    };
+  }, [openChat]);
+
   const toggleChat = useCallback(() => {
     setState(prev => ({
       ...prev,
       isOpen: !prev.isOpen,
-      unreadCount: prev.isOpen ? prev.unreadCount : 0, // Clear unread when opening
+      unreadCount: prev.isOpen ? prev.unreadCount : 0,
     }));
   }, []);
 
@@ -54,6 +80,7 @@ export function useChatUI() {
 
   return {
     ...state,
+    openChat,
     toggleChat,
     minimizeChat,
     closeChat,

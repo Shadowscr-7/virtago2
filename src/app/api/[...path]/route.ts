@@ -2,6 +2,58 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const BACKEND_URL = process.env.BACKEND_URL || 'https://virtago-backend.vercel.app';
 
+/**
+ * Whitelist de prefijos de path permitidos.
+ * Solo estos paths serán proxied al backend. Todo lo demás retorna 403.
+ */
+const ALLOWED_PATH_PREFIXES = [
+  'auth',
+  'users',
+  'products',
+  'clients',
+  'categories',
+  'brands',
+  'subcategories',
+  'prices',
+  'price-lists',
+  'discounts',
+  'orders',
+  'dashboard',
+  'onboarding',
+  'distributors',
+  'plans',
+  'redoc',
+  'docs',
+];
+
+/**
+ * Paths públicos que no requieren Authorization header.
+ * Todo lo demás requiere un token Bearer válido.
+ */
+const PUBLIC_PATH_PREFIXES = [
+  'auth/login',
+  'auth/register',
+  'auth/verify',
+  'auth/resend',
+  'auth/forgot',
+  'auth/reset',
+  'redoc',
+  'docs',
+];
+
+/**
+ * Límite máximo del body en bytes (5 MB)
+ */
+const MAX_BODY_SIZE = 5 * 1024 * 1024;
+
+function isPathAllowed(pathString: string): boolean {
+  return ALLOWED_PATH_PREFIXES.some(prefix => pathString.startsWith(prefix));
+}
+
+function isPublicPath(pathString: string): boolean {
+  return PUBLIC_PATH_PREFIXES.some(prefix => pathString.startsWith(prefix));
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> }
@@ -49,32 +101,59 @@ async function proxyRequest(
 ) {
   try {
     const pathString = path.join('/');
+
+    // 1. Validar que el path está en la whitelist
+    if (!isPathAllowed(pathString)) {
+      return NextResponse.json(
+        { error: 'Forbidden', message: 'Path not allowed' },
+        { status: 403 }
+      );
+    }
+
+    // 2. Validar autenticación para paths no públicos
+    if (!isPublicPath(pathString)) {
+      const authHeader = request.headers.get('authorization');
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return NextResponse.json(
+          { error: 'Unauthorized', message: 'Authentication required' },
+          { status: 401 }
+        );
+      }
+    }
+
     const url = `${BACKEND_URL}/api/${pathString}`;
     
     // Obtener el search params de la URL original
     const searchParams = request.nextUrl.searchParams.toString();
     const fullUrl = searchParams ? `${url}?${searchParams}` : url;
 
-    console.log(`[API Proxy] ${method} ${fullUrl}`);
-
-    // Obtener headers de la petición original
+    // Obtener headers de la petición original (solo los necesarios)
     const headers: Record<string, string> = {};
-    request.headers.forEach((value, key) => {
-      // Excluir headers que no deben ser reenviados
-      if (!['host', 'connection', 'content-length'].includes(key.toLowerCase())) {
-        headers[key] = value;
+    const FORWARDED_HEADERS = ['authorization', 'content-type', 'accept', 'accept-language'];
+    for (const headerName of FORWARDED_HEADERS) {
+      const value = request.headers.get(headerName);
+      if (value) {
+        headers[headerName] = value;
       }
-    });
+    }
 
-    // Obtener el body si existe
+    // Obtener el body si existe, con límite de tamaño
     let body: string | undefined;
     if (['POST', 'PUT', 'PATCH'].includes(method)) {
       try {
-        const jsonBody = await request.json();
-        body = JSON.stringify(jsonBody);
-        headers['content-type'] = 'application/json';
+        const rawBody = await request.text();
+        if (rawBody.length > MAX_BODY_SIZE) {
+          return NextResponse.json(
+            { error: 'Payload too large', message: `Body exceeds ${MAX_BODY_SIZE / 1024 / 1024}MB limit` },
+            { status: 413 }
+          );
+        }
+        body = rawBody;
+        if (!headers['content-type']) {
+          headers['content-type'] = 'application/json';
+        }
       } catch {
-        // No hay body o no es JSON
+        // No hay body o no se puede leer
       }
     }
 
@@ -85,37 +164,27 @@ async function proxyRequest(
       body,
     });
 
-    // Obtener la respuesta como texto primero
+    // Obtener la respuesta como texto
     const responseText = await response.text();
-    
-    console.log(`[API Proxy] ${method} ${fullUrl} - Status: ${response.status}`);
-    console.log(`[API Proxy] Response body:`, responseText);
 
-    // Intentar parsear como JSON para logging
-    let responseData;
-    try {
-      responseData = JSON.parse(responseText);
-      console.log(`[API Proxy] Parsed JSON:`, responseData);
-    } catch {
-      console.log(`[API Proxy] Response is not JSON`);
+    // Crear los headers de respuesta (solo los seguros)
+    const responseHeaders = new Headers();
+    const SAFE_RESPONSE_HEADERS = ['content-type', 'cache-control', 'x-request-id'];
+    for (const headerName of SAFE_RESPONSE_HEADERS) {
+      const value = response.headers.get(headerName);
+      if (value) {
+        responseHeaders.set(headerName, value);
+      }
     }
 
-    // Crear los headers de respuesta
-    const responseHeaders = new Headers();
-    response.headers.forEach((value, key) => {
-      responseHeaders.set(key, value);
-    });
-
-    // IMPORTANTE: Siempre devolver la respuesta, incluso si es error
-    // Esto permite que el cliente maneje el error apropiadamente
     return new NextResponse(responseText, {
       status: response.status,
       headers: responseHeaders,
     });
   } catch (error) {
-    console.error('[API Proxy] Error:', error);
+    console.error('[API Proxy] Error:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json(
-      { error: 'Proxy error', message: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Proxy error', message: 'Internal proxy error' },
       { status: 500 }
     );
   }

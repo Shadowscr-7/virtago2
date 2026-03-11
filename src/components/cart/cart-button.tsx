@@ -3,10 +3,18 @@
 import { useCartStore } from "./cart-store";
 import { ShoppingCart } from "lucide-react";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
 export function CartButton() {
   const { getTotalItems, openCart } = useCartStore();
-  const totalItems = getTotalItems();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Usar 0 en servidor para evitar hydration mismatch (el store se rehidrata en cliente)
+  const totalItems = mounted ? getTotalItems() : 0;
 
   return (
     <motion.button

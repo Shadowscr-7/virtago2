@@ -4,6 +4,7 @@ import axios, {
   AxiosResponse, 
   InternalAxiosRequestConfig 
 } from 'axios';
+import { emitError, createApiError } from '@/store/error-analyzer';
 
 // Extender el tipo para agregar _retry
 declare module 'axios' {
@@ -92,6 +93,26 @@ httpClient.interceptors.response.use(
         message: error.message,
       });
     }
+
+    // ── Emitir al ErrorAnalyzer para análisis de IA ──
+    // Emitir errores relevantes (500, red, timeout, 400/422)
+    const shouldEmit = status === 0 || (status && status >= 400 && status !== 401 && status !== 403 && status !== 404);
+    if (shouldEmit) {
+      try {
+        emitError(
+          createApiError({
+            method: error.config?.method || 'UNKNOWN',
+            url: error.config?.url || 'unknown',
+            requestBody: error.config?.data ? (() => { try { return JSON.parse(error.config!.data); } catch { return error.config!.data; } })() : undefined,
+            status: status || 0,
+            statusText: error.response?.statusText,
+            responseData: error.response?.data,
+            errorMessage: error.message,
+            errorCode: (error.response?.data as Record<string, unknown>)?.errorCode as string,
+          }),
+        );
+      } catch { /* no-op: error analyzer must never break the app */ }
+    }
     
     // Si el error es 401 (Unauthorized) y no es un retry
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
@@ -121,11 +142,9 @@ httpClient.interceptors.response.use(
           // Si falla el refresh, remover tokens y redirigir al login
           removeToken();
           
-          // TEMPORALMENTE DESACTIVADO PARA DEBUG - Redirigir al login (solo en cliente)
-          console.log("🔴 DEBERÍA REDIRIGIR A /login PERO ESTÁ DESACTIVADO PARA DEBUG");
-          // if (typeof window !== 'undefined') {
-          //   window.location.href = '/login';
-          // }
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+          }
           
           return Promise.reject(refreshError);
         }
@@ -133,11 +152,9 @@ httpClient.interceptors.response.use(
         // No hay refresh token, redirigir al login
         removeToken();
         
-        // TEMPORALMENTE DESACTIVADO PARA DEBUG - Redirigir al login
-        console.log("🔴 DEBERÍA REDIRIGIR A /login PERO ESTÁ DESACTIVADO PARA DEBUG (no refresh token)");
-        // if (typeof window !== 'undefined') {
-        //   window.location.href = '/login';
-        // }
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
       }
     }
     

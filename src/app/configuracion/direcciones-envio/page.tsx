@@ -13,7 +13,7 @@ import {
   Building,
   Star,
 } from "lucide-react";
-import { useAuthStore } from "@/lib/auth-store";
+import { useAuthStore } from "@/store/auth";
 import { StyledSelect } from "@/components/ui/styled-select";
 import { StyledSwitch } from "@/components/ui/styled-switch";
 import Link from "next/link";

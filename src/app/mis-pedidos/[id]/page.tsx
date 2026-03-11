@@ -19,7 +19,7 @@ import {
   Percent,
   FileText,
 } from "lucide-react";
-import { useAuthStore } from "@/lib/auth-store";
+import { useAuthStore } from "@/store/auth";
 import { api, Order, OrderItem } from "@/api";
 import Link from "next/link";
 import { notFound } from "next/navigation";

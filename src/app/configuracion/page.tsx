@@ -16,7 +16,7 @@ import {
   Save,
   RefreshCw,
 } from "lucide-react";
-import { useAuthStore } from "@/lib/auth-store";
+import { useAuthStore } from "@/store/auth";
 import { StyledSelect } from "@/components/ui/styled-select";
 import { StyledSwitch } from "@/components/ui/styled-switch";
 import Link from "next/link";
@@ -93,7 +93,7 @@ export default function ConfiguracionPage() {
                   </label>
                   <input
                     type="text"
-                    defaultValue={user.name}
+                    defaultValue={user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : ''}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   />
                 </div>
@@ -125,7 +125,7 @@ export default function ConfiguracionPage() {
                   </label>
                   <input
                     type="text"
-                    defaultValue={user.company}
+                    defaultValue={user?.distributorInfo?.businessName || ''}
                     className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   />
                 </div>

@@ -18,20 +18,25 @@ import {
   Bell,
   Lock,
 } from "lucide-react";
-import { useAuthStore } from "@/lib/auth-store";
+import { useAuthStore } from "@/store/auth";
 import { toast } from "sonner";
 import Link from "next/link";
 
 export default function ProfilePage() {
-  const { user, updateProfile } = useAuthStore();
+  const { user } = useAuthStore();
   const [isEditing, setIsEditing] = useState(false);
+  const fullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '';
+  const userCompany = user?.distributorInfo?.businessName || '';
+  const userPhone = user?.profile?.phone || '';
+  const userAddress = user?.profile?.address || '';
+  const userRole = user?.role === 'distributor' || user?.userType === 'distributor' ? 'distributor' : (user?.role || 'user');
   const [formData, setFormData] = useState({
-    name: user?.name || "",
+    name: fullName,
     email: user?.email || "",
-    phone: user?.phone || "",
-    company: user?.company || "",
-    address: user?.address || "",
-    avatar: user?.avatar || "👤",
+    phone: userPhone,
+    company: userCompany,
+    address: userAddress,
+    avatar: "👤",
   });
 
   if (!user) {
@@ -66,7 +71,7 @@ export default function ProfilePage() {
 
   const handleSave = () => {
     if (user) {
-      updateProfile(formData);
+      // TODO: Implementar API de updateProfile cuando esté disponible en el backend
       setIsEditing(false);
       toast.success("Perfil actualizado correctamente");
     }
@@ -75,12 +80,12 @@ export default function ProfilePage() {
   const handleCancel = () => {
     if (user) {
       setFormData({
-        name: user.name,
+        name: fullName,
         email: user.email,
-        phone: user.phone || "",
-        company: user.company || "",
-        address: user.address || "",
-        avatar: user.avatar || "👤",
+        phone: userPhone,
+        company: userCompany,
+        address: userAddress,
+        avatar: "👤",
       });
     }
     setIsEditing(false);
@@ -162,22 +167,22 @@ export default function ProfilePage() {
 
                   <div>
                     <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-                      {user.name}
+                      {fullName}
                     </h2>
                     <div className="flex items-center gap-3 mb-3">
                       <div
                         className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
-                          user.role === "distribuidor"
+                          userRole === "distributor"
                             ? "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
                             : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
                         }`}
                       >
-                        {user.role === "distribuidor" ? (
+                        {userRole === "distributor" ? (
                           <Shield className="w-4 h-4" />
                         ) : (
                           <User className="w-4 h-4" />
                         )}
-                        <span className="capitalize">{user.role}</span>
+                        <span className="capitalize">{userRole}</span>
                       </div>
                       <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
                         <Calendar className="w-4 h-4" />
@@ -298,7 +303,7 @@ export default function ProfilePage() {
                     <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                       <User className="w-5 h-5 text-slate-500" />
                       <span className="text-slate-900 dark:text-white">
-                        {user.name}
+                        {fullName}
                       </span>
                     </div>
                   )}
@@ -351,7 +356,7 @@ export default function ProfilePage() {
                     <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                       <Phone className="w-5 h-5 text-slate-500" />
                       <span className="text-slate-900 dark:text-white">
-                        {user.phone || "No especificado"}
+                        {userPhone || "No especificado"}
                       </span>
                     </div>
                   )}
@@ -397,7 +402,7 @@ export default function ProfilePage() {
                     <div className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                       <Building2 className="w-5 h-5 text-slate-500" />
                       <span className="text-slate-900 dark:text-white">
-                        {user.company || "No especificado"}
+                        {userCompany || "No especificado"}
                       </span>
                     </div>
                   )}
@@ -424,7 +429,7 @@ export default function ProfilePage() {
                     <div className="flex items-start gap-3 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
                       <MapPin className="w-5 h-5 text-slate-500 mt-0.5" />
                       <span className="text-slate-900 dark:text-white">
-                        {user.address || "No especificado"}
+                        {userAddress || "No especificado"}
                       </span>
                     </div>
                   )}

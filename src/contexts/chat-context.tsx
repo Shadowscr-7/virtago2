@@ -1,6 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useReducer, useCallback } from 'react';
+import type { CapturedError, ErrorAnalysis } from '@/store/error-analyzer';
+import { useAuthStore } from '@/store/auth';
 // import { chatConfig } from '../components/chat/chatConfig';
 
 // Tipos del sistema de chat
@@ -15,6 +17,13 @@ export interface ChatMessage {
     suggestions?: string[];
     attachments?: string[];
     quickReplies?: string[];
+    // Error analysis fields
+    errorAnalysis?: {
+      error: CapturedError;
+      analysis: ErrorAnalysis | null;
+      analyzing: boolean;
+      provider?: string;
+    };
   };
 }
 
@@ -38,6 +47,8 @@ type ChatAction =
 interface ChatContextType {
   state: ChatState;
   sendMessage: (content: string, metadata?: ChatMessage['metadata']) => Promise<void>;
+  addMessage: (message: ChatMessage) => void;
+  injectErrorAnalysis: (error: CapturedError) => void;
   clearChat: () => void;
   setTyping: (isTyping: boolean) => void;
   setAiStatus: (status: ChatState['aiStatus']) => void;
@@ -179,6 +190,10 @@ interface ChatProviderProps {
 export function ChatProvider({ children }: ChatProviderProps) {
   const [state, dispatch] = useReducer(chatReducer, initialState);
 
+  // Leer info del usuario conectado para dar contexto a la IA
+  const authUser = useAuthStore(s => s.user);
+  const isAuthenticated = useAuthStore(s => s.isAuthenticated);
+
   const sendMessage = useCallback(async (content: string, metadata?: ChatMessage['metadata']) => {
     // Agregar mensaje del usuario
     const userMessage: ChatMessage = {
@@ -194,10 +209,61 @@ export function ChatProvider({ children }: ChatProviderProps) {
     dispatch({ type: 'SET_TYPING', payload: true });
 
     try {
-      // Simular respuesta de IA (aquí se conectará con n8n)
       dispatch({ type: 'SET_AI_STATUS', payload: 'responding' });
-      const aiResponse = await simulateAIResponse(content);
-      
+
+      // Buscar si hay un error reciente en el historial para dar contexto
+      const recentErrorMsg = [...state.messages].reverse().find(
+        m => m.metadata?.errorAnalysis?.analysis
+      );
+      const errorContext = recentErrorMsg?.metadata?.errorAnalysis
+        ? {
+            error: recentErrorMsg.metadata.errorAnalysis.error,
+            analysis: recentErrorMsg.metadata.errorAnalysis.analysis,
+          }
+        : null;
+
+      // Construir historial reciente (últimos mensajes)
+      const history = state.messages
+        .filter(m => m.sender === 'user' || m.sender === 'ai')
+        .slice(-6)
+        .map(m => ({
+          role: m.sender === 'user' ? 'user' as const : 'ai' as const,
+          content: m.content,
+        }));
+
+      // Contexto del usuario conectado
+      const userContext = isAuthenticated && authUser ? {
+        firstName: authUser.firstName,
+        userType: authUser.userType || 'unknown',
+        role: authUser.role || 'user',
+        plan: authUser.plan?.displayName || authUser.plan?.name || 'free',
+        hasDistributorInfo: !!authUser.distributorInfo,
+        businessName: authUser.distributorInfo?.businessName,
+      } : null;
+
+      // Llamar al endpoint de chat IA
+      const res = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: content, errorContext, history, userContext }),
+      });
+      const data = await res.json();
+
+      const aiResponse: ChatMessage = {
+        id: `ai-${Date.now()}`,
+        content: data.reply || 'No pude generar una respuesta.',
+        sender: 'ai',
+        timestamp: new Date(),
+        metadata: {
+          confidence: data.provider === 'openai' ? 0.95 : 0.8,
+          ...(data.provider === 'openai' ? {} : {
+            suggestions: errorContext
+              ? ['Más detalles técnicos', 'Cómo prevenirlo', 'Siguiente paso']
+              : ['Tour del sistema', 'Mejores prácticas', 'Soporte técnico'],
+          }),
+        },
+      };
+
       dispatch({ type: 'SET_TYPING', payload: false });
       dispatch({ type: 'ADD_MESSAGE', payload: aiResponse });
       dispatch({ type: 'SET_AI_STATUS', payload: 'idle' });
@@ -215,10 +281,103 @@ export function ChatProvider({ children }: ChatProviderProps) {
       dispatch({ type: 'ADD_MESSAGE', payload: errorMessage });
       dispatch({ type: 'SET_AI_STATUS', payload: 'idle' });
     }
-  }, []);
+  }, [state.messages, authUser, isAuthenticated]);
 
   const clearChat = useCallback(() => {
     dispatch({ type: 'CLEAR_CHAT' });
+  }, []);
+
+  // Agregar un mensaje directamente sin disparar respuesta de IA
+  const addMessage = useCallback((message: ChatMessage) => {
+    dispatch({ type: 'ADD_MESSAGE', payload: message });
+  }, []);
+
+  // Inyectar un error capturado → mostrar análisis de IA dentro del chat
+  const injectErrorAnalysis = useCallback(async (capturedError: CapturedError) => {
+    // 1. Insertar mensaje "analizando" con shimmer
+    const msgId = `error-analysis-${Date.now()}`;
+    const analyzingMsg: ChatMessage = {
+      id: msgId,
+      content: `🔍 Se detectó un error en **${capturedError.source === 'api' ? 'una llamada API' : 'el frontend'}**. Analizando...`,
+      sender: 'ai',
+      timestamp: new Date(),
+      metadata: {
+        errorAnalysis: {
+          error: capturedError,
+          analysis: null,
+          analyzing: true,
+        },
+      },
+    };
+    dispatch({ type: 'ADD_MESSAGE', payload: analyzingMsg });
+    dispatch({ type: 'SET_AI_STATUS', payload: 'thinking' });
+    dispatch({ type: 'SET_TYPING', payload: true });
+
+    // 2. Solicitar análisis de IA
+    try {
+      const res = await fetch('/api/ai/analyze-error', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source: capturedError.source,
+          request: capturedError.request,
+          response: capturedError.response,
+          error: capturedError.error,
+          context: capturedError.context,
+        }),
+      });
+      const data = await res.json();
+
+      // 3. Actualizar el mensaje con el análisis completo
+      dispatch({
+        type: 'UPDATE_MESSAGE',
+        payload: {
+          id: msgId,
+          updates: {
+            content: `⚠️ **Error detectado** — ${capturedError.error.message.slice(0, 80)}`,
+            metadata: {
+              errorAnalysis: {
+                error: capturedError,
+                analysis: data.analysis,
+                analyzing: false,
+                provider: data.provider,
+              },
+              quickReplies: [
+                '¿Cómo soluciono esto?',
+                '¿Es un error grave?',
+                'Más detalles técnicos',
+                'Ignorar este error',
+              ],
+            },
+          },
+        },
+      });
+    } catch {
+      dispatch({
+        type: 'UPDATE_MESSAGE',
+        payload: {
+          id: msgId,
+          updates: {
+            content: `⚠️ **Error detectado** — ${capturedError.error.message.slice(0, 80)}`,
+            metadata: {
+              errorAnalysis: {
+                error: capturedError,
+                analysis: {
+                  cause: 'No se pudo conectar con el servicio de análisis.',
+                  solution: 'Verifica que la app esté corriendo correctamente.',
+                  severity: 'low',
+                  category: 'client',
+                },
+                analyzing: false,
+              },
+            },
+          },
+        },
+      });
+    } finally {
+      dispatch({ type: 'SET_TYPING', payload: false });
+      dispatch({ type: 'SET_AI_STATUS', payload: 'idle' });
+    }
   }, []);
 
   const setTyping = useCallback((isTyping: boolean) => {
@@ -240,6 +399,8 @@ export function ChatProvider({ children }: ChatProviderProps) {
   const contextValue: ChatContextType = {
     state,
     sendMessage,
+    addMessage,
+    injectErrorAnalysis,
     clearChat,
     setTyping,
     setAiStatus,

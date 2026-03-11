@@ -14,7 +14,7 @@ import {
   Lock,
   Building,
 } from "lucide-react";
-import { useAuthStore } from "@/lib/auth-store";
+import { useAuthStore } from "@/store/auth";
 import Link from "next/link";
 
 export default function MetodosPagoPage() {
@@ -501,7 +501,7 @@ export default function MetodosPagoPage() {
                   <div className="space-y-3 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-300">Empresa:</span>
-                      <span className="text-white">{user.company}</span>
+                      <span className="text-white">{user?.distributorInfo?.businessName || 'N/A'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-300">Email:</span>

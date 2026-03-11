@@ -28,7 +28,19 @@ import {
 
   AlertCircle,
   Sparkles,
-  RefreshCw
+  RefreshCw,
+  AlertTriangle,
+  ArrowRight,
+  Code2,
+  Globe,
+  Server,
+  Shield,
+  Zap,
+  Bug,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Check,
 } from 'lucide-react';
 
 // Componente para el indicador de escritura
@@ -111,6 +123,250 @@ function QuickReplies({
   );
 }
 
+// ── Helpers para el análisis de errores ────────────────────────────────────
+
+function sevColor(severity?: string) {
+  switch (severity) {
+    case 'critical': return { bg: '#ef444420', text: '#ef4444', border: '#ef444440' };
+    case 'medium': return { bg: '#f59e0b20', text: '#f59e0b', border: '#f59e0b40' };
+    case 'low': return { bg: '#22c55e20', text: '#22c55e', border: '#22c55e40' };
+    default: return { bg: '#6366f120', text: '#6366f1', border: '#6366f140' };
+  }
+}
+
+function ErrorCategoryIcon({ category, className, style }: { category?: string; className?: string; style?: React.CSSProperties }) {
+  const props = { className: className || 'w-3.5 h-3.5', style };
+  switch (category) {
+    case 'network': return <Globe {...props} />;
+    case 'server': return <Server {...props} />;
+    case 'auth': return <Shield {...props} />;
+    case 'validation': return <Code2 {...props} />;
+    case 'config': return <Zap {...props} />;
+    default: return <Bug {...props} />;
+  }
+}
+
+// ── Card que muestra dentro del bubble cuando hay errorAnalysis ──────────
+
+function ErrorAnalysisCard({
+  metadata,
+  themeColors,
+}: {
+  metadata: NonNullable<ChatMessage['metadata']>['errorAnalysis'];
+  themeColors: ThemeColors;
+}) {
+  if (!metadata) return null;
+  const { error: capturedError, analysis, analyzing, provider } = metadata;
+  const sev = sevColor(analysis?.severity);
+  const [showDetails, setShowDetails] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    const text = [
+      `Error: ${capturedError.error.message}`,
+      capturedError.request ? `Request: ${capturedError.request.method} ${capturedError.request.url}` : '',
+      capturedError.response ? `Status: ${capturedError.response.status}` : '',
+      analysis ? `\nCausa: ${analysis.cause}` : '',
+      analysis ? `Solución: ${analysis.solution}` : '',
+    ].filter(Boolean).join('\n');
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <motion.div
+      className="mt-2 space-y-2"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.15 }}
+    >
+      {/* Header badges */}
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <span
+          className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded"
+          style={{
+            backgroundColor: capturedError.source === 'api' ? '#3b82f620' : '#a855f720',
+            color: capturedError.source === 'api' ? '#3b82f6' : '#a855f7',
+          }}
+        >
+          {capturedError.source}
+        </span>
+        {capturedError.request && (
+          <span className="text-[10px] font-mono" style={{ color: themeColors.text.secondary }}>
+            {capturedError.request.method} {capturedError.response?.status || ''}
+          </span>
+        )}
+        {analysis && (
+          <span
+            className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded"
+            style={{ backgroundColor: sev.bg, color: sev.text }}
+          >
+            {analysis.severity}
+          </span>
+        )}
+      </div>
+
+      {/* URL */}
+      {capturedError.request?.url && (
+        <p className="text-[10px] font-mono truncate" style={{ color: themeColors.text.secondary }}>
+          {capturedError.request.url}
+        </p>
+      )}
+
+      {/* Shimmer while analyzing */}
+      {analyzing && (
+        <motion.div className="flex items-center gap-2 py-2">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+          >
+            <Sparkles className="w-4 h-4 text-orange-400" />
+          </motion.div>
+          <span className="text-xs" style={{ color: themeColors.text.secondary }}>
+            Analizando con IA...
+          </span>
+          <motion.div
+            className="flex-1 h-0.5 rounded-full overflow-hidden"
+            style={{ backgroundColor: `${themeColors.primary}15` }}
+          >
+            <motion.div
+              className="h-full w-1/2"
+              style={{ background: `linear-gradient(90deg, transparent, ${themeColors.primary}60, transparent)` }}
+              animate={{ x: ['-100%', '200%'] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+            />
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* Analysis results */}
+      {analysis && !analyzing && (
+        <motion.div
+          className="space-y-1.5"
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          {/* Causa */}
+          <div className="rounded-lg p-2" style={{ backgroundColor: '#ef444408', border: '1px solid #ef444415' }}>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <AlertTriangle className="w-3 h-3 text-red-400" />
+              <span className="text-[10px] font-bold uppercase text-red-400">Causa</span>
+            </div>
+            <p className="text-xs leading-relaxed" style={{ color: themeColors.text.primary }}>
+              {analysis.cause}
+            </p>
+          </div>
+
+          {/* Solución */}
+          <div className="rounded-lg p-2" style={{ backgroundColor: '#22c55e08', border: '1px solid #22c55e15' }}>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <ArrowRight className="w-3 h-3 text-green-400" />
+              <span className="text-[10px] font-bold uppercase text-green-400">Solución</span>
+            </div>
+            <p className="text-xs leading-relaxed" style={{ color: themeColors.text.primary }}>
+              {analysis.solution}
+            </p>
+          </div>
+
+          {/* Code suggestion */}
+          {analysis.code_suggestion && (
+            <div className="rounded-lg p-2 font-mono" style={{ backgroundColor: `${themeColors.primary}08`, border: `1px solid ${themeColors.primary}15` }}>
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <Code2 className="w-3 h-3" style={{ color: themeColors.primary }} />
+                <span className="text-[10px] font-bold uppercase" style={{ color: themeColors.primary }}>
+                  Código sugerido
+                </span>
+              </div>
+              <pre className="text-[11px] whitespace-pre-wrap break-words" style={{ color: themeColors.text.primary }}>
+                {analysis.code_suggestion}
+              </pre>
+            </div>
+          )}
+
+          {/* Technical details (collapsible) */}
+          {(capturedError.request || capturedError.response) && (
+            <div>
+              <button
+                onClick={() => setShowDetails(!showDetails)}
+                className="flex items-center gap-1 text-[10px] font-medium py-0.5"
+                style={{ color: themeColors.text.secondary }}
+              >
+                {showDetails ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                Detalles técnicos
+              </button>
+              <AnimatePresence>
+                {showDetails && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="rounded-lg p-2 text-[10px] font-mono space-y-1" style={{ backgroundColor: `${themeColors.surface}60` }}>
+                      {capturedError.request && (
+                        <div>
+                          <span className="font-bold" style={{ color: '#3b82f6' }}>Request: </span>
+                          <span style={{ color: themeColors.text.primary }}>
+                            {capturedError.request.method} {capturedError.request.url}
+                          </span>
+                        </div>
+                      )}
+                      {capturedError.response && (
+                        <div>
+                          <span className="font-bold" style={{ color: capturedError.response.status >= 500 ? '#ef4444' : '#f59e0b' }}>
+                            Response: {capturedError.response.status}
+                          </span>
+                          {capturedError.response.data != null && (
+                            <pre className="mt-0.5 whitespace-pre-wrap break-words opacity-70" style={{ color: themeColors.text.secondary }}>
+                              {JSON.stringify(capturedError.response.data, null, 2)?.slice(0, 300) ?? ''}
+                            </pre>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+
+          {/* Actions row */}
+          <div className="flex items-center gap-2 pt-0.5">
+            <motion.button
+              onClick={handleCopy}
+              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-medium"
+              style={{
+                backgroundColor: `${themeColors.surface}80`,
+                color: themeColors.text.secondary,
+                border: `1px solid ${themeColors.primary}15`,
+              }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              {copied ? <><Check className="w-3 h-3 text-green-400" /> Copiado</> : <><Copy className="w-3 h-3" /> Copiar</>}
+            </motion.button>
+
+            {provider && (
+              <span
+                className="ml-auto text-[9px] px-1.5 py-0.5 rounded flex items-center gap-1"
+                style={{
+                  backgroundColor: provider === 'openai' ? '#10b98120' : `${themeColors.surface}60`,
+                  color: provider === 'openai' ? '#10b981' : themeColors.text.secondary,
+                }}
+              >
+                <Sparkles className="w-2.5 h-2.5" />
+                {provider === 'openai' ? 'GPT-4o' : 'Análisis local'}
+              </span>
+            )}
+          </div>
+        </motion.div>
+      )}
+    </motion.div>
+  );
+}
+
 // Componente para los mensajes individuales
 function ChatBubble({ 
   message, 
@@ -123,6 +379,7 @@ function ChatBubble({
 }) {
   const isUser = message.sender === 'user';
   const isSystem = message.sender === 'system';
+  const hasErrorAnalysis = !!message.metadata?.errorAnalysis;
   
   return (
     <motion.div
@@ -145,12 +402,16 @@ function ChatBubble({
             isSystem ? 'mt-1' : ''
           }`}
           style={{ 
-            backgroundColor: isSystem 
-              ? `${themeColors.accent}20` 
-              : `${themeColors.primary}20` 
+            backgroundColor: hasErrorAnalysis
+              ? '#ef444420'
+              : isSystem 
+                ? `${themeColors.accent}20` 
+                : `${themeColors.primary}20` 
           }}
         >
-          {isSystem ? (
+          {hasErrorAnalysis ? (
+            <AlertTriangle className="w-4 h-4 text-red-400" />
+          ) : isSystem ? (
             <AlertCircle className="w-4 h-4" style={{ color: themeColors.accent }} />
           ) : (
             <Bot className="w-4 h-4" style={{ color: themeColors.primary }} />
@@ -202,6 +463,14 @@ function ChatBubble({
           <p className="text-sm leading-relaxed whitespace-pre-wrap">
             {message.content}
           </p>
+
+          {/* Error analysis card */}
+          {message.metadata?.errorAnalysis && (
+            <ErrorAnalysisCard
+              metadata={message.metadata.errorAnalysis}
+              themeColors={themeColors}
+            />
+          )}
           
           {/* Indicador de confianza para mensajes de IA */}
           {message.metadata?.confidence && (

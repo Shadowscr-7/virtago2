@@ -13,16 +13,33 @@ import {
   Tag,
   ArrowRight,
 } from "lucide-react";
-import { useAuthStore } from "@/lib/auth-store";
+import { useAuthStore } from "@/store/auth";
 import { useCartStore } from "@/components/cart/cart-store";
 import { toast } from "sonner";
 import Link from "next/link";
 
 export default function FavoritesPage() {
-  const { user, favorites, removeFromFavorites } = useAuthStore();
+  const { user } = useAuthStore();
   const { addItem } = useCartStore();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("dateAdded");
+
+  // TODO: Migrar favoritos a una API del backend. Por ahora se usa estado local vacío.
+  const [favorites, setFavorites] = useState<Array<{
+    id: string;
+    productId: string;
+    name: string;
+    brand: string;
+    supplier: string;
+    image: string;
+    price: number;
+    originalPrice?: number;
+    dateAdded: string;
+  }>>([]);
+
+  const removeFromFavorites = (productId: string) => {
+    setFavorites(prev => prev.filter(f => f.productId !== productId));
+  };
 
   if (!user) {
     return (

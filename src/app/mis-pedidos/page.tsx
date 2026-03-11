@@ -21,7 +21,7 @@ import {
   AlertCircle,
   Tag,
 } from "lucide-react";
-import { useAuthStore } from "@/lib/auth-store";
+import { useAuthStore } from "@/store/auth";
 import { api } from "@/api";
 import { Order } from "@/api";
 import Link from "next/link";

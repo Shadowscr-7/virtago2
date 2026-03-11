@@ -17,6 +17,7 @@ import {
   Ticket,
   BookOpen,
   GraduationCap,
+  FlaskConical,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -82,6 +83,12 @@ const menuItems = [
     label: "Cupones",
     icon: Ticket,
     href: "/admin/cupones",
+  },
+  {
+    id: "tests",
+    label: "Tests E2E",
+    icon: FlaskConical,
+    href: "/admin/tests",
   },
   {
     id: "tutorials",

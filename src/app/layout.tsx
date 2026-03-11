@@ -10,6 +10,8 @@ import { ToastIntegration } from "@/components/cart/toast-integration";
 import { Toaster } from "sonner";
 import { ChatSystem } from "@/components/chat";
 import { DebugTools } from "@/components/debug-tools";
+import { GlobalErrorBoundary } from "@/components/error/GlobalErrorBoundary";
+import { GlobalErrorCatcherInit } from "@/components/error/GlobalErrorCatcherInit";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -66,8 +68,11 @@ export default function RootLayout({
               <ToastIntegration />
               <Toaster position="top-right" richColors />
               <LoadingProvider>
-                <ClientLayout>{children}</ClientLayout>
+                <GlobalErrorBoundary name="RootLayout">
+                  <ClientLayout>{children}</ClientLayout>
+                </GlobalErrorBoundary>
                 <ChatSystem />
+                <GlobalErrorCatcherInit />
                 <DebugTools />
               </LoadingProvider>
             </ToastProvider>
