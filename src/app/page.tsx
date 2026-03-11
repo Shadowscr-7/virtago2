@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { OfferBanner } from "@/components/banners/offer-banner";
 import { ProductCard } from "@/components/products/product-card";
@@ -8,10 +9,11 @@ import { AnimatedBackground } from "@/components/ui/animated-background";
 import { ChatDemo } from "@/components/chat/ChatDemo";
 import { useAuthStore } from "@/store/auth";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Star, TrendingUp, Users, ShieldCheck } from "lucide-react";
+import { ArrowRight, Star, TrendingUp, Users, ShieldCheck, FlaskConical } from "lucide-react";
+import { api } from "@/api";
 
-// Mock data para productos
-const featuredProducts = [
+// Datos demo — se muestran solo cuando no hay productos reales en la base de datos
+const demoProducts = [
   {
     name: "Smartphone Pro Max 256GB",
     brand: "TechBrand",
@@ -70,6 +72,60 @@ export default function Home() {
   const { isAuthenticated } = useAuthStore();
   const { themeColors } = useTheme();
   const router = useRouter();
+
+  // Estado para productos reales vs demo
+  const [featuredProducts, setFeaturedProducts] = useState(demoProducts);
+  const [isDemo, setIsDemo] = useState(true);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+
+  // Intentar cargar productos reales del backend
+  useEffect(() => {
+    const loadRealProducts = async () => {
+      try {
+        setIsLoadingProducts(true);
+        const response = await api.product.getProductsWithDiscounts({ page: 1, limit: 6 });
+        
+        // Extraer productos de las posibles estructuras de respuesta
+        let products: any[] = [];
+        const data = response?.data as any;
+        
+        if (Array.isArray(data)) {
+          products = data;
+        } else if (data?.products && Array.isArray(data.products)) {
+          products = data.products;
+        } else if (data?.data && Array.isArray(data.data)) {
+          products = data.data;
+        }
+
+        if (products.length > 0) {
+          // Adaptar productos reales al formato de ProductCard
+          const adapted = products.map((p: any) => ({
+            id: p.id || p.prodVirtaId || p.productId,
+            name: p.name || p.title || 'Producto',
+            brand: p.brandId || p.brand || '',
+            supplier: p.distributorCode || '',
+            image: p.productImages?.[0]?.url || '/images/placeholder-product.png',
+            price: p.pricing?.final_price || p.pricing?.base_price || p.price || 0,
+            originalPrice: p.pricing?.has_discount ? p.pricing.base_price : undefined,
+            description: p.shortDescription || p.fullDescription || p.description || '',
+          }));
+          setFeaturedProducts(adapted);
+          setIsDemo(false);
+          console.log(`🛍️ Home: ${adapted.length} productos reales cargados`);
+        } else {
+          console.log('🏷️ Home: Sin productos reales, mostrando datos demo');
+          setIsDemo(true);
+        }
+      } catch (error) {
+        console.log('🏷️ Home: Error cargando productos, mostrando datos demo');
+        setIsDemo(true);
+      } finally {
+        setIsLoadingProducts(false);
+      }
+    };
+
+    loadRealProducts();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -212,19 +268,32 @@ export default function Home() {
         {/* Productos destacados */}
         <section className="space-y-6">
           <div className="flex items-center justify-between">
-            <motion.h2
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5, duration: 0.6 }}
-              className="text-3xl font-bold text-foreground"
-            >
-              Productos Destacados
-            </motion.h2>
+            <div className="flex items-center gap-3">
+              <motion.h2
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5, duration: 0.6 }}
+                className="text-3xl font-bold text-foreground"
+              >
+                {isDemo ? 'Productos Demo' : 'Productos Destacados'}
+              </motion.h2>
+              {isDemo && (
+                <motion.span
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.7, duration: 0.4 }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                >
+                  <FlaskConical className="w-3.5 h-3.5" />
+                  Demo
+                </motion.span>
+              )}
+            </div>
             <motion.a
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.6, duration: 0.6 }}
-              href="#"
+              href="/productos"
               className="flex items-center gap-2 transition-colors group"
               style={{ color: themeColors.primary }}
             >
@@ -232,6 +301,22 @@ export default function Home() {
               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </motion.a>
           </div>
+
+          {/* Banner informativo cuando son productos demo */}
+          {isDemo && !isLoadingProducts && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl border border-amber-500/20 bg-amber-500/5 backdrop-blur-sm"
+            >
+              <FlaskConical className="w-5 h-5 text-amber-500 flex-shrink-0" />
+              <p className="text-sm text-amber-700 dark:text-amber-300">
+                <span className="font-semibold">Estos son productos de demostración.</span>{' '}
+                Cuando se carguen productos reales en la base de datos, se mostrarán automáticamente aquí.
+              </p>
+            </motion.div>
+          )}
 
           <motion.div
             initial={{ opacity: 0, y: 40 }}
@@ -249,7 +334,7 @@ export default function Home() {
                 <ProductCard
                   {...product}
                   isAuthenticated={isAuthenticated}
-                  isFavorite={index % 3 === 0} // Algunos productos como favoritos para demo
+                  isFavorite={isDemo ? index % 3 === 0 : false}
                 />
               </motion.div>
             ))}
