@@ -39,13 +39,24 @@ export function PlanSelection({ onPlanSelected, onBack }: PlanSelectionProps) {
   const loadPlans = async () => {
     try {
       const response = await api.plans.getPlans();
-      setPlans(response.data.data.sort((a, b) => a.order - b.order));
-      
-      // Seleccionar plan por defecto
-      const defaultPlan = response.data.data.find(plan => plan.isDefault);
-      if (defaultPlan) {
-        setSelectedPlan(defaultPlan);
-      }
+
+      // El backend puede devolver { data: Plan[] } o { data: { data: Plan[] } }
+      const raw = response.data as any;
+      const plansArray: Plan[] = Array.isArray(raw)
+        ? raw
+        : Array.isArray(raw?.data)
+          ? raw.data
+          : Array.isArray(raw?.plans)
+            ? raw.plans
+            : [];
+
+      console.log("📋 Planes cargados:", plansArray.length, plansArray.map(p => p.displayName));
+
+      const sorted = [...plansArray].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      setPlans(sorted);
+
+      const defaultPlan = sorted.find(plan => plan.isDefault) ?? sorted[0] ?? null;
+      if (defaultPlan) setSelectedPlan(defaultPlan);
     } catch (error) {
       console.error("Error loading plans:", error);
       showToast({

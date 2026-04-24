@@ -19,6 +19,9 @@ import { StyledSelect } from "@/components/ui/styled-select";
 import Image from "next/image";
 import Link from "next/link";
 import { useCartStore } from "@/components/cart/cart-store";
+import { useAuthStore } from "@/store/auth";
+import { Lock } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Product {
   id: string;
@@ -97,6 +100,8 @@ export function ProductsGrid({
   const itemsPerPage = 12;
 
   const { addItem } = useCartStore();
+  const { isAuthenticated } = useAuthStore();
+  const router = useRouter();
 
   const sortOptions = [
     { value: "relevance", label: "Relevancia" },
@@ -241,17 +246,19 @@ export function ProductsGrid({
             </Link>
           </div>
 
-          {/* Quick Add */}
-          <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <button
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAddToCart(product); }}
-              disabled={!product.inStock}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-            >
-              <ShoppingCart className="w-4 h-4" />
-              {product.inStock ? "Agregar al Carrito" : "Sin Stock"}
-            </button>
-          </div>
+          {/* Quick Add — solo si está autenticado */}
+          {isAuthenticated && (
+            <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <button
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleAddToCart(product); }}
+                disabled={!product.inStock}
+                className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+              >
+                <ShoppingCart className="w-4 h-4" />
+                {product.inStock ? "Agregar al Carrito" : "Sin Stock"}
+              </button>
+            </div>
+          )}
         </Link>
 
         {/* Content */}
@@ -286,52 +293,67 @@ export function ProductsGrid({
 
           {/* Price */}
           <div className="mb-3">
-            {/* Precio Final (destacado) */}
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                {formatPrice(product.price)}
-              </span>
-            </div>
-
-            {/* Precio Base (tachado) + Ahorro */}
-            {isOnSale && product.originalPrice && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-slate-500 dark:text-slate-400 line-through">
-                  {formatPrice(product.originalPrice)}
-                </span>
-                {product.pricing?.total_savings && product.pricing.total_savings > 0 && (
-                  <span className="text-xs text-green-600 dark:text-green-400 font-medium">
-                    Ahorras {formatPrice(product.pricing.total_savings)}
+            {isAuthenticated ? (
+              <>
+                {/* Precio Final (destacado) */}
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    {formatPrice(product.price)}
                   </span>
+                </div>
+
+                {/* Precio Base (tachado) + Ahorro */}
+                {isOnSale && product.originalPrice && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-slate-500 dark:text-slate-400 line-through">
+                      {formatPrice(product.originalPrice)}
+                    </span>
+                    {product.pricing?.total_savings && product.pricing.total_savings > 0 && (
+                      <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                        Ahorras {formatPrice(product.pricing.total_savings)}
+                      </span>
+                    )}
+                  </div>
                 )}
-              </div>
-            )}
 
-            {/* Descuento Adicional Disponible */}
-            {product.bestAdditionalDiscount && product.bestAdditionalDiscount.potentialSavings > 0 && (
-              <div className="mt-2 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-purple-700 dark:text-purple-300">
-                    {product.bestAdditionalDiscount.badge}
-                  </span>
-                  <span className="text-xs text-purple-600 dark:text-purple-400">
-                    {product.bestAdditionalDiscount.description}
-                  </span>
-                </div>
-                <div className="text-xs text-purple-700 dark:text-purple-300 font-medium mt-1">
-                  Ahorro extra: {formatPrice(product.bestAdditionalDiscount.potentialSavings)}
-                </div>
-              </div>
-            )}
+                {/* Descuento Adicional Disponible */}
+                {product.bestAdditionalDiscount && product.bestAdditionalDiscount.potentialSavings > 0 && (
+                  <div className="mt-2 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-purple-700 dark:text-purple-300">
+                        {product.bestAdditionalDiscount.badge}
+                      </span>
+                      <span className="text-xs text-purple-600 dark:text-purple-400">
+                        {product.bestAdditionalDiscount.description}
+                      </span>
+                    </div>
+                    <div className="text-xs text-purple-700 dark:text-purple-300 font-medium mt-1">
+                      Ahorro extra: {formatPrice(product.bestAdditionalDiscount.potentialSavings)}
+                    </div>
+                  </div>
+                )}
 
-            {/* Promociones condicionales disponibles */}
-            {product.discounts?.conditional && product.discounts.conditional > 0 && (
-              <div className="mt-2 flex items-center gap-1 text-xs text-green-700 dark:text-green-400">
-                <span>🏷️</span>
-                <span className="font-medium">
-                  {product.discounts.conditional} promoción(es) disponible(s)
-                </span>
-              </div>
+                {/* Promociones condicionales disponibles */}
+                {product.discounts?.conditional && product.discounts.conditional > 0 && (
+                  <div className="mt-2 flex items-center gap-1 text-xs text-green-700 dark:text-green-400">
+                    <span>🏷️</span>
+                    <span className="font-medium">
+                      {product.discounts.conditional} promoción(es) disponible(s)
+                    </span>
+                  </div>
+                )}
+              </>
+            ) : (
+              <button
+                onClick={() => router.push('/login')}
+                className="w-full flex items-center gap-2 p-3 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 transition-colors text-left"
+              >
+                <Lock className="w-4 h-4 text-purple-600 flex-shrink-0" />
+                <div>
+                  <p className="text-xs font-semibold text-purple-700">Iniciá sesión para ver el precio</p>
+                  <p className="text-xs text-purple-500">Precios exclusivos B2B</p>
+                </div>
+              </button>
             )}
           </div>
 

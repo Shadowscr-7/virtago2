@@ -533,7 +533,12 @@ export interface Plan {
     orders: number;
     categories: number;
     brands: number;
+    aiRequests: number;
   };
+  aiSupport: boolean;
+  supportLevel: "community" | "priority" | "dedicated";
+  isDefault: boolean;
+  order: number;
 }
 
 export interface WizardSummaryData {

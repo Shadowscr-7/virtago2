@@ -78,14 +78,8 @@ export default function Home() {
   const [isDemo, setIsDemo] = useState(true);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
 
-  // Intentar cargar productos reales del backend (solo si está autenticado)
+  // Intentar cargar productos reales del backend
   useEffect(() => {
-    if (!isAuthenticated) {
-      setIsLoadingProducts(false);
-      setIsDemo(true);
-      return;
-    }
-
     const loadRealProducts = async () => {
       try {
         setIsLoadingProducts(true);
@@ -131,7 +125,7 @@ export default function Home() {
     };
 
     loadRealProducts();
-  }, [isAuthenticated]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background relative">

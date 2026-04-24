@@ -512,6 +512,16 @@ export const useAuthStore = create<AuthState>()(
           } else {
             // Si es distribuidor, crear/actualizar usuario con el tipo y continuar al siguiente paso
             const { user } = get();
+
+            // 🔐 Mover el token temporal para que las siguientes llamadas a la API
+            // (personalInfo, businessInfo, planSelection) se hagan con autenticación
+            const tempToken = localStorage.getItem('temp_auth_token');
+            if (tempToken) {
+              localStorage.removeItem('temp_auth_token');
+              get().setToken(tempToken);
+              console.log("✅ Token temporal movido a auth para flujo de distribuidor");
+            }
+
             const updatedUser: User = {
               ...user,
               id: user?.id || Date.now().toString(),
@@ -525,6 +535,7 @@ export const useAuthStore = create<AuthState>()(
 
             set({
               user: updatedUser,
+              token: tempToken || get().token,
               registrationStep: "personalInfo",
               isLoading: false,
             });
