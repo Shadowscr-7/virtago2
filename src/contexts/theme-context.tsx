@@ -8,8 +8,7 @@ import {
   ReactNode,
 } from "react";
 
-// Definición de temas con sus paletas de colores
-export type ThemeVariant = "original" | "ocean" | "forest" | "crimson";
+export type ThemeVariant = "light-blue" | "light-green" | "light-orange" | "light-purple";
 
 export interface ThemeColors {
   name: string;
@@ -18,6 +17,7 @@ export interface ThemeColors {
   accent: string;
   background: string;
   surface: string;
+  border: string;
   text: {
     primary: string;
     secondary: string;
@@ -35,100 +35,96 @@ export interface ThemeColors {
 }
 
 export const themes: Record<ThemeVariant, ThemeColors> = {
-  original: {
-    name: "Virtago Original",
-    primary: "#8b5cf6", // purple-500
-    secondary: "#ec4899", // pink-500
-    accent: "#06b6d4", // cyan-500
-    background: "#0f172a", // slate-900
-    surface: "#1e293b", // slate-800
+  "light-blue": {
+    name: "Azul",
+    primary: "#1E3A61",
+    secondary: "#3A5A94",
+    accent: "#2A4D89",
+    background: "#ffffff",
+    surface: "#f1f5f9",
+    border: "#e2e8f0",
     text: {
-      primary: "#f8fafc", // slate-50
-      secondary: "#cbd5e1", // slate-300
-      muted: "#64748b", // slate-500
+      primary: "#0f172a",
+      secondary: "#475569",
+      muted: "#94a3b8",
     },
     gradients: {
-      primary: "from-purple-500 to-pink-500",
-      secondary: "from-blue-500 to-cyan-500",
-      accent: "from-purple-600 to-pink-600",
+      primary: "from-blue-800 to-blue-600",
+      secondary: "from-blue-600 to-blue-400",
+      accent: "from-blue-700 to-blue-500",
     },
     glass: {
-      primary:
-        "from-white/80 to-gray-50/80 dark:from-slate-800/80 dark:to-slate-700/80",
-      secondary:
-        "from-white/70 to-gray-50/70 dark:from-slate-800/70 dark:to-slate-700/70",
+      primary: "from-blue-50/90 to-white/90",
+      secondary: "from-white/90 to-blue-50/80",
     },
   },
-  ocean: {
-    name: "Ocean Depths",
-    primary: "#3b82f6", // blue-500
-    secondary: "#06b6d4", // cyan-500
-    accent: "#10b981", // emerald-500
-    background: "#0c1421", // azul muy oscuro
-    surface: "#1e2a3a", // azul grisáceo
+  "light-green": {
+    name: "Verde",
+    primary: "#1B6B3A",
+    secondary: "#4CAF7D",
+    accent: "#2E7D52",
+    background: "#ffffff",
+    surface: "#f0fdf4",
+    border: "#dcfce7",
     text: {
-      primary: "#f0f9ff", // blue-50
-      secondary: "#bae6fd", // blue-200
-      muted: "#64748b", // slate-500
+      primary: "#0a1f10",
+      secondary: "#374151",
+      muted: "#6b7280",
     },
     gradients: {
-      primary: "from-blue-500 to-cyan-500",
-      secondary: "from-cyan-500 to-emerald-500",
-      accent: "from-blue-600 to-cyan-600",
+      primary: "from-green-800 to-green-600",
+      secondary: "from-green-600 to-emerald-400",
+      accent: "from-green-700 to-emerald-500",
     },
     glass: {
-      primary:
-        "from-blue-50/80 to-cyan-50/80 dark:from-blue-900/80 dark:to-cyan-900/80",
-      secondary:
-        "from-blue-50/70 to-cyan-50/70 dark:from-blue-900/70 dark:to-cyan-900/70",
+      primary: "from-green-50/90 to-white/90",
+      secondary: "from-white/90 to-green-50/80",
     },
   },
-  forest: {
-    name: "Forest Depths",
-    primary: "#10b981", // emerald-500
-    secondary: "#059669", // emerald-600
-    accent: "#3b82f6", // blue-500
-    background: "#0f1f13", // verde muy oscuro
-    surface: "#1a2e20", // verde grisáceo
+  "light-orange": {
+    name: "Naranja",
+    primary: "#C45000",
+    secondary: "#F4874B",
+    accent: "#E65100",
+    background: "#ffffff",
+    surface: "#fff7ed",
+    border: "#fed7aa",
     text: {
-      primary: "#f0fdf4", // green-50
-      secondary: "#bbf7d0", // green-200
-      muted: "#64748b", // slate-500
+      primary: "#1c0a00",
+      secondary: "#374151",
+      muted: "#6b7280",
     },
     gradients: {
-      primary: "from-emerald-500 to-green-500",
-      secondary: "from-green-500 to-blue-500",
-      accent: "from-emerald-600 to-green-600",
+      primary: "from-orange-700 to-orange-500",
+      secondary: "from-orange-500 to-amber-400",
+      accent: "from-orange-600 to-amber-500",
     },
     glass: {
-      primary:
-        "from-emerald-50/80 to-green-50/80 dark:from-emerald-900/80 dark:to-green-900/80",
-      secondary:
-        "from-emerald-50/70 to-green-50/70 dark:from-emerald-900/70 dark:to-green-900/70",
+      primary: "from-orange-50/90 to-white/90",
+      secondary: "from-white/90 to-orange-50/80",
     },
   },
-  crimson: {
-    name: "Crimson Nights",
-    primary: "#ef4444", // red-500
-    secondary: "#dc2626", // red-600
-    accent: "#f59e0b", // amber-500
-    background: "#1a0f0f", // rojo muy oscuro
-    surface: "#2a1818", // rojo grisáceo
+  "light-purple": {
+    name: "Morado",
+    primary: "#4A148C",
+    secondary: "#7E57C2",
+    accent: "#6200EA",
+    background: "#ffffff",
+    surface: "#faf5ff",
+    border: "#e9d5ff",
     text: {
-      primary: "#fef2f2", // red-50
-      secondary: "#fecaca", // red-200
-      muted: "#64748b", // slate-500
+      primary: "#1a0a2e",
+      secondary: "#475569",
+      muted: "#6b7280",
     },
     gradients: {
-      primary: "from-red-500 to-rose-500",
-      secondary: "from-rose-500 to-amber-500",
-      accent: "from-red-600 to-rose-600",
+      primary: "from-purple-900 to-purple-600",
+      secondary: "from-purple-600 to-violet-400",
+      accent: "from-purple-700 to-violet-500",
     },
     glass: {
-      primary:
-        "from-red-50/80 to-rose-50/80 dark:from-red-900/80 dark:to-rose-900/80",
-      secondary:
-        "from-red-50/70 to-rose-50/70 dark:from-red-900/70 dark:to-rose-900/70",
+      primary: "from-purple-50/90 to-white/90",
+      secondary: "from-white/90 to-purple-50/80",
     },
   },
 };
@@ -143,9 +139,8 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [currentTheme, setCurrentTheme] = useState<ThemeVariant>("original");
+  const [currentTheme, setCurrentTheme] = useState<ThemeVariant>("light-blue");
 
-  // Cargar tema guardado al inicializar
   useEffect(() => {
     const savedTheme = localStorage.getItem("virtago-theme") as ThemeVariant;
     if (savedTheme && themes[savedTheme]) {
@@ -153,17 +148,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Aplicar variables CSS personalizadas cuando cambie el tema
   useEffect(() => {
     const theme = themes[currentTheme];
     const root = document.documentElement;
 
-    // Aplicar variables CSS personalizadas
     root.style.setProperty("--theme-primary", theme.primary);
     root.style.setProperty("--theme-secondary", theme.secondary);
     root.style.setProperty("--theme-accent", theme.accent);
     root.style.setProperty("--theme-background", theme.background);
     root.style.setProperty("--theme-surface", theme.surface);
+    root.style.setProperty("--theme-border", theme.border);
     root.style.setProperty("--theme-text-primary", theme.text.primary);
     root.style.setProperty("--theme-text-secondary", theme.text.secondary);
     root.style.setProperty("--theme-text-muted", theme.text.muted);

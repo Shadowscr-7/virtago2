@@ -2,14 +2,15 @@
 
 /* Variables CSS personalizadas para temas de Virtago */
 :root {
-  --theme-primary: #8b5cf6;
-  --theme-secondary: #ec4899;
-  --theme-accent: #06b6d4;
-  --theme-background: #0f172a;
-  --theme-surface: #1e293b;
-  --theme-text-primary: #f8fafc;
-  --theme-text-secondary: #cbd5e1;
-  --theme-text-muted: #64748b;
+  --theme-primary: #1E3A61;
+  --theme-secondary: #3A5A94;
+  --theme-accent: #2A4D89;
+  --theme-background: #ffffff;
+  --theme-surface: #f1f5f9;
+  --theme-border: #e2e8f0;
+  --theme-text-primary: #0f172a;
+  --theme-text-secondary: #475569;
+  --theme-text-muted: #94a3b8;
 }
 
 /* Variables originales del sistema */
