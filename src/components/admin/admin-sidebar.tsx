@@ -22,6 +22,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useTheme } from "@/contexts/theme-context";
+import { useAuthStore } from "@/store/auth";
 
 const menuItems = [
   {
@@ -89,6 +90,7 @@ const menuItems = [
     label: "Tests E2E",
     icon: FlaskConical,
     href: "/admin/tests",
+    adminOnly: true,
   },
   {
     id: "tutorials",
@@ -111,8 +113,11 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ className = "" }: AdminSidebarProps) {
   const { themeColors } = useTheme();
+  const { user } = useAuthStore();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
+  const isDistributor = user?.role === "distributor";
+  const visibleItems = menuItems.filter((item) => !(item.adminOnly && isDistributor));
 
   const isActive = (href: string) => {
     if (href === "/admin") {
@@ -194,7 +199,7 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
 
       {/* Navigation */}
       <nav className="p-2 space-y-1">
-        {menuItems.map((item, index) => {
+        {visibleItems.map((item, index) => {
           const IconComponent = item.icon;
           const active = isActive(item.href);
           const itemColor = getItemColor(index);
