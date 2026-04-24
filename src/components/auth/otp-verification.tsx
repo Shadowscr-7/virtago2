@@ -38,9 +38,14 @@ export function OTPVerification({ email, onBack, onSuccess }: OTPVerificationPro
   const progress = ((1800 - timeLeft) / 1800) * 100;
 
   const handleOTPChange = (element: HTMLInputElement, index: number) => {
-    if (isNaN(Number(element.value))) return;
-    setOtp([...otp.map((d, idx) => (idx === index ? element.value : d))]);
-    if (element.value !== "" && element.nextSibling) {
+    const raw = element.value.replace(/\D/g, "");
+    if (!raw) return;
+    // Tomar solo el último dígito si escribe directamente
+    const digit = raw.slice(-1);
+    const newOtp = [...otp];
+    newOtp[index] = digit;
+    setOtp(newOtp);
+    if (digit && element.nextSibling) {
       (element.nextSibling as HTMLInputElement).focus();
     }
   };
@@ -57,16 +62,18 @@ export function OTPVerification({ email, onBack, onSuccess }: OTPVerificationPro
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
     const pasteData = e.clipboardData.getData("text");
-    const pasteArray = pasteData
-      .slice(0, 6)
-      .split("")
-      .filter((char) => !isNaN(Number(char)));
+    // Extraer solo dígitos del texto pegado, sin importar espacios ni guiones
+    const digits = pasteData.replace(/\D/g, "").slice(0, 6).split("");
+    if (digits.length === 0) return;
 
-    if (pasteArray.length === 6) {
-      setOtp(pasteArray);
-      const inputs = document.querySelectorAll(".otp-input");
-      (inputs[5] as HTMLInputElement).focus();
-    }
+    const newOtp = new Array(6).fill("");
+    digits.forEach((d, i) => { newOtp[i] = d; });
+    setOtp(newOtp);
+
+    // Enfocar el siguiente campo vacío o el último
+    const focusIndex = Math.min(digits.length, 5);
+    const inputs = document.querySelectorAll<HTMLInputElement>(".otp-input");
+    inputs[focusIndex]?.focus();
   };
 
   const handleVerifyOTP = async () => {
@@ -190,7 +197,7 @@ export function OTPVerification({ email, onBack, onSuccess }: OTPVerificationPro
             transition={{ delay: 0.25 }}
             className="mb-6"
           >
-            <div className="flex justify-center gap-2.5" onPaste={handlePaste}>
+            <div className="flex justify-center gap-2.5">
               {otp.map((data, index) => (
                 <motion.input
                   key={index}
@@ -204,11 +211,15 @@ export function OTPVerification({ email, onBack, onSuccess }: OTPVerificationPro
                     color: themeColors.text.primary,
                   }}
                   type="text"
-                  maxLength={1}
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
                   value={data}
                   onChange={(e) => handleOTPChange(e.target, index)}
                   onKeyDown={(e) => handleKeyDown(e, index)}
+                  onPaste={handlePaste}
                   onFocus={(e) => {
+                    e.target.select();
                     e.target.style.borderColor = themeColors.primary;
                     e.target.style.boxShadow = `0 0 0 3px ${themeColors.primary}20`;
                   }}
