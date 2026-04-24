@@ -10,6 +10,7 @@ import {
   User,
   ArrowRight,
   Building2,
+  UserPlus,
 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -65,588 +66,363 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
         email: data.email,
         password: data.password,
       });
-      
-      // Si llegamos aquí, el registro fue exitoso
       onSuccess?.();
     } catch {
       // Los errores ya se muestran vía toast desde el store
     }
   };
 
-  // Indicador de fuerza de contraseña
   const getPasswordStrength = (password: string) => {
     if (!password) return { strength: 0, text: "" };
 
     let strength = 0;
-    const requirements = [];
-
-    if (password.length >= 8) {
-      strength += 25;
-      requirements.push("8+ caracteres");
-    }
-    if (/[A-Z]/.test(password)) {
-      strength += 25;
-      requirements.push("Mayúscula");
-    }
-    if (/[a-z]/.test(password)) {
-      strength += 25;
-      requirements.push("Minúscula");
-    }
-    if (/[0-9]/.test(password)) {
-      strength += 25;
-      requirements.push("Número");
-    }
+    if (password.length >= 8) strength += 25;
+    if (/[A-Z]/.test(password)) strength += 25;
+    if (/[a-z]/.test(password)) strength += 25;
+    if (/[0-9]/.test(password)) strength += 25;
 
     let text = "Débil";
-    let color = "bg-red-500";
+    if (strength >= 75) text = "Fuerte";
+    else if (strength >= 50) text = "Media";
 
-    if (strength >= 75) {
-      text = "Fuerte";
-      color = "bg-green-500";
-    } else if (strength >= 50) {
-      text = "Media";
-      color = "bg-yellow-500";
-    }
-
-    return { strength, text, color, requirements };
-  };
-
-  const inputStyle = {
-    backgroundColor: themeColors.surface + "40",
-    borderColor: themeColors.primary + "30",
-    color: themeColors.text.primary,
-    transition: "all 0.3s ease",
-  };
-
-  const inputFocusStyle = {
-    borderColor: themeColors.primary,
-    boxShadow: `0 0 20px ${themeColors.primary}60, 0 0 0 2px ${themeColors.primary}80`,
-    backgroundColor: themeColors.surface + "60",
-  };
-
-  const inputHoverStyle = {
-    borderColor: themeColors.primary + "60",
-    boxShadow: `0 0 10px ${themeColors.primary}40`,
+    return { strength, text };
   };
 
   const passwordStrength = getPasswordStrength(password || "");
+
+  const inputBase =
+    "w-full py-3 border-2 rounded-lg text-sm transition-all duration-200 focus:outline-none bg-white";
+
+  const getInputStyle = (hasError: boolean) => ({
+    borderColor: hasError ? "#ef4444" : themeColors.border,
+    color: themeColors.text.primary,
+  });
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>, hasError: boolean) => {
+    if (!hasError) {
+      e.target.style.borderColor = themeColors.primary;
+      e.target.style.boxShadow = `0 0 0 3px ${themeColors.primary}20`;
+    }
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>, hasError: boolean) => {
+    if (!hasError) {
+      e.target.style.borderColor = themeColors.border;
+      e.target.style.boxShadow = "none";
+    }
+  };
 
   return (
     <div className="w-full max-w-md mx-auto">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="backdrop-blur-lg rounded-2xl border p-8 shadow-2xl"
+        transition={{ duration: 0.5 }}
+        className="rounded-2xl overflow-hidden"
         style={{
-          backgroundColor: themeColors.surface + "40",
-          borderColor: themeColors.primary + "30",
+          backgroundColor: "#ffffff",
+          boxShadow: `0 20px 60px ${themeColors.primary}20, 0 4px 20px rgba(0,0,0,0.08)`,
+          border: `1px solid ${themeColors.border}`,
         }}
       >
-        {/* Header */}
-        <div className="text-center mb-8">
-          <motion.div
-            initial={{ scale: 0.5, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="w-16 mx-auto mb-4"
-          >
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="text-3xl font-bold mb-2"
-            style={{ color: themeColors.text.primary }}
-          >
-            Crear Cuenta
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            className="flex items-center justify-center gap-2"
-            style={{ color: themeColors.text.secondary }}
-          >
-            <Building2 className="h-4 w-4" />
-            Registro para empresas B2B
-          </motion.p>
+        {/* Header con gradiente */}
+        <div
+          className="px-8 pt-8 pb-6 text-white"
+          style={{
+            background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
+          }}
+        >
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+              <UserPlus className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-white">Crear Cuenta</h1>
+              <p className="text-white/80 text-sm flex items-center gap-1.5">
+                <Building2 className="h-3.5 w-3.5" />
+                Registro exclusivo para empresas B2B
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Formulario */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Nombre y Apellido */}
-          <div className="grid grid-cols-2 gap-4">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5, duration: 0.6 }}
-            >
-              <label
-                className="block text-sm font-medium mb-2"
-                style={{ color: themeColors.text.primary }}
+        <div className="px-8 py-7">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            {/* Nombre y Apellido */}
+            <div className="grid grid-cols-2 gap-4">
+              <motion.div
+                initial={{ opacity: 0, x: -16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
               >
-                Nombre *
-              </label>
-              <div className="relative">
-                <User
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5"
-                  style={{ color: themeColors.text.secondary }}
-                />
-                <input
-                  {...register("firstName")}
-                  className={cn(
-                    "w-full pl-10 pr-4 py-3 border rounded-lg transition-all duration-300 focus:outline-none",
-                    errors.firstName && "border-red-500",
-                  )}
-                  style={{
-                    ...inputStyle,
-                    ...(errors.firstName && { borderColor: "#ef4444" }),
-                  }}
-                  onFocus={(e) => {
-                    if (!errors.firstName) {
-                      Object.assign(
-                        (e.target as HTMLInputElement).style,
-                        inputFocusStyle,
-                      );
-                    }
-                  }}
-                  onBlur={(e) => {
-                    if (!errors.firstName) {
-                      Object.assign(
-                        (e.target as HTMLInputElement).style,
-                        inputStyle,
-                      );
-                    }
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!errors.firstName) {
-                      Object.assign(
-                        (e.target as HTMLInputElement).style,
-                        inputHoverStyle,
-                      );
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (
-                      !errors.firstName &&
-                      document.activeElement !== e.target
-                    ) {
-                      Object.assign(
-                        (e.target as HTMLInputElement).style,
-                        inputStyle,
-                      );
-                    }
-                  }}
-                  placeholder="Juan"
-                />
-              </div>
-              {errors.firstName && (
-                <p className="text-red-400 text-sm mt-1">
-                  {errors.firstName.message}
-                </p>
-              )}
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6, duration: 0.6 }}
-            >
-              <label
-                className="block text-sm font-medium mb-2"
-                style={{ color: themeColors.text.primary }}
-              >
-                Apellido *
-              </label>
-              <div className="relative">
-                <User
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5"
-                  style={{ color: themeColors.text.secondary }}
-                />
-                <input
-                  {...register("lastName")}
-                  className={cn(
-                    "w-full pl-10 pr-4 py-3 border rounded-lg transition-all duration-300 focus:outline-none",
-                    errors.lastName && "border-red-500",
-                  )}
-                  style={{
-                    ...inputStyle,
-                    ...(errors.lastName && { borderColor: "#ef4444" }),
-                  }}
-                  onFocus={(e) => {
-                    if (!errors.lastName) {
-                      Object.assign(
-                        (e.target as HTMLInputElement).style,
-                        inputFocusStyle,
-                      );
-                    }
-                  }}
-                  onBlur={(e) => {
-                    if (!errors.lastName) {
-                      Object.assign(
-                        (e.target as HTMLInputElement).style,
-                        inputStyle,
-                      );
-                    }
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!errors.lastName) {
-                      Object.assign(
-                        (e.target as HTMLInputElement).style,
-                        inputHoverStyle,
-                      );
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (
-                      !errors.lastName &&
-                      document.activeElement !== e.target
-                    ) {
-                      Object.assign(
-                        (e.target as HTMLInputElement).style,
-                        inputStyle,
-                      );
-                    }
-                  }}
-                  placeholder="Pérez"
-                />
-              </div>
-              {errors.lastName && (
-                <p className="text-red-400 text-sm mt-1">
-                  {errors.lastName.message}
-                </p>
-              )}
-            </motion.div>
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.7, duration: 0.6 }}
-          >
-            <label
-              className="block text-sm font-medium mb-2"
-              style={{ color: themeColors.text.primary }}
-            >
-              Correo electrónico *
-            </label>
-            <div className="relative">
-              <Mail
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5"
-                style={{ color: themeColors.text.secondary }}
-              />
-              <input
-                {...register("email")}
-                type="email"
-                className={cn(
-                  "w-full pl-10 pr-4 py-3 border rounded-lg transition-all duration-300 focus:outline-none",
-                  errors.email && "border-red-500",
-                )}
-                style={{
-                  ...inputStyle,
-                  ...(errors.email && { borderColor: "#ef4444" }),
-                }}
-                onFocus={(e) => {
-                  if (!errors.email) {
-                    Object.assign(
-                      (e.target as HTMLInputElement).style,
-                      inputFocusStyle,
-                    );
-                  }
-                }}
-                onBlur={(e) => {
-                  if (!errors.email) {
-                    Object.assign(
-                      (e.target as HTMLInputElement).style,
-                      inputStyle,
-                    );
-                  }
-                }}
-                onMouseEnter={(e) => {
-                  if (!errors.email) {
-                    Object.assign(
-                      (e.target as HTMLInputElement).style,
-                      inputHoverStyle,
-                    );
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!errors.email && document.activeElement !== e.target) {
-                    Object.assign(
-                      (e.target as HTMLInputElement).style,
-                      inputStyle,
-                    );
-                  }
-                }}
-                placeholder="juan@empresa.com"
-              />
-            </div>
-            {errors.email && (
-              <p className="text-red-400 text-sm mt-1">
-                {errors.email.message}
-              </p>
-            )}
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.8, duration: 0.6 }}
-          >
-            <label
-              className="block text-sm font-medium mb-2"
-              style={{ color: themeColors.text.primary }}
-            >
-              Contraseña *
-            </label>
-            <div className="relative">
-              <Lock
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5"
-                style={{ color: themeColors.text.secondary }}
-              />
-              <input
-                {...register("password")}
-                type={showPassword ? "text" : "password"}
-                className={cn(
-                  "w-full pl-10 pr-12 py-3 border rounded-lg transition-all duration-300 focus:outline-none",
-                  errors.password && "border-red-500",
-                )}
-                style={{
-                  ...inputStyle,
-                  ...(errors.password && { borderColor: "#ef4444" }),
-                }}
-                onFocus={(e) => {
-                  if (!errors.password) {
-                    Object.assign(
-                      (e.target as HTMLInputElement).style,
-                      inputFocusStyle,
-                    );
-                  }
-                }}
-                onBlur={(e) => {
-                  if (!errors.password) {
-                    Object.assign(
-                      (e.target as HTMLInputElement).style,
-                      inputStyle,
-                    );
-                  }
-                }}
-                onMouseEnter={(e) => {
-                  if (!errors.password) {
-                    Object.assign(
-                      (e.target as HTMLInputElement).style,
-                      inputHoverStyle,
-                    );
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!errors.password && document.activeElement !== e.target) {
-                    Object.assign(
-                      (e.target as HTMLInputElement).style,
-                      inputStyle,
-                    );
-                  }
-                }}
-                placeholder="••••••••"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 transition-colors"
-                style={{ color: themeColors.text.secondary }}
-              >
-                {showPassword ? (
-                  <EyeOff className="h-5 w-5" />
-                ) : (
-                  <Eye className="h-5 w-5" />
-                )}
-              </button>
-            </div>
-
-            {/* Indicador de fuerza de contraseña */}
-            {password && (
-              <div className="mt-2">
-                <div className="flex justify-between items-center mb-1">
-                  <span
-                    className="text-xs"
-                    style={{ color: themeColors.text.secondary }}
-                  >
-                    Fuerza de contraseña
-                  </span>
-                  <span
-                    className="text-xs"
-                    style={{ color: themeColors.text.secondary }}
-                  >
-                    {passwordStrength.text}
-                  </span>
-                </div>
-                <div
-                  className="w-full rounded-full h-2"
-                  style={{ backgroundColor: themeColors.surface + "40" }}
+                <label
+                  className="block text-sm font-semibold mb-1.5"
+                  style={{ color: themeColors.text.primary }}
                 >
-                  <div
-                    className="h-2 rounded-full transition-all duration-300"
-                    style={{
-                      width: `${passwordStrength.strength}%`,
-                      backgroundColor:
-                        passwordStrength.strength >= 75
-                          ? themeColors.accent
-                          : passwordStrength.strength >= 50
-                            ? "#f59e0b"
-                            : "#ef4444",
-                    }}
+                  Nombre *
+                </label>
+                <div className="relative">
+                  <User
+                    className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"
+                    style={{ color: themeColors.text.muted }}
+                  />
+                  <input
+                    {...register("firstName")}
+                    className={cn(inputBase, "pl-10 pr-4")}
+                    style={getInputStyle(!!errors.firstName)}
+                    onFocus={(e) => handleFocus(e, !!errors.firstName)}
+                    onBlur={(e) => handleBlur(e, !!errors.firstName)}
+                    placeholder="Juan"
                   />
                 </div>
-              </div>
-            )}
-
-            {errors.password && (
-              <p className="text-red-400 text-sm mt-1">
-                {errors.password.message}
-              </p>
-            )}
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.9, duration: 0.6 }}
-          >
-            <label
-              className="block text-sm font-medium mb-2"
-              style={{ color: themeColors.text.primary }}
-            >
-              Confirmar contraseña *
-            </label>
-            <div className="relative">
-              <Lock
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5"
-                style={{ color: themeColors.text.secondary }}
-              />
-              <input
-                {...register("passwordConfirmation")}
-                type={showConfirmPassword ? "text" : "password"}
-                className={cn(
-                  "w-full pl-10 pr-12 py-3 border rounded-lg transition-all duration-300 focus:outline-none",
-                  errors.passwordConfirmation && "border-red-500",
+                {errors.firstName && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.firstName.message}
+                  </p>
                 )}
-                style={{
-                  ...inputStyle,
-                  ...(errors.passwordConfirmation && {
-                    borderColor: "#ef4444",
-                  }),
-                }}
-                onFocus={(e) => {
-                  if (!errors.passwordConfirmation) {
-                    Object.assign(
-                      (e.target as HTMLInputElement).style,
-                      inputFocusStyle,
-                    );
-                  }
-                }}
-                onBlur={(e) => {
-                  if (!errors.passwordConfirmation) {
-                    Object.assign(
-                      (e.target as HTMLInputElement).style,
-                      inputStyle,
-                    );
-                  }
-                }}
-                onMouseEnter={(e) => {
-                  if (!errors.passwordConfirmation) {
-                    Object.assign(
-                      (e.target as HTMLInputElement).style,
-                      inputHoverStyle,
-                    );
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (
-                    !errors.passwordConfirmation &&
-                    document.activeElement !== e.target
-                  ) {
-                    Object.assign(
-                      (e.target as HTMLInputElement).style,
-                      inputStyle,
-                    );
-                  }
-                }}
-                placeholder="••••••••"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 transition-colors"
-                style={{ color: themeColors.text.secondary }}
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: 16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.12 }}
               >
-                {showConfirmPassword ? (
-                  <EyeOff className="h-5 w-5" />
-                ) : (
-                  <Eye className="h-5 w-5" />
+                <label
+                  className="block text-sm font-semibold mb-1.5"
+                  style={{ color: themeColors.text.primary }}
+                >
+                  Apellido *
+                </label>
+                <div className="relative">
+                  <User
+                    className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"
+                    style={{ color: themeColors.text.muted }}
+                  />
+                  <input
+                    {...register("lastName")}
+                    className={cn(inputBase, "pl-10 pr-4")}
+                    style={getInputStyle(!!errors.lastName)}
+                    onFocus={(e) => handleFocus(e, !!errors.lastName)}
+                    onBlur={(e) => handleBlur(e, !!errors.lastName)}
+                    placeholder="Pérez"
+                  />
+                </div>
+                {errors.lastName && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {errors.lastName.message}
+                  </p>
                 )}
-              </button>
+              </motion.div>
             </div>
-            {errors.passwordConfirmation && (
-              <p className="text-red-400 text-sm mt-1">
-                {errors.passwordConfirmation.message}
-              </p>
-            )}
-          </motion.div>
 
-          {/* Botón de registro */}
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 0.6 }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            type="submit"
-            disabled={isLoading}
-            className={cn(
-              "w-full py-3 px-6 rounded-lg font-semibold text-white transition-all duration-300",
-              "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent",
-              "disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2",
-              isLoading && "animate-pulse",
-            )}
-            style={{
-              background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
-              boxShadow: `0 0 0 2px ${themeColors.primary}50`,
-            }}
-          >
-            {isLoading ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Creando cuenta...
-              </>
-            ) : (
-              <>
-                Continuar
-                <ArrowRight className="h-5 w-5" />
-              </>
-            )}
-          </motion.button>
-        </form>
-
-        {/* Footer */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.1, duration: 0.6 }}
-          className="mt-6 text-center"
-        >
-          <p className="text-sm" style={{ color: themeColors.text.secondary }}>
-            ¿Ya tienes cuenta?{" "}
-            <button
-              className="font-medium transition-colors"
-              style={{ color: themeColors.primary }}
+            {/* Email */}
+            <motion.div
+              initial={{ opacity: 0, x: -16 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.15 }}
             >
-              Iniciar sesión
-            </button>
-          </p>
-        </motion.div>
+              <label
+                className="block text-sm font-semibold mb-1.5"
+                style={{ color: themeColors.text.primary }}
+              >
+                Correo electrónico *
+              </label>
+              <div className="relative">
+                <Mail
+                  className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"
+                  style={{ color: themeColors.text.muted }}
+                />
+                <input
+                  {...register("email")}
+                  type="email"
+                  className={cn(inputBase, "pl-10 pr-4")}
+                  style={getInputStyle(!!errors.email)}
+                  onFocus={(e) => handleFocus(e, !!errors.email)}
+                  onBlur={(e) => handleBlur(e, !!errors.email)}
+                  placeholder="juan@empresa.com"
+                />
+              </div>
+              {errors.email && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.email.message}
+                </p>
+              )}
+            </motion.div>
+
+            {/* Contraseña */}
+            <motion.div
+              initial={{ opacity: 0, x: -16 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <label
+                className="block text-sm font-semibold mb-1.5"
+                style={{ color: themeColors.text.primary }}
+              >
+                Contraseña *
+              </label>
+              <div className="relative">
+                <Lock
+                  className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"
+                  style={{ color: themeColors.text.muted }}
+                />
+                <input
+                  {...register("password")}
+                  type={showPassword ? "text" : "password"}
+                  className={cn(inputBase, "pl-10 pr-12")}
+                  style={getInputStyle(!!errors.password)}
+                  onFocus={(e) => handleFocus(e, !!errors.password)}
+                  onBlur={(e) => handleBlur(e, !!errors.password)}
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                  style={{ color: themeColors.text.muted }}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+
+              {/* Indicador de fuerza */}
+              {password && (
+                <div className="mt-2">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs" style={{ color: themeColors.text.muted }}>
+                      Fuerza de contraseña
+                    </span>
+                    <span
+                      className="text-xs font-medium"
+                      style={{
+                        color:
+                          passwordStrength.strength >= 75
+                            ? "#16a34a"
+                            : passwordStrength.strength >= 50
+                              ? "#d97706"
+                              : "#dc2626",
+                      }}
+                    >
+                      {passwordStrength.text}
+                    </span>
+                  </div>
+                  <div
+                    className="w-full rounded-full h-1.5"
+                    style={{ backgroundColor: themeColors.surface }}
+                  >
+                    <div
+                      className="h-1.5 rounded-full transition-all duration-300"
+                      style={{
+                        width: `${passwordStrength.strength}%`,
+                        backgroundColor:
+                          passwordStrength.strength >= 75
+                            ? "#16a34a"
+                            : passwordStrength.strength >= 50
+                              ? "#d97706"
+                              : "#dc2626",
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {errors.password && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.password.message}
+                </p>
+              )}
+            </motion.div>
+
+            {/* Confirmar contraseña */}
+            <motion.div
+              initial={{ opacity: 0, x: -16 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.25 }}
+            >
+              <label
+                className="block text-sm font-semibold mb-1.5"
+                style={{ color: themeColors.text.primary }}
+              >
+                Confirmar contraseña *
+              </label>
+              <div className="relative">
+                <Lock
+                  className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"
+                  style={{ color: themeColors.text.muted }}
+                />
+                <input
+                  {...register("passwordConfirmation")}
+                  type={showConfirmPassword ? "text" : "password"}
+                  className={cn(inputBase, "pl-10 pr-12")}
+                  style={getInputStyle(!!errors.passwordConfirmation)}
+                  onFocus={(e) => handleFocus(e, !!errors.passwordConfirmation)}
+                  onBlur={(e) => handleBlur(e, !!errors.passwordConfirmation)}
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                  style={{ color: themeColors.text.muted }}
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {errors.passwordConfirmation && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.passwordConfirmation.message}
+                </p>
+              )}
+            </motion.div>
+
+            {/* Botón submit */}
+            <motion.button
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-3 px-6 rounded-lg font-semibold text-white text-sm transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              style={{
+                background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
+                boxShadow: `0 4px 14px ${themeColors.primary}40`,
+              }}
+            >
+              {isLoading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Creando cuenta...
+                </>
+              ) : (
+                <>
+                  Continuar
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </motion.button>
+          </form>
+
+          {/* Footer */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.35 }}
+            className="mt-5 text-center"
+          >
+            <p className="text-sm" style={{ color: themeColors.text.secondary }}>
+              ¿Ya tienes cuenta?{" "}
+              <button
+                className="font-semibold transition-colors hover:underline"
+                style={{ color: themeColors.primary }}
+              >
+                Iniciar sesión
+              </button>
+            </p>
+          </motion.div>
+        </div>
       </motion.div>
     </div>
   );

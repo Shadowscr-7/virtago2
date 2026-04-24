@@ -165,63 +165,35 @@ export function PlanSelection({ onPlanSelected, onBack }: PlanSelectionProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="backdrop-blur-lg rounded-2xl border p-8 shadow-2xl"
+        className="rounded-2xl overflow-hidden"
         style={{
-          backgroundColor: themeColors.surface + "40",
-          borderColor: themeColors.primary + "30",
+          backgroundColor: "#ffffff",
+          boxShadow: `0 20px 60px ${themeColors.primary}20, 0 4px 20px rgba(0,0,0,0.08)`,
+          border: `1px solid ${themeColors.border}`,
         }}
       >
-        {/* Header */}
-        <div className="text-center mb-12">
-          <motion.div
-            initial={{ scale: 0.5, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="w-20 h-20 mx-auto mb-6"
-          >
-            <div className="relative">
-              <div
-                className="absolute inset-0 rounded-full"
-                style={{
-                  background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.accent})`,
-                }}
-              />
-              <div
-                className="absolute inset-2 rounded-full flex items-center justify-center"
-                style={{ backgroundColor: themeColors.background }}
-              >
-                <Crown
-                  className="h-8 w-8"
-                  style={{ color: themeColors.primary }}
-                />
-              </div>
+        {/* Header con gradiente */}
+        <div
+          className="px-8 pt-8 pb-6 text-white text-center"
+          style={{
+            background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
+          }}
+        >
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+              <Crown className="w-5 h-5 text-white" />
             </div>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-            className="text-4xl font-bold mb-4"
-            style={{ color: themeColors.text.primary }}
-          >
-            Elige tu Plan
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            className="text-xl max-w-2xl mx-auto"
-            style={{ color: themeColors.text.secondary }}
-          >
-            Selecciona el plan que mejor se adapte a las necesidades de tu negocio.
-            Podrás cambiar o actualizar tu plan en cualquier momento.
-          </motion.p>
+            <div className="text-left">
+              <h1 className="text-2xl font-bold text-white">Elige tu Plan</h1>
+              <p className="text-white/80 text-sm">Podrás cambiar tu plan en cualquier momento</p>
+            </div>
+          </div>
         </div>
 
+        <div className="p-8">
+
         {/* Plans Grid */}
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
           {plans.map((plan, index) => {
             const colors = getPlanColor(plan.name);
             const isSelected = selectedPlan?.id === plan.id;
@@ -230,20 +202,15 @@ export function PlanSelection({ onPlanSelected, onBack }: PlanSelectionProps) {
             return (
               <motion.div
                 key={plan.id}
-                initial={{ opacity: 0, y: 50 }}
+                initial={{ opacity: 0, y: 32 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 + index * 0.1, duration: 0.6 }}
-                className={cn(
-                  "relative rounded-2xl border-2 p-8 cursor-pointer transition-all duration-300",
-                  isSelected 
-                    ? `${colors.border} ${colors.bg}` 
-                    : "border-gray-600 hover:border-gray-500",
-                  isPopular && "ring-2 ring-yellow-400 ring-opacity-50"
-                )}
+                transition={{ delay: 0.1 + index * 0.08, duration: 0.5 }}
+                className="relative rounded-2xl border-2 p-6 cursor-pointer transition-all duration-300"
                 style={{
-                  backgroundColor: isSelected 
-                    ? colors.bg 
-                    : themeColors.surface + "30",
+                  borderColor: isSelected ? themeColors.primary : themeColors.border,
+                  backgroundColor: isSelected ? `${themeColors.primary}08` : themeColors.surface,
+                  boxShadow: isSelected ? `0 0 0 3px ${themeColors.primary}20` : "none",
+                  ...(isPopular && !isSelected && { borderColor: "#f59e0b" }),
                 }}
                 onClick={() => handlePlanSelect(plan)}
                 whileHover={{ scale: 1.02 }}
@@ -259,9 +226,12 @@ export function PlanSelection({ onPlanSelected, onBack }: PlanSelectionProps) {
                 )}
 
                 {/* Plan Header */}
-                <div className="text-center mb-8">
-                  <div className={cn("w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center", colors.bg)}>
-                    <div style={{ color: colors.text.replace('text-', '') }}>
+                <div className="text-center mb-6">
+                  <div
+                    className="w-14 h-14 mx-auto mb-3 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: `${themeColors.primary}15` }}
+                  >
+                    <div style={{ color: themeColors.primary }}>
                       {getPlanIcon(plan.name)}
                     </div>
                   </div>
@@ -287,8 +257,8 @@ export function PlanSelection({ onPlanSelected, onBack }: PlanSelectionProps) {
                 </div>
 
                 {/* Key Limits */}
-                <div className="grid grid-cols-2 gap-4 mb-6 p-4 rounded-lg" 
-                     style={{ backgroundColor: themeColors.surface + "20" }}>
+                <div className="grid grid-cols-2 gap-3 mb-5 p-3 rounded-xl"
+                     style={{ backgroundColor: "#ffffff", border: `1px solid ${themeColors.border}` }}>
                   <div className="text-center">
                     <Users className="h-5 w-5 mx-auto mb-1" style={{ color: themeColors.primary }} />
                     <div className="text-sm font-semibold" style={{ color: themeColors.text.primary }}>
@@ -350,8 +320,10 @@ export function PlanSelection({ onPlanSelected, onBack }: PlanSelectionProps) {
                 </div>
 
                 {/* Support Level */}
-                <div className="flex items-center justify-center gap-2 p-3 rounded-lg"
-                     style={{ backgroundColor: themeColors.surface + "10" }}>
+                <div
+                  className="flex items-center justify-center gap-2 p-2.5 rounded-lg"
+                  style={{ backgroundColor: themeColors.surface }}
+                >
                   <Shield className="h-4 w-4" style={{ color: themeColors.primary }} />
                   <span className="text-sm font-medium" style={{ color: themeColors.text.primary }}>
                     Soporte {plan.supportLevel === 'community' ? 'Comunidad' : 
@@ -379,18 +351,19 @@ export function PlanSelection({ onPlanSelected, onBack }: PlanSelectionProps) {
 
         {/* Action Buttons */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.6 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
           className="flex items-center justify-between gap-4"
         >
           {onBack && (
             <button
               onClick={onBack}
-              className="px-6 py-3 rounded-lg font-semibold transition-all duration-300 border"
+              className="px-6 py-3 rounded-lg font-semibold text-sm transition-all duration-300 border-2"
               style={{
-                borderColor: themeColors.primary + "50",
+                borderColor: themeColors.border,
                 color: themeColors.text.secondary,
+                backgroundColor: "#ffffff",
               }}
             >
               Volver
@@ -400,26 +373,21 @@ export function PlanSelection({ onPlanSelected, onBack }: PlanSelectionProps) {
           <button
             onClick={handleContinue}
             disabled={!selectedPlan || isSelecting}
-            className={cn(
-              "flex-1 max-w-md ml-auto py-3 px-6 rounded-lg font-semibold text-white transition-all duration-300",
-              "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-transparent",
-              "disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2",
-              isSelecting && "animate-pulse"
-            )}
+            className="flex-1 max-w-md ml-auto py-3 px-6 rounded-lg font-semibold text-white text-sm transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             style={{
               background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
-              boxShadow: `0 0 0 2px ${themeColors.primary}50`,
+              boxShadow: `0 4px 14px ${themeColors.primary}40`,
             }}
           >
             {isSelecting ? (
               <>
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 Creando distribuidor...
               </>
             ) : (
               <>
-                Completar registro con {selectedPlan?.displayName}
-                <Crown className="h-5 w-5" />
+                Completar con {selectedPlan?.displayName}
+                <Crown className="h-4 w-4" />
               </>
             )}
           </button>
@@ -429,11 +397,11 @@ export function PlanSelection({ onPlanSelected, onBack }: PlanSelectionProps) {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1, duration: 0.6 }}
-          className="mt-8 p-4 rounded-lg border"
-          style={{ 
-            backgroundColor: themeColors.surface + "20",
-            borderColor: themeColors.primary + "30" 
+          transition={{ delay: 0.4, duration: 0.5 }}
+          className="mt-6 p-4 rounded-xl"
+          style={{
+            backgroundColor: themeColors.surface,
+            border: `1px solid ${themeColors.border}`,
           }}
         >
           <div className="flex items-center justify-between mb-2">
@@ -444,33 +412,29 @@ export function PlanSelection({ onPlanSelected, onBack }: PlanSelectionProps) {
               86%
             </span>
           </div>
-          <div className="w-full rounded-full h-2" 
-               style={{ backgroundColor: themeColors.surface + "40" }}>
+          <div className="w-full rounded-full h-1.5" style={{ backgroundColor: themeColors.border }}>
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: "86%" }}
-              transition={{ delay: 1.2, duration: 1 }}
-              className="h-2 rounded-full"
+              transition={{ delay: 0.6, duration: 1 }}
+              className="h-1.5 rounded-full"
               style={{
-                background: `linear-gradient(90deg, ${themeColors.primary}, ${themeColors.accent})`
+                background: `linear-gradient(90deg, ${themeColors.primary}, ${themeColors.secondary})`,
               }}
             />
           </div>
         </motion.div>
 
-        {/* Footer Note */}
-        <motion.div
+        <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.1, duration: 0.6 }}
-          className="mt-4 text-center p-4 rounded-lg"
-          style={{ backgroundColor: themeColors.surface + "20" }}
+          transition={{ delay: 0.5 }}
+          className="mt-4 text-center text-xs"
+          style={{ color: themeColors.text.muted }}
         >
-          <p className="text-sm" style={{ color: themeColors.text.secondary }}>
-            🔄 Puedes cambiar tu plan en cualquier momento desde la configuración de tu cuenta.
-            Los cambios se aplicarán en tu próximo ciclo de facturación.
-          </p>
-        </motion.div>
+          Puedes cambiar tu plan en cualquier momento desde la configuración de tu cuenta.
+        </motion.p>
+        </div>
       </motion.div>
     </div>
   );

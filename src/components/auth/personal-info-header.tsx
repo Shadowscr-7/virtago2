@@ -1,54 +1,43 @@
-// Personal Info Form - Header Component
 import { motion } from "framer-motion";
 import { ArrowLeft, User } from "lucide-react";
+import { useTheme } from "@/contexts/theme-context";
 
 interface PersonalInfoHeaderProps {
   onBack: () => void;
 }
 
 export function PersonalInfoHeader({ onBack }: PersonalInfoHeaderProps) {
-  return (
-    <div className="text-center mb-8 relative">
-      <motion.button
-        onClick={onBack}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        className="absolute -top-2 -left-2 text-white/70 hover:text-white transition-colors"
-      >
-        <ArrowLeft className="h-6 w-6" />
-      </motion.button>
+  const { themeColors } = useTheme();
 
-      <motion.div
-        initial={{ scale: 0.5, rotate: -180 }}
-        animate={{ scale: 1, rotate: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="w-16 h-16 mx-auto mb-4"
-      >
-        <div className="relative">
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
-          <div className="absolute inset-2 rounded-full bg-slate-900 flex items-center justify-center">
-            <User className="h-6 w-6 text-white" />
+  return (
+    <div
+      className="px-8 pt-8 pb-6 -mx-8 -mt-8 mb-6 text-white"
+      style={{
+        background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
+      }}
+    >
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onBack}
+          className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center hover:bg-white/30 transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4 text-white" />
+        </button>
+        <div className="flex items-center gap-3">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"
+          >
+            <User className="w-5 h-5 text-white" />
+          </motion.div>
+          <div>
+            <h1 className="text-xl font-bold text-white">Información Personal</h1>
+            <p className="text-white/80 text-sm">Completa tu perfil</p>
           </div>
         </div>
-      </motion.div>
-
-      <motion.h1
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, duration: 0.6 }}
-        className="text-3xl font-bold text-white mb-2"
-      >
-        Información Personal
-      </motion.h1>
-
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4, duration: 0.6 }}
-        className="text-white/70"
-      >
-        Completa tu perfil con tus datos personales
-      </motion.p>
+      </div>
     </div>
   );
 }

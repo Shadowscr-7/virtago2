@@ -62,7 +62,12 @@ export function PersonalInfoForm({ onBack, onSuccess }: PersonalInfoFormProps) {
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -100 }}
         transition={{ duration: 0.6 }}
-        className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 p-8 shadow-2xl"
+        className="rounded-2xl overflow-hidden p-8"
+        style={{
+          backgroundColor: "#ffffff",
+          boxShadow: `0 20px 60px rgba(0,0,0,0.08)`,
+          border: `1px solid #e2e8f0`,
+        }}
       >
         <PersonalInfoHeader onBack={onBack} />
         <PersonalInfoFormFields

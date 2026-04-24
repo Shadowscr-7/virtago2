@@ -29,12 +29,12 @@ export function StyledSwitch({
       {(label || description) && (
         <div className="flex-1">
           {label && (
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+            <span className="text-sm font-medium" style={{ color: themeColors.text.primary }}>
               {label}
             </span>
           )}
           {description && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <p className="text-xs mt-1" style={{ color: themeColors.text.muted }}>
               {description}
             </p>
           )}

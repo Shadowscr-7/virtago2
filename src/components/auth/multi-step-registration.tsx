@@ -139,10 +139,11 @@ export function MultiStepRegistration() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-4 backdrop-blur-lg rounded-full px-6 py-3 border"
+          className="flex items-center gap-4 rounded-full px-6 py-3 border"
           style={{
-            backgroundColor: themeColors.surface + "40",
-            borderColor: themeColors.primary + "30",
+            backgroundColor: "#ffffff",
+            borderColor: themeColors.border,
+            boxShadow: `0 2px 12px ${themeColors.primary}15`,
           }}
         >
           {[
@@ -175,7 +176,7 @@ export function MultiStepRegistration() {
                     ? themeColors.primary
                     : isCompleted
                       ? themeColors.accent
-                      : themeColors.surface + "60",
+                      : themeColors.border,
                 }}
                 animate={{
                   scale: isActive ? 1.25 : 1,
