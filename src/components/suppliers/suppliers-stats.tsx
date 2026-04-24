@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import {
@@ -11,8 +11,10 @@ import {
   CheckCircle,
   Star,
 } from "lucide-react";
+import { useTheme } from "@/contexts/theme-context";
 
 export function SuppliersStats() {
+  const { themeColors } = useTheme();
   const stats = [
     {
       icon: Building,
@@ -86,7 +88,7 @@ export function SuppliersStats() {
   ];
 
   return (
-    <section className="py-20 bg-slate-50 dark:bg-slate-900">
+    <section className="py-20 bg-slate-50">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <motion.div
@@ -96,10 +98,10 @@ export function SuppliersStats() {
           transition={{ duration: 0.8 }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
             Liderando el Mercado B2B
           </h2>
-          <p className="text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto">
+          <p className="text-xl text-slate-600 max-w-3xl mx-auto">
             Cifras que demuestran nuestro compromiso con la excelencia y la
             satisfacción de nuestros partners comerciales.
           </p>
@@ -116,21 +118,21 @@ export function SuppliersStats() {
               transition={{ duration: 0.6, delay: index * 0.1 }}
               className="group"
             >
-              <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-slate-200 dark:border-slate-700">
+              <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-slate-200">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                  <div className="flex items-center justify-center w-12 h-12 rounded-xl group-hover:scale-110 transition-transform duration-300" style={{ background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})` }}>
                     <stat.icon className="w-6 h-6 text-white" />
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">
+                    <div className="text-2xl md:text-3xl font-bold text-slate-900">
                       {stat.value}
                     </div>
                   </div>
                 </div>
-                <h3 className="font-semibold text-slate-900 dark:text-white mb-2">
+                <h3 className="font-semibold text-slate-900 mb-2">
                   {stat.label}
                 </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-400">
+                <p className="text-sm text-slate-600">
                   {stat.description}
                 </p>
               </div>
@@ -146,10 +148,10 @@ export function SuppliersStats() {
           transition={{ duration: 0.8 }}
           className="text-center mb-12"
         >
-          <h3 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white mb-4">
+          <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">
             ¿Por Qué Elegirnos?
           </h3>
-          <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
             Tres pilares fundamentales que nos posicionan como la plataforma
             líder en conexiones B2B.
           </p>
@@ -165,7 +167,7 @@ export function SuppliersStats() {
               transition={{ duration: 0.6, delay: index * 0.2 }}
               className="group"
             >
-              <div className="relative overflow-hidden bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-slate-200 dark:border-slate-700">
+              <div className="relative overflow-hidden bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-slate-200">
                 {/* Gradient Background */}
                 <div
                   className={`absolute inset-0 bg-gradient-to-br ${highlight.color} opacity-5 group-hover:opacity-10 transition-opacity duration-300`}
@@ -183,11 +185,11 @@ export function SuppliersStats() {
                     </div>
                   </div>
 
-                  <h4 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
+                  <h4 className="text-xl font-bold text-slate-900 mb-4">
                     {highlight.title}
                   </h4>
 
-                  <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
+                  <p className="text-slate-600 leading-relaxed">
                     {highlight.description}
                   </p>
                 </div>
@@ -204,15 +206,15 @@ export function SuppliersStats() {
           transition={{ duration: 0.8 }}
           className="text-center mt-16"
         >
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white">
+          <div className="rounded-2xl p-8 text-white" style={{ background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})` }}>
             <h3 className="text-2xl font-bold mb-4">
               ¿Listo para formar parte de nuestra red?
             </h3>
-            <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
+            <p className="mb-6 max-w-2xl mx-auto" style={{ color: "rgba(255,255,255,0.85)" }}>
               Únete a miles de empresas que ya confían en nuestra plataforma
               para encontrar los mejores proveedores.
             </p>
-            <button className="bg-white text-blue-600 px-8 py-3 rounded-xl font-semibold hover:bg-blue-50 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+            <button className="bg-white px-8 py-3 rounded-xl font-semibold hover:bg-white/90 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg" style={{ color: themeColors.primary }}>
               Comenzar Ahora
             </button>
           </div>

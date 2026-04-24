@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,6 +15,7 @@ import {
   Star,
 } from "lucide-react";
 import { ProductFilters } from "./products-section";
+import { useTheme } from "@/contexts/theme-context";
 
 interface FilterData {
   categories: Array<{ id: string; name: string; count: number }>;
@@ -35,6 +36,7 @@ export function ProductsFilters({
   onFiltersChange,
   filterData,
 }: ProductsFiltersProps) {
+  const { themeColors } = useTheme();
   const [isExpanded, setIsExpanded] = useState(true);
   const [expandedSections, setExpandedSections] = useState({
     search: true,
@@ -146,14 +148,14 @@ export function ProductsFilters({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
+          <div className="flex items-center justify-center w-10 h-10 rounded-xl" style={{ background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})` }}>
             <Filter className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-slate-900">
               Filtros
             </h3>
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-sm text-slate-500">
               {activeFiltersCount} filtros activos
             </p>
           </div>
@@ -163,7 +165,7 @@ export function ProductsFilters({
           {activeFiltersCount > 0 && (
             <button
               onClick={clearAllFilters}
-              className="flex items-center gap-1 text-sm text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+              className="flex items-center gap-1 text-sm text-red-600 hover:text-red-700 transition-colors"
             >
               <X className="w-4 h-4" />
               Limpiar
@@ -171,7 +173,7 @@ export function ProductsFilters({
           )}
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors lg:hidden"
+            className="p-2 text-slate-500 hover:text-slate-700 transition-colors lg:hidden"
           >
             {isExpanded ? (
               <ChevronUp className="w-5 h-5" />
@@ -193,14 +195,14 @@ export function ProductsFilters({
             className="space-y-6"
           >
             {/* Search */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200/50 dark:border-slate-600/50">
+            <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200/50">
               <button
                 onClick={() => toggleSection("search")}
                 className="flex items-center justify-between w-full mb-3"
               >
                 <div className="flex items-center gap-2">
                   <Search className="w-4 h-4 text-slate-500" />
-                  <span className="font-medium text-slate-900 dark:text-white">
+                  <span className="font-medium text-slate-900">
                     Búsqueda
                   </span>
                 </div>
@@ -226,12 +228,12 @@ export function ProductsFilters({
                         placeholder="Buscar productos..."
                         value={filters.search}
                         onChange={(e) => updateFilter("search", e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
                       {filters.search && (
                         <button
                           onClick={() => updateFilter("search", "")}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
                         >
                           <X className="w-4 h-4" />
                         </button>
@@ -243,14 +245,14 @@ export function ProductsFilters({
             </div>
 
             {/* Category */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200/50 dark:border-slate-600/50">
+            <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200/50">
               <button
                 onClick={() => toggleSection("category")}
                 className="flex items-center justify-between w-full mb-3"
               >
                 <div className="flex items-center gap-2">
                   <Package className="w-4 h-4 text-slate-500" />
-                  <span className="font-medium text-slate-900 dark:text-white">
+                  <span className="font-medium text-slate-900">
                     Categoría
                   </span>
                 </div>
@@ -278,7 +280,7 @@ export function ProductsFilters({
                         placeholder="Buscar categorías..."
                         value={categorySearch}
                         onChange={(e) => setCategorySearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 rounded-lg bg-white text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
                     </div>
 
@@ -289,7 +291,7 @@ export function ProductsFilters({
                       ).map((category, idx) => (
                         <label
                           key={`cat-${category.id}-${idx}`}
-                          className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
+                          className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
                         >
                           <div className="flex items-center gap-3">
                             <input
@@ -301,11 +303,11 @@ export function ProductsFilters({
                               }
                               className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
                             />
-                            <span className="text-slate-700 dark:text-slate-300">
+                            <span className="text-slate-700">
                               {category.name}
                             </span>
                           </div>
-                          <span className="text-xs text-slate-500 bg-slate-100 dark:bg-slate-600 px-2 py-1 rounded-full">
+                          <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full">
                             {category.count}
                           </span>
                         </label>
@@ -317,7 +319,8 @@ export function ProductsFilters({
                           onClick={() =>
                             setShowAllCategories(!showAllCategories)
                           }
-                          className="w-full text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 py-2 transition-colors"
+                          className="w-full text-sm py-2 transition-colors"
+                          style={{ color: themeColors.primary }}
                         >
                           {showAllCategories
                             ? "Ver menos"
@@ -328,14 +331,14 @@ export function ProductsFilters({
 
                     {/* Subcategories */}
                     {getSubcategories().length > 0 && (
-                      <div className="ml-6 mt-4 space-y-2 border-l-2 border-slate-200 dark:border-slate-600 pl-4">
-                        <div className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
+                      <div className="ml-6 mt-4 space-y-2 border-l-2 border-slate-200 pl-4">
+                        <div className="text-sm font-medium text-slate-600 mb-2">
                           Subcategorías:
                         </div>
                         {getSubcategories().map((subcategory: string) => (
                           <label
                             key={subcategory}
-                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
+                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
                           >
                             <input
                               type="radio"
@@ -346,12 +349,12 @@ export function ProductsFilters({
                               }
                               className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
                             />
-                            <span className="text-slate-700 dark:text-slate-300 text-sm">
+                            <span className="text-slate-700 text-sm">
                               {subcategory}
                             </span>
                           </label>
                         ))}
-                        <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
+                        <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
                           <input
                             type="radio"
                             name="subcategory"
@@ -359,7 +362,7 @@ export function ProductsFilters({
                             onChange={() => updateFilter("subcategory", "all")}
                             className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
                           />
-                          <span className="text-slate-700 dark:text-slate-300 text-sm">
+                          <span className="text-slate-700 text-sm">
                             Todas las subcategorías
                           </span>
                         </label>
@@ -371,14 +374,14 @@ export function ProductsFilters({
             </div>
 
             {/* Brand */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200/50 dark:border-slate-600/50">
+            <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200/50">
               <button
                 onClick={() => toggleSection("brand")}
                 className="flex items-center justify-between w-full mb-3"
               >
                 <div className="flex items-center gap-2">
                   <Tag className="w-4 h-4 text-slate-500" />
-                  <span className="font-medium text-slate-900 dark:text-white">
+                  <span className="font-medium text-slate-900">
                     Marca
                   </span>
                 </div>
@@ -406,7 +409,7 @@ export function ProductsFilters({
                         placeholder="Buscar marcas..."
                         value={brandSearch}
                         onChange={(e) => setBrandSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 rounded-lg bg-white text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
                     </div>
 
@@ -415,7 +418,7 @@ export function ProductsFilters({
                         (brand, idx) => (
                           <label
                             key={`brand-${brand.id}-${idx}`}
-                            className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
+                            className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
                           >
                             <div className="flex items-center gap-3">
                               <input
@@ -425,11 +428,11 @@ export function ProductsFilters({
                                 onChange={() => updateFilter("brand", brand.id)}
                                 className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
                               />
-                              <span className="text-slate-700 dark:text-slate-300">
+                              <span className="text-slate-700">
                                 {brand.name}
                               </span>
                             </div>
-                            <span className="text-xs text-slate-500 bg-slate-100 dark:bg-slate-600 px-2 py-1 rounded-full">
+                            <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded-full">
                               {brand.count}
                             </span>
                           </label>
@@ -440,7 +443,8 @@ export function ProductsFilters({
                       {filteredBrands.length > ITEMS_LIMIT && (
                         <button
                           onClick={() => setShowAllBrands(!showAllBrands)}
-                          className="w-full text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 py-2 transition-colors"
+                          className="w-full text-sm py-2 transition-colors"
+                          style={{ color: themeColors.primary }}
                         >
                           {showAllBrands
                             ? "Ver menos"
@@ -454,14 +458,14 @@ export function ProductsFilters({
             </div>
 
             {/* Supplier */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200/50 dark:border-slate-600/50">
+            <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200/50">
               <button
                 onClick={() => toggleSection("supplier")}
                 className="flex items-center justify-between w-full mb-3"
               >
                 <div className="flex items-center gap-2">
                   <Building className="w-4 h-4 text-slate-500" />
-                  <span className="font-medium text-slate-900 dark:text-white">
+                  <span className="font-medium text-slate-900">
                     Proveedor
                   </span>
                 </div>
@@ -489,7 +493,7 @@ export function ProductsFilters({
                         placeholder="Buscar proveedores..."
                         value={supplierSearch}
                         onChange={(e) => setSupplierSearch(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                        className="w-full pl-10 pr-4 py-2 text-sm border border-slate-300 rounded-lg bg-white text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       />
                     </div>
 
@@ -500,7 +504,7 @@ export function ProductsFilters({
                       ).map((supplier) => (
                         <label
                           key={supplier.id}
-                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
+                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
                         >
                           <input
                             type="radio"
@@ -511,7 +515,7 @@ export function ProductsFilters({
                             }
                             className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
                           />
-                          <span className="text-slate-700 dark:text-slate-300">
+                          <span className="text-slate-700">
                             {supplier.name}
                           </span>
                         </label>
@@ -521,7 +525,8 @@ export function ProductsFilters({
                       {filteredSuppliers.length > ITEMS_LIMIT && (
                         <button
                           onClick={() => setShowAllSuppliers(!showAllSuppliers)}
-                          className="w-full text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 py-2 transition-colors"
+                          className="w-full text-sm py-2 transition-colors"
+                          style={{ color: themeColors.primary }}
                         >
                           {showAllSuppliers
                             ? "Ver menos"
@@ -535,14 +540,14 @@ export function ProductsFilters({
             </div>
 
             {/* Price Range */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200/50 dark:border-slate-600/50">
+            <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200/50">
               <button
                 onClick={() => toggleSection("price")}
                 className="flex items-center justify-between w-full mb-3"
               >
                 <div className="flex items-center gap-2">
                   <DollarSign className="w-4 h-4 text-slate-500" />
-                  <span className="font-medium text-slate-900 dark:text-white">
+                  <span className="font-medium text-slate-900">
                     Precio
                   </span>
                 </div>
@@ -564,17 +569,18 @@ export function ProductsFilters({
                   >
                     {/* Price Range Slider */}
                     <div className="space-y-3">
-                      <div className="flex justify-between text-sm text-slate-600 dark:text-slate-400">
+                      <div className="flex justify-between text-sm text-slate-600">
                         <span>${priceRange.min.toLocaleString()}</span>
                         <span>${priceRange.max.toLocaleString()}</span>
                       </div>
 
                       {/* Custom Dual Range Slider */}
-                      <div className="relative h-2 bg-slate-200 dark:bg-slate-600 rounded-full">
+                      <div className="relative h-2 bg-slate-200 rounded-full">
                         {/* Track */}
                         <div
-                          className="absolute h-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"
+                          className="absolute h-2 rounded-full"
                           style={{
+                            background: `linear-gradient(90deg, ${themeColors.primary}, ${themeColors.secondary})`,
                             left: `${(priceRange.min / 100000) * 100}%`,
                             width: `${((priceRange.max - priceRange.min) / 100000) * 100}%`,
                           }}
@@ -640,7 +646,7 @@ export function ProductsFilters({
                                 ),
                               }))
                             }
-                            className="w-full px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                            className="w-full px-2 py-1 text-sm border border-slate-300 rounded bg-white text-slate-900"
                             placeholder="0"
                           />
                         </div>
@@ -661,7 +667,7 @@ export function ProductsFilters({
                                 ),
                               }))
                             }
-                            className="w-full px-2 py-1 text-sm border border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                            className="w-full px-2 py-1 text-sm border border-slate-300 rounded bg-white text-slate-900"
                             placeholder="100000"
                           />
                         </div>
@@ -670,25 +676,24 @@ export function ProductsFilters({
                       {/* Apply Price Filter Button */}
                       <button
                         onClick={() => {
-                          // Aquí aplicarías el filtro de precio personalizado
-                          // Por ahora solo actualizamos el estado
                           console.log("Applying price filter:", priceRange);
                         }}
-                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                        className="w-full text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
+                        style={{ backgroundColor: themeColors.primary }}
                       >
                         Aplicar Filtro de Precio
                       </button>
                     </div>
 
                     {/* Quick Price Ranges */}
-                    <div className="space-y-2 pt-3 border-t border-slate-200 dark:border-slate-600">
-                      <div className="text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
+                    <div className="space-y-2 pt-3 border-t border-slate-200">
+                      <div className="text-sm font-medium text-slate-600 mb-2">
                         Rangos rápidos:
                       </div>
                       {filterData.priceRanges.map((range) => (
                         <label
                           key={range.id}
-                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
+                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
                         >
                           <input
                             type="radio"
@@ -699,7 +704,7 @@ export function ProductsFilters({
                             }
                             className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500"
                           />
-                          <span className="text-slate-700 dark:text-slate-300">
+                          <span className="text-slate-700">
                             {range.name}
                           </span>
                         </label>
@@ -711,14 +716,14 @@ export function ProductsFilters({
             </div>
 
             {/* Additional Options */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200/50 dark:border-slate-600/50">
+            <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200/50">
               <button
                 onClick={() => toggleSection("options")}
                 className="flex items-center justify-between w-full mb-3"
               >
                 <div className="flex items-center gap-2">
                   <Star className="w-4 h-4 text-slate-500" />
-                  <span className="font-medium text-slate-900 dark:text-white">
+                  <span className="font-medium text-slate-900">
                     Opciones
                   </span>
                 </div>
@@ -738,7 +743,7 @@ export function ProductsFilters({
                     transition={{ duration: 0.2 }}
                     className="space-y-3"
                   >
-                    <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
+                    <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
                       <input
                         type="checkbox"
                         checked={filters.inStockOnly}
@@ -747,12 +752,12 @@ export function ProductsFilters({
                         }
                         className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
                       />
-                      <span className="text-slate-700 dark:text-slate-300">
+                      <span className="text-slate-700">
                         Solo productos en stock
                       </span>
                     </label>
 
-                    <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors">
+                    <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
                       <input
                         type="checkbox"
                         checked={filters.onSaleOnly}
@@ -761,7 +766,7 @@ export function ProductsFilters({
                         }
                         className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
                       />
-                      <span className="text-slate-700 dark:text-slate-300">
+                      <span className="text-slate-700">
                         Solo productos en oferta
                       </span>
                     </label>
@@ -783,17 +788,17 @@ const sliderStyles = `
     height: 20px;
     width: 20px;
     border-radius: 50%;
-    background: linear-gradient(45deg, #3B82F6, #8B5CF6);
+    background: #6366f1;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     border: 2px solid white;
   }
-  
+
   .slider-thumb::-moz-range-thumb {
     height: 20px;
     width: 20px;
     border-radius: 50%;
-    background: linear-gradient(45deg, #3B82F6, #8B5CF6);
+    background: #6366f1;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     border: 2px solid white;

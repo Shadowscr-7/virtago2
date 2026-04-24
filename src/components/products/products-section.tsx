@@ -1,7 +1,8 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { toast } from "sonner";
+import { useTheme } from "@/contexts/theme-context";
 import { api, ProductWithDiscounts, ProductDiscount, Category, Brand } from "@/api";
 import { ProductsHero } from "./products-hero";
 import { ProductsFilters } from "./products-filters";
@@ -73,6 +74,7 @@ interface GridProduct {
 }
 
 export function ProductsSection() {
+  const { themeColors } = useTheme();
   // Estado para productos de la API
   const [apiProducts, setApiProducts] = useState<ProductWithDiscounts[]>([]);
   const [displayProducts, setDisplayProducts] = useState<GridProduct[]>([]);
@@ -533,7 +535,7 @@ export function ProductsSection() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-purple-900">
+    <div className="min-h-screen" style={{ backgroundColor: themeColors.background }}>
       {/* Hero Section */}
       <ProductsHero />
 
@@ -567,8 +569,8 @@ export function ProductsSection() {
             {!isLoadingProducts && totalProducts > 0 && totalPages > 1 && (
               <div className="mt-12 flex flex-col items-center gap-4">
                 {/* Información de productos */}
-                <div className="text-sm text-slate-600 dark:text-slate-400">
-                  Mostrando <span className="font-semibold text-slate-900 dark:text-white">{((currentPage - 1) * PRODUCTS_PER_PAGE) + 1}</span> - <span className="font-semibold text-slate-900 dark:text-white">{Math.min(currentPage * PRODUCTS_PER_PAGE, totalProducts)}</span> de <span className="font-semibold text-slate-900 dark:text-white">{totalProducts}</span> productos
+                <div className="text-sm text-slate-600">
+                  Mostrando <span className="font-semibold text-slate-900">{((currentPage - 1) * PRODUCTS_PER_PAGE) + 1}</span> - <span className="font-semibold text-slate-900">{Math.min(currentPage * PRODUCTS_PER_PAGE, totalProducts)}</span> de <span className="font-semibold text-slate-900">{totalProducts}</span> productos
                 </div>
 
                 {/* Controles de paginación */}
@@ -577,13 +579,13 @@ export function ProductsSection() {
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="group relative px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-slate-200 dark:disabled:hover:border-slate-700 disabled:hover:bg-white dark:disabled:hover:bg-slate-800 transition-all duration-200"
+                    className="group relative px-4 py-2 rounded-lg border-2 border-slate-200 bg-white hover:border-blue-500 hover:bg-blue-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-slate-200 disabled:hover:bg-white transition-all duration-200"
                   >
                     <div className="flex items-center gap-2">
-                      <svg className="w-4 h-4 text-slate-600 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-4 h-4 text-slate-600 group-hover:text-blue-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                       </svg>
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Anterior</span>
+                      <span className="text-sm font-medium text-slate-700 group-hover:text-blue-600 transition-colors">Anterior</span>
                     </div>
                   </button>
 
@@ -594,7 +596,7 @@ export function ProductsSection() {
                         return (
                           <span
                             key={`ellipsis-${index}`}
-                            className="px-3 py-2 text-slate-400 dark:text-slate-600"
+                            className="px-3 py-2 text-slate-400"
                           >
                             ...
                           </span>
@@ -608,13 +610,11 @@ export function ProductsSection() {
                         <button
                           key={pageNum}
                           onClick={() => handlePageChange(pageNum)}
-                          className={`
-                            min-w-[40px] h-10 px-3 rounded-lg font-medium text-sm transition-all duration-200
-                            ${isActive 
-                              ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 scale-105" 
-                              : "bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400"
-                            }
-                          `}
+                          className="min-w-[40px] h-10 px-3 rounded-lg font-medium text-sm transition-all duration-200 border-2"
+                          style={isActive
+                            ? { background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`, color: "#ffffff", borderColor: "transparent", transform: "scale(1.05)" }
+                            : { backgroundColor: "#ffffff", borderColor: themeColors.border, color: themeColors.text.secondary }
+                          }
                         >
                           {pageNum}
                         </button>
@@ -626,11 +626,11 @@ export function ProductsSection() {
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="group relative px-4 py-2 rounded-lg border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-slate-200 dark:disabled:hover:border-slate-700 disabled:hover:bg-white dark:disabled:hover:bg-slate-800 transition-all duration-200"
+                    className="group relative px-4 py-2 rounded-lg border-2 border-slate-200 bg-white hover:border-blue-500 hover:bg-blue-50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-slate-200 disabled:hover:bg-white transition-all duration-200"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Siguiente</span>
-                      <svg className="w-4 h-4 text-slate-600 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <span className="text-sm font-medium text-slate-700 group-hover:text-blue-600 transition-colors">Siguiente</span>
+                      <svg className="w-4 h-4 text-slate-600 group-hover:text-blue-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </div>

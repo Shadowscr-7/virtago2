@@ -1,9 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, Eye, ShoppingCart, Bookmark, Timer } from "lucide-react";
 import Image from "next/image";
+import { useTheme } from "@/contexts/theme-context";
 
 interface Offer {
   id: string;
@@ -37,6 +38,7 @@ interface OffersGridProps {
 }
 
 export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
+  const { themeColors } = useTheme();
   const [selectedOffer, setSelectedOffer] = useState<Offer | null>(null);
   const [quantities, setQuantities] = useState<{ [key: string]: number }>({});
 
@@ -61,10 +63,10 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
   }) => {
     const totalMinutes =
       timeLeft.days * 24 * 60 + timeLeft.hours * 60 + timeLeft.minutes;
-    if (totalMinutes < 60) return "text-red-500 bg-red-100 dark:bg-red-900";
+    if (totalMinutes < 60) return "text-red-500 bg-red-100";
     if (totalMinutes < 360)
-      return "text-orange-500 bg-orange-100 dark:bg-orange-900";
-    return "text-green-500 bg-green-100 dark:bg-green-900";
+      return "text-orange-500 bg-orange-100";
+    return "text-green-500 bg-green-100";
   };
 
   const getOfferTypeStyle = (offerType: string) => {
@@ -99,7 +101,7 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -8 }}
-      className="group relative bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-2xl transition-all duration-500"
+      className="group relative bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden hover:shadow-2xl transition-all duration-500"
     >
       {/* Offer Type Badge */}
       <div className="absolute top-4 left-4 z-10">
@@ -156,10 +158,10 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
       <div className="p-6">
         {/* Brand and Title */}
         <div className="mb-3">
-          <p className="text-sm font-medium text-orange-500 mb-1">
+          <p className="text-sm font-medium mb-1" style={{ color: themeColors.primary }}>
             {offer.brand}
           </p>
-          <h3 className="font-bold text-lg text-slate-900 dark:text-white line-clamp-2 leading-tight">
+          <h3 className="font-bold text-lg text-slate-900 line-clamp-2 leading-tight">
             {offer.title}
           </h3>
         </div>
@@ -168,11 +170,11 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
         <div className="flex items-center gap-2 mb-4">
           <div className="flex items-center gap-1">
             <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            <span className="font-semibold text-sm text-slate-900 dark:text-white">
+            <span className="font-semibold text-sm text-slate-900">
               {offer.rating}
             </span>
           </div>
-          <span className="text-xs text-slate-500 dark:text-slate-400">
+          <span className="text-xs text-slate-500">
             ({offer.reviews} reseñas)
           </span>
         </div>
@@ -180,14 +182,14 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
         {/* Pricing */}
         <div className="mb-4">
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-slate-900 dark:text-white">
+            <span className="text-2xl font-bold text-slate-900">
               ${offer.discountedPrice.toLocaleString()}
             </span>
             <span className="text-lg text-slate-400 line-through">
               ${offer.originalPrice.toLocaleString()}
             </span>
           </div>
-          <p className="text-sm text-green-600 dark:text-green-400 font-medium">
+          <p className="text-sm text-green-600 font-medium">
             Ahorras ${offer.savedAmount.toLocaleString()}
           </p>
         </div>
@@ -195,7 +197,7 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
         {/* Stock Info */}
         <div className="mb-4">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-slate-600 dark:text-slate-400">
+            <span className="text-slate-600">
               Stock disponible:
             </span>
             <span
@@ -210,7 +212,7 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
               {offer.stockLeft} unidades
             </span>
           </div>
-          <div className="mt-2 bg-slate-200 dark:bg-slate-700 rounded-full h-2">
+          <div className="mt-2 bg-slate-200 rounded-full h-2">
             <div
               className={`h-2 rounded-full transition-all duration-300 ${
                 offer.stockLeft < 10
@@ -230,12 +232,13 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
         <div className="flex gap-3">
           <button
             onClick={() => setSelectedOffer(offer)}
-            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-xl transition-colors duration-300 flex items-center justify-center gap-2"
+            className="flex-1 text-white font-semibold py-3 px-4 rounded-xl transition-colors duration-300 flex items-center justify-center gap-2"
+            style={{ backgroundColor: themeColors.primary }}
           >
             <Eye className="w-4 h-4" />
             Ver Oferta
           </button>
-          <button className="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 p-3 rounded-xl transition-colors duration-300">
+          <button className="bg-slate-100 hover:bg-slate-200 text-slate-700 p-3 rounded-xl transition-colors duration-300">
             <Bookmark className="w-5 h-5" />
           </button>
         </div>
@@ -248,12 +251,12 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-8">
         {Array.from({ length: 8 }).map((_, index) => (
           <div key={index} className="animate-pulse">
-            <div className="bg-slate-300 dark:bg-slate-700 h-56 rounded-t-2xl" />
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-b-2xl space-y-4">
-              <div className="h-4 bg-slate-300 dark:bg-slate-700 rounded w-3/4" />
-              <div className="h-6 bg-slate-300 dark:bg-slate-700 rounded" />
-              <div className="h-4 bg-slate-300 dark:bg-slate-700 rounded w-1/2" />
-              <div className="h-8 bg-slate-300 dark:bg-slate-700 rounded" />
+            <div className="bg-slate-300 h-56 rounded-t-2xl" />
+            <div className="bg-white p-6 rounded-b-2xl space-y-4">
+              <div className="h-4 bg-slate-300 rounded w-3/4" />
+              <div className="h-6 bg-slate-300 rounded" />
+              <div className="h-4 bg-slate-300 rounded w-1/2" />
+              <div className="h-8 bg-slate-300 rounded" />
             </div>
           </div>
         ))}
@@ -284,7 +287,7 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white dark:bg-slate-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+              className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
             >
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
                 {/* Image Section */}
@@ -324,13 +327,13 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
                 {/* Details Section */}
                 <div className="space-y-6">
                   <div>
-                    <p className="text-lg font-medium text-orange-500 mb-2">
+                    <p className="text-lg font-medium mb-2" style={{ color: themeColors.primary }}>
                       {selectedOffer.brand}
                     </p>
-                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
+                    <h2 className="text-3xl font-bold text-slate-900 mb-4">
                       {selectedOffer.title}
                     </h2>
-                    <p className="text-slate-600 dark:text-slate-400">
+                    <p className="text-slate-600">
                       {selectedOffer.description}
                     </p>
                   </div>
@@ -339,26 +342,26 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1">
                       <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                      <span className="font-bold text-lg text-slate-900 dark:text-white">
+                      <span className="font-bold text-lg text-slate-900">
                         {selectedOffer.rating}
                       </span>
                     </div>
-                    <span className="text-slate-500 dark:text-slate-400">
+                    <span className="text-slate-500">
                       ({selectedOffer.reviews} reseñas)
                     </span>
                   </div>
 
                   {/* Pricing */}
-                  <div className="bg-slate-50 dark:bg-slate-700 p-6 rounded-xl">
+                  <div className="bg-slate-50 p-6 rounded-xl">
                     <div className="flex items-baseline gap-3 mb-2">
-                      <span className="text-4xl font-bold text-slate-900 dark:text-white">
+                      <span className="text-4xl font-bold text-slate-900">
                         ${selectedOffer.discountedPrice.toLocaleString()}
                       </span>
                       <span className="text-2xl text-slate-400 line-through">
                         ${selectedOffer.originalPrice.toLocaleString()}
                       </span>
                     </div>
-                    <p className="text-lg text-green-600 dark:text-green-400 font-semibold">
+                    <p className="text-lg text-green-600 font-semibold">
                       ¡Ahorras ${selectedOffer.savedAmount.toLocaleString()}!
                     </p>
                   </div>
@@ -366,7 +369,7 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
                   {/* Stock and Quantity */}
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="font-medium text-slate-900 dark:text-white">
+                      <span className="font-medium text-slate-900">
                         Stock disponible:
                       </span>
                       <span
@@ -383,7 +386,7 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
                     </div>
 
                     <div>
-                      <label className="block font-medium text-slate-900 dark:text-white mb-2">
+                      <label className="block font-medium text-slate-900 mb-2">
                         Cantidad (mín. {selectedOffer.minQuantity}, máx.{" "}
                         {selectedOffer.maxQuantity})
                       </label>
@@ -400,7 +403,7 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
                               );
                             }
                           }}
-                          className="w-10 h-10 rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-slate-700 dark:text-slate-300"
+                          className="w-10 h-10 rounded-lg bg-slate-200 hover:bg-slate-300 flex items-center justify-center font-bold text-slate-700"
                         >
                           -
                         </button>
@@ -423,7 +426,7 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
                             );
                             handleQuantityChange(selectedOffer.id, value);
                           }}
-                          className="w-20 h-10 text-center border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
+                          className="w-20 h-10 text-center border border-slate-300 rounded-lg bg-white text-slate-900"
                         />
                         <button
                           onClick={() => {
@@ -437,7 +440,7 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
                               );
                             }
                           }}
-                          className="w-10 h-10 rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-slate-700 dark:text-slate-300"
+                          className="w-10 h-10 rounded-lg bg-slate-200 hover:bg-slate-300 flex items-center justify-center font-bold text-slate-700"
                         >
                           +
                         </button>
@@ -447,11 +450,11 @@ export function OffersGrid({ offers, isLoading = false }: OffersGridProps) {
 
                   {/* Actions */}
                   <div className="flex gap-4">
-                    <button className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 px-6 rounded-xl transition-colors duration-300 flex items-center justify-center gap-2">
+                    <button className="flex-1 text-white font-bold py-4 px-6 rounded-xl transition-colors duration-300 flex items-center justify-center gap-2" style={{ backgroundColor: themeColors.primary }}>
                       <ShoppingCart className="w-5 h-5" />
                       Agregar al Carrito
                     </button>
-                    <button className="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 p-4 rounded-xl transition-colors duration-300">
+                    <button className="bg-slate-100 hover:bg-slate-200 text-slate-700 p-4 rounded-xl transition-colors duration-300">
                       <Bookmark className="w-6 h-6" />
                     </button>
                   </div>

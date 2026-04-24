@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,6 +12,7 @@ import {
   ChevronDown,
   X,
 } from "lucide-react";
+import { useTheme } from "@/contexts/theme-context";
 
 interface SuppliersFilters {
   search: string;
@@ -31,6 +32,7 @@ export function SuppliersFilters({
   filters,
   onFiltersChange,
 }: SuppliersFiltersProps) {
+  const { themeColors } = useTheme();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
@@ -206,7 +208,7 @@ export function SuppliersFilters({
     (filters.search ? 1 : 0);
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-6">
+    <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row gap-4 mb-6">
         {/* Search Bar */}
@@ -220,7 +222,7 @@ export function SuppliersFilters({
               onChange={(e) =>
                 onFiltersChange({ ...filters, search: e.target.value })
               }
-              className="w-full pl-12 pr-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400"
+              className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-slate-900 placeholder-slate-500"
             />
           </div>
         </div>
@@ -229,11 +231,12 @@ export function SuppliersFilters({
         <div className="flex gap-3">
           <button
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className={`flex items-center gap-2 px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
+            className="flex items-center gap-2 px-4 py-3 rounded-xl font-medium transition-all duration-300"
+            style={
               isFilterOpen || activeFiltersCount > 0
-                ? "bg-blue-500 text-white shadow-lg shadow-blue-500/25"
-                : "bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600"
-            }`}
+                ? { backgroundColor: themeColors.primary, color: "#ffffff" }
+                : { backgroundColor: "#f1f5f9", color: "#475569" }
+            }
           >
             <Filter className="w-5 h-5" />
             Filtros
@@ -247,7 +250,7 @@ export function SuppliersFilters({
           {activeFiltersCount > 0 && (
             <button
               onClick={clearAllFilters}
-              className="flex items-center gap-2 px-4 py-3 rounded-xl font-medium bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-all duration-300"
+              className="flex items-center gap-2 px-4 py-3 rounded-xl font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all duration-300"
             >
               <X className="w-4 h-4" />
               Limpiar
@@ -264,7 +267,7 @@ export function SuppliersFilters({
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="border-t border-slate-200 dark:border-slate-700 pt-6"
+            className="border-t border-slate-200 pt-6"
           >
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               {filterSections.map((section) => (
@@ -274,13 +277,13 @@ export function SuppliersFilters({
                     className="flex items-center justify-between w-full text-left"
                   >
                     <div className="flex items-center gap-2">
-                      <section.icon className="w-5 h-5 text-blue-500" />
-                      <span className="font-semibold text-slate-900 dark:text-white">
+                      <section.icon className="w-5 h-5" style={{ color: themeColors.primary }} />
+                      <span className="font-semibold text-slate-900">
                         {section.title}
                       </span>
                       {filters[section.id as keyof typeof filters].length >
                         0 && (
-                        <span className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs px-2 py-1 rounded-full">
+                        <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: `${themeColors.primary}20`, color: themeColors.primary }}>
                           {filters[section.id as keyof typeof filters].length}
                         </span>
                       )}
@@ -313,7 +316,7 @@ export function SuppliersFilters({
                             onChange={(e) =>
                               handleSearchChange(section.id, e.target.value)
                             }
-                            className="w-full pl-10 pr-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400"
+                            className="w-full pl-10 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-slate-50 text-slate-900 placeholder-slate-500"
                           />
                         </div>
 
@@ -323,7 +326,7 @@ export function SuppliersFilters({
                             (option) => (
                               <label
                                 key={option}
-                                className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-colors duration-200"
+                                className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors duration-200"
                               >
                                 <input
                                   type="checkbox"
@@ -339,7 +342,7 @@ export function SuppliersFilters({
                                   }
                                   className="rounded border-slate-300 text-blue-500 focus:ring-blue-500 focus:ring-offset-0"
                                 />
-                                <span className="text-sm text-slate-700 dark:text-slate-300 flex-1">
+                                <span className="text-sm text-slate-700 flex-1">
                                   {option}
                                 </span>
                               </label>
@@ -357,7 +360,8 @@ export function SuppliersFilters({
                               onClick={() =>
                                 handleShowMore(section.id, section.options)
                               }
-                              className="text-xs text-blue-500 hover:text-blue-600 font-medium"
+                              className="text-xs font-medium"
+                              style={{ color: themeColors.primary }}
                             >
                               Ver más (
                               {getFilteredOptions(section.id, section.options)

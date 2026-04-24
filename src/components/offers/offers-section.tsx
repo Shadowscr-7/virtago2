@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useState, useMemo } from "react";
 import { OffersHero } from "./offers-hero";
 import { OffersFilters } from "./offers-filters";
+import { useTheme } from "@/contexts/theme-context";
 import { OffersGrid } from "./offers-grid";
 
 interface OffersFilters {
@@ -320,6 +321,7 @@ const mockOffers: Offer[] = [
 ];
 
 export function OffersSection() {
+  const { themeColors } = useTheme();
   const [filters, setFilters] = useState<OffersFilters>({
     search: "",
     category: [],
@@ -412,7 +414,7 @@ export function OffersSection() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-pink-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen" style={{ backgroundColor: themeColors.background }}>
       <OffersHero />
 
       <div className="container mx-auto px-4 py-12">
@@ -425,7 +427,7 @@ export function OffersSection() {
 
         <div className="mb-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+            <h2 className="text-2xl font-bold text-slate-900">
               {filteredOffers.length === mockOffers.length
                 ? `Todas las Ofertas (${filteredOffers.length})`
                 : `${filteredOffers.length} ofertas encontradas`}
@@ -445,7 +447,8 @@ export function OffersSection() {
                     offerType: [],
                   })
                 }
-                className="text-orange-500 hover:text-orange-600 font-medium"
+                className="font-medium"
+                style={{ color: themeColors.primary }}
               >
                 Limpiar filtros
               </button>
@@ -458,10 +461,10 @@ export function OffersSection() {
         {filteredOffers.length === 0 && !isLoading && (
           <div className="text-center py-16">
             <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">
               No se encontraron ofertas
             </h3>
-            <p className="text-slate-600 dark:text-slate-400 mb-6">
+            <p className="text-slate-600 mb-6">
               Intenta ajustar los filtros para encontrar más ofertas
             </p>
             <button
@@ -474,7 +477,8 @@ export function OffersSection() {
                   offerType: [],
                 })
               }
-              className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors duration-300"
+              className="text-white font-semibold py-3 px-6 rounded-xl transition-colors duration-300"
+              style={{ backgroundColor: themeColors.primary }}
             >
               Ver todas las ofertas
             </button>
