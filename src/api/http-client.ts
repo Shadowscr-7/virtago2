@@ -117,45 +117,48 @@ httpClient.interceptors.response.use(
     // Si el error es 401 (Unauthorized) y no es un retry
     if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
       originalRequest._retry = true;
-      
+
+      const existingToken = getToken();
       const refreshToken = localStorage.getItem('refresh_token');
-      
+
       if (refreshToken) {
         try {
           // Intentar refrescar el token
           const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
             refresh_token: refreshToken,
           });
-          
+
           const newToken = response.data.access_token;
           setToken(newToken);
-          
+
           // Reintentar la request original con el nuevo token
           if (originalRequest.headers) {
             originalRequest.headers.Authorization = `Bearer ${newToken}`;
           }
           return httpClient(originalRequest);
-          
+
         } catch (refreshError) {
           console.error('❌ Token refresh failed:', refreshError);
-          
+
           // Si falla el refresh, remover tokens y redirigir al login
           removeToken();
-          
+
           if (typeof window !== 'undefined') {
             window.location.href = '/login';
           }
-          
+
           return Promise.reject(refreshError);
         }
-      } else {
-        // No hay refresh token, redirigir al login
+      } else if (existingToken) {
+        // Tenía token pero expiró y no hay refresh → sesión vencida, redirigir
         removeToken();
-        
+
         if (typeof window !== 'undefined') {
           window.location.href = '/login';
         }
       }
+      // Si nunca hubo token, el usuario es anónimo tocando un endpoint protegido.
+      // No redirigir — dejar que el componente maneje el error.
     }
     
     // Para otros errores, rechazar directamente

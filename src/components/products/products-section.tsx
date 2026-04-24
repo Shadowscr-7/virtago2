@@ -2,7 +2,12 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 import { api, ProductWithDiscounts, ProductDiscount, Category, Brand } from "@/api";
+import { useAuthStore } from "@/store/auth";
+import { useTheme } from "@/contexts/theme-context";
+import { useRouter } from "next/navigation";
+import { Lock, LogIn, UserPlus } from "lucide-react";
 import { ProductsHero } from "./products-hero";
 import { ProductsFilters } from "./products-filters";
 import { ProductsGrid } from "./products-grid";
@@ -73,6 +78,10 @@ interface GridProduct {
 }
 
 export function ProductsSection() {
+  const { isAuthenticated } = useAuthStore();
+  const { themeColors } = useTheme();
+  const router = useRouter();
+
   // Estado para productos de la API
   const [apiProducts, setApiProducts] = useState<ProductWithDiscounts[]>([]);
   const [displayProducts, setDisplayProducts] = useState<GridProduct[]>([]);
@@ -171,6 +180,8 @@ export function ProductsSection() {
 
   // Cargar categorías y marcas reales del backend
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     const loadFiltersData = async () => {
       try {
         const [categoriesRes, brandsRes] = await Promise.all([
@@ -199,7 +210,7 @@ export function ProductsSection() {
     };
 
     loadFiltersData();
-  }, []);
+  }, [isAuthenticated]);
 
   // Adaptar ProductWithDiscounts al formato esperado por ProductsGrid
   const adaptProducts = useCallback((products: ProductWithDiscounts[]): GridProduct[] => {
@@ -340,6 +351,8 @@ export function ProductsSection() {
 
   // Cargar productos desde la API
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     const loadProducts = async () => {
       try {
         setIsLoadingProducts(true);
@@ -442,7 +455,7 @@ export function ProductsSection() {
 
     loadProducts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, filters.search, filters.category, filters.brand, filters.sortBy]);
+  }, [isAuthenticated, currentPage, filters.search, filters.category, filters.brand, filters.sortBy]);
 
   // Aplicar filtros locales y ordenamiento (único punto que establece displayProducts)
   useEffect(() => {
@@ -531,6 +544,62 @@ export function ProductsSection() {
 
     return pages;
   };
+
+  // Muro de autenticación — no llamar a la API si no está logueado
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen"
+        style={{ background: `linear-gradient(135deg, ${themeColors.surface} 0%, #ffffff 60%, ${themeColors.primary}08 100%)` }}>
+        <ProductsHero />
+
+        <div className="container mx-auto px-4 py-16 flex flex-col items-center justify-center">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="max-w-md w-full text-center rounded-2xl overflow-hidden"
+            style={{
+              backgroundColor: "#ffffff",
+              boxShadow: `0 20px 60px ${themeColors.primary}20`,
+              border: `1px solid ${themeColors.border}`,
+            }}
+          >
+            <div className="px-8 pt-8 pb-6"
+              style={{ background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})` }}>
+              <div className="w-16 h-16 mx-auto mb-3 bg-white/20 rounded-2xl flex items-center justify-center">
+                <Lock className="w-8 h-8 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-white">Acceso exclusivo B2B</h2>
+              <p className="text-sm text-white/80 mt-1">Inicia sesión para ver el catálogo completo y precios mayoristas</p>
+            </div>
+
+            <div className="p-8 space-y-4">
+              <p className="text-sm" style={{ color: themeColors.text.secondary }}>
+                Virtago es una plataforma exclusiva para empresas y distribuidores. Regístrate para acceder a más de 50,000 productos con precios especiales.
+              </p>
+
+              <div className="flex flex-col gap-3 pt-2">
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  onClick={() => router.push('/login')}
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-lg font-semibold text-sm text-white transition-all"
+                  style={{ background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`, boxShadow: `0 4px 14px ${themeColors.primary}40` }}>
+                  <LogIn className="w-4 h-4" />
+                  Iniciar Sesión
+                </motion.button>
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  onClick={() => router.push('/register')}
+                  className="flex items-center justify-center gap-2 w-full py-3 rounded-lg font-semibold text-sm border-2 transition-all"
+                  style={{ borderColor: themeColors.primary, color: themeColors.primary, backgroundColor: "#ffffff" }}>
+                  <UserPlus className="w-4 h-4" />
+                  Crear Cuenta Empresarial
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-purple-900">
