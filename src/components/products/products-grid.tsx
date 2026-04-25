@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,6 +12,7 @@ import {
   Eye,
   Package,
   AlertCircle,
+  X,
 } from "lucide-react";
 import { ProductFilters } from "./products-section";
 import { QuantityModal } from "./quantity-modal";
@@ -97,6 +98,7 @@ export function ProductsGrid({
   const [quantityModalProduct, setQuantityModalProduct] =
     useState<Product | null>(null);
   const [isQuantityModalOpen, setIsQuantityModalOpen] = useState(false);
+  const [sortDrawerOpen, setSortDrawerOpen] = useState(false);
   const itemsPerPage = 12;
 
   const { addItem } = useCartStore();
@@ -600,52 +602,108 @@ export function ProductsGrid({
   return (
     <div className="space-y-6">
       {/* Header with controls */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-slate-200/50 dark:border-slate-600/50">
-        <div className="flex items-center gap-4">
-          <div className="text-slate-700 dark:text-slate-300">
-            <span className="font-semibold">{products.length}</span> productos
-            encontrados
-          </div>
+      <div className="flex items-center justify-between gap-2 bg-white rounded-xl px-3 py-2.5 shadow-sm border border-slate-200/50">
+        {/* Left: count */}
+        <span className="text-sm text-slate-600">
+          <span className="font-semibold text-slate-900">{products.length}</span> productos
+        </span>
 
-          {/* View Mode Toggle */}
-          <div className="flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
+        {/* Right: controls */}
+        <div className="flex items-center gap-2">
+          {/* View toggle */}
+          <div className="flex bg-slate-100 rounded-lg p-0.5">
             <button
               onClick={() => onViewModeChange("grid")}
-              className={`p-2 rounded-md transition-colors ${
-                viewMode === "grid"
-                  ? "bg-blue-600 text-white"
-                  : "text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-600"
-              }`}
+              className={`p-1.5 rounded-md transition-colors ${viewMode === "grid" ? "bg-white shadow-sm text-blue-600" : "text-slate-500 hover:text-slate-700"}`}
             >
               <Grid3X3 className="w-4 h-4" />
             </button>
             <button
               onClick={() => onViewModeChange("list")}
-              className={`p-2 rounded-md transition-colors ${
-                viewMode === "list"
-                  ? "bg-blue-600 text-white"
-                  : "text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-600"
-              }`}
+              className={`p-1.5 rounded-md transition-colors ${viewMode === "list" ? "bg-white shadow-sm text-blue-600" : "text-slate-500 hover:text-slate-700"}`}
             >
               <List className="w-4 h-4" />
             </button>
           </div>
-        </div>
 
-        {/* Sort Dropdown */}
-        <div className="flex items-center gap-3">
-          <ArrowUpDown className="w-4 h-4 text-slate-500" />
-          <StyledSelect
-            value={filters.sortBy}
-            onChange={(value) => onFiltersChange({ ...filters, sortBy: value })}
-            options={sortOptions.map((option) => ({
-              value: option.value,
-              label: option.label,
-            }))}
-            className="min-w-[200px]"
-          />
+          {/* Sort mobile button */}
+          <button
+            onClick={() => setSortDrawerOpen(true)}
+            className="md:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+          >
+            <ArrowUpDown className="w-3.5 h-3.5" />
+            <span className="max-w-[80px] truncate">
+              {sortOptions.find(o => o.value === filters.sortBy)?.label ?? "Ordenar"}
+            </span>
+          </button>
+
+          {/* Sort desktop */}
+          <div className="hidden md:flex items-center gap-2">
+            <ArrowUpDown className="w-4 h-4 text-slate-500" />
+            <StyledSelect
+              value={filters.sortBy}
+              onChange={(value) => onFiltersChange({ ...filters, sortBy: value })}
+              options={sortOptions.map((option) => ({ value: option.value, label: option.label }))}
+              className="min-w-[200px]"
+            />
+          </div>
         </div>
       </div>
+
+      {/* Mobile Sort Drawer */}
+      <AnimatePresence>
+        {sortDrawerOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-black/50 z-40 md:hidden"
+              onClick={() => setSortDrawerOpen(false)}
+            />
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 z-50 md:hidden rounded-t-2xl bg-white shadow-2xl"
+            >
+              <div className="flex justify-center pt-3 pb-1">
+                <div className="w-10 h-1 rounded-full bg-slate-300" />
+              </div>
+              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
+                <span className="font-semibold text-slate-900 text-lg">Ordenar por</span>
+                <button onClick={() => setSortDrawerOpen(false)} className="p-2 rounded-lg hover:bg-slate-100 transition-colors">
+                  <X className="w-5 h-5 text-slate-600" />
+                </button>
+              </div>
+              <div className="p-4 space-y-1">
+                {sortOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      onFiltersChange({ ...filters, sortBy: option.value });
+                      setSortDrawerOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-left transition-colors ${
+                      filters.sortBy === option.value
+                        ? "bg-blue-50 text-blue-700 font-medium"
+                        : "text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    {option.label}
+                    {filters.sortBy === option.value && (
+                      <div className="w-2 h-2 rounded-full bg-blue-600" />
+                    )}
+                  </button>
+                ))}
+              </div>
+              <div className="h-4" />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Loading State */}
       {isLoading && (
