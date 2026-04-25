@@ -545,14 +545,26 @@ export function ProductsSection() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: themeColors.background }}>
-      {/* Hero Section */}
-      <ProductsHero />
+      {/* Hero Section — oculto en mobile */}
+      <div className="hidden md:block">
+        <ProductsHero />
+      </div>
 
-      {/* Stats Section */}
-      <ProductsStats totalProducts={totalProducts} />
+      {/* Stats Section — oculto en mobile */}
+      <div className="hidden md:block">
+        <ProductsStats totalProducts={totalProducts} />
+      </div>
+
+      {/* Header compacto mobile-only */}
+      <div className="md:hidden px-4 pt-5 pb-2">
+        <h1 className="text-xl font-bold text-slate-900">Catálogo de Productos</h1>
+        {totalProducts > 0 && (
+          <p className="text-sm text-slate-500 mt-0.5">{totalProducts.toLocaleString()} productos disponibles</p>
+        )}
+      </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 md:py-8 pt-2 md:pt-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar con filtros */}
           <div className="hidden lg:block lg:w-80 flex-shrink-0">
