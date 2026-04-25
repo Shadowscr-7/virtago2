@@ -1,10 +1,41 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useTheme } from "@/contexts/theme-context";
 
 export function AnimatedBackground() {
   const { themeColors } = useTheme();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  if (isMobile) {
+    return (
+      <>
+        <div className="fixed inset-0 overflow-hidden -z-20">
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `radial-gradient(ellipse at top, ${themeColors.primary}10, transparent 50%), radial-gradient(ellipse at bottom right, ${themeColors.secondary}15, transparent 50%)`,
+            }}
+          />
+          <div
+            className="absolute inset-0 opacity-20"
+            style={{
+              background: `radial-gradient(circle at 25% 25%, ${themeColors.primary}20 0%, transparent 50%), radial-gradient(circle at 75% 75%, ${themeColors.secondary}20 0%, transparent 50%)`,
+            }}
+          />
+        </div>
+        <div className="fixed inset-0 bg-background/40 -z-10" />
+      </>
+    );
+  }
 
   return (
     <>
@@ -13,7 +44,7 @@ export function AnimatedBackground() {
         <div
           className="absolute inset-0"
           style={{
-            background: `radial-gradient(ellipse at top, ${themeColors.primary}10, transparent 50%), 
+            background: `radial-gradient(ellipse at top, ${themeColors.primary}10, transparent 50%),
                         radial-gradient(ellipse at bottom right, ${themeColors.secondary}15, transparent 50%),
                         radial-gradient(ellipse at top left, ${themeColors.accent}08, transparent 50%)`,
           }}

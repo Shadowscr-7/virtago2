@@ -77,6 +77,14 @@ export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState(demoProducts);
   const [isDemo, setIsDemo] = useState(true);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   // Intentar cargar productos reales del backend
   useEffect(() => {
@@ -137,17 +145,17 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-8"
+            className="text-center mb-4 md:mb-8"
           >
             <h1
-              className="text-4xl md:text-6xl font-bold bg-clip-text text-transparent mb-4"
+              className="text-2xl sm:text-4xl md:text-6xl font-bold bg-clip-text text-transparent mb-3 md:mb-4"
               style={{
                 backgroundImage: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.accent})`,
               }}
             >
               Bienvenido a Virtago
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="hidden sm:block text-xl text-muted-foreground max-w-2xl mx-auto">
               La plataforma B2B más avanzada para compras mayoristas. Conectamos
               marcas, proveedores y distribuidores en un solo lugar.
             </p>
@@ -165,7 +173,7 @@ export default function Home() {
                 ctaText="Ver todas las ofertas"
               />
             </div>
-            <div className="space-y-4">
+            <div className="hidden md:block space-y-4">
               <OfferBanner
                 title="Nuevas Marcas"
                 description="Descubre productos de proveedores verificados"
@@ -186,9 +194,10 @@ export default function Home() {
         {/* Estadísticas */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.6 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-6"
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="hidden md:grid md:grid-cols-4 gap-6"
         >
           {[
             { icon: Users, label: "Empresas Registradas", value: "10,000+" },
@@ -273,7 +282,7 @@ export default function Home() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5, duration: 0.6 }}
-                className="text-3xl font-bold text-foreground"
+                className="text-xl md:text-3xl font-bold text-foreground"
               >
                 {isDemo ? 'Productos Demo' : 'Productos Destacados'}
               </motion.h2>
@@ -322,9 +331,9 @@ export default function Home() {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.8 }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6"
           >
-            {featuredProducts.map((product, index) => (
+            {featuredProducts.slice(0, isMobile ? 4 : 6).map((product, index) => (
               <motion.div
                 key={product.name}
                 initial={{ opacity: 0, y: 20 }}
@@ -341,17 +350,20 @@ export default function Home() {
           </motion.div>
         </section>
 
-        {/* Chat Demo */}
-        <ChatDemo />
+        {/* Chat Demo — solo desktop */}
+        <div className="hidden md:block">
+          <ChatDemo />
+        </div>
 
         {/* Categorías populares */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1, duration: 0.6 }}
-          className="space-y-6"
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="space-y-4 md:space-y-6"
         >
-          <h2 className="text-3xl font-bold text-foreground text-center">
+          <h2 className="text-xl md:text-3xl font-bold text-foreground text-center">
             Categorías Populares
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
