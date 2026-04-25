@@ -1,6 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Filter, X } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/contexts/theme-context";
 import { api, ProductWithDiscounts, ProductDiscount, Category, Brand } from "@/api";
@@ -83,7 +85,7 @@ export function ProductsSection() {
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const PRODUCTS_PER_PAGE = 20;
 
-  // Estado para categorías y marcas reales del backend
+  // Estado para categor�as y marcas reales del backend
   const [apiCategories, setApiCategories] = useState<Category[]>([]);
   const [apiBrands, setApiBrands] = useState<Brand[]>([]);
 
@@ -100,9 +102,16 @@ export function ProductsSection() {
     onSaleOnly: false,
   });
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const activeFiltersCount = Object.entries(filters).filter(([key, value]) => {
+    if (key === "search") return (value as string).length > 0;
+    if (key === "sortBy") return value !== "relevance";
+    if (typeof value === "boolean") return value as boolean;
+    return value !== "all";
+  }).length;
   const [isLoading, setIsLoading] = useState(false);
 
-  // Extraer el ID real de una categoría (el backend puede usar distintos campos)
+  // Extraer el ID real de una categor�a (el backend puede usar distintos campos)
   const getCategoryId = useCallback((c: Category): string => {
     return c.id || c.categoryId || c.categoryCode || c._id || '';
   }, []);
@@ -113,9 +122,9 @@ export function ProductsSection() {
   }, []);
 
   // Construir filterData desde los datos del backend (productCount viene de /categories y /brands)
-  // Se deduplican por ID para evitar keys duplicados en React y problemas de selección
+  // Se deduplican por ID para evitar keys duplicados en React y problemas de selecci�n
   const filterData = useMemo(() => {
-    // Deduplicar categorías por ID real
+    // Deduplicar categor�as por ID real
     const seenCatIds = new Set<string>();
     const uniqueCategories = apiCategories
       .map((c, idx) => {
@@ -151,7 +160,7 @@ export function ProductsSection() {
 
     return {
       categories: [
-        { id: "all", name: "Todas las categorías", count: totalProducts },
+        { id: "all", name: "Todas las categor�as", count: totalProducts },
         ...uniqueCategories,
       ],
       subcategories: {} as Record<string, string[]>,
@@ -166,12 +175,12 @@ export function ProductsSection() {
         { id: "100-500", name: "$100 - $500", min: 100, max: 500 },
         { id: "500-1000", name: "$500 - $1,000", min: 500, max: 1000 },
         { id: "1000-5000", name: "$1,000 - $5,000", min: 1000, max: 5000 },
-        { id: "over-5000", name: "Más de $5,000", min: 5000, max: Infinity },
+        { id: "over-5000", name: "M�s de $5,000", min: 5000, max: Infinity },
       ],
     };
   }, [apiCategories, apiBrands, totalProducts]);
 
-  // Cargar categorías y marcas reales del backend
+  // Cargar categor�as y marcas reales del backend
   useEffect(() => {
     const loadFiltersData = async () => {
       try {
@@ -184,7 +193,7 @@ export function ProductsSection() {
           const cats = Array.isArray(categoriesRes.data)
             ? categoriesRes.data
             : (categoriesRes.data as any)?.data || [];
-          console.log("📂 Categorías cargadas:", cats.length, "- Primera:", JSON.stringify(cats[0]));
+          console.log("?? Categor�as cargadas:", cats.length, "- Primera:", JSON.stringify(cats[0]));
           setApiCategories(cats);
         }
 
@@ -192,11 +201,11 @@ export function ProductsSection() {
           const brands = Array.isArray(brandsRes.data)
             ? brandsRes.data
             : (brandsRes.data as any)?.data || [];
-          console.log("🏷️ Marcas cargadas:", brands.length, "- Primera:", JSON.stringify(brands[0]));
+          console.log("??? Marcas cargadas:", brands.length, "- Primera:", JSON.stringify(brands[0]));
           setApiBrands(brands);
         }
       } catch (error) {
-        console.error("❌ Error cargando filtros:", error);
+        console.error("? Error cargando filtros:", error);
       }
     };
 
@@ -306,30 +315,30 @@ export function ProductsSection() {
       case "bogo":
       case "buy_x_get_y":
         description = bestDiscount.name || "Oferta especial";
-        badge = "🎁 PROMO";
+        badge = "?? PROMO";
         break;
       case "bundle":
         description = bestDiscount.name || "Compra en pack";
-        badge = "📦 PACK";
+        badge = "?? PACK";
         break;
       case "tiered_volume":
       case "volume":
         const minQty = bestDiscount.min_quantity || 2;
         description = `Comprando ${minQty}+ unidades`;
-        badge = `🔢 x${minQty}`;
+        badge = `?? x${minQty}`;
         break;
       case "min_purchase":
         const minAmount = bestDiscount.min_purchase_amount || 0;
         description = `Comprando por $${minAmount.toLocaleString()}+`;
-        badge = "💰 MIN";
+        badge = "?? MIN";
         break;
       case "loyalty":
         description = bestDiscount.name || "Descuento por fidelidad";
-        badge = "⭐ LOYALTY";
+        badge = "? LOYALTY";
         break;
       default:
         description = bestDiscount.name || "Descuento adicional";
-        badge = "🏷️ OFERTA";
+        badge = "??? OFERTA";
     }
 
     return {
@@ -345,7 +354,7 @@ export function ProductsSection() {
     const loadProducts = async () => {
       try {
         setIsLoadingProducts(true);
-        console.log("🛍️ Cargando productos página:", currentPage);
+        console.log("??? Cargando productos p�gina:", currentPage);
 
         const params: {
           page: number;
@@ -394,7 +403,7 @@ export function ProductsSection() {
 
         const response = await api.product.getProductsWithDiscounts(params);
 
-        console.log("📦 Respuesta completa de la API:", response);
+        console.log("?? Respuesta completa de la API:", response);
 
         if (response.success && response.data) {
           let productsArray: ProductWithDiscounts[] = [];
@@ -413,15 +422,15 @@ export function ProductsSection() {
             totalCount = data.total || data.products.length;
           }
 
-          console.log("✅ Productos cargados:", productsArray.length, "de", totalCount);
+          console.log("? Productos cargados:", productsArray.length, "de", totalCount);
           if (productsArray.length > 0) {
-            console.log("📊 Primer producto:", productsArray[0]?.name, "- pricing:", productsArray[0]?.pricing);
+            console.log("?? Primer producto:", productsArray[0]?.name, "- pricing:", productsArray[0]?.pricing);
           }
           
           setApiProducts(productsArray);
           setTotalProducts(totalCount);
         } else {
-          console.error("❌ Error al cargar productos:", response.message);
+          console.error("? Error al cargar productos:", response.message);
           toast.error("Error al cargar productos", {
             description: response.message || "Intente nuevamente",
           });
@@ -430,7 +439,7 @@ export function ProductsSection() {
           setTotalProducts(0);
         }
       } catch (error) {
-        console.error("❌ Error en loadProducts:", error);
+        console.error("? Error en loadProducts:", error);
         toast.error("Error al cargar productos", {
           description: "No se pudo conectar con el servidor",
         });
@@ -446,7 +455,7 @@ export function ProductsSection() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, filters.search, filters.category, filters.brand, filters.sortBy]);
 
-  // Aplicar filtros locales y ordenamiento (único punto que establece displayProducts)
+  // Aplicar filtros locales y ordenamiento (�nico punto que establece displayProducts)
   useEffect(() => {
     if (apiProducts.length === 0) {
       setDisplayProducts([]);
@@ -488,7 +497,7 @@ export function ProductsSection() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [apiProducts, filters.onSaleOnly, filters.sortBy, filters.priceRange]);
 
-  // Manejar cambio de página
+  // Manejar cambio de p�gina
   const handlePageChange = (newPage: number) => {
     const totalPages = Math.ceil(totalProducts / PRODUCTS_PER_PAGE);
     if (newPage >= 1 && newPage <= totalPages) {
@@ -499,13 +508,13 @@ export function ProductsSection() {
 
   const totalPages = Math.ceil(totalProducts / PRODUCTS_PER_PAGE);
 
-  // Generar números de página para mostrar
+  // Generar n�meros de p�gina para mostrar
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
-    const maxVisible = 7; // Máximo de números visibles
+    const maxVisible = 7; // M�ximo de n�meros visibles
 
     if (totalPages <= maxVisible) {
-      // Mostrar todas las páginas si son pocas
+      // Mostrar todas las p�ginas si son pocas
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
@@ -546,7 +555,7 @@ export function ProductsSection() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar con filtros */}
-          <div className="lg:w-80 flex-shrink-0">
+          <div className="hidden lg:block lg:w-80 flex-shrink-0">
             <ProductsFilters
               filters={filters}
               onFiltersChange={setFilters}
@@ -556,6 +565,32 @@ export function ProductsSection() {
 
           {/* Grid de productos */}
           <div className="flex-1">
+            {/* Boton filtros mobile */}
+            <div className="lg:hidden mb-4 flex items-center gap-3">
+              <button
+                onClick={() => setMobileFiltersOpen(true)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 font-medium text-sm shadow-sm transition-all active:scale-95"
+                style={{ borderColor: themeColors.primary, color: themeColors.primary, backgroundColor: themeColors.background }}
+              >
+                <Filter className="w-4 h-4" />
+                Filtros
+                {activeFiltersCount > 0 && (
+                  <span className="flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold text-white"
+                    style={{ backgroundColor: themeColors.primary }}>
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </button>
+              {activeFiltersCount > 0 && (
+                <button
+                  onClick={() => setFilters({ search: "", category: "all", subcategory: "all", brand: "all", supplier: "all", priceRange: "all", sortBy: "relevance", inStockOnly: false, onSaleOnly: false })}
+                  className="text-sm text-red-500 flex items-center gap-1"
+                >
+                  <X className="w-3.5 h-3.5" /> Limpiar
+                </button>
+              )}
+            </div>
+
             <ProductsGrid
               products={displayProducts}
               viewMode={viewMode}
@@ -565,17 +600,17 @@ export function ProductsSection() {
               onFiltersChange={setFilters}
             />
 
-            {/* Paginación Elegante */}
+            {/* Paginaci�n Elegante */}
             {!isLoadingProducts && totalProducts > 0 && totalPages > 1 && (
               <div className="mt-12 flex flex-col items-center gap-4">
-                {/* Información de productos */}
+                {/* Informaci�n de productos */}
                 <div className="text-sm text-slate-600">
                   Mostrando <span className="font-semibold text-slate-900">{((currentPage - 1) * PRODUCTS_PER_PAGE) + 1}</span> - <span className="font-semibold text-slate-900">{Math.min(currentPage * PRODUCTS_PER_PAGE, totalProducts)}</span> de <span className="font-semibold text-slate-900">{totalProducts}</span> productos
                 </div>
 
-                {/* Controles de paginación */}
+                {/* Controles de paginaci�n */}
                 <div className="flex items-center gap-2">
-                  {/* Botón Anterior */}
+                  {/* Bot�n Anterior */}
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
@@ -589,7 +624,7 @@ export function ProductsSection() {
                     </div>
                   </button>
 
-                  {/* Números de página */}
+                  {/* N�meros de p�gina */}
                   <div className="flex items-center gap-1">
                     {getPageNumbers().map((page, index) => {
                       if (page === "...") {
@@ -622,7 +657,7 @@ export function ProductsSection() {
                     })}
                   </div>
 
-                  {/* Botón Siguiente */}
+                  {/* Bot�n Siguiente */}
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
@@ -641,6 +676,62 @@ export function ProductsSection() {
           </div>
         </div>
       </div>
+
+      {/* Mobile Filters Drawer */}
+      <AnimatePresence>
+        {mobileFiltersOpen && (
+          <>
+            {/* Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className='fixed inset-0 bg-black/50 z-40 lg:hidden'
+              onClick={() => setMobileFiltersOpen(false)}
+            />
+            {/* Drawer desde abajo */}
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className='fixed bottom-0 left-0 right-0 z-50 lg:hidden rounded-t-2xl shadow-2xl overflow-hidden'
+              style={{ backgroundColor: themeColors.surface || '#ffffff', maxHeight: '85vh' }}
+            >
+              {/* Handle bar */}
+              <div className='flex justify-center pt-3 pb-1'>
+                <div className='w-10 h-1 rounded-full bg-slate-300' />
+              </div>
+              {/* Header del drawer */}
+              <div className='flex items-center justify-between px-4 py-3 border-b border-slate-200'>
+                <span className='font-semibold text-slate-900 text-lg'>Filtros</span>
+                <button onClick={() => setMobileFiltersOpen(false)} className='p-2 rounded-lg hover:bg-slate-100 transition-colors'>
+                  <X className='w-5 h-5 text-slate-600' />
+                </button>
+              </div>
+              {/* Contenido scrolleable */}
+              <div className='overflow-y-auto p-4' style={{ maxHeight: 'calc(85vh - 120px)' }}>
+                <ProductsFilters
+                  filters={filters}
+                  onFiltersChange={setFilters}
+                  filterData={filterData}
+                />
+              </div>
+              {/* Boton aplicar */}
+              <div className='p-4 border-t border-slate-200' style={{ backgroundColor: themeColors.surface || '#ffffff' }}>
+                <button
+                  onClick={() => setMobileFiltersOpen(false)}
+                  className='w-full py-3 rounded-xl font-semibold text-white text-base transition-all active:scale-95'
+                  style={{ background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})` }}
+                >
+                  {activeFiltersCount > 0 ? `Ver productos (${activeFiltersCount} filtros activos)` : 'Ver productos'}
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
