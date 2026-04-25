@@ -103,10 +103,13 @@ export function ProductCard({
             />
           ) : (
             <div
-              className="w-full h-full flex items-center justify-center"
+              className="w-full h-full flex flex-col items-center justify-center"
               style={{ backgroundColor: themeColors.surface }}
             >
-              <Package className="w-12 h-12" style={{ color: themeColors.text.muted }} />
+              <Package className="w-10 h-10 sm:w-16 sm:h-16 mb-1 sm:mb-2" style={{ color: themeColors.text.muted }} />
+              <span className="text-xs sm:text-sm font-medium" style={{ color: themeColors.text.muted }}>
+                Sin imagen
+              </span>
             </div>
           )}
 
