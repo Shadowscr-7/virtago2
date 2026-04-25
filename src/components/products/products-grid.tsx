@@ -23,6 +23,7 @@ import { useCartStore } from "@/components/cart/cart-store";
 import { useAuthStore } from "@/store/auth";
 import { Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useTheme } from "@/contexts/theme-context";
 
 interface Product {
   id: string;
@@ -104,6 +105,7 @@ export function ProductsGrid({
   const { addItem } = useCartStore();
   const { isAuthenticated } = useAuthStore();
   const router = useRouter();
+  const { themeColors } = useTheme();
 
   const sortOptions = [
     { value: "relevance", label: "Relevancia" },
@@ -187,10 +189,11 @@ export function ProductsGrid({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.3 }}
-        className="group bg-white dark:bg-slate-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-slate-200/50 dark:border-slate-600/50 overflow-hidden"
+        className="group rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border overflow-hidden"
+        style={{ backgroundColor: themeColors.background, borderColor: themeColors.border }}
       >
         {/* Image */}
-        <Link href={`/producto/${product.prodVirtaId || product.id}`} className="block relative aspect-square overflow-hidden bg-slate-100 dark:bg-slate-700 cursor-pointer">
+        <Link href={`/producto/${product.prodVirtaId || product.id}`} className="block relative aspect-square overflow-hidden cursor-pointer" style={{ backgroundColor: themeColors.surface }}>
           {hasImage ? (
             <Image
               src={primaryImage!.url}
@@ -201,9 +204,9 @@ export function ProductsGrid({
               blurDataURL={primaryImage!.blurDataURL}
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800">
-              <Package className="w-16 h-16 text-slate-400 dark:text-slate-500 mb-2" />
-              <span className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+            <div className="w-full h-full flex flex-col items-center justify-center" style={{ backgroundColor: themeColors.surface }}>
+              <Package className="w-10 h-10 sm:w-16 sm:h-16 mb-1 sm:mb-2" style={{ color: themeColors.text.muted }} />
+              <span className="text-xs sm:text-sm font-medium" style={{ color: themeColors.text.muted }}>
                 Sin imagen
               </span>
             </div>
@@ -264,115 +267,85 @@ export function ProductsGrid({
         </Link>
 
         {/* Content */}
-        <div className="p-4">
+        <div className="p-2 sm:p-4">
           {/* Title */}
           <Link href={`/producto/${product.prodVirtaId || product.id}`}>
-            <h3 className="font-semibold text-slate-900 dark:text-white mb-2 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors cursor-pointer">
+            <h3 className="font-semibold text-xs sm:text-sm mb-1 sm:mb-2 line-clamp-2 transition-colors cursor-pointer leading-snug"
+              style={{ color: themeColors.text.primary }}>
               {product.name}
             </h3>
           </Link>
 
-          {/* Rating */}
-          {product.rating && (
-            <div className="flex items-center gap-2 mb-2">
-              <div className="flex items-center">
-                {[...Array(5)].map((_, i) => (
-                  <Star
-                    key={i}
-                    className={`w-4 h-4 ${
-                      i < Math.floor(product.rating!)
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-slate-300"
-                    }`}
-                  />
-                ))}
-              </div>
-              <span className="text-sm text-slate-500">
-                {product.rating} ({product.reviews} reseñas)
-              </span>
-            </div>
-          )}
-
           {/* Price */}
-          <div className="mb-3">
+          <div className="mb-2 sm:mb-3">
             {isAuthenticated ? (
               <>
-                {/* Precio Final (destacado) */}
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                <div className="flex items-center gap-1 sm:gap-2 mb-0.5 sm:mb-1">
+                  <span className="text-base sm:text-2xl font-bold" style={{ color: themeColors.primary }}>
                     {formatPrice(product.price)}
                   </span>
                 </div>
 
-                {/* Precio Base (tachado) + Ahorro */}
                 {isOnSale && product.originalPrice && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-slate-500 dark:text-slate-400 line-through">
+                  <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                    <span className="text-xs sm:text-sm line-through" style={{ color: themeColors.text.muted }}>
                       {formatPrice(product.originalPrice)}
                     </span>
                     {product.pricing?.total_savings && product.pricing.total_savings > 0 && (
-                      <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                      <span className="text-xs text-green-600 font-medium hidden sm:inline">
                         Ahorras {formatPrice(product.pricing.total_savings)}
                       </span>
                     )}
                   </div>
                 )}
 
-                {/* Descuento Adicional Disponible */}
                 {product.bestAdditionalDiscount && product.bestAdditionalDiscount.potentialSavings > 0 && (
-                  <div className="mt-2 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-2">
+                  <div className="hidden sm:block mt-2 rounded-lg p-2 border border-purple-200"
+                    style={{ background: "linear-gradient(to right, #faf5ff, #fdf4ff)" }}>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-purple-700 dark:text-purple-300">
+                      <span className="text-xs font-bold text-purple-700">
                         {product.bestAdditionalDiscount.badge}
                       </span>
-                      <span className="text-xs text-purple-600 dark:text-purple-400">
-                        {product.bestAdditionalDiscount.description}
-                      </span>
                     </div>
-                    <div className="text-xs text-purple-700 dark:text-purple-300 font-medium mt-1">
-                      Ahorro extra: {formatPrice(product.bestAdditionalDiscount.potentialSavings)}
+                    <div className="text-xs text-purple-700 font-medium mt-0.5">
+                      +{formatPrice(product.bestAdditionalDiscount.potentialSavings)} extra
                     </div>
-                  </div>
-                )}
-
-                {/* Promociones condicionales disponibles */}
-                {product.discounts?.conditional && product.discounts.conditional > 0 && (
-                  <div className="mt-2 flex items-center gap-1 text-xs text-green-700 dark:text-green-400">
-                    <span>🏷️</span>
-                    <span className="font-medium">
-                      {product.discounts.conditional} promoción(es) disponible(s)
-                    </span>
                   </div>
                 )}
               </>
             ) : (
               <button
                 onClick={() => router.push('/login')}
-                className="w-full flex items-center gap-2 p-3 rounded-lg border border-purple-200 bg-purple-50 hover:bg-purple-100 transition-colors text-left"
+                className="w-full flex items-center gap-1.5 p-1.5 sm:p-3 rounded-lg border transition-colors text-left"
+                style={{ borderColor: themeColors.border, backgroundColor: themeColors.surface }}
               >
-                <Lock className="w-4 h-4 text-purple-600 flex-shrink-0" />
+                <Lock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" style={{ color: themeColors.primary }} />
                 <div>
-                  <p className="text-xs font-semibold text-purple-700">Iniciá sesión para ver el precio</p>
-                  <p className="text-xs text-purple-500">Precios exclusivos B2B</p>
+                  <p className="text-xs font-semibold leading-tight" style={{ color: themeColors.primary }}>
+                    <span className="hidden sm:inline">Iniciá sesión para ver el precio</span>
+                    <span className="sm:hidden">Ver precio</span>
+                  </p>
+                  <p className="text-xs hidden sm:block" style={{ color: themeColors.text.muted }}>Precios exclusivos B2B</p>
                 </div>
               </button>
             )}
           </div>
 
-          {/* Tags */}
-          <div className="flex flex-wrap gap-1 mb-3">
+          {/* Tags — hidden on mobile */}
+          <div className="hidden sm:flex flex-wrap gap-1 mb-3">
             {product.tags.slice(0, 3).map((tag) => (
               <span
                 key={tag}
-                className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-1 rounded-full"
+                className="text-xs px-2 py-1 rounded-full"
+                style={{ backgroundColor: themeColors.surface, color: themeColors.text.secondary }}
               >
                 {tag}
               </span>
             ))}
           </div>
 
-          {/* Stock Info */}
-          <div className="text-sm text-slate-500 dark:text-slate-400">
+          {/* Stock Info — hidden on mobile */}
+          <div className="hidden sm:block text-sm" style={{ color: themeColors.text.muted }}>
             {product.inStock ? (
               <span className="flex items-center gap-1">
                 <Package className="w-4 h-4 text-green-500" />
@@ -385,6 +358,14 @@ export function ProductsGrid({
               </span>
             )}
           </div>
+
+          {/* Sin stock badge mobile only */}
+          {!product.inStock && (
+            <div className="sm:hidden text-xs text-red-500 flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" />
+              Sin stock
+            </div>
+          )}
         </div>
       </motion.div>
     );
@@ -406,11 +387,12 @@ export function ProductsGrid({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.3 }}
-        className="group bg-white dark:bg-slate-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-200/50 dark:border-slate-600/50 overflow-hidden"
+        className="group rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border overflow-hidden"
+        style={{ backgroundColor: themeColors.background, borderColor: themeColors.border }}
       >
         <div className="flex">
           {/* Image */}
-          <Link href={`/producto/${product.prodVirtaId || product.id}`} className="block relative w-48 h-32 flex-shrink-0 overflow-hidden bg-slate-100 dark:bg-slate-700 cursor-pointer">
+          <Link href={`/producto/${product.prodVirtaId || product.id}`} className="block relative w-48 h-32 flex-shrink-0 overflow-hidden cursor-pointer" style={{ backgroundColor: themeColors.surface }}>
             {hasImage ? (
               <Image
                 src={primaryImage!.url}
@@ -421,9 +403,9 @@ export function ProductsGrid({
                 blurDataURL={primaryImage!.blurDataURL}
               />
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800">
-                <Package className="w-12 h-12 text-slate-400 dark:text-slate-500 mb-1" />
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+              <div className="w-full h-full flex flex-col items-center justify-center" style={{ backgroundColor: themeColors.surface }}>
+                <Package className="w-12 h-12 mb-1" style={{ color: themeColors.text.muted }} />
+                <span className="text-xs font-medium" style={{ color: themeColors.text.muted }}>
                   Sin imagen
                 </span>
               </div>
@@ -449,19 +431,20 @@ export function ProductsGrid({
             <div className="flex justify-between">
               <div className="flex-1">
                 {/* Category */}
-                <div className="text-sm text-slate-500 dark:text-slate-400 mb-1">
+                <div className="text-sm mb-1" style={{ color: themeColors.text.muted }}>
                   {product.category}
                 </div>
 
                 {/* Title */}
                 <Link href={`/producto/${product.prodVirtaId || product.id}`}>
-                  <h3 className="font-semibold text-lg text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors cursor-pointer">
+                  <h3 className="font-semibold text-lg mb-2 transition-colors cursor-pointer"
+                    style={{ color: themeColors.text.primary }}>
                     {product.name}
                   </h3>
                 </Link>
 
                 {/* Description */}
-                <p className="text-slate-600 dark:text-slate-300 text-sm mb-3 line-clamp-2">
+                <p className="text-sm mb-3 line-clamp-2" style={{ color: themeColors.text.secondary }}>
                   {product.description}
                 </p>
 
@@ -491,7 +474,8 @@ export function ProductsGrid({
                   {product.tags.slice(0, 4).map((tag) => (
                     <span
                       key={tag}
-                      className="text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-1 rounded-full"
+                      className="text-xs px-2 py-1 rounded-full"
+                      style={{ backgroundColor: themeColors.surface, color: themeColors.text.secondary }}
                     >
                       {tag}
                     </span>
@@ -505,7 +489,7 @@ export function ProductsGrid({
                 <div className="text-right mb-4 w-full">
                   {/* Precio Final */}
                   <div className="flex items-center justify-end gap-2 mb-1">
-                    <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    <span className="text-2xl font-bold" style={{ color: themeColors.primary }}>
                       {formatPrice(product.price)}
                     </span>
                   </div>
@@ -513,11 +497,11 @@ export function ProductsGrid({
                   {/* Precio Base (tachado) */}
                   {isOnSale && product.originalPrice && (
                     <div className="flex items-center justify-end gap-2 mb-1">
-                      <span className="text-sm text-slate-500 dark:text-slate-400 line-through">
+                      <span className="text-sm line-through" style={{ color: themeColors.text.muted }}>
                         {formatPrice(product.originalPrice)}
                       </span>
                       {product.pricing?.total_savings && product.pricing.total_savings > 0 && (
-                        <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                        <span className="text-xs text-green-600 font-medium">
                           Ahorras {formatPrice(product.pricing.total_savings)}
                         </span>
                       )}
@@ -526,16 +510,17 @@ export function ProductsGrid({
 
                   {/* Descuento Adicional */}
                   {product.bestAdditionalDiscount && product.bestAdditionalDiscount.potentialSavings > 0 && (
-                    <div className="mt-2 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-2">
+                    <div className="mt-2 rounded-lg p-2 border border-purple-200"
+                      style={{ background: "linear-gradient(to right, #faf5ff, #fdf4ff)" }}>
                       <div className="flex items-center justify-end gap-2">
-                        <span className="text-xs font-bold text-purple-700 dark:text-purple-300">
+                        <span className="text-xs font-bold text-purple-700">
                           {product.bestAdditionalDiscount.badge}
                         </span>
-                        <span className="text-xs text-purple-600 dark:text-purple-400">
+                        <span className="text-xs text-purple-600">
                           {product.bestAdditionalDiscount.description}
                         </span>
                       </div>
-                      <div className="text-xs text-purple-700 dark:text-purple-300 font-medium mt-1 text-right">
+                      <div className="text-xs text-purple-700 font-medium mt-1 text-right">
                         Ahorro extra: {formatPrice(product.bestAdditionalDiscount.potentialSavings)}
                       </div>
                     </div>
@@ -543,14 +528,14 @@ export function ProductsGrid({
 
                   {/* Promociones condicionales */}
                   {product.discounts?.conditional && product.discounts.conditional > 0 && (
-                    <div className="mt-1 text-xs text-green-700 dark:text-green-400 text-right">
+                    <div className="mt-1 text-xs text-green-700 text-right">
                       🏷️ {product.discounts.conditional} promoción(es) disponible(s)
                     </div>
                   )}
                 </div>
 
                 {/* Stock Info */}
-                <div className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                <div className="text-sm mb-4" style={{ color: themeColors.text.muted }}>
                   {product.inStock ? (
                     <span className="flex items-center gap-1">
                       <Package className="w-4 h-4 text-green-500" />
@@ -569,23 +554,24 @@ export function ProductsGrid({
                   <button
                     onClick={() => toggleFavorite(product.id)}
                     className={`p-2 rounded-lg transition-colors ${
-                      favorites.has(product.id)
-                        ? "bg-red-500 text-white"
-                        : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-red-500 hover:text-white"
+                      favorites.has(product.id) ? "bg-red-500 text-white" : "hover:bg-red-500 hover:text-white"
                     }`}
+                    style={!favorites.has(product.id) ? { backgroundColor: themeColors.surface, color: themeColors.text.secondary } : undefined}
                   >
                     <Heart className="w-4 h-4" />
                   </button>
                   <Link
                     href={`/producto/${product.prodVirtaId || product.id}`}
-                    className="p-2 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-blue-500 hover:text-white transition-colors"
+                    className="p-2 rounded-lg hover:bg-blue-500 hover:text-white transition-colors"
+                    style={{ backgroundColor: themeColors.surface, color: themeColors.text.secondary }}
                   >
                     <Eye className="w-4 h-4" />
                   </Link>
                   <button
                     onClick={() => handleAddToCart(product)}
                     disabled={!product.inStock}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                    className="text-white px-4 py-2 rounded-lg font-medium disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                    style={{ backgroundColor: product.inStock ? themeColors.primary : undefined }}
                   >
                     <ShoppingCart className="w-4 h-4" />
                     {product.inStock ? "Agregar" : "Sin Stock"}
@@ -602,10 +588,11 @@ export function ProductsGrid({
   return (
     <div className="space-y-6">
       {/* Header with controls */}
-      <div className="flex items-center justify-between gap-2 bg-white rounded-xl px-3 py-2.5 shadow-sm border border-slate-200/50">
+      <div className="flex items-center justify-between gap-2 rounded-xl px-3 py-2.5 shadow-sm border"
+        style={{ backgroundColor: themeColors.background, borderColor: themeColors.border }}>
         {/* Left: count */}
-        <span className="text-sm text-slate-600">
-          <span className="font-semibold text-slate-900">{products.length}</span> productos
+        <span className="text-sm" style={{ color: themeColors.text.secondary }}>
+          <span className="font-semibold" style={{ color: themeColors.text.primary }}>{products.length}</span> productos
         </span>
 
         {/* Right: controls */}
@@ -667,15 +654,16 @@ export function ProductsGrid({
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 z-50 md:hidden rounded-t-2xl bg-white shadow-2xl"
+              className="fixed bottom-0 left-0 right-0 z-50 md:hidden rounded-t-2xl shadow-2xl"
+            style={{ backgroundColor: themeColors.background }}
             >
               <div className="flex justify-center pt-3 pb-1">
                 <div className="w-10 h-1 rounded-full bg-slate-300" />
               </div>
-              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
-                <span className="font-semibold text-slate-900 text-lg">Ordenar por</span>
-                <button onClick={() => setSortDrawerOpen(false)} className="p-2 rounded-lg hover:bg-slate-100 transition-colors">
-                  <X className="w-5 h-5 text-slate-600" />
+              <div className="flex items-center justify-between px-4 py-3 border-b" style={{ borderColor: themeColors.border }}>
+                <span className="font-semibold text-lg" style={{ color: themeColors.text.primary }}>Ordenar por</span>
+                <button onClick={() => setSortDrawerOpen(false)} className="p-2 rounded-lg transition-colors hover:opacity-70">
+                  <X className="w-5 h-5" style={{ color: themeColors.text.secondary }} />
                 </button>
               </div>
               <div className="p-4 space-y-1">
@@ -686,15 +674,16 @@ export function ProductsGrid({
                       onFiltersChange({ ...filters, sortBy: option.value });
                       setSortDrawerOpen(false);
                     }}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-left transition-colors ${
+                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-left transition-colors"
+                    style={
                       filters.sortBy === option.value
-                        ? "bg-blue-50 text-blue-700 font-medium"
-                        : "text-slate-700 hover:bg-slate-50"
-                    }`}
+                        ? { backgroundColor: themeColors.surface, color: themeColors.primary, fontWeight: 600 }
+                        : { color: themeColors.text.secondary }
+                    }
                   >
                     {option.label}
                     {filters.sortBy === option.value && (
-                      <div className="w-2 h-2 rounded-full bg-blue-600" />
+                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: themeColors.primary }} />
                     )}
                   </button>
                 ))}
@@ -727,7 +716,7 @@ export function ProductsGrid({
               transition={{ duration: 0.3 }}
               className={
                 viewMode === "grid"
-                  ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                  ? "grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5"
                   : "space-y-4"
               }
             >
