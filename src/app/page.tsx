@@ -116,6 +116,8 @@ export default function Home() {
             price: p.pricing?.final_price || p.pricing?.base_price || p.price || 0,
             originalPrice: p.pricing?.has_discount ? p.pricing.base_price : undefined,
             description: p.shortDescription || p.fullDescription || p.description || '',
+            productImages: p.productImages,
+            pricing: p.pricing,
           }));
           setFeaturedProducts(adapted);
           setIsDemo(false);

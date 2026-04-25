@@ -1,11 +1,14 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Heart, ShoppingCart, Eye, Lock } from "lucide-react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Heart, Lock, Package } from "lucide-react";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+import { useTheme } from "@/contexts/theme-context";
+import { useRouter } from "next/navigation";
 
 interface ProductCardProps {
+  id?: string;
   name: string;
   brand: string;
   supplier: string;
@@ -16,9 +19,30 @@ interface ProductCardProps {
   isAuthenticated?: boolean;
   isFavorite?: boolean;
   className?: string;
+  productImages?: Array<{
+    url: string;
+    blurDataURL?: string;
+    alt?: string;
+    isPrimary?: boolean;
+  }>;
+  pricing?: {
+    base_price: number;
+    final_price: number;
+    total_savings: number;
+    percentage_saved: string | number;
+    has_discount: boolean;
+  };
 }
 
+const formatPrice = (p: number) =>
+  new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    minimumFractionDigits: 0,
+  }).format(p);
+
 export function ProductCard({
+  id,
   name,
   brand,
   supplier,
@@ -29,164 +53,251 @@ export function ProductCard({
   isAuthenticated = false,
   isFavorite = false,
   className,
+  productImages,
+  pricing,
 }: ProductCardProps) {
-  const hasDiscount = originalPrice && price && originalPrice > price;
-  const discountPercentage = hasDiscount
-    ? Math.round(((originalPrice - price) / originalPrice) * 100)
-    : 0;
+  const { themeColors } = useTheme();
+  const router = useRouter();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const primaryImage = productImages
+    ? productImages.find((img) => img.isPrimary) || productImages[0]
+    : null;
+  const displayImageUrl = primaryImage?.url || image || null;
+
+  const handleCardClick = () => {
+    if (isAuthenticated) {
+      if (id) router.push(`/producto/${id}`);
+    } else {
+      setShowAuthModal(true);
+    }
+  };
+
+  const hasDiscount =
+    pricing?.has_discount ??
+    (originalPrice != null && price != null && originalPrice > price);
+  const discountPercent =
+    pricing?.percentage_saved ??
+    (hasDiscount && originalPrice && price
+      ? Math.round(((originalPrice - price) / originalPrice) * 100)
+      : 0);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -8, transition: { duration: 0.3 } }}
-      className={cn(
-        "group relative bg-card rounded-xl border shadow-sm hover:shadow-xl transition-all duration-300",
-        "overflow-hidden backdrop-blur-sm",
-        className,
-      )}
-    >
-      {/* Efecto de gradiente en hover */}
-      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-pink-500/0 to-cyan-500/0 group-hover:from-purple-500/5 group-hover:via-pink-500/5 group-hover:to-cyan-500/5 transition-all duration-500" />
-
-      {/* Badge de descuento */}
-      {hasDiscount && isAuthenticated && (
-        <motion.div
-          initial={{ scale: 0, rotate: -12 }}
-          animate={{ scale: 1, rotate: -12 }}
-          className="absolute top-2 left-2 z-10 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full"
-        >
-          -{discountPercentage}%
-        </motion.div>
-      )}
-
-      {/* Botón de favoritos */}
-      <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        className="absolute top-2 right-2 z-10 p-2 rounded-full bg-background/80 backdrop-blur-sm shadow-lg hover:bg-background transition-colors"
+    <>
+      <motion.div
+        className={`group rounded-xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border overflow-hidden${className ? ` ${className}` : ""}`}
+        style={{ backgroundColor: themeColors.background, borderColor: themeColors.border }}
       >
-        <Heart
-          className={cn(
-            "h-4 w-4 transition-colors",
-            isFavorite
-              ? "fill-red-500 text-red-500"
-              : "text-muted-foreground hover:text-red-500",
-          )}
-        />
-      </motion.button>
-
-      {/* Imagen del producto */}
-      <div className="relative aspect-square overflow-hidden">
-        <Image
-          src={image || "/placeholder-product.jpg"}
-          alt={name}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-110"
-        />
-
-        {/* Overlay con acciones */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileHover={{ opacity: 1 }}
-          className="absolute inset-0 bg-black/20 flex items-center justify-center gap-2"
+        <div
+          className="relative aspect-square overflow-hidden cursor-pointer"
+          onClick={handleCardClick}
         >
-          <motion.button
-            initial={{ y: 20, opacity: 0 }}
-            whileHover={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.1 }}
-            className="p-2 rounded-full bg-white/90 hover:bg-white transition-colors"
+          {displayImageUrl ? (
+            <Image
+              src={displayImageUrl}
+              alt={primaryImage?.alt || name}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-110"
+              placeholder={primaryImage?.blurDataURL ? 'blur' : 'empty'}
+              blurDataURL={primaryImage?.blurDataURL}
+            />
+          ) : (
+            <div
+              className="w-full h-full flex items-center justify-center"
+              style={{ backgroundColor: themeColors.surface }}
+            >
+              <Package className="w-12 h-12" style={{ color: themeColors.text.muted }} />
+            </div>
+          )}
+
+          {hasDiscount && isAuthenticated && (
+            <div className="absolute top-3 left-3 z-10 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+              -{discountPercent}%
+            </div>
+          )}
+
+          <button
+            className="absolute top-3 right-3 z-10 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ backgroundColor: isFavorite ? '#ef4444' : 'rgba(255,255,255,0.9)' }}
+            onClick={(e) => e.stopPropagation()}
+            aria-label="Favorito"
           >
-            <Eye className="h-4 w-4 text-gray-700" />
-          </motion.button>
+            <Heart
+              className="w-4 h-4"
+              style={{ color: isFavorite ? '#ffffff' : '#374151' }}
+              fill={isFavorite ? '#ffffff' : 'none'}
+            />
+          </button>
 
           {isAuthenticated && (
-            <motion.button
-              initial={{ y: 20, opacity: 0 }}
-              whileHover={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="p-2 rounded-full bg-primary hover:bg-primary/90 transition-colors"
-            >
-              <ShoppingCart className="h-4 w-4 text-primary-foreground" />
-            </motion.button>
+            <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+              <button
+                className="w-full py-2 rounded-lg text-sm font-semibold text-white transition-all active:scale-95"
+                style={{ backgroundColor: themeColors.primary }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                Agregar al carrito
+              </button>
+            </div>
           )}
-        </motion.div>
-      </div>
-
-      {/* Contenido */}
-      <div className="p-4 space-y-2">
-        {/* Marca y proveedor */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span className="bg-secondary px-2 py-1 rounded-full">{brand}</span>
-          <span>{supplier}</span>
         </div>
 
-        {/* Nombre del producto */}
-        <h3 className="font-semibold text-sm line-clamp-2 group-hover:text-primary transition-colors">
-          {name}
-        </h3>
+        <div className="p-2 sm:p-4">
+          <h3
+            className="font-semibold text-xs sm:text-sm mb-1 sm:mb-2 line-clamp-2 transition-colors cursor-pointer leading-snug"
+            style={{ color: themeColors.text.primary }}
+            onClick={handleCardClick}
+          >
+            {name}
+          </h3>
 
-        {/* Descripción */}
-        {description && (
-          <p className="text-xs text-muted-foreground line-clamp-2">
-            {description}
-          </p>
-        )}
-
-        {/* Precio o mensaje de autenticación */}
-        <div className="pt-2">
-          {isAuthenticated ? (
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                {hasDiscount ? (
-                  <>
-                    <span className="text-lg font-bold text-foreground">
-                      ${price?.toLocaleString()}
-                    </span>
-                    <span className="text-sm text-muted-foreground line-through">
-                      ${originalPrice?.toLocaleString()}
-                    </span>
-                  </>
-                ) : (
-                  <span className="text-lg font-bold text-foreground">
-                    ${price?.toLocaleString()}
+          <div className="mb-1 sm:mb-2">
+            {isAuthenticated ? (
+              <div className="flex items-center gap-2 flex-wrap">
+                {price != null && (
+                  <span
+                    className="text-base sm:text-2xl font-bold"
+                    style={{ color: themeColors.primary }}
+                  >
+                    {formatPrice(price)}
                   </span>
                 )}
+                {originalPrice != null &&
+                  price != null &&
+                  originalPrice > price && (
+                    <span
+                      className="text-xs sm:text-sm line-through"
+                      style={{ color: themeColors.text.muted }}
+                    >
+                      {formatPrice(originalPrice)}
+                    </span>
+                  )}
               </div>
+            ) : (
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="w-full flex items-center gap-1.5 p-1.5 sm:p-3 rounded-lg border transition-colors text-left"
+                style={{
+                  borderColor: themeColors.border,
+                  backgroundColor: themeColors.surface,
+                }}
+              >
+                <Lock
+                  className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0"
+                  style={{ color: themeColors.primary }}
+                />
+                <div>
+                  <p
+                    className="text-xs font-semibold leading-tight"
+                    style={{ color: themeColors.primary }}
+                  >
+                    <span className="hidden sm:inline">Inicia sesion para ver el precio</span>
+                    <span className="sm:hidden">Ver precio</span>
+                  </p>
+                  <p
+                    className="text-xs hidden sm:block"
+                    style={{ color: themeColors.text.muted }}
+                  >
+                    Precios exclusivos B2B
+                  </p>
+                </div>
+              </button>
+            )}
+          </div>
+
+          {brand && (
+            <div className="hidden sm:flex flex-wrap gap-1 mt-2">
+              <span
+                className="text-xs px-2 py-1 rounded-full"
+                style={{
+                  backgroundColor: themeColors.surface,
+                  color: themeColors.text.secondary,
+                }}
+              >
+                {brand}
+              </span>
             </div>
-          ) : (
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              className="flex items-center gap-2 p-3 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/20 dark:to-pink-950/20 border border-purple-200 dark:border-purple-800"
-            >
-              <Lock className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-              <div className="text-xs">
-                <p className="font-medium text-purple-700 dark:text-purple-300">
-                  Inicie sesión para ver precios
-                </p>
-                <p className="text-purple-600 dark:text-purple-400">
-                  Precios exclusivos B2B
-                </p>
-              </div>
-            </motion.div>
           )}
         </div>
+      </motion.div>
 
-        {/* Botón de acción */}
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          disabled={!isAuthenticated}
-          className={cn(
-            "w-full mt-3 py-2 rounded-lg font-medium text-sm transition-all duration-300",
-            isAuthenticated
-              ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl"
-              : "bg-muted text-muted-foreground cursor-not-allowed",
-          )}
-        >
-          {isAuthenticated ? "Agregar al carrito" : "Requiere autenticación"}
-        </motion.button>
-      </div>
-    </motion.div>
+      <AnimatePresence>
+        {showAuthModal && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 z-50"
+              onClick={() => setShowAuthModal(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
+            >
+              <div
+                className="rounded-2xl shadow-2xl p-6 max-w-sm w-full pointer-events-auto"
+                style={{
+                  backgroundColor: themeColors.background,
+                  border: `1px solid ${themeColors.border}`,
+                }}
+              >
+                <div className="flex justify-center mb-4">
+                  <div
+                    className="w-16 h-16 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: themeColors.surface }}
+                  >
+                    <Lock className="w-8 h-8" style={{ color: themeColors.primary }} />
+                  </div>
+                </div>
+
+                <h3
+                  className="text-lg font-bold text-center mb-2"
+                  style={{ color: themeColors.text.primary }}
+                >
+                  Iniciá sesión para continuar
+                </h3>
+
+                <p
+                  className="text-sm text-center mb-6"
+                  style={{ color: themeColors.text.secondary }}
+                >
+                  Para ver el detalle del producto y acceder a precios exclusivos B2B necesitás estar registrado.
+                </p>
+
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => {
+                      setShowAuthModal(false);
+                      router.push('/login');
+                    }}
+                    className="w-full py-3 rounded-xl font-semibold text-white transition-all active:scale-95"
+                    style={{
+                      background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
+                    }}
+                  >
+                    Iniciar Sesión
+                  </button>
+                  <button
+                    onClick={() => setShowAuthModal(false)}
+                    className="w-full py-3 rounded-xl font-medium transition-all active:scale-95 border"
+                    style={{
+                      borderColor: themeColors.border,
+                      color: themeColors.text.secondary,
+                      backgroundColor: 'transparent',
+                    }}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
