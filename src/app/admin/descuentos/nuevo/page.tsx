@@ -42,6 +42,8 @@ const discountSchema = z.object({
   validoHasta: z.string().min(1, "La fecha de vencimiento es requerida"),
   codigoDescuento: z.string().optional(),
   usoMaximo: z.number().optional(),
+  budgetLimit: z.number().optional(),
+  reintegroPercentage: z.number().min(0).max(100).optional(),
   acumulativo: z.boolean(),
   activo: z.boolean(),
   modoAplicacion: z.enum(["ACUMULABLE", "EXCLUSIVO", "CASCADA"]),
@@ -196,6 +198,8 @@ export default function NewDiscountPage() {
         is_cumulative: data.acumulativo,
         priority: data.prioridad,
         usage_limit: data.usoMaximo,
+        budget_limit: data.budgetLimit,
+        reintegro_percentage: data.reintegroPercentage,
         conditions: Object.keys(backendConditions).length > 0 ? backendConditions : undefined,
         applicable_to: applicableTo.length > 0 ? applicableTo : undefined,
         customFields: {
@@ -665,6 +669,66 @@ export default function NewDiscountPage() {
                         />
                       )}
                     />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>
+                      Monto Máximo del Descuento (Opcional)
+                    </label>
+                    <Controller
+                      name="budgetLimit"
+                      control={control}
+                      render={({ field: { onChange, value, ...field } }) => (
+                        <input
+                          {...field}
+                          type="number"
+                          value={value || ""}
+                          onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
+                          placeholder="Presupuesto total en pesos"
+                          className="w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2"
+                          style={{
+                            backgroundColor: themeColors.surface + "50",
+                            borderColor: themeColors.primary + "30",
+                            color: themeColors.text.primary,
+                          }}
+                        />
+                      )}
+                    />
+                    <p className="text-xs mt-1" style={{ color: themeColors.text.secondary }}>
+                      El descuento se desactiva al alcanzar este monto total acumulado
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>
+                      % de Reintegro (Opcional)
+                    </label>
+                    <Controller
+                      name="reintegroPercentage"
+                      control={control}
+                      render={({ field: { onChange, value, ...field } }) => (
+                        <input
+                          {...field}
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={value || ""}
+                          onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
+                          placeholder="Ej: 5 (para 5% de reintegro)"
+                          className="w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2"
+                          style={{
+                            backgroundColor: themeColors.surface + "50",
+                            borderColor: themeColors.primary + "30",
+                            color: themeColors.text.primary,
+                          }}
+                        />
+                      )}
+                    />
+                    <p className="text-xs mt-1" style={{ color: themeColors.text.secondary }}>
+                      Porcentaje que se reintegra al cliente sobre el valor de compra
+                    </p>
                   </div>
                 </div>
 

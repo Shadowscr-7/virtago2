@@ -59,6 +59,8 @@ interface DiscountItem {
   codigoDescuento?: string;
   usoMaximo?: number;
   usoActual: number;
+  budgetLimit?: number;
+  reintegroPercentage?: number;
   fechaCreacion: string;
   fechaModificacion: string;
   condiciones: DiscountCondition[];
@@ -291,6 +293,30 @@ export const DiscountTable: React.FC<DiscountTableProps> = ({
                           </span>
                         )}
                       </div>
+                      {discount.budgetLimit && (
+                        <span
+                          className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-mono mt-1"
+                          style={{
+                            backgroundColor: `${themeColors.primary}15`,
+                            color: themeColors.primary,
+                          }}
+                        >
+                          <DollarSign className="w-3 h-3" />
+                          Tope: {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(discount.budgetLimit)}
+                        </span>
+                      )}
+                      {!!discount.reintegroPercentage && discount.reintegroPercentage > 0 && (
+                        <span
+                          className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-mono mt-1 ml-1"
+                          style={{
+                            backgroundColor: `${themeColors.secondary}15`,
+                            color: themeColors.secondary,
+                          }}
+                        >
+                          <Percent className="w-3 h-3" />
+                          Reintegro {discount.reintegroPercentage}%
+                        </span>
+                      )}
                       {discount.usoMaximo && (
                         <div className="mt-1">
                           <div className="flex items-center gap-2 text-xs" style={{ color: themeColors.text.secondary }}>

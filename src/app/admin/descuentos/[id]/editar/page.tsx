@@ -40,6 +40,8 @@ const discountSchema = z.object({
   validoHasta: z.string().min(1, "La fecha de vencimiento es requerida"),
   codigoDescuento: z.string().optional(),
   usoMaximo: z.number().optional(),
+  budgetLimit: z.number().optional(),
+  reintegroPercentage: z.number().min(0).max(100).optional(),
   acumulativo: z.boolean(),
   activo: z.boolean(),
   modoAplicacion: z.enum(["ACUMULABLE", "EXCLUSIVO", "CASCADA"]),
@@ -53,7 +55,23 @@ type DiscountFormData = z.infer<typeof discountSchema>;
 // Tipos para condiciones y relaciones
 interface DiscountCondition {
   id: string;
-  tipoCondicion: 'CATEGORIA' | 'PRODUCTO' | 'MONTO_MINIMO' | 'CANTIDAD_MINIMA' | 'CLIENTE_VIP';
+  tipoCondicion:
+    | 'CATEGORIA'
+    | 'PRODUCTO'
+    | 'MARCA'
+    | 'MONTO_MINIMO'
+    | 'CANTIDAD_MINIMA'
+    | 'CANTIDAD_MAXIMA'
+    | 'CLIENTE_VIP'
+    | 'CLIENTE_NUEVO'
+    | 'CLIENTE_MAYORISTA'
+    | 'METODO_PAGO'
+    | 'REGION'
+    | 'CANAL_VENTA'
+    | 'DIA_SEMANA'
+    | 'RANGO_HORARIO'
+    | 'EXCLUIR_OFERTAS'
+    | 'PRIMER_PEDIDO';
   valorCondicion: string | number;
   descripcion?: string;
 }
@@ -127,6 +145,9 @@ export default function EditDiscountPage() {
           is_cumulative?: boolean;
           priority?: number;
           usage_limit?: number;
+          budget_limit?: number;
+          reintegro_percentage?: number;
+          applicable_to?: Array<{ type?: string; target_type?: string; value?: string; target_value?: string; target_name?: string }>;
           createdAt?: string;
           updatedAt?: string;
         };
@@ -162,9 +183,28 @@ export default function EditDiscountPage() {
         };
         
         setDiscount(mockDiscount);
-        setConditions([]);
         setRelations([]);
-        
+
+        // Cargar applicable_to como condiciones editables
+        if (data.applicable_to && Array.isArray(data.applicable_to)) {
+          const loadedConditions: DiscountCondition[] = data.applicable_to.map((item, idx) => {
+            const type = item.type || item.target_type || '';
+            const value = item.value || item.target_value || '';
+            let tipoCondicion: DiscountCondition['tipoCondicion'] = 'PRODUCTO';
+            if (type === 'category') tipoCondicion = 'CATEGORIA';
+            else if (type === 'brand') tipoCondicion = 'MARCA';
+            return {
+              id: `condition-loaded-${idx}`,
+              tipoCondicion,
+              valorCondicion: value,
+              descripcion: item.target_name || '',
+            };
+          });
+          setConditions(loadedConditions);
+        } else {
+          setConditions([]);
+        }
+
         // Llenar el formulario con los datos existentes
         reset({
           nombre: mockDiscount.nombre,
@@ -174,6 +214,8 @@ export default function EditDiscountPage() {
           validoHasta: mockDiscount.validoHasta,
           codigoDescuento: mockDiscount.codigoDescuento,
           usoMaximo: mockDiscount.usoMaximo,
+          budgetLimit: data.budget_limit,
+          reintegroPercentage: data.reintegro_percentage,
           acumulativo: mockDiscount.acumulativo,
           activo: mockDiscount.activo,
           modoAplicacion: "ACUMULABLE",
@@ -208,6 +250,49 @@ export default function EditDiscountPage() {
         discountType = 'bogo';
       }
 
+      const backendConditions: Record<string, unknown> = {};
+      const applicableTo: Array<{ type: string; value: string }> = [];
+      conditions.forEach(condition => {
+        switch (condition.tipoCondicion) {
+          case 'MONTO_MINIMO':
+            backendConditions.min_purchase_amount = condition.valorCondicion;
+            break;
+          case 'CANTIDAD_MINIMA':
+            backendConditions.min_items = condition.valorCondicion;
+            break;
+          case 'CANTIDAD_MAXIMA':
+            backendConditions.max_items = condition.valorCondicion;
+            break;
+          case 'CLIENTE_VIP':
+          case 'CLIENTE_NUEVO':
+          case 'CLIENTE_MAYORISTA':
+            backendConditions.customer_type = condition.valorCondicion;
+            break;
+          case 'CATEGORIA':
+            applicableTo.push({ type: 'category', value: String(condition.valorCondicion) });
+            break;
+          case 'PRODUCTO':
+            applicableTo.push({ type: 'product', value: String(condition.valorCondicion) });
+            break;
+          case 'MARCA':
+            if (!backendConditions.applicable_brands) backendConditions.applicable_brands = [];
+            (backendConditions.applicable_brands as string[]).push(String(condition.valorCondicion));
+            break;
+          case 'METODO_PAGO':
+            backendConditions.payment_methods = String(condition.valorCondicion).split(',').map(s => s.trim());
+            break;
+          case 'REGION':
+            backendConditions.regions = String(condition.valorCondicion).split(',').map(s => s.trim());
+            break;
+          case 'EXCLUIR_OFERTAS':
+            backendConditions.exclude_sale_items = String(condition.valorCondicion).toLowerCase() === 'true';
+            break;
+          case 'PRIMER_PEDIDO':
+            backendConditions.first_order_only = String(condition.valorCondicion).toLowerCase() === 'true';
+            break;
+        }
+      });
+
       const payload = {
         name: data.nombre,
         discount_id: data.codigoDescuento || `DISC-${Date.now()}`,
@@ -221,7 +306,11 @@ export default function EditDiscountPage() {
         is_cumulative: data.acumulativo,
         priority: data.prioridad,
         usage_limit: data.usoMaximo,
+        budget_limit: data.budgetLimit,
+        reintegro_percentage: data.reintegroPercentage,
         description: data.descripcion,
+        conditions: Object.keys(backendConditions).length > 0 ? backendConditions : undefined,
+        applicable_to: applicableTo.length > 0 ? applicableTo : undefined,
         customFields: {
           modo_aplicacion: data.modoAplicacion,
           tipo_descuento_frontend: data.tipoDescuento,
@@ -327,18 +416,23 @@ export default function EditDiscountPage() {
 
   const getConditionPlaceholder = (tipo: string) => {
     switch (tipo) {
-      case "CATEGORIA":
-        return "ID de la categoría";
-      case "PRODUCTO":
-        return "ID del producto";
-      case "MONTO_MINIMO":
-        return "Monto mínimo en pesos";
-      case "CANTIDAD_MINIMA":
-        return "Cantidad mínima de items";
-      case "CLIENTE_VIP":
-        return "Tipo de cliente VIP";
-      default:
-        return "Valor de la condición";
+      case "CATEGORIA": return "ID de la categoría";
+      case "PRODUCTO": return "ID del producto";
+      case "MARCA": return "ID de la marca";
+      case "MONTO_MINIMO": return "Monto mínimo en pesos";
+      case "CANTIDAD_MINIMA": return "Cantidad mínima de items";
+      case "CANTIDAD_MAXIMA": return "Cantidad máxima de items";
+      case "CLIENTE_VIP": return "vip, premium, gold, etc.";
+      case "CLIENTE_NUEVO": return "true/false";
+      case "CLIENTE_MAYORISTA": return "wholesale, distributor";
+      case "METODO_PAGO": return "credit_card, paypal, etc.";
+      case "REGION": return "colombia, usa, etc.";
+      case "CANAL_VENTA": return "online, retail, mobile";
+      case "DIA_SEMANA": return "lunes, martes, etc.";
+      case "RANGO_HORARIO": return "09:00-18:00";
+      case "EXCLUIR_OFERTAS": return "true/false";
+      case "PRIMER_PEDIDO": return "true/false";
+      default: return "Valor de la condición";
     }
   };
 
@@ -722,6 +816,66 @@ export default function EditDiscountPage() {
                   </div>
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>
+                      Monto Máximo del Descuento (Opcional)
+                    </label>
+                    <Controller
+                      name="budgetLimit"
+                      control={control}
+                      render={({ field: { onChange, value, ...field } }) => (
+                        <input
+                          {...field}
+                          type="number"
+                          value={value || ""}
+                          onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
+                          placeholder="Presupuesto total en pesos"
+                          className="w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2"
+                          style={{
+                            backgroundColor: themeColors.surface + "50",
+                            borderColor: themeColors.primary + "30",
+                            color: themeColors.text.primary,
+                          }}
+                        />
+                      )}
+                    />
+                    <p className="text-xs mt-1" style={{ color: themeColors.text.secondary }}>
+                      El descuento se desactiva al alcanzar este monto total acumulado
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>
+                      % de Reintegro (Opcional)
+                    </label>
+                    <Controller
+                      name="reintegroPercentage"
+                      control={control}
+                      render={({ field: { onChange, value, ...field } }) => (
+                        <input
+                          {...field}
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={value || ""}
+                          onChange={(e) => onChange(e.target.value ? Number(e.target.value) : undefined)}
+                          placeholder="Ej: 5 (para 5% de reintegro)"
+                          className="w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2"
+                          style={{
+                            backgroundColor: themeColors.surface + "50",
+                            borderColor: themeColors.primary + "30",
+                            color: themeColors.text.primary,
+                          }}
+                        />
+                      )}
+                    />
+                    <p className="text-xs mt-1" style={{ color: themeColors.text.secondary }}>
+                      Porcentaje que se reintegra al cliente sobre el valor de compra
+                    </p>
+                  </div>
+                </div>
+
                 {/* Nuevos campos de configuración */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div>
@@ -1013,17 +1167,35 @@ export default function EditDiscountPage() {
                               >
                                 <option value="CATEGORIA">Categoría</option>
                                 <option value="PRODUCTO">Producto</option>
+                                <option value="MARCA">Marca</option>
                                 <option value="MONTO_MINIMO">Monto Mínimo</option>
                                 <option value="CANTIDAD_MINIMA">Cantidad Mínima</option>
+                                <option value="CANTIDAD_MAXIMA">Cantidad Máxima</option>
                                 <option value="CLIENTE_VIP">Cliente VIP</option>
+                                <option value="CLIENTE_NUEVO">Cliente Nuevo</option>
+                                <option value="CLIENTE_MAYORISTA">Cliente Mayorista</option>
+                                <option value="METODO_PAGO">Método de Pago</option>
+                                <option value="REGION">Región</option>
+                                <option value="CANAL_VENTA">Canal de Venta</option>
+                                <option value="DIA_SEMANA">Día de Semana</option>
+                                <option value="RANGO_HORARIO">Rango Horario</option>
+                                <option value="EXCLUIR_OFERTAS">Excluir Ofertas</option>
+                                <option value="PRIMER_PEDIDO">Primer Pedido</option>
                               </select>
 
                               <input
-                                type={condition.tipoCondicion === 'MONTO_MINIMO' || condition.tipoCondicion === 'CANTIDAD_MINIMA' ? 'number' : 'text'}
+                                type={
+                                  condition.tipoCondicion === 'MONTO_MINIMO' ||
+                                  condition.tipoCondicion === 'CANTIDAD_MINIMA' ||
+                                  condition.tipoCondicion === 'CANTIDAD_MAXIMA'
+                                    ? 'number' : 'text'
+                                }
                                 value={condition.valorCondicion}
-                                onChange={(e) => updateCondition(condition.id, 'valorCondicion', 
-                                  condition.tipoCondicion === 'MONTO_MINIMO' || condition.tipoCondicion === 'CANTIDAD_MINIMA' 
-                                    ? Number(e.target.value) 
+                                onChange={(e) => updateCondition(condition.id, 'valorCondicion',
+                                  condition.tipoCondicion === 'MONTO_MINIMO' ||
+                                  condition.tipoCondicion === 'CANTIDAD_MINIMA' ||
+                                  condition.tipoCondicion === 'CANTIDAD_MAXIMA'
+                                    ? Number(e.target.value)
                                     : e.target.value
                                 )}
                                 placeholder={getConditionPlaceholder(condition.tipoCondicion)}

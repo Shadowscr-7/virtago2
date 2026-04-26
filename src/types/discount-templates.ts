@@ -171,6 +171,8 @@ export interface DiscountJSON {
   min_purchase_amount?: number;
   usage_limit?: number;
   usage_limit_per_customer?: number;
+  budget_limit?: number;
+  reintegro_percentage?: number;
   applicable_to?: ApplicableToItem[];
   conditions?: {
     min_items?: number;
