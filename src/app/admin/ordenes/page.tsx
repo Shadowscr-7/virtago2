@@ -18,9 +18,12 @@ import {
   XCircle,
   Truck,
   ShoppingBag,
+  Settings,
 } from "lucide-react";
 import { useTheme } from "@/contexts/theme-context";
+import { useAuthStore } from "@/store/auth";
 import { AdminLayout } from "@/components/admin/admin-layout";
+import { ExportWizardModal } from "@/components/admin/ordenes/ExportWizardModal";
 
 interface Order {
   id: string;
@@ -114,9 +117,31 @@ const mockOrders: Order[] = [
 
 export default function OrdersPage() {
   const { themeColors } = useTheme();
+  const { user } = useAuthStore();
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportMode, setExportMode] = useState<"export" | "config">("export");
+
+  const distId = user?.distributorInfo?.distributorCode || user?.id || "";
+
+  const toggleSelectOrder = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const handleExportClick = () => {
+    setExportMode("export");
+    setShowExportModal(true);
+  };
+
+  const handleConfigClick = () => {
+    setExportMode("config");
+    setShowExportModal(true);
+  };
 
   const getStatusIcon = (status: Order["status"]) => {
     switch (status) {
@@ -202,6 +227,21 @@ export default function OrdersPage() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              onClick={handleConfigClick}
+              className="p-2 rounded-xl font-medium transition-all duration-200"
+              title="Configurar exportación al ERP"
+              style={{
+                backgroundColor: `${themeColors.surface}80`,
+                color: themeColors.text.secondary,
+                border: `1px solid ${themeColors.primary}30`,
+              }}
+            >
+              <Settings className="w-4 h-4" />
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleExportClick}
               className="px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center gap-2"
               style={{
                 backgroundColor: `${themeColors.surface}80`,
@@ -210,7 +250,7 @@ export default function OrdersPage() {
               }}
             >
               <Download className="w-4 h-4" />
-              Exportar
+              {selectedIds.length > 0 ? `Exportar (${selectedIds.length})` : "Exportar al ERP"}
             </motion.button>
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -434,6 +474,20 @@ export default function OrdersPage() {
             <table className="w-full">
               <thead>
                 <tr style={{ backgroundColor: `${themeColors.primary}10` }}>
+                  <th className="p-4 w-10">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.length === filteredOrders.length && filteredOrders.length > 0}
+                      onChange={() =>
+                        setSelectedIds(
+                          selectedIds.length === filteredOrders.length
+                            ? []
+                            : filteredOrders.map((o) => o.id)
+                        )
+                      }
+                      className="rounded"
+                    />
+                  </th>
                   <th className="text-left p-4 font-semibold" style={{ color: themeColors.text.primary }}>
                     Usuario
                   </th>
@@ -462,10 +516,18 @@ export default function OrdersPage() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.1 * index }}
                     className="border-t transition-colors duration-200 hover:bg-opacity-50"
-                    style={{ 
+                    style={{
                       borderColor: `${themeColors.primary}20`,
                     }}
                   >
+                    <td className="p-4 w-10">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(order.id)}
+                        onChange={() => toggleSelectOrder(order.id)}
+                        className="rounded"
+                      />
+                    </td>
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div
@@ -538,6 +600,14 @@ export default function OrdersPage() {
           </div>
         </motion.div>
       </div>
+
+      <ExportWizardModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        selectedOrderIds={selectedIds}
+        distributorId={distId}
+        mode={exportMode}
+      />
     </AdminLayout>
   );
 }

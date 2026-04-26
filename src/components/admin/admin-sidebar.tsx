@@ -20,6 +20,7 @@ import {
   FlaskConical,
   ChevronLeft,
   ChevronRight,
+  MonitorDown,
 } from "lucide-react";
 import { useTheme } from "@/contexts/theme-context";
 import { useAuthStore } from "@/store/auth";
@@ -84,6 +85,12 @@ const menuItems = [
     label: "Cupones",
     icon: Ticket,
     href: "/admin/cupones",
+  },
+  {
+    id: "virtago-sync",
+    label: "Virtago Sync",
+    icon: MonitorDown,
+    href: "/admin/virtago-sync",
   },
   {
     id: "tests",

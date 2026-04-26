@@ -445,6 +445,25 @@ export interface Order {
   createdAt: string;
 }
 
+export interface ExportConfigData {
+  distributorId: string;
+  format: 'json' | 'xlsx' | 'csv';
+  fieldMapping: Record<string, string>;
+  erpApiConfig?: {
+    url?: string;
+    method?: 'POST' | 'PUT';
+    authType?: 'bearer' | 'basic' | 'apikey' | 'none';
+    authValue?: string;
+  };
+}
+
+export interface ExportOrdersResult {
+  format: 'json' | 'xlsx' | 'csv';
+  records: Record<string, unknown>[];
+  filename: string;
+  totalExported: number;
+}
+
 export interface OrderItem {
   pid: string;
   name: string;
@@ -2024,6 +2043,18 @@ export const adminApi = {
       console.log('[API] Obteniendo datos del dashboard home...');
       return http.get('/distributor/dashboard-home');
     }
+  },
+
+  // Exportación al ERP
+  exportConfig: {
+    get: async (distributorId: string): Promise<ApiResponse<ExportConfigData | null>> =>
+      http.get(`/export/config?distributorId=${distributorId}`),
+
+    save: async (config: ExportConfigData): Promise<ApiResponse<ExportConfigData>> =>
+      http.post('/export/config', config),
+
+    exportOrders: async (distributorId: string, orderIds: string[]): Promise<ApiResponse<ExportOrdersResult>> =>
+      http.post('/export/orders', { distributorId, orderIds }),
   },
 };
 

@@ -22,6 +22,9 @@ const ALLOWED_PATH_PREFIXES = [
   'onboarding',
   'distributors',
   'plans',
+  'sync',
+  'export',
+  'imports',
   'redoc',
   'docs',
 ];
