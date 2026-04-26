@@ -50,6 +50,13 @@ const initialProductData: ProductData = {
   allowBackorder: false,
   trackStock: true,
 
+  // Unidad de venta
+  baseUnit: 'unidad' as string,
+  packagingUnit: 'caja' as string,
+  unitsPerPackage: 1,
+  purchaseMode: 'by_unit' as 'by_unit' | 'by_package' | 'both',
+  minOrderQuantity: 1,
+
   // Información física
   weight: 0,
   dimensions: {

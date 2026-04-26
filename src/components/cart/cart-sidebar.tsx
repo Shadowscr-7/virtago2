@@ -183,25 +183,34 @@ export function CartSidebar() {
                                         onClick={() =>
                                           handleQuantityChange(
                                             item.id,
-                                            item.quantity - 1,
+                                            item.purchaseMode === 'by_package' && item.unitsPerPackage
+                                              ? item.quantity - item.unitsPerPackage
+                                              : item.quantity - 1,
                                           )
                                         }
                                         disabled={
                                           processingItemId === item.id ||
-                                          item.quantity <= 1
+                                          (item.purchaseMode === 'by_package' && item.unitsPerPackage
+                                            ? item.quantity <= item.unitsPerPackage
+                                            : item.quantity <= (item.minOrderQuantity || 1))
                                         }
                                         className="w-7 h-7 rounded-md bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
                                       >
                                         <Minus className="w-3 h-3" />
                                       </button>
-                                      <span className="w-8 text-center text-sm font-medium text-slate-900 dark:text-white">
-                                        {item.quantity}
+                                      <span className="w-12 text-center text-sm font-medium text-slate-900 dark:text-white">
+                                        {item.purchaseMode === 'by_package' && item.unitsPerPackage && item.unitsPerPackage > 1
+                                          ? `${item.quantity / item.unitsPerPackage} ${item.packagingUnit || 'cajas'}`
+                                          : `${item.quantity} ${item.baseUnit || 'u.'}`
+                                        }
                                       </span>
                                       <button
                                         onClick={() =>
                                           handleQuantityChange(
                                             item.id,
-                                            item.quantity + 1,
+                                            item.purchaseMode === 'by_package' && item.unitsPerPackage
+                                              ? item.quantity + item.unitsPerPackage
+                                              : item.quantity + 1,
                                           )
                                         }
                                         disabled={
@@ -223,6 +232,12 @@ export function CartSidebar() {
                                     </button>
                                   </div>
 
+                                  {/* Package breakdown */}
+                                  {item.purchaseMode === 'by_package' && item.unitsPerPackage && item.unitsPerPackage > 1 && (
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                      {item.quantity / item.unitsPerPackage} {item.packagingUnit || 'empaque(s)'} × {item.unitsPerPackage} {item.baseUnit || 'u.'} = {item.quantity} {item.baseUnit || 'u.'}
+                                    </p>
+                                  )}
                                   {/* Stock Warning */}
                                   {item.quantity >= item.stockQuantity && (
                                     <p className="text-xs text-orange-600 dark:text-orange-400">

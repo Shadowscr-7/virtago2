@@ -267,7 +267,12 @@ export interface ProductComplete {
   }>;
   likes?: number;
   productTagsList?: string[];
-  
+  baseUnit?: string;
+  packagingUnit?: string;
+  unitsPerPackage?: number;
+  purchaseMode?: 'by_unit' | 'by_package' | 'both';
+  minOrderQuantity?: number;
+
   brand?: {
     brandId: string;
     name: string;

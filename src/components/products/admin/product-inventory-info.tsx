@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import {
@@ -357,6 +357,84 @@ export function ProductInventoryInfo({
             {Math.max(0, productData.stock - (productData.reservedStock || 0))}
           </div>
         </div>
+      </div>
+    
+      {/* Unidad de Venta */}
+      <div className="mt-6 pt-6 border-t border-gray-200/30 dark:border-gray-700/30">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+          <Package className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          Unidad de Venta
+        </h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+          Configura como se puede comprar este producto (por unidad suelta o por empaque)
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Nombre de la unidad base</label>
+            {isEditing ? (
+              <input type="text" value={productData.baseUnit || ''} onChange={(e) => onChange({ baseUnit: e.target.value })} placeholder="Ej: sobre, unidad, pieza" className="w-full px-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all backdrop-blur-sm text-gray-900 dark:text-white" />
+            ) : (
+              <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
+                <span className="text-gray-900 dark:text-white">{productData.baseUnit || 'unidad'}</span>
+              </div>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Nombre del empaque</label>
+            {isEditing ? (
+              <input type="text" value={productData.packagingUnit || ''} onChange={(e) => onChange({ packagingUnit: e.target.value })} placeholder="Ej: caja, pack, rollo" className="w-full px-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all backdrop-blur-sm text-gray-900 dark:text-white" />
+            ) : (
+              <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
+                <span className="text-gray-900 dark:text-white">{productData.packagingUnit || 'caja'}</span>
+              </div>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Unidades por empaque</label>
+            {isEditing ? (
+              <input type="number" min="1" step="1" value={productData.unitsPerPackage || 1} onChange={(e) => onChange({ unitsPerPackage: Math.max(1, Number(e.target.value)) })} className="w-full px-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all backdrop-blur-sm text-gray-900 dark:text-white" />
+            ) : (
+              <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
+                <span className="text-2xl font-bold text-gray-900 dark:text-white">{productData.unitsPerPackage || 1}</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">{productData.baseUnit || 'unidades'} por {productData.packagingUnit || 'empaque'}</span>
+              </div>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Modo de compra permitido</label>
+            {isEditing ? (
+              <select value={productData.purchaseMode || 'by_unit'} onChange={(e) => onChange({ purchaseMode: e.target.value as 'by_unit' | 'by_package' | 'both' })} className="w-full px-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all backdrop-blur-sm text-gray-900 dark:text-white">
+                <option value="by_unit">Solo por unidad suelta</option>
+                <option value="by_package">Solo por empaque completo</option>
+                <option value="both">Por unidad o por empaque</option>
+              </select>
+            ) : (
+              <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
+                <span className="text-gray-900 dark:text-white">
+                  {productData.purchaseMode === 'by_package' ? 'Solo por empaque completo' : productData.purchaseMode === 'both' ? 'Por unidad o por empaque' : 'Solo por unidad suelta'}
+                </span>
+              </div>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Cantidad minima de pedido</label>
+            {isEditing ? (
+              <input type="number" min="1" step="1" value={productData.minOrderQuantity || 1} onChange={(e) => onChange({ minOrderQuantity: Math.max(1, Number(e.target.value)) })} className="w-full px-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all backdrop-blur-sm text-gray-900 dark:text-white" />
+            ) : (
+              <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
+                <span className="text-2xl font-bold text-gray-900 dark:text-white">{productData.minOrderQuantity || 1}</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">{productData.baseUnit || 'unidades'} minimo</span>
+              </div>
+            )}
+          </div>
+        </div>
+        {!isEditing && productData.unitsPerPackage > 1 && (
+          <div className="mt-4 p-4 bg-gradient-to-r from-blue-50/50 to-cyan-50/50 dark:from-blue-900/10 dark:to-cyan-900/10 rounded-xl border border-blue-200/30">
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              <strong>Configuracion activa</strong>
+            </p>
+          </div>
+        )}
       </div>
     </motion.div>
   );

@@ -46,6 +46,12 @@ interface Product {
     response_time: string;
     verified: boolean;
   };
+  // Unidad de venta
+  baseUnit?: string;
+  packagingUnit?: string;
+  unitsPerPackage?: number;
+  purchaseMode?: 'by_unit' | 'by_package' | 'both';
+  minOrderQuantity?: number;
 }
 
 interface ProductDetailSectionProps {

@@ -37,6 +37,12 @@ export interface CartItem {
   quantity: number;
   inStock: boolean;
   stockQuantity: number;
+  // Unidad de venta
+  baseUnit?: string;
+  packagingUnit?: string;
+  unitsPerPackage?: number;
+  purchaseMode?: 'by_unit' | 'by_package' | 'both';
+  minOrderQuantity?: number;
   category: string;
   specifications?: Record<string, string>;
 }
@@ -101,6 +107,13 @@ export const useCartStore = create<CartStore>()(
               id: `${newItem.productId}-${Date.now()}`,
             };
 
+            // Validar cantidad inicial según modo de compra
+            if (cartItem.purchaseMode === 'by_package' && cartItem.unitsPerPackage && cartItem.unitsPerPackage > 1) {
+              cartItem.quantity = Math.max(cartItem.unitsPerPackage, Math.round(cartItem.quantity / cartItem.unitsPerPackage) * cartItem.unitsPerPackage);
+            } else if (cartItem.minOrderQuantity && cartItem.quantity < cartItem.minOrderQuantity) {
+              cartItem.quantity = cartItem.minOrderQuantity;
+            }
+
             if (toastFunction) {
               toastFunction({
                 title: "Producto agregado",
@@ -145,11 +158,23 @@ export const useCartStore = create<CartStore>()(
             return { items: state.items.filter((item) => item.id !== itemId) };
           }
 
+          // Para modo by_package, la cantidad debe ser múltiplo de unitsPerPackage
+          const itemToUpdate = state.items.find((i) => i.id === itemId);
+          let validatedQuantity = quantity;
+          if (itemToUpdate?.purchaseMode === 'by_package' && itemToUpdate.unitsPerPackage && itemToUpdate.unitsPerPackage > 1) {
+            validatedQuantity = Math.max(
+              itemToUpdate.unitsPerPackage,
+              Math.round(quantity / itemToUpdate.unitsPerPackage) * itemToUpdate.unitsPerPackage
+            );
+          } else if (itemToUpdate?.minOrderQuantity && quantity < itemToUpdate.minOrderQuantity) {
+            validatedQuantity = itemToUpdate.minOrderQuantity;
+          }
+
           const updatedItems = state.items.map((item) =>
             item.id === itemId
               ? {
                   ...item,
-                  quantity: Math.min(quantity, item.stockQuantity),
+                  quantity: Math.min(validatedQuantity, item.stockQuantity),
                 }
               : item,
           );

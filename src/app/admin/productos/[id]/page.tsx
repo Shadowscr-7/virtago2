@@ -54,6 +54,13 @@ const mockProductData = {
   allowBackorder: false,
   trackStock: true,
 
+  // Unidad de venta
+  baseUnit: 'unidad',
+  packagingUnit: 'caja',
+  unitsPerPackage: 1,
+  purchaseMode: 'by_unit' as 'by_unit' | 'by_package' | 'both',
+  minOrderQuantity: 1,
+
   // Información física
   weight: 221, // gramos
   dimensions: {
@@ -234,6 +241,13 @@ export default function ProductDetailPage() {
           isVisible: apiProduct.published || false,
           allowBackorder: false,
           trackStock: apiProduct.trackInventory || false,
+
+          // Unidad de venta
+          baseUnit: apiProduct.baseUnit || 'unidad',
+          packagingUnit: apiProduct.packagingUnit || 'caja',
+          unitsPerPackage: apiProduct.unitsPerPackage || 1,
+          purchaseMode: (apiProduct.purchaseMode as 'by_unit' | 'by_package' | 'both') || 'by_unit',
+          minOrderQuantity: apiProduct.minOrderQuantity || 1,
 
           // Información física
           weight: apiProduct.weight || apiProduct.inputWeight || 0,
@@ -427,6 +441,11 @@ export default function ProductDetailPage() {
         // Incluir imágenes si existen
         ...(productImages.length > 0 && { productImages }),
         // Agregar más campos según sea necesario
+        baseUnit: productData.baseUnit,
+        packagingUnit: productData.packagingUnit,
+        unitsPerPackage: productData.unitsPerPackage,
+        purchaseMode: productData.purchaseMode,
+        minOrderQuantity: productData.minOrderQuantity,
       };
 
       // Llamar al endpoint de actualización

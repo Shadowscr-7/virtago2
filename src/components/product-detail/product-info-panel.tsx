@@ -15,6 +15,7 @@ import {
   CreditCard,
   AlertCircle,
   Check,
+  Package,
 } from "lucide-react";
 import { useCartStore } from "@/components/cart/cart-store";
 import { useTheme } from "@/contexts/theme-context";
@@ -56,6 +57,11 @@ interface ProductInfo {
   discounts?: DiscountRule[];
   priceSale?: number;
   discountPercentage?: number;
+  baseUnit?: string;
+  packagingUnit?: string;
+  unitsPerPackage?: number;
+  purchaseMode?: 'by_unit' | 'by_package' | 'both';
+  minOrderQuantity?: number;
 }
 
 interface ProductInfoPanelProps {
@@ -63,7 +69,7 @@ interface ProductInfoPanelProps {
 }
 
 export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(product.minOrderQuantity || 1);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showAddedToast, setShowAddedToast] = useState(false);
   const [calculatedPrice, setCalculatedPrice] = useState({
@@ -90,8 +96,17 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
   const savings = isOnSale ? product.originalPrice! - product.price : 0;
 
   const handleQuantityChange = (newQuantity: number) => {
-    if (newQuantity >= 1 && newQuantity <= product.stockQuantity) {
-      setQuantity(newQuantity);
+    const min = product.purchaseMode === 'by_package' && product.unitsPerPackage
+      ? product.unitsPerPackage
+      : (product.minOrderQuantity || 1);
+    const step = product.purchaseMode === 'by_package' && product.unitsPerPackage
+      ? product.unitsPerPackage
+      : 1;
+    if (newQuantity >= min && newQuantity <= product.stockQuantity) {
+      const snapped = product.purchaseMode === 'by_package'
+        ? Math.round(newQuantity / step) * step
+        : newQuantity;
+      setQuantity(Math.max(min, Math.min(snapped, product.stockQuantity)));
     }
   };
 
@@ -111,6 +126,11 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
       inStock: product.inStock,
       stockQuantity: product.stockQuantity,
       category: product.category,
+      baseUnit: product.baseUnit,
+      packagingUnit: product.packagingUnit,
+      unitsPerPackage: product.unitsPerPackage,
+      purchaseMode: product.purchaseMode,
+      minOrderQuantity: product.minOrderQuantity,
     });
     
     // Mostrar confirmación
@@ -137,6 +157,18 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
               <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs" style={{ background: `${themeColors.accent}20`, color: themeColors.accent }}>
                 <Shield className="w-3 h-3" />
                 Verificado
+              </div>
+            )}
+            {product.purchaseMode && product.purchaseMode !== 'by_unit' && (
+              <div
+                className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium"
+                style={{ background: `${themeColors.secondary}20`, color: themeColors.secondary }}
+              >
+                <Package className="w-3 h-3" />
+                {product.purchaseMode === 'by_package'
+                  ? `Solo por ${product.packagingUnit || 'empaque'} (${product.unitsPerPackage} ${product.baseUnit || 'u.'})`
+                  : `Por unidad o por ${product.packagingUnit || 'empaque'}`
+                }
               </div>
             )}
           </div>
@@ -228,6 +260,30 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
           <p className="text-sm" style={{ color: themeColors.text.secondary }}>
             Precio por unidad • Impuestos incluidos
           </p>
+          {product.unitsPerPackage && product.unitsPerPackage > 1 && (
+            <div className="flex flex-wrap items-center gap-3 mt-1">
+              {product.purchaseMode === 'by_package' ? (
+                <>
+                  <span className="text-sm" style={{ color: themeColors.text.secondary }}>
+                    Precio por {product.packagingUnit || 'empaque'}:
+                    <strong className="ml-1" style={{ color: themeColors.primary }}>
+                      {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(product.price)}
+                    </strong>
+                  </span>
+                  <span className="text-sm" style={{ color: themeColors.text.secondary }}>
+                    = {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(product.price / product.unitsPerPackage)} por {product.baseUnit || 'unidad'}
+                  </span>
+                </>
+              ) : (
+                <span className="text-sm" style={{ color: themeColors.text.secondary }}>
+                  Por {product.packagingUnit || 'empaque'} ({product.unitsPerPackage} {product.baseUnit || 'unidades'}):
+                  <strong className="ml-1" style={{ color: themeColors.primary }}>
+                    {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', minimumFractionDigits: 0 }).format(product.price * product.unitsPerPackage)}
+                  </strong>
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -277,8 +333,18 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
             </span>
             <div className="flex items-center gap-3">
               <button
-                onClick={() => handleQuantityChange(quantity - 1)}
-                disabled={quantity <= 1}
+                onClick={() => handleQuantityChange(
+                  product.purchaseMode === 'by_package' && product.unitsPerPackage
+                    ? quantity - product.unitsPerPackage
+                    : quantity - 1
+                )}
+                disabled={
+                  quantity <= (
+                    product.purchaseMode === 'by_package' && product.unitsPerPackage
+                      ? product.unitsPerPackage
+                      : (product.minOrderQuantity || 1)
+                  )
+                }
                 className="w-10 h-10 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors hover:scale-105"
                 style={{ background: `${themeColors.surface}90`, color: themeColors.text.primary }}
                 aria-label="Disminuir cantidad"
@@ -310,7 +376,11 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
                 }}
               />
               <button
-                onClick={() => handleQuantityChange(quantity + 1)}
+                onClick={() => handleQuantityChange(
+                  product.purchaseMode === 'by_package' && product.unitsPerPackage
+                    ? quantity + product.unitsPerPackage
+                    : quantity + 1
+                )}
                 disabled={quantity >= product.stockQuantity}
                 className="w-10 h-10 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors hover:scale-105"
                 style={{ background: `${themeColors.surface}90`, color: themeColors.text.primary }}
@@ -324,7 +394,10 @@ export function ProductInfoPanel({ product }: ProductInfoPanelProps) {
           <div className="p-4 rounded-xl" style={{ background: `${themeColors.surface}50` }}>
             <div className="flex items-center justify-between">
               <span className="font-medium" style={{ color: themeColors.text.secondary }}>
-                Total ({quantity} {quantity === 1 ? "unidad" : "unidades"}):
+                Total ({product.purchaseMode === 'by_package' && product.unitsPerPackage && product.unitsPerPackage > 1
+                  ? `${quantity / product.unitsPerPackage} ${product.packagingUnit || 'empaque(s)'}`
+                  : `${quantity} ${product.baseUnit || (quantity === 1 ? 'unidad' : 'unidades')}`
+                }):
               </span>
               <span className="text-2xl font-bold" style={{ color: themeColors.primary }}>
                 ${(totalPrice || 0).toLocaleString()}

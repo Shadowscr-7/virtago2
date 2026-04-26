@@ -50,6 +50,12 @@ interface AdaptedProduct {
   discounts?: DiscountRule[];
   priceSale?: number;
   discountPercentage?: number;
+  // Unidad de venta
+  baseUnit?: string;
+  packagingUnit?: string;
+  unitsPerPackage?: number;
+  purchaseMode?: 'by_unit' | 'by_package' | 'both';
+  minOrderQuantity?: number;
 }
 
 export default function ProductPage() {
@@ -182,6 +188,12 @@ export default function ProductPage() {
           discounts: discounts.length > 0 ? discounts : undefined,
           priceSale: priceSale > 0 ? priceSale : undefined,
           discountPercentage: apiProduct.discounts?.totalDiscountPercentage ? parseFloat(apiProduct.discounts.totalDiscountPercentage) : undefined,
+          // Unidad de venta
+          baseUnit: apiProduct.baseUnit,
+          packagingUnit: apiProduct.packagingUnit,
+          unitsPerPackage: apiProduct.unitsPerPackage,
+          purchaseMode: apiProduct.purchaseMode,
+          minOrderQuantity: apiProduct.minOrderQuantity,
         };
 
         console.log('[PRODUCT DETAIL] Adapted Product:', adaptedProduct);
