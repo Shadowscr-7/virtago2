@@ -15,7 +15,7 @@ import {
 import { useTheme } from "@/contexts/theme-context";
 import { AdminLayout } from "@/components/admin/admin-layout";
 
-const DOWNLOAD_URL_WIN = "https://virtago-releases.s3.amazonaws.com/sync/VirtagoSync-Setup-latest.exe";
+const DOWNLOAD_URL_WIN = "https://github.com/Shadowscr-7/virtago2/releases/download/Virtago-Sync/VirtagoSync-1.0.0-win32-x64.zip";
 const DOWNLOAD_URL_MAC = "https://virtago-releases.s3.amazonaws.com/sync/VirtagoSync-latest.dmg";
 
 const STEPS = [
