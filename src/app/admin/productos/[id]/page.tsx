@@ -15,6 +15,8 @@ import { UnsavedChangesNotification } from "@/components/products/admin/unsaved-
 import { api } from "@/api";
 import { motion } from "framer-motion";
 
+const PRIMARY = "#1E3A61";
+
 // Datos de ejemplo - después esto vendrá del servidor
 const mockProductData = {
   id: "PRO001",
@@ -164,44 +166,28 @@ export default function ProductDetailPage() {
   useEffect(() => {
     const loadProduct = async () => {
       if (!params.id) return;
-      
+
       setIsLoading(true);
       setError(null);
-      
+
       try {
-        console.log(`[PRODUCT DETAIL] 📥 Cargando producto: ${params.id}`);
-        
-        // Llamar a la API para obtener el producto
+        console.log(`[PRODUCT DETAIL] Cargando producto: ${params.id}`);
+
         const response = await api.admin.products.getById(params.id as string);
-        
-        console.log('[PRODUCT DETAIL] ✅ Respuesta completa:', response);
-        console.log('[PRODUCT DETAIL] ✅ response.data:', response.data);
-        
-        // La API devuelve { success: true, data: {...producto...} }
-        // Necesitamos acceder a response.data (que ya es el objeto con success y data)
+
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let apiProduct: any;
-        
+
         if (response.data && typeof response.data === 'object') {
-          // Si response.data tiene una propiedad 'data', usar esa
           if ('data' in response.data && response.data.data) {
             apiProduct = response.data.data;
-            console.log('[PRODUCT DETAIL] 📦 Producto extraído de response.data.data:', apiProduct);
           } else {
-            // Si no, usar response.data directamente
             apiProduct = response.data;
-            console.log('[PRODUCT DETAIL] 📦 Producto extraído de response.data:', apiProduct);
           }
         } else {
           throw new Error('Formato de respuesta inesperado');
         }
-        
-        console.log('[PRODUCT DETAIL] 🎯 Producto final a mapear:', apiProduct);
-        console.log('[PRODUCT DETAIL] 🎯 Nombre:', apiProduct.name);
-        console.log('[PRODUCT DETAIL] 🎯 SKU:', apiProduct.sku);
-        console.log('[PRODUCT DETAIL] 🎯 Precio:', apiProduct.price);
-        console.log('[PRODUCT DETAIL] 🎯 Stock:', apiProduct.stockQuantity);
-        
+
         const transformedData: ProductData = {
           id: apiProduct.prodVirtaId || apiProduct.productId || params.id as string,
           name: apiProduct.name || apiProduct.title || 'Sin nombre',
@@ -215,17 +201,14 @@ export default function ProductDetailPage() {
           supplier: apiProduct.supplierCode || apiProduct.vendor || '',
           supplierCode: apiProduct.supplierMasterDataId || '',
 
-          // Precios
           price: apiProduct.price || 0,
           costPrice: apiProduct.price ? apiProduct.price * 0.7 : 0,
-          // Solo asignar originalPrice si existe y es diferente al precio actual
-          originalPrice: apiProduct.originalPrice && apiProduct.originalPrice !== apiProduct.price 
-            ? apiProduct.originalPrice 
+          originalPrice: apiProduct.originalPrice && apiProduct.originalPrice !== apiProduct.price
+            ? apiProduct.originalPrice
             : undefined,
           wholesalePrice: apiProduct.priceSale || (apiProduct.price ? apiProduct.price * 0.9 : 0),
           minPrice: apiProduct.price ? apiProduct.price * 0.8 : 0,
 
-          // Inventario
           stock: apiProduct.stockQuantity || apiProduct.quantity || 0,
           minStock: 10,
           maxStock: 100,
@@ -234,7 +217,6 @@ export default function ProductDetailPage() {
           location: apiProduct.storeCode || '',
           supplier_sku: apiProduct.sku || '',
 
-          // Estado y configuración
           status: apiProduct.status === 'active' ? 'ACTIVO' : 'INACTIVO',
           isActive: apiProduct.status === 'active',
           isFeatured: apiProduct.isTopSelling || false,
@@ -242,14 +224,12 @@ export default function ProductDetailPage() {
           allowBackorder: false,
           trackStock: apiProduct.trackInventory || false,
 
-          // Unidad de venta
           baseUnit: apiProduct.baseUnit || 'unidad',
           packagingUnit: apiProduct.packagingUnit || 'caja',
           unitsPerPackage: apiProduct.unitsPerPackage || 1,
           purchaseMode: (apiProduct.purchaseMode as 'by_unit' | 'by_package' | 'both') || 'by_unit',
           minOrderQuantity: apiProduct.minOrderQuantity || 1,
 
-          // Información física
           weight: apiProduct.weight || apiProduct.inputWeight || 0,
           dimensions: {
             length: apiProduct.pieceLength || 0,
@@ -257,14 +237,11 @@ export default function ProductDetailPage() {
             height: apiProduct.pieceHeight || 0,
           },
 
-          // SEO y marketing
           metaTitle: apiProduct.metaTitle || apiProduct.title || apiProduct.name || '',
           metaDescription: apiProduct.metaDescription || apiProduct.shortDescription || '',
           tags: apiProduct.productTags || apiProduct.productTagsList || [],
 
-          // Imágenes - Se llenará con placeholder si no hay imágenes
           images: (apiProduct.productImages || []).map((img: { url: string; blurDataURL?: string; alt?: string; isPrimary?: boolean } | string, index: number) => {
-            // Si es string, es formato antiguo (solo URL)
             if (typeof img === 'string') {
               return {
                 id: `img-${index}`,
@@ -275,7 +252,6 @@ export default function ProductDetailPage() {
                 order: index + 1,
               };
             }
-            // Si es objeto, es el formato nuevo con blurDataURL
             return {
               id: `img-${index}`,
               url: img.url,
@@ -286,10 +262,8 @@ export default function ProductDetailPage() {
             };
           }),
 
-          // Especificaciones técnicas - construir dinámicamente
           specifications: buildSpecifications(apiProduct),
 
-          // Estadísticas de ventas
           salesStats: {
             totalSales: apiProduct.likes || 0,
             totalRevenue: 0,
@@ -303,7 +277,6 @@ export default function ProductDetailPage() {
             profitMargin: 0,
           },
 
-          // Fechas
           createdAt: apiProduct.createdAt || new Date().toISOString(),
           updatedAt: apiProduct.updatedAt || new Date().toISOString(),
           lastStockUpdate: apiProduct.updatedAt || new Date().toISOString(),
@@ -312,9 +285,9 @@ export default function ProductDetailPage() {
         setProductData(transformedData);
         setOriginalData(transformedData);
         setIsLoading(false);
-        
+
       } catch (err) {
-        console.error('[PRODUCT DETAIL] ❌ Error cargando producto:', err);
+        console.error('[PRODUCT DETAIL] Error cargando producto:', err);
         setError(err instanceof Error ? err.message : 'Error al cargar el producto');
         setIsLoading(false);
       }
@@ -323,18 +296,15 @@ export default function ProductDetailPage() {
     loadProduct();
   }, [params.id]);
 
-  // Helper para detectar si un valor parece un UUID (no mostrar IDs internos)
+  // Helper para detectar si un valor parece un UUID
   const isUUID = (value: string): boolean => {
     return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
   };
 
-  // Función helper para construir especificaciones dinámicamente
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const buildSpecifications = (product: any): Record<string, string> => {
     const specs: Record<string, string> = {};
 
-    // Solo agregar campos que tienen valor
-    // ⚠️ NUNCA mostrar prodVirtaId ni IDs internos tipo UUID
     if (product.sku) specs['SKU'] = product.sku;
     if (product.productId && !isUUID(product.productId)) specs['Código de producto'] = product.productId;
     if (product.brandId || product.brand) specs['Marca'] = product.brandId || product.brand;
@@ -353,15 +323,11 @@ export default function ProductDetailPage() {
     if (product.manufacturerPartNumber) specs['Número de parte'] = product.manufacturerPartNumber;
     if (product.packSize) specs['Tamaño de paquete'] = String(product.packSize);
     if (product.piecesPerCase) specs['Piezas por caja'] = String(product.piecesPerCase);
-    
-    // Dimensiones
     if (product.pieceLength) specs['Largo'] = `${product.pieceLength} cm`;
     if (product.pieceWidth) specs['Ancho'] = `${product.pieceWidth} cm`;
     if (product.pieceHeight) specs['Alto'] = `${product.pieceHeight} cm`;
     if (product.pieceGrossWeight) specs['Peso bruto'] = `${product.pieceGrossWeight} kg`;
     if (product.pieceNetWeight) specs['Peso neto'] = `${product.pieceNetWeight} kg`;
-
-    // Información nutricional (si aplica)
     if (product.energyKcal) specs['Energía (kcal)'] = `${product.energyKcal} kcal`;
     if (product.energykJ) specs['Energía (kJ)'] = `${product.energykJ} kJ`;
     if (product.proteinsG) specs['Proteínas'] = `${product.proteinsG} g`;
@@ -370,30 +336,20 @@ export default function ProductDetailPage() {
     if (product.fatG) specs['Grasas'] = `${product.fatG} g`;
     if (product.saturatedFatG) specs['Grasas saturadas'] = `${product.saturatedFatG} g`;
     if (product.saltG) specs['Sal'] = `${product.saltG} g`;
-
-    // Colores y tallas
     if (product.colors && product.colors.length > 0) specs['Colores'] = product.colors.join(', ');
     if (product.sizes && product.sizes.length > 0) specs['Tallas'] = product.sizes.join(', ');
-
-    // Fechas de disponibilidad
     if (product.availableStartDateTimeUtc) specs['Disponible desde'] = new Date(product.availableStartDateTimeUtc).toLocaleDateString();
     if (product.availableEndDateTimeUtc) specs['Disponible hasta'] = new Date(product.availableEndDateTimeUtc).toLocaleDateString();
-
-    // Si está marcado como nuevo
     if (product.markAsNew) {
       specs['Marcado como nuevo'] = 'Sí';
       if (product.markAsNewStartDateTimeUtc) specs['Nuevo desde'] = new Date(product.markAsNewStartDateTimeUtc).toLocaleDateString();
       if (product.markAsNewEndDateTimeUtc) specs['Nuevo hasta'] = new Date(product.markAsNewEndDateTimeUtc).toLocaleDateString();
     }
-
-    // Si está en top selling
     if (product.isTopSelling) {
       specs['Top Selling'] = 'Sí';
       if (product.topSellingStartDateTimeUtc) specs['Top desde'] = new Date(product.topSellingStartDateTimeUtc).toLocaleDateString();
       if (product.topSellingEndDateTimeUtc) specs['Top hasta'] = new Date(product.topSellingEndDateTimeUtc).toLocaleDateString();
     }
-
-    // Otras características
     if (product.availableInLoyaltyMarket) specs['Disponible en mercado de lealtad'] = 'Sí';
     if (product.availableInPromoPack) specs['Disponible en paquete promo'] = 'Sí';
     if (product.priceInPoints) specs['Precio en puntos'] = String(product.priceInPoints);
@@ -403,8 +359,7 @@ export default function ProductDetailPage() {
 
   // Detectar cambios en los datos
   useEffect(() => {
-    const hasDataChanged =
-      JSON.stringify(productData) !== JSON.stringify(originalData);
+    const hasDataChanged = JSON.stringify(productData) !== JSON.stringify(originalData);
     setHasChanges(hasDataChanged);
   }, [productData, originalData]);
 
@@ -415,11 +370,8 @@ export default function ProductDetailPage() {
 
   const handleSave = async () => {
     if (!productData) return;
-    
-    try {
-      console.log('[PRODUCT DETAIL] 💾 Guardando producto:', productData);
 
-      // Transformar imágenes al formato esperado por la API
+    try {
       const productImages = productData.images.map((img) => ({
         url: img.url,
         blurDataURL: img.blurDataURL || '',
@@ -427,7 +379,6 @@ export default function ProductDetailPage() {
         isPrimary: img.isPrimary,
       }));
 
-      // Transformar datos al formato de la API
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const updatePayload: any = {
         name: productData.name,
@@ -438,9 +389,7 @@ export default function ProductDetailPage() {
         category: productData.category,
         description: productData.description,
         status: productData.isActive ? 'active' : 'inactive',
-        // Incluir imágenes si existen
         ...(productImages.length > 0 && { productImages }),
-        // Agregar más campos según sea necesario
         baseUnit: productData.baseUnit,
         packagingUnit: productData.packagingUnit,
         unitsPerPackage: productData.unitsPerPackage,
@@ -448,10 +397,8 @@ export default function ProductDetailPage() {
         minOrderQuantity: productData.minOrderQuantity,
       };
 
-      // Llamar al endpoint de actualización
       const response = await api.admin.products.update(params.id as string, updatePayload);
-      
-      console.log('[PRODUCT DETAIL] ✅ Producto actualizado:', response.data);
+      console.log('[PRODUCT DETAIL] Producto actualizado:', response.data);
 
       setOriginalData(productData);
       setHasChanges(false);
@@ -462,7 +409,7 @@ export default function ProductDetailPage() {
         description: 'Los cambios se han guardado exitosamente',
       });
     } catch (error) {
-      console.error("[PRODUCT DETAIL] ❌ Error al guardar el producto:", error);
+      console.error("[PRODUCT DETAIL] Error al guardar el producto:", error);
       toast.error('Error al guardar el producto', {
         description: 'No se pudieron guardar los cambios. Intenta nuevamente.',
       });
@@ -485,40 +432,42 @@ export default function ProductDetailPage() {
     setProductData((prev) => prev ? { ...prev, ...updates } : prev);
   };
 
-  // Mostrar pantalla de carga
+  // Pantalla de carga
   if (isLoading) {
     return (
       <AdminLayout>
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-purple-900 flex items-center justify-center">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center">
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-              className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4"
+              className="w-16 h-16 border-4 border-t-transparent rounded-full mx-auto mb-4"
+              style={{ borderColor: '#e5e7eb', borderTopColor: PRIMARY }}
             />
-            <p className="text-lg text-gray-600 dark:text-gray-300">Cargando producto...</p>
+            <p className="text-lg text-gray-600">Cargando producto...</p>
           </div>
         </div>
       </AdminLayout>
     );
   }
 
-  // Mostrar pantalla de error
+  // Pantalla de error
   if (error || !productData) {
     return (
       <AdminLayout>
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-purple-900 flex items-center justify-center">
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="text-center max-w-md">
             <div className="text-6xl mb-4">❌</div>
-            <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
               Error al cargar el producto
             </h2>
-            <p className="text-gray-600 dark:text-gray-300 mb-6">
+            <p className="text-gray-600 mb-6">
               {error || 'No se pudo cargar la información del producto'}
             </p>
             <button
               onClick={() => router.push('/admin/productos')}
-              className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              className="px-6 py-3 text-white rounded-lg transition-colors hover:opacity-90"
+              style={{ backgroundColor: PRIMARY }}
             >
               Volver a la lista
             </button>
@@ -530,9 +479,8 @@ export default function ProductDetailPage() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-purple-900">
+      <div className="min-h-screen bg-gray-50">
         <div className="container mx-auto px-4 py-8 space-y-8">
-          {/* Header */}
           <ProductHeader
             productData={productData}
             isEditing={isEditing}
@@ -542,28 +490,23 @@ export default function ProductDetailPage() {
             onCancel={handleCancel}
           />
 
-          {/* Main Content */}
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-            {/* Left Column - Main Info */}
             <div className="xl:col-span-2 space-y-8">
               <ProductBasicInfo
                 productData={productData}
                 isEditing={isEditing}
                 onChange={updateProductData}
               />
-
               <ProductPricingInfo
                 productData={productData}
                 isEditing={isEditing}
                 onChange={updateProductData}
               />
-
               <ProductInventoryInfo
                 productData={productData}
                 isEditing={isEditing}
                 onChange={updateProductData}
               />
-
               <ProductSpecifications
                 productData={productData}
                 isEditing={isEditing}
@@ -571,20 +514,17 @@ export default function ProductDetailPage() {
               />
             </div>
 
-            {/* Right Column - Images and Stats */}
             <div className="space-y-8">
               <ProductImagesGallery
                 productData={productData}
                 isEditing={isEditing}
                 onChange={updateProductData}
               />
-
               <ProductSalesStats productData={productData} />
             </div>
           </div>
         </div>
 
-        {/* Unsaved Changes Notification */}
         {hasChanges && (
           <UnsavedChangesNotification
             onSave={handleSave}

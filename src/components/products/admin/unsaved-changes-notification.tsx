@@ -19,19 +19,19 @@ export function UnsavedChangesNotification({
       exit={{ opacity: 0, y: 100 }}
       className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50"
     >
-      <div className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-xl rounded-2xl border border-white/30 shadow-2xl p-6 min-w-[400px]">
+      <div className="bg-white backdrop-blur-xl rounded-2xl border border-gray-200 shadow-2xl p-6 min-w-[400px]">
         <div className="flex items-center gap-4">
           {/* Icono de advertencia */}
-          <div className="flex-shrink-0 p-3 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-xl">
-            <AlertTriangle className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+          <div className="flex-shrink-0 p-3 bg-orange-50 rounded-xl">
+            <AlertTriangle className="w-6 h-6 text-orange-600" />
           </div>
 
           {/* Contenido */}
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-gray-900">
               Cambios sin guardar
             </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+            <p className="text-sm text-gray-600 mt-1">
               Tienes modificaciones pendientes en este producto
             </p>
           </div>
@@ -42,7 +42,7 @@ export function UnsavedChangesNotification({
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               onClick={onDiscard}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-gray-500/20 to-slate-500/20 hover:from-gray-500/30 hover:to-slate-500/30 text-gray-700 dark:text-gray-300 rounded-xl transition-all backdrop-blur-sm border border-gray-500/20"
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all border border-gray-200"
             >
               <RotateCcw className="w-4 h-4" />
               <span className="font-medium">Descartar</span>
@@ -52,7 +52,8 @@ export function UnsavedChangesNotification({
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
               onClick={onSave}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 text-green-700 dark:text-green-300 rounded-xl transition-all backdrop-blur-sm border border-green-500/20"
+              className="flex items-center gap-2 px-4 py-2 text-white rounded-xl transition-all"
+              style={{ backgroundColor: "#1E3A61" }}
             >
               <Save className="w-4 h-4" />
               <span className="font-medium">Guardar cambios</span>

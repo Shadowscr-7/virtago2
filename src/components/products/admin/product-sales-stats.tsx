@@ -83,16 +83,12 @@ export function ProductSalesStats({ productData }: ProductSalesStatsProps) {
 
   const getColorClasses = (color: string) => {
     const colors = {
-      purple:
-        "from-purple-500/20 to-pink-500/20 border-purple-500/30 text-purple-700 dark:text-purple-300",
-      green:
-        "from-green-500/20 to-emerald-500/20 border-green-500/30 text-green-700 dark:text-green-300",
-      yellow:
-        "from-yellow-500/20 to-orange-500/20 border-yellow-500/30 text-yellow-700 dark:text-yellow-300",
-      blue: "from-blue-500/20 to-cyan-500/20 border-blue-500/30 text-blue-700 dark:text-blue-300",
-      red: "from-red-500/20 to-rose-500/20 border-red-500/30 text-red-700 dark:text-red-300",
-      indigo:
-        "from-indigo-500/20 to-purple-500/20 border-indigo-500/30 text-indigo-700 dark:text-indigo-300",
+      purple: "bg-purple-50 border-purple-200 text-purple-700",
+      green: "bg-green-50 border-green-200 text-green-700",
+      yellow: "bg-yellow-50 border-yellow-200 text-yellow-700",
+      blue: "bg-blue-50 border-blue-200 text-blue-700",
+      red: "bg-red-50 border-red-200 text-red-700",
+      indigo: "bg-indigo-50 border-indigo-200 text-indigo-700",
     };
     return colors[color as keyof typeof colors] || colors.purple;
   };
@@ -102,17 +98,17 @@ export function ProductSalesStats({ productData }: ProductSalesStatsProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5 }}
-      className="bg-white/70 dark:bg-slate-800/70 rounded-2xl border border-white/30 shadow-xl p-6"
+      className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6"
     >
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-3 bg-gradient-to-r from-orange-500/20 to-red-500/20 rounded-xl">
-          <TrendingUp className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+        <div className="p-3 bg-orange-50 rounded-xl">
+          <TrendingUp className="w-6 h-6 text-orange-600" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-xl font-bold text-gray-900">
             Estadísticas de Ventas
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-500">
             Rendimiento y métricas del producto
           </p>
         </div>
@@ -126,7 +122,7 @@ export function ProductSalesStats({ productData }: ProductSalesStatsProps) {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.1 }}
-            className={`p-4 bg-gradient-to-r ${getColorClasses(stat.color)} rounded-xl border backdrop-blur-sm`}
+            className={`p-4 rounded-xl border ${getColorClasses(stat.color)}`}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -147,33 +143,33 @@ export function ProductSalesStats({ productData }: ProductSalesStatsProps) {
       </div>
 
       {/* Información adicional */}
-      <div className="space-y-3 pt-6 border-t border-gray-200/30 dark:border-gray-700/30">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+      <div className="space-y-3 pt-6 border-t border-gray-200">
+        <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
           <Calendar className="w-5 h-5" />
           Información Temporal
         </h3>
 
         <div className="grid grid-cols-1 gap-3">
-          <div className="flex items-center justify-between p-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-200">
+            <span className="text-sm font-medium text-gray-700">
               Última venta
             </span>
-            <span className="text-sm text-gray-900 dark:text-white font-medium">
+            <span className="text-sm text-gray-900 font-medium">
               {formatDate(salesStats.lastSale)}
             </span>
           </div>
 
-          <div className="flex items-center justify-between p-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-200">
+            <span className="text-sm font-medium text-gray-700">
               Variante más vendida
             </span>
-            <span className="text-sm text-gray-900 dark:text-white font-medium">
+            <span className="text-sm text-gray-900 font-medium">
               {salesStats.topSellingVariant}
             </span>
           </div>
 
-          <div className="flex items-center justify-between p-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-gray-200">
+            <span className="text-sm font-medium text-gray-700">
               Tendencia de ventas
             </span>
             <div className="flex items-center gap-2">
@@ -197,21 +193,21 @@ export function ProductSalesStats({ productData }: ProductSalesStatsProps) {
       </div>
 
       {/* Promedio de ventas mensuales */}
-      <div className="mt-6 p-4 bg-gradient-to-r from-gray-50/50 to-white/50 dark:from-slate-700/30 dark:to-slate-600/30 rounded-xl border border-white/20">
+      <div className="mt-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
         <div className="flex items-center justify-between">
           <div>
-            <div className="font-semibold text-gray-900 dark:text-white">
+            <div className="font-semibold text-gray-900">
               Promedio mensual
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-sm text-gray-500">
               Ventas estimadas por mes
             </div>
           </div>
           <div className="text-right">
-            <div className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <div className="text-2xl font-bold text-[#1E3A61]">
               {Math.round(salesStats.totalSales / 12)}
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="text-sm text-gray-500">
               unidades/mes
             </div>
           </div>

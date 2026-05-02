@@ -2,25 +2,23 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { OfferBanner } from "@/components/banners/offer-banner";
 import { ProductCard } from "@/components/products/product-card";
 import { useTheme } from "@/contexts/theme-context";
 import { AnimatedBackground } from "@/components/ui/animated-background";
 import { ChatDemo } from "@/components/chat/ChatDemo";
 import { useAuthStore } from "@/store/auth";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Star, TrendingUp, Users, ShieldCheck } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { api } from "@/api";
+import { SmartCartBanner } from "@/components/smart-cart/SmartCartBanner";
 
 
 export default function Home() {
-  // Obtener el estado real de autenticación
   const { isAuthenticated } = useAuthStore();
   const { themeColors } = useTheme();
   const router = useRouter();
 
   const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
-  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -30,17 +28,14 @@ export default function Home() {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // Intentar cargar productos reales del backend
   useEffect(() => {
     const loadRealProducts = async () => {
       try {
-        setIsLoadingProducts(true);
         const response = await api.product.getProductsWithDiscounts({ page: 1, limit: 6 });
-        
-        // Extraer productos de las posibles estructuras de respuesta
+
         let products: any[] = [];
         const data = response?.data as any;
-        
+
         if (Array.isArray(data)) {
           products = data;
         } else if (data?.products && Array.isArray(data.products)) {
@@ -52,13 +47,13 @@ export default function Home() {
         if (products.length > 0) {
           const adapted = products.map((p: any) => ({
             id: p.id || p.prodVirtaId || p.productId,
-            name: p.name || p.title || 'Producto',
-            brand: p.brandId || p.brand || '',
-            supplier: p.distributorCode || '',
-            image: p.productImages?.[0]?.url || '',
+            name: p.name || p.title || "Producto",
+            brand: p.brandId || p.brand || "",
+            supplier: p.distributorCode || "",
+            image: p.productImages?.[0]?.url || "",
             price: p.pricing?.final_price || p.pricing?.base_price || p.price || 0,
             originalPrice: p.pricing?.has_discount ? p.pricing.base_price : undefined,
-            description: p.shortDescription || p.fullDescription || p.description || '',
+            description: p.shortDescription || p.fullDescription || p.description || "",
             productImages: p.productImages,
             pricing: p.pricing,
           }));
@@ -66,8 +61,6 @@ export default function Home() {
         }
       } catch {
         // sin productos — la sección no se muestra
-      } finally {
-        setIsLoadingProducts(false);
       }
     };
 
@@ -78,7 +71,14 @@ export default function Home() {
     <div className="min-h-screen bg-background relative">
       <AnimatedBackground />
       <main className="container mx-auto px-4 py-8 space-y-12 relative z-10">
-        {/* Hero Section con banners */}
+        {/* Smart Cart Banner — solo visible para clientes con plan GOLD/PLATINUM */}
+        {isAuthenticated && (
+          <div className="mb-2">
+            <SmartCartBanner />
+          </div>
+        )}
+
+        {/* Hero Section */}
         <section className="space-y-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -92,78 +92,65 @@ export default function Home() {
                 backgroundImage: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.accent})`,
               }}
             >
-              Bienvenido a Virtago
+              Estás en Virtago
             </h1>
             <p className="hidden sm:block text-xl text-muted-foreground max-w-2xl mx-auto">
-              La plataforma B2B más avanzada para compras mayoristas. Conectamos
-              marcas, proveedores y distribuidores en un solo lugar.
+              Conectamos de manera simple todo tu ecosistema Comercial.
             </p>
           </motion.div>
 
-          {/* Banners de ofertas */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <OfferBanner
-                title="Mega Sale B2B"
-                subtitle="Ofertas exclusivas"
-                description="Descuentos de hasta 40% en productos seleccionados para empresas registradas"
-                discount="Hasta 40% OFF"
-                variant="primary"
-                ctaText="Ver todas las ofertas"
-              />
-            </div>
-            <div className="hidden md:block space-y-4">
-              <OfferBanner
-                title="Nuevas Marcas"
-                description="Descubre productos de proveedores verificados"
-                discount="Nuevo"
-                variant="secondary"
-                ctaText="Explorar"
-              />
-              <OfferBanner
-                title="Envío Gratis"
-                description="En compras mayores a $500.000"
-                variant="secondary"
-                ctaText="Más info"
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Estadísticas */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="hidden md:grid md:grid-cols-4 gap-6"
-        >
-          {[
-            { icon: Users, label: "Empresas Registradas", value: "10,000+" },
-            { icon: Star, label: "Productos Disponibles", value: "50,000+" },
-            { icon: TrendingUp, label: "Marcas Aliadas", value: "500+" },
-            {
-              icon: ShieldCheck,
-              label: "Proveedores Verificados",
-              value: "1,200+",
-            },
-          ].map((stat, index) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.1 * index, duration: 0.4 }}
-              className="text-center p-6 rounded-xl bg-card border hover:shadow-lg transition-shadow"
+          {/* Banner full-width */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="w-full overflow-hidden rounded-2xl"
+            style={{ aspectRatio: "1440 / 400" }}
+          >
+            <div
+              className="w-full h-full flex items-center justify-center rounded-2xl"
+              style={{ backgroundColor: "#F5F5F5" }}
             >
-              <stat.icon
-                className="h-8 w-8 mx-auto mb-2"
-                style={{ color: themeColors.primary }}
-              />
-              <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-              <p className="text-sm text-muted-foreground">{stat.label}</p>
-            </motion.div>
-          ))}
-        </motion.section>
+              <span className="text-xl font-medium" style={{ color: "#9CA3AF" }}>
+                Banner principal
+              </span>
+            </div>
+          </motion.div>
+
+          {/* Texto con flechas debajo del banner */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="flex items-center justify-center gap-4 py-6"
+          >
+            <motion.span
+              animate={{ x: [-4, 0, -4] }}
+              transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+              className="text-2xl font-light select-none"
+              style={{ color: themeColors.primary }}
+            >
+              ←
+            </motion.span>
+            <span
+              className="text-base sm:text-lg font-medium tracking-wide"
+              style={{
+                color: themeColors.primary,
+                fontFamily: "var(--font-manrope), sans-serif",
+              }}
+            >
+              deslizá para hacer tu pedido
+            </span>
+            <motion.span
+              animate={{ x: [4, 0, 4] }}
+              transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+              className="text-2xl font-light select-none"
+              style={{ color: themeColors.primary }}
+            >
+              →
+            </motion.span>
+          </motion.div>
+        </section>
 
         {/* Mensaje de autenticación si no está logueado */}
         {!isAuthenticated && (
@@ -191,7 +178,7 @@ export default function Home() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => router.push('/login')}
+                onClick={() => router.push("/login")}
                 className="px-6 py-2 text-white rounded-lg font-medium transition-all"
                 style={{ backgroundColor: themeColors.primary }}
               >
@@ -200,7 +187,7 @@ export default function Home() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => router.push('/register')}
+                onClick={() => router.push("/register")}
                 className="px-6 py-2 border rounded-lg font-medium transition-all"
                 style={{
                   borderColor: themeColors.primary,

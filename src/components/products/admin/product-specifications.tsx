@@ -70,17 +70,17 @@ export function ProductSpecifications({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4 }}
-      className="bg-white/70 dark:bg-slate-800/70 rounded-2xl border border-white/30 shadow-xl p-6"
+      className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6"
     >
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-3 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-xl">
-          <Settings className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+        <div className="p-3 bg-indigo-50 rounded-xl">
+          <Settings className="w-6 h-6 text-indigo-600" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-xl font-bold text-gray-900">
             Especificaciones Técnicas
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-500">
             Características y detalles técnicos
           </p>
         </div>
@@ -105,12 +105,12 @@ export function ProductSpecifications({
             />
           ))
         ) : (
-          <div className="text-center py-8 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
+          <div className="text-center py-8 bg-gray-50 rounded-xl border border-gray-200">
             <Settings className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
               No hay especificaciones
             </h3>
-            <p className="text-gray-500 dark:text-gray-400">
+            <p className="text-gray-500">
               {isEditing
                 ? "Agrega especificaciones técnicas del producto"
                 : "Este producto no tiene especificaciones definidas"}
@@ -124,36 +124,36 @@ export function ProductSpecifications({
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
-          className="pt-6 border-t border-gray-200/30 dark:border-gray-700/30"
+          className="pt-6 border-t border-gray-200"
         >
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <Plus className="w-5 h-5" />
             Agregar Especificación
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Característica
               </label>
               <input
                 type="text"
                 value={newSpecKey}
                 onChange={(e) => setNewSpecKey(e.target.value)}
-                className="w-full px-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1E3A61]/30 focus:border-[#1E3A61] transition-all"
                 placeholder="Ej: Procesador, Pantalla, Memoria..."
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Valor
               </label>
               <input
                 type="text"
                 value={newSpecValue}
                 onChange={(e) => setNewSpecValue(e.target.value)}
-                className="w-full px-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1E3A61]/30 focus:border-[#1E3A61] transition-all"
                 placeholder="Ej: Intel Core i7, 15.6 pulgadas, 16GB..."
                 onKeyPress={(e) => {
                   if (e.key === "Enter") {
@@ -169,7 +169,8 @@ export function ProductSpecifications({
             whileTap={{ scale: 0.98 }}
             onClick={addSpecification}
             disabled={!newSpecKey.trim() || !newSpecValue.trim()}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ backgroundColor: "#1E3A61" }}
           >
             <Plus className="w-4 h-4" />
             <span>Agregar especificación</span>
@@ -220,13 +221,13 @@ function SpecificationItem({
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-purple-50/50 dark:bg-purple-900/10 rounded-xl border border-purple-200/30"
+        className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-blue-50 rounded-xl border border-blue-200"
       >
         <input
           type="text"
           value={editKey}
           onChange={(e) => setEditKey(e.target.value)}
-          className="px-3 py-2 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all backdrop-blur-sm"
+          className="px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1E3A61]/30 focus:border-[#1E3A61] transition-all"
           placeholder="Característica"
         />
 
@@ -235,7 +236,7 @@ function SpecificationItem({
             type="text"
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
-            className="flex-1 px-3 py-2 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all backdrop-blur-sm"
+            className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1E3A61]/30 focus:border-[#1E3A61] transition-all"
             placeholder="Valor"
             onKeyPress={(e) => {
               if (e.key === "Enter") {
@@ -248,7 +249,7 @@ function SpecificationItem({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleSave}
-            className="px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-all"
+            className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all"
           >
             ✓
           </motion.button>
@@ -257,7 +258,7 @@ function SpecificationItem({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleCancel}
-            className="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-all"
+            className="px-3 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded-lg transition-all"
           >
             ✕
           </motion.button>
@@ -269,16 +270,16 @@ function SpecificationItem({
   return (
     <motion.div
       whileHover={{ scale: 1.01 }}
-      className="flex items-center justify-between p-4 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20 hover:border-purple-300/50 transition-all"
+      className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-[#1E3A61]/30 transition-all"
     >
       <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <span className="text-sm font-medium text-gray-700">
             {specKey}
           </span>
         </div>
         <div>
-          <span className="text-gray-900 dark:text-white">{specValue}</span>
+          <span className="text-gray-900">{specValue}</span>
         </div>
       </div>
 
@@ -288,7 +289,7 @@ function SpecificationItem({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={onEdit}
-            className="p-2 text-blue-600 hover:bg-blue-100/50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
+            className="p-2 text-[#1E3A61] hover:bg-blue-50 rounded-lg transition-all"
             title="Editar especificación"
           >
             <Edit2 className="w-4 h-4" />
@@ -298,7 +299,7 @@ function SpecificationItem({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={onRemove}
-            className="p-2 text-red-600 hover:bg-red-100/50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
             title="Eliminar especificación"
           >
             <X className="w-4 h-4" />

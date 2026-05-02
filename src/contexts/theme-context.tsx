@@ -8,7 +8,7 @@ import {
   ReactNode,
 } from "react";
 
-export type ThemeVariant = "light-blue" | "light-green" | "light-orange" | "light-purple";
+export type ThemeVariant = "light-red" | "light-blue" | "light-green" | "light-orange" | "light-purple";
 
 export interface ThemeColors {
   name: string;
@@ -35,6 +35,29 @@ export interface ThemeColors {
 }
 
 export const themes: Record<ThemeVariant, ThemeColors> = {
+  "light-red": {
+    name: "Rojo",
+    primary: "#C8102E",
+    secondary: "#E8354A",
+    accent: "#A00C24",
+    background: "#ffffff",
+    surface: "#fff5f5",
+    border: "#fecdd3",
+    text: {
+      primary: "#1a0205",
+      secondary: "#475569",
+      muted: "#94a3b8",
+    },
+    gradients: {
+      primary: "from-red-700 to-red-500",
+      secondary: "from-red-500 to-rose-400",
+      accent: "from-red-800 to-red-600",
+    },
+    glass: {
+      primary: "from-red-50/90 to-white/90",
+      secondary: "from-white/90 to-red-50/80",
+    },
+  },
   "light-blue": {
     name: "Azul",
     primary: "#1E3A61",
@@ -139,12 +162,15 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [currentTheme, setCurrentTheme] = useState<ThemeVariant>("light-blue");
+  const [currentTheme, setCurrentTheme] = useState<ThemeVariant>("light-red");
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("virtago-theme") as ThemeVariant;
     if (savedTheme && themes[savedTheme]) {
       setCurrentTheme(savedTheme);
+    } else {
+      // Force light-red as default, remove stale saved value
+      localStorage.setItem("virtago-theme", "light-red");
     }
   }, []);
 

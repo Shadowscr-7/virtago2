@@ -11,6 +11,8 @@ interface ProductBasicInfoProps {
   onChange: (updates: Partial<ProductData>) => void;
 }
 
+const PRIMARY = "#1E3A61";
+
 export function ProductBasicInfo({
   productData,
   isEditing,
@@ -65,30 +67,35 @@ export function ProductBasicInfo({
     );
   };
 
+  const inputClass =
+    "w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 transition-all text-gray-800 placeholder-gray-400";
+  const inputFocusStyle = { "--tw-ring-color": PRIMARY + "40" } as React.CSSProperties;
+  const readonlyClass =
+    "px-4 py-3 bg-gray-50 rounded-xl border border-gray-100";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white/70 dark:bg-slate-800/70 rounded-2xl border border-white/30 shadow-xl p-6"
+      className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6"
     >
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl">
-          <Package className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+        <div
+          className="p-3 rounded-xl"
+          style={{ backgroundColor: PRIMARY + "15" }}
+        >
+          <Package className="w-6 h-6" style={{ color: PRIMARY }} />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            Información Básica
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Datos principales del producto
-          </p>
+          <h2 className="text-xl font-bold text-gray-900">Información Básica</h2>
+          <p className="text-sm text-gray-500">Datos principales del producto</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Nombre del producto */}
         <div className="lg:col-span-2">
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
             <Package className="w-4 h-4 inline mr-2" />
             Nombre del producto *
           </label>
@@ -97,21 +104,20 @@ export function ProductBasicInfo({
               type="text"
               value={productData.name}
               onChange={(e) => onChange({ name: e.target.value })}
-              className="w-full px-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
+              className={inputClass}
+              style={inputFocusStyle}
               placeholder="Ingresa el nombre del producto"
             />
           ) : (
-            <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
-              <span className="text-gray-900 dark:text-white font-medium">
-                {productData.name}
-              </span>
+            <div className={readonlyClass}>
+              <span className="text-gray-900 font-medium">{productData.name}</span>
             </div>
           )}
         </div>
 
         {/* SKU */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
             <Tag className="w-4 h-4 inline mr-2" />
             SKU *
           </label>
@@ -120,21 +126,20 @@ export function ProductBasicInfo({
               type="text"
               value={productData.sku}
               onChange={(e) => onChange({ sku: e.target.value })}
-              className="w-full px-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
+              className={inputClass}
+              style={inputFocusStyle}
               placeholder="SKU-XXXXX"
             />
           ) : (
-            <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
-              <span className="text-gray-900 dark:text-white font-mono">
-                {productData.sku}
-              </span>
+            <div className={readonlyClass}>
+              <span className="text-gray-900 font-mono">{productData.sku}</span>
             </div>
           )}
         </div>
 
         {/* Marca */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
             <Building className="w-4 h-4 inline mr-2" />
             Marca *
           </label>
@@ -143,67 +148,55 @@ export function ProductBasicInfo({
               type="text"
               value={productData.brand}
               onChange={(e) => onChange({ brand: e.target.value })}
-              className="w-full px-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
+              className={inputClass}
+              style={inputFocusStyle}
               placeholder="Nombre de la marca"
             />
           ) : (
-            <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
-              <span className="text-gray-900 dark:text-white font-medium">
-                {productData.brand}
-              </span>
+            <div className={readonlyClass}>
+              <span className="text-gray-900 font-medium">{productData.brand}</span>
             </div>
           )}
         </div>
 
         {/* Modelo */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            Modelo
-          </label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Modelo</label>
           {isEditing ? (
             <input
               type="text"
               value={productData.model}
               onChange={(e) => onChange({ model: e.target.value })}
-              className="w-full px-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
+              className={inputClass}
+              style={inputFocusStyle}
               placeholder="Modelo específico"
             />
           ) : (
-            <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
-              <span className="text-gray-900 dark:text-white">
-                {productData.model}
-              </span>
+            <div className={readonlyClass}>
+              <span className="text-gray-900">{productData.model}</span>
             </div>
           )}
         </div>
 
         {/* Categoría */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            Categoría *
-          </label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Categoría *</label>
           {isEditing ? (
             <StyledSelect
               value={productData.category}
-              onChange={(value) =>
-                onChange({ category: value, subcategory: "" })
-              }
+              onChange={(value) => onChange({ category: value, subcategory: "" })}
               options={categoryOptions}
             />
           ) : (
-            <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
-              <span className="text-gray-900 dark:text-white">
-                {productData.category}
-              </span>
+            <div className={readonlyClass}>
+              <span className="text-gray-900">{productData.category}</span>
             </div>
           )}
         </div>
 
         {/* Subcategoría */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            Subcategoría
-          </label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Subcategoría</label>
           {isEditing ? (
             <StyledSelect
               value={productData.subcategory}
@@ -212,19 +205,15 @@ export function ProductBasicInfo({
               disabled={!productData.category}
             />
           ) : (
-            <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
-              <span className="text-gray-900 dark:text-white">
-                {productData.subcategory || "No especificada"}
-              </span>
+            <div className={readonlyClass}>
+              <span className="text-gray-900">{productData.subcategory || "No especificada"}</span>
             </div>
           )}
         </div>
 
         {/* Estado */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            Estado *
-          </label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Estado *</label>
           {isEditing ? (
             <StyledSelect
               value={productData.status}
@@ -232,16 +221,16 @@ export function ProductBasicInfo({
               options={statusOptions}
             />
           ) : (
-            <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
+            <div className={readonlyClass}>
               <span
                 className={`px-3 py-1 rounded-lg text-sm font-medium ${
                   productData.status === "ACTIVO"
-                    ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
+                    ? "bg-green-100 text-green-800"
                     : productData.status === "INACTIVO"
-                      ? "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300"
+                      ? "bg-gray-100 text-gray-700"
                       : productData.status === "BORRADOR"
-                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
-                        : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-red-100 text-red-800"
                 }`}
               >
                 {productData.status}
@@ -252,7 +241,7 @@ export function ProductBasicInfo({
 
         {/* Descripción corta */}
         <div className="lg:col-span-2">
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
             <FileText className="w-4 h-4 inline mr-2" />
             Descripción corta
           </label>
@@ -261,21 +250,20 @@ export function ProductBasicInfo({
               type="text"
               value={productData.shortDescription}
               onChange={(e) => onChange({ shortDescription: e.target.value })}
-              className="w-full px-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
+              className={inputClass}
+              style={inputFocusStyle}
               placeholder="Descripción breve para listados"
             />
           ) : (
-            <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
-              <span className="text-gray-900 dark:text-white">
-                {productData.shortDescription}
-              </span>
+            <div className={readonlyClass}>
+              <span className="text-gray-900">{productData.shortDescription}</span>
             </div>
           )}
         </div>
 
         {/* Descripción detallada */}
         <div className="lg:col-span-2">
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
             Descripción detallada
           </label>
           {isEditing ? (
@@ -283,23 +271,20 @@ export function ProductBasicInfo({
               rows={4}
               value={productData.description}
               onChange={(e) => onChange({ description: e.target.value })}
-              className="w-full px-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm resize-none"
+              className={`${inputClass} resize-none`}
+              style={inputFocusStyle}
               placeholder="Descripción completa del producto, características principales, beneficios..."
             />
           ) : (
-            <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20 min-h-[120px]">
-              <p className="text-gray-900 dark:text-white leading-relaxed">
-                {productData.description}
-              </p>
+            <div className={`${readonlyClass} min-h-[120px]`}>
+              <p className="text-gray-900 leading-relaxed">{productData.description}</p>
             </div>
           )}
         </div>
 
         {/* Tags */}
         <div className="lg:col-span-2">
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            Etiquetas
-          </label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Etiquetas</label>
           {isEditing ? (
             <input
               type="text"
@@ -309,16 +294,18 @@ export function ProductBasicInfo({
                   tags: e.target.value.split(", ").filter((tag) => tag.trim()),
                 })
               }
-              className="w-full px-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all backdrop-blur-sm"
+              className={inputClass}
+              style={inputFocusStyle}
               placeholder="iPhone, Apple, 5G, Pro (separadas por comas)"
             />
           ) : (
-            <div className="px-4 py-3 bg-gray-50/50 dark:bg-slate-700/30 rounded-xl border border-white/20">
+            <div className={readonlyClass}>
               <div className="flex flex-wrap gap-2">
                 {productData.tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="px-3 py-1 bg-purple-100/50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium"
+                    className="px-3 py-1 rounded-full text-sm font-medium text-white"
+                    style={{ backgroundColor: PRIMARY }}
                   >
                     {tag}
                   </span>

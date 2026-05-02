@@ -99,7 +99,7 @@ export function ProductImagesGallery({
         url: result.url,
         blurDataURL: result.blurDataURL,
         alt: validFiles[index].name.replace(/\.[^/.]+$/, ''),
-        isPrimary: productData.images.length === 0 && index === 0, // Primera imagen es principal si no hay otras
+        isPrimary: productData.images.length === 0 && index === 0,
         order: productData.images.length + index + 1,
       }));
 
@@ -117,7 +117,7 @@ export function ProductImagesGallery({
     } catch (error) {
       console.error('Error subiendo imágenes:', error);
       toast.error('Error al subir las imágenes');
-      
+
       setUploadingImages((prev) =>
         prev.map((img) => ({
           ...img,
@@ -125,7 +125,7 @@ export function ProductImagesGallery({
           error: 'Error al subir',
         }))
       );
-      
+
       setTimeout(() => {
         setUploadingImages([]);
         setIsUploading(false);
@@ -139,7 +139,6 @@ export function ProductImagesGallery({
     );
     onChange({ images: updatedImages });
 
-    // Ajustar el índice seleccionado si es necesario
     if (selectedImageIndex >= updatedImages.length) {
       setSelectedImageIndex(Math.max(0, updatedImages.length - 1));
     }
@@ -166,7 +165,6 @@ export function ProductImagesGallery({
     const [movedImage] = updatedImages.splice(currentIndex, 1);
     updatedImages.splice(newIndex, 0, movedImage);
 
-    // Actualizar órdenes
     const imagesWithOrder = updatedImages.map((img, index) => ({
       ...img,
       order: index + 1,
@@ -183,17 +181,17 @@ export function ProductImagesGallery({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
-      className="bg-white/70 dark:bg-slate-800/70 rounded-2xl border border-white/30 shadow-xl p-6"
+      className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6"
     >
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-3 bg-gradient-to-r from-pink-500/20 to-rose-500/20 rounded-xl">
-          <ImageIcon className="w-6 h-6 text-pink-600 dark:text-pink-400" />
+        <div className="p-3 bg-pink-50 rounded-xl">
+          <ImageIcon className="w-6 h-6 text-pink-600" />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-xl font-bold text-gray-900">
             Galería de Imágenes
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-500">
             Gestión de imágenes del producto
           </p>
         </div>
@@ -201,7 +199,7 @@ export function ProductImagesGallery({
 
       {/* Imagen principal */}
       <div className="mb-6">
-        <div className="relative aspect-square bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 rounded-2xl overflow-hidden border-2 border-white/20 shadow-lg">
+        <div className="relative aspect-square bg-gray-100 rounded-2xl overflow-hidden border-2 border-gray-200 shadow-sm">
           {primaryImage ? (
             <Image
               src={primaryImage.url}
@@ -211,7 +209,7 @@ export function ProductImagesGallery({
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 dark:from-purple-900/20 dark:via-pink-900/20 dark:to-blue-900/20">
+            <div className="w-full h-full flex items-center justify-center bg-gray-50">
               <div className="text-center p-8">
                 <motion.div
                   initial={{ scale: 0.8, opacity: 0 }}
@@ -219,17 +217,17 @@ export function ProductImagesGallery({
                   transition={{ duration: 0.5 }}
                   className="relative"
                 >
-                  <div className="w-32 h-32 mx-auto mb-4 bg-gradient-to-br from-purple-200 to-pink-200 dark:from-purple-800 dark:to-pink-800 rounded-3xl flex items-center justify-center shadow-xl">
-                    <ImageIcon className="w-16 h-16 text-purple-600 dark:text-purple-300" />
+                  <div className="w-32 h-32 mx-auto mb-4 bg-gray-200 rounded-3xl flex items-center justify-center shadow-sm">
+                    <ImageIcon className="w-16 h-16 text-gray-400" />
                   </div>
                   <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
                     <span className="text-xl">📷</span>
                   </div>
                 </motion.div>
-                <p className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                <p className="text-lg font-semibold text-gray-700 mb-1">
                   Sin imagen
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-gray-500">
                   {isEditing ? 'Sube una imagen para este producto' : 'No hay imagen principal'}
                 </p>
               </div>
@@ -238,7 +236,7 @@ export function ProductImagesGallery({
 
           {primaryImage && (
             <div className="absolute top-3 left-3">
-              <span className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+              <span className="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
                 <Star className="w-3 h-3 fill-current" />
                 Principal
               </span>
@@ -249,7 +247,7 @@ export function ProductImagesGallery({
 
       {/* Miniaturas */}
       <div className="mb-6">
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+        <h3 className="text-sm font-semibold text-gray-700 mb-3">
           Todas las imágenes ({productData.images.length})
         </h3>
 
@@ -260,8 +258,8 @@ export function ProductImagesGallery({
               whileHover={{ scale: 1.05 }}
               className={`relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${
                 selectedImageIndex === index
-                  ? "border-purple-500 ring-2 ring-purple-500/30"
-                  : "border-white/20 hover:border-purple-300"
+                  ? "border-[#1E3A61] ring-2 ring-[#1E3A61]/20"
+                  : "border-gray-200 hover:border-[#1E3A61]/40"
               }`}
               onClick={() => setSelectedImageIndex(index)}
             >
@@ -301,7 +299,7 @@ export function ProductImagesGallery({
                       e.stopPropagation();
                       moveImage(image.id, "up");
                     }}
-                    className="p-1 bg-blue-500 hover:bg-blue-600 text-white rounded"
+                    className="p-1 bg-blue-600 hover:bg-blue-700 text-white rounded"
                     title="Mover arriba"
                     disabled={index === 0}
                   >
@@ -315,7 +313,7 @@ export function ProductImagesGallery({
                       e.stopPropagation();
                       moveImage(image.id, "down");
                     }}
-                    className="p-1 bg-blue-500 hover:bg-blue-600 text-white rounded"
+                    className="p-1 bg-blue-600 hover:bg-blue-700 text-white rounded"
                     title="Mover abajo"
                     disabled={index === productData.images.length - 1}
                   >
@@ -345,7 +343,7 @@ export function ProductImagesGallery({
               key={uploadImg.id}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="relative aspect-square rounded-xl overflow-hidden border-2 border-purple-300"
+              className="relative aspect-square rounded-xl overflow-hidden border-2 border-[#1E3A61]/40"
             >
               <Image
                 src={uploadImg.preview}
@@ -380,7 +378,7 @@ export function ProductImagesGallery({
           {isEditing && (
             <motion.label
               whileHover={{ scale: 1.05 }}
-              className={`relative aspect-square border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:border-purple-400 transition-colors flex items-center justify-center bg-gray-50/50 dark:bg-slate-700/50 ${
+              className={`relative aspect-square border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-[#1E3A61]/50 transition-colors flex items-center justify-center bg-gray-50 ${
                 isUploading ? 'opacity-50 pointer-events-none' : ''
               }`}
             >
@@ -390,7 +388,7 @@ export function ProductImagesGallery({
                 ) : (
                   <Upload className="w-6 h-6 text-gray-400 mx-auto mb-1" />
                 )}
-                <span className="text-xs text-gray-500 dark:text-gray-400">
+                <span className="text-xs text-gray-500">
                   {isUploading ? 'Subiendo...' : 'Agregar'}
                 </span>
               </div>
@@ -409,30 +407,30 @@ export function ProductImagesGallery({
 
       {/* Información de la imagen seleccionada */}
       {productData.images[selectedImageIndex] && (
-        <div className="p-4 bg-gradient-to-r from-gray-50/50 to-white/50 dark:from-slate-700/30 dark:to-slate-600/30 rounded-xl border border-white/20">
-          <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+        <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+          <h4 className="font-medium text-gray-900 mb-2">
             Información de la imagen
           </h4>
           <div className="space-y-2 text-sm">
             <div>
-              <span className="text-gray-500 dark:text-gray-400">Archivo:</span>
-              <span className="ml-2 text-gray-900 dark:text-white">
+              <span className="text-gray-500">Archivo:</span>
+              <span className="ml-2 text-gray-900">
                 {productData.images[selectedImageIndex].alt}
               </span>
             </div>
             <div>
-              <span className="text-gray-500 dark:text-gray-400">Orden:</span>
-              <span className="ml-2 text-gray-900 dark:text-white">
+              <span className="text-gray-500">Orden:</span>
+              <span className="ml-2 text-gray-900">
                 {productData.images[selectedImageIndex].order}
               </span>
             </div>
             <div>
-              <span className="text-gray-500 dark:text-gray-400">Estado:</span>
+              <span className="text-gray-500">Estado:</span>
               <span
                 className={`ml-2 px-2 py-1 rounded text-xs font-medium ${
                   productData.images[selectedImageIndex].isPrimary
-                    ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
-                    : "bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-300"
+                    ? "bg-yellow-100 text-yellow-800"
+                    : "bg-gray-100 text-gray-700"
                 }`}
               >
                 {productData.images[selectedImageIndex].isPrimary
@@ -448,16 +446,16 @@ export function ProductImagesGallery({
       {productData.images.length === 0 && (
         <div className="text-center py-8">
           <ImageIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
             No hay imágenes
           </h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">
+          <p className="text-gray-500 mb-4">
             {isEditing
               ? "Agrega imágenes del producto para mostrar a los clientes"
               : "Este producto no tiene imágenes configuradas"}
           </p>
           {isEditing && (
-            <label className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all cursor-pointer">
+            <label className="inline-flex items-center gap-2 px-4 py-2 text-white rounded-xl transition-all cursor-pointer" style={{ backgroundColor: "#1E3A61" }}>
               <Upload className="w-4 h-4" />
               <span>Subir imágenes</span>
               <input

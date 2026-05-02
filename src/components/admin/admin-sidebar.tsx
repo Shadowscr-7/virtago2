@@ -21,6 +21,8 @@ import {
   ChevronLeft,
   ChevronRight,
   MonitorDown,
+  UserCog,
+  BarChart3,
 } from "lucide-react";
 import { useTheme } from "@/contexts/theme-context";
 import { useAuthStore } from "@/store/auth";
@@ -43,6 +45,13 @@ const menuItems = [
     label: "Clientes",
     icon: Users,
     href: "/admin/clientes",
+  },
+  {
+    id: "users",
+    label: "Usuarios",
+    icon: UserCog,
+    href: "/admin/usuarios",
+    adminOnly: true,
   },
   {
     id: "products",
@@ -79,6 +88,13 @@ const menuItems = [
     label: "Órdenes",
     icon: ShoppingCart,
     href: "/admin/ordenes",
+  },
+  {
+    id: "commissions",
+    label: "Comisiones",
+    icon: BarChart3,
+    href: "/admin/comisiones",
+    adminOnly: true,
   },
   {
     id: "coupons",
@@ -157,20 +173,20 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
       transition={{ duration: 0.3 }}
       className={`
         relative h-screen border-r backdrop-blur-xl
-        ${isCollapsed ? "w-16" : "w-64"} 
+        ${isCollapsed ? "w-16" : "w-64"}
         transition-all duration-300 ease-in-out
         ${className}
       `}
       style={{
-        background: `linear-gradient(180deg, 
-          ${themeColors.surface}90 0%, 
-          ${themeColors.primary}20 50%, 
+        background: `linear-gradient(180deg,
+          ${themeColors.surface}90 0%,
+          ${themeColors.primary}20 50%,
           ${themeColors.surface}80 100%)`,
         borderColor: themeColors.primary + "20"
       }}
     >
       {/* Header */}
-      <div 
+      <div
         className="flex items-center justify-between p-4 border-b"
         style={{ borderColor: themeColors.primary + "20" }}
       >
@@ -205,7 +221,7 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="p-2 space-y-1">
+      <nav className="p-2 space-y-1 overflow-y-auto" style={{ maxHeight: "calc(100vh - 8rem)" }}>
         {visibleItems.map((item, index) => {
           const IconComponent = item.icon;
           const active = isActive(item.href);
@@ -220,11 +236,11 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
                 ${isCollapsed ? "justify-center" : ""}
               `}
               style={{
-                backgroundColor: active 
-                  ? itemColor + "40" 
+                backgroundColor: active
+                  ? itemColor + "40"
                   : "transparent",
-                color: active 
-                  ? themeColors.text.primary 
+                color: active
+                  ? themeColors.text.primary
                   : themeColors.text.secondary
               }}
             >
@@ -243,7 +259,7 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
               )}
 
               {/* Efecto de brillo al hacer hover */}
-              <div 
+              <div
                 className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 style={{
                   background: `linear-gradient(90deg, transparent, ${itemColor}15, transparent)`
@@ -254,8 +270,8 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
               <div
                 className="relative z-10 p-2 rounded-lg transition-all duration-300"
                 style={{
-                  backgroundColor: active 
-                    ? itemColor + "30" 
+                  backgroundColor: active
+                    ? itemColor + "30"
                     : themeColors.surface + "20"
                 }}
               >
@@ -286,7 +302,7 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
                   }}
                 >
                   {item.label}
-                  <div 
+                  <div
                     className="absolute left-0 top-1/2 transform -translate-x-1 -translate-y-1/2 w-2 h-2 rotate-45 border-l border-b"
                     style={{
                       backgroundColor: themeColors.surface + "95",
@@ -303,7 +319,7 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
               key={item.id}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ delay: index * 0.05 }}
             >
               {item.external ? (
                 <a href={item.href} target="_blank" rel="noopener noreferrer">
@@ -332,7 +348,7 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
             }}
           >
             <div className="text-xs text-center">
-              <div 
+              <div
                 className="font-medium"
                 style={{ color: themeColors.text.primary }}
               >
@@ -349,14 +365,14 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
             animate={{ opacity: 1 }}
             className="flex justify-center"
           >
-            <div 
+            <div
               className="w-8 h-8 rounded-lg border flex items-center justify-center"
               style={{
                 backgroundColor: themeColors.primary + "20",
                 borderColor: themeColors.primary + "30"
               }}
             >
-              <div 
+              <div
                 className="w-2 h-2 rounded-full"
                 style={{
                   background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`

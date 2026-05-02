@@ -18,7 +18,6 @@ import {
   Building,
   Award,
   Phone,
-  Palette,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
@@ -26,7 +25,6 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth";
 import { useTheme } from "@/contexts/theme-context";
 import { CartButton } from "@/components/cart/cart-button";
-import { ThemeSelector } from "@/components/ui/theme-selector";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,7 +44,6 @@ const navLinks = [
   { name: "Marcas", href: "/marcas", icon: Award },
   { name: "Proveedores", href: "/suppliers", icon: Building },
   { name: "Ofertas", href: "/ofertas", icon: Tag },
-  { name: "Temas", href: "/themes", icon: Palette },
   { name: "Contacto", href: "/contacto", icon: Phone },
 ];
 
@@ -79,11 +76,7 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
           <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
             <motion.div whileHover={{ scale: 1.05 }} className="flex items-center space-x-2 flex-shrink-0">
               <div className="relative">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  className="w-8 h-8"
-                >
+                <div className="w-8 h-8">
                   <div
                     className="absolute inset-0 rounded-lg"
                     style={{
@@ -95,7 +88,7 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                       V
                     </span>
                   </div>
-                </motion.div>
+                </div>
               </div>
               <span
                 className="text-xl font-bold bg-clip-text text-transparent"
@@ -169,11 +162,6 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                 <Search className="h-5 w-5" />
               </motion.button>
             )}
-
-            {/* Selector de temas — solo desktop */}
-            <div className="hidden md:block">
-              <ThemeSelector />
-            </div>
 
             {/* Carrito */}
             {!isAdminMode && <CartButton />}
@@ -416,12 +404,6 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
 
               {/* Divider */}
               <div className="h-px my-2" style={{ backgroundColor: themeColors.border }} />
-
-              {/* Theme selector en mobile */}
-              <div className="px-4 py-2 flex items-center gap-3">
-                <span className="text-sm text-muted-foreground">Tema:</span>
-                <ThemeSelector />
-              </div>
 
               {/* Auth links (if not authenticated) */}
               {!isAuthenticated && (

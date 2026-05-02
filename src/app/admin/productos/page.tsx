@@ -1,19 +1,20 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { 
-  Search, 
-  Plus, 
-  Edit, 
+import {
+  Search,
+  Plus,
+  Edit,
   Eye,
-  Package, 
+  Package,
   Download,
   Upload,
   ChevronLeft,
   ChevronRight,
-  AlertTriangle
+  AlertTriangle,
+  Layers
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/admin-layout";
 import { useAuthStore } from "@/store/auth";
@@ -22,18 +23,27 @@ import { StyledSelect } from "@/components/ui/styled-select";
 import { api, ApiProductData } from "@/api";
 import { showToast } from "@/store/toast-helpers";
 import { ProductImportModal } from "@/components/admin/products/ProductImportModal";
+import { StockBadge } from "@/components/admin/products/StockBadge";
+import { StockEditModal } from "@/components/admin/products/StockEditModal";
+import { BulkStockModal } from "@/components/admin/products/BulkStockModal";
+
+interface StockEditTarget {
+  productId: string;
+  productName: string;
+  currentStock: number;
+}
 
 export default function ProductsAdminPage() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { themeColors } = useTheme();
-  
+
   // Estados para datos de la API
   const [products, setProducts] = useState<ApiProductData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  
+
   // Estados para UI
   const [searchQuery, setSearchQuery] = useState("");
   const [searchInput, setSearchInput] = useState("");
@@ -43,49 +53,43 @@ export default function ProductsAdminPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [showImportModal, setShowImportModal] = useState(false);
 
-  console.log('[PRODUCTOS PAGE] 🔍 Usuario completo:', JSON.stringify(user, null, 2));
+  // Estados para stock
+  const [stockEditTarget, setStockEditTarget] = useState<StockEditTarget | null>(null);
+  const [showBulkStockModal, setShowBulkStockModal] = useState(false);
 
-  // ✅ Verificar acceso (distributor o admin)
+  console.log('[PRODUCTOS PAGE] Usuario completo:', JSON.stringify(user, null, 2));
+
+  // Verificar acceso (distributor o admin)
   const hasAccess = user && (
-    user.role === "distributor" || 
-    user.role === "admin" || 
+    user.role === "distributor" ||
+    user.role === "admin" ||
     user.userType === "distributor"
   );
 
   console.log('[PRODUCTOS PAGE] hasAccess:', hasAccess);
 
-  // 🔄 Función para cargar productos desde la API
+  // Funcion para cargar productos desde la API
   const loadProducts = useCallback(async () => {
-    console.log('[PRODUCTOS] 🔄 Ejecutando loadProducts...');
-    console.log('[PRODUCTOS] 🔍 user:', user);
-    console.log('[PRODUCTOS] 🔍 distributorInfo:', user?.distributorInfo);
-    console.log('[PRODUCTOS] 🔍 distributorCode:', user?.distributorInfo?.distributorCode);
-    
-    if (!user) {
-      console.warn('[PRODUCTOS] ❌ No hay usuario logueado');
-      setIsLoading(false);
-      return; 
-    }
+    console.log('[PRODUCTOS] Ejecutando loadProducts...');
 
-    const distributorCode = user?.distributorInfo?.distributorCode;
-    
-    if (!distributorCode) {
-      console.error('[PRODUCTOS] ❌ distributorCode es vacío/null/undefined. distributorInfo:', JSON.stringify(user?.distributorInfo));
+    if (!user) {
+      console.warn('[PRODUCTOS] No hay usuario logueado');
       setIsLoading(false);
       return;
     }
-    
-    console.log('[PRODUCTOS] ✅ Usando distributorCode:', distributorCode);
+
+    const distributorCode = user?.distributorInfo?.distributorCode;
+
+    if (!distributorCode) {
+      console.error('[PRODUCTOS] distributorCode es vacio/null/undefined.');
+      setIsLoading(false);
+      return;
+    }
+
+    console.log('[PRODUCTOS] Usando distributorCode:', distributorCode);
 
     setIsLoading(true);
     try {
-      console.log('[PRODUCTOS] Cargando productos...', {
-        distributorCode: distributorCode,
-        page: currentPage,
-        rowsPerPage: itemsPerPage,
-        search: searchQuery
-      });
-
       const response = await api.admin.products.getAll({
         distributorCode: distributorCode,
         page: currentPage,
@@ -98,28 +102,20 @@ export default function ProductsAdminPage() {
       console.log('[PRODUCTOS] Respuesta de la API:', response);
 
       if (response.success && response.data) {
-        const productsArray: ApiProductData[] = Array.isArray(response.data) 
-          ? response.data 
+        const productsArray: ApiProductData[] = Array.isArray(response.data)
+          ? response.data
           : (response.data as { data?: ApiProductData[] }).data || [];
-        
+
         const total = (response.data as { total?: number }).total || productsArray.length;
         const pages = (response.data as { totalPages?: number }).totalPages || Math.ceil(total / itemsPerPage);
-        
-        console.log('[PRODUCTOS] 🔍 Productos extraídos:', productsArray.length);
-        
+
         setProducts(productsArray);
         setTotalProducts(total);
         setTotalPages(pages);
-        
-        console.log('[PRODUCTOS] ✅', productsArray.length, 'productos cargados de', total, 'totales');
-        
-        // No mostrar toast en cada carga, solo cuando hay error
-        // showToast({
-        //   title: "Productos cargados correctamente",
-        //   type: "success"
-        // });
+
+        console.log('[PRODUCTOS] ', productsArray.length, 'productos cargados de', total, 'totales');
       } else {
-        console.error('[PRODUCTOS] ❌ Error en la respuesta:', response);
+        console.error('[PRODUCTOS] Error en la respuesta:', response);
         setProducts([]);
         showToast({
           title: "Error al cargar productos",
@@ -128,11 +124,11 @@ export default function ProductsAdminPage() {
         });
       }
     } catch (error) {
-      console.error('[PRODUCTOS] ❌ Error al cargar productos:', error);
+      console.error('[PRODUCTOS] Error al cargar productos:', error);
       setProducts([]);
       showToast({
         title: "Error al cargar productos",
-        description: error instanceof Error ? error.message : "Ocurrió un error inesperado",
+        description: error instanceof Error ? error.message : "Ocurrio un error inesperado",
         type: "error"
       });
     } finally {
@@ -140,7 +136,6 @@ export default function ProductsAdminPage() {
     }
   }, [user, currentPage, itemsPerPage, searchQuery, categoryFilter, statusFilter]);
 
-  // 🔄 Cargar productos al montar y cuando cambien los parámetros
   useEffect(() => {
     if (user && hasAccess) {
       loadProducts();
@@ -148,7 +143,7 @@ export default function ProductsAdminPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, hasAccess, currentPage, itemsPerPage, searchQuery, categoryFilter, statusFilter]);
 
-  // 🔄 Debounce para el input de búsqueda
+  // Debounce para el input de busqueda
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setSearchQuery(searchInput);
@@ -181,8 +176,15 @@ export default function ProductsAdminPage() {
   };
 
   const handleImportSuccess = () => {
-    // Recargar productos después de importar
     loadProducts();
+  };
+
+  const handleStockUpdated = (productId: string, newStock: number) => {
+    setProducts((prev) =>
+      prev.map((p) =>
+        p.prodVirtaId === productId ? { ...p, stockQuantity: newStock } : p
+      )
+    );
   };
 
   // Mostrar loading mientras se carga el usuario
@@ -196,12 +198,11 @@ export default function ProductsAdminPage() {
     );
   }
 
-  // Validar acceso después de que el usuario esté cargado
   if (!hasAccess) {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center h-full">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="text-center p-8 backdrop-blur-lg rounded-2xl shadow-xl border"
@@ -210,7 +211,7 @@ export default function ProductsAdminPage() {
               borderColor: themeColors.primary + "20"
             }}
           >
-            <div 
+            <div
               className="w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center"
               style={{
                 background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`
@@ -218,14 +219,14 @@ export default function ProductsAdminPage() {
             >
               <AlertTriangle className="w-6 h-6 text-white" />
             </div>
-            <h2 
+            <h2
               className="text-xl font-bold mb-2"
               style={{ color: themeColors.text.primary }}
             >
               Acceso Denegado
             </h2>
             <p style={{ color: themeColors.text.secondary }}>
-              No tienes permisos para acceder a esta sección.
+              No tienes permisos para acceder a esta seccion.
             </p>
           </motion.div>
         </div>
@@ -237,29 +238,29 @@ export default function ProductsAdminPage() {
     <AdminLayout>
       <div className="p-6 space-y-6">
         {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }} 
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
         >
           <div>
-            <h1 
+            <h1
               className="text-2xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
               style={{
                 backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
               }}
             >
-              Gestión de Productos
+              Gestion de Productos
             </h1>
             <p style={{ color: themeColors.text.secondary }}>
-              Administra tu catálogo de productos
+              Administra tu catalogo de productos
             </p>
           </div>
         </motion.div>
 
         {/* Filtros y Acciones */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }} 
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           className="flex flex-col lg:flex-row gap-4 p-6 rounded-2xl border shadow-lg"
@@ -268,10 +269,10 @@ export default function ProductsAdminPage() {
             borderColor: themeColors.primary + "30"
           }}
         >
-          {/* Búsqueda - Más ancha */}
+          {/* Busqueda */}
           <div className="flex-1 lg:flex-[3] relative">
-            <Search 
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5" 
+            <Search
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5"
               style={{ color: themeColors.text.secondary }}
             />
             <input
@@ -289,7 +290,7 @@ export default function ProductsAdminPage() {
             />
           </div>
 
-          {/* Filtro de Categoría */}
+          {/* Filtro de Categoria */}
           <div className="w-full lg:w-48">
             <StyledSelect
               value={categoryFilter}
@@ -298,8 +299,8 @@ export default function ProductsAdminPage() {
                 setCurrentPage(1);
               }}
               options={[
-                { value: "", label: "Todas las categorías" },
-                { value: "Electrónicos", label: "Electrónicos" },
+                { value: "", label: "Todas las categorias" },
+                { value: "Electronicos", label: "Electronicos" },
                 { value: "Computadoras", label: "Computadoras" },
               ]}
             />
@@ -322,7 +323,7 @@ export default function ProductsAdminPage() {
             />
           </div>
 
-          {/* Items por página */}
+          {/* Items por pagina */}
           <div className="w-full lg:w-48">
             <StyledSelect
               value={itemsPerPage.toString()}
@@ -340,7 +341,7 @@ export default function ProductsAdminPage() {
           </div>
 
           {/* Acciones */}
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
             <motion.button
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
@@ -353,6 +354,22 @@ export default function ProductsAdminPage() {
             >
               <Plus className="w-4 h-4" />
               <span className="hidden sm:inline">Crear Producto</span>
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowBulkStockModal(true)}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all backdrop-blur-sm border font-medium"
+              style={{
+                backgroundColor: themeColors.secondary + "20",
+                color: themeColors.text.primary,
+                borderColor: themeColors.secondary + "40"
+              }}
+              title="Actualizar stock de todos los productos"
+            >
+              <Layers className="w-4 h-4" />
+              <span className="hidden sm:inline">Stock Masivo</span>
             </motion.button>
 
             <motion.button
@@ -375,9 +392,9 @@ export default function ProductsAdminPage() {
               onClick={handleImportProducts}
               className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all backdrop-blur-sm border font-medium"
               style={{
-                backgroundColor: themeColors.secondary + "20",
+                backgroundColor: themeColors.secondary + "15",
                 color: themeColors.text.primary,
-                borderColor: themeColors.secondary + "40"
+                borderColor: themeColors.secondary + "30"
               }}
             >
               <Upload className="w-4 h-4" />
@@ -399,7 +416,7 @@ export default function ProductsAdminPage() {
         >
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <div 
+              <div
                 className="animate-spin rounded-full h-12 w-12 border-b-2"
                 style={{ borderColor: themeColors.primary }}
               ></div>
@@ -410,12 +427,12 @@ export default function ProductsAdminPage() {
                 className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
                 style={{ backgroundColor: themeColors.primary + "20" }}
               >
-                <Package 
-                  className="w-8 h-8" 
+                <Package
+                  className="w-8 h-8"
                   style={{ color: themeColors.primary }}
                 />
               </div>
-              <p 
+              <p
                 className="text-lg font-medium"
                 style={{ color: themeColors.text.secondary }}
               >
@@ -426,7 +443,7 @@ export default function ProductsAdminPage() {
             <>
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead 
+                  <thead
                     className="border-b"
                     style={{
                       backgroundColor: themeColors.surface,
@@ -434,46 +451,25 @@ export default function ProductsAdminPage() {
                     }}
                   >
                     <tr>
-                      <th 
-                        className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider"
-                        style={{ color: themeColors.text.secondary }}
-                      >
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
                         Producto
                       </th>
-                      <th 
-                        className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider"
-                        style={{ color: themeColors.text.secondary }}
-                      >
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
                         SKU
                       </th>
-                      <th 
-                        className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider"
-                        style={{ color: themeColors.text.secondary }}
-                      >
-                        Categoría
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
+                        Categoria
                       </th>
-                      <th 
-                        className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider"
-                        style={{ color: themeColors.text.secondary }}
-                      >
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
                         Precio
                       </th>
-                      <th 
-                        className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider"
-                        style={{ color: themeColors.text.secondary }}
-                      >
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
                         Stock
                       </th>
-                      <th 
-                        className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider"
-                        style={{ color: themeColors.text.secondary }}
-                      >
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
                         Estado
                       </th>
-                      <th 
-                        className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider"
-                        style={{ color: themeColors.text.secondary }}
-                      >
+                      <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
                         Acciones
                       </th>
                     </tr>
@@ -482,23 +478,19 @@ export default function ProductsAdminPage() {
                   {products.map((product, index) => {
                     const statusInfo = getStatusInfo(product.status);
                     const productColor = [themeColors.primary, themeColors.secondary, themeColors.accent][index % 3];
-                    
-                    // Generar iniciales del nombre del producto
+
                     const productWords = product.name.split(' ');
-                    const initials = productWords.length >= 2 
+                    const initials = productWords.length >= 2
                       ? `${productWords[0][0]}${productWords[1][0]}`.toUpperCase()
                       : product.name.substring(0, 2).toUpperCase();
-                    
+
                     return (
-                      <motion.tr 
+                      <motion.tr
                         key={product.prodVirtaId}
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.05 }}
                         className="group transition-all duration-300 backdrop-blur-sm hover:backdrop-blur-md"
-                        style={{
-                          "--hover-bg": `linear-gradient(90deg, ${themeColors.primary}10, ${themeColors.secondary}10)`
-                        } as React.CSSProperties}
                         onMouseEnter={(e) => {
                           const target = e.currentTarget as HTMLElement;
                           target.style.background = `linear-gradient(90deg, ${themeColors.primary}10, ${themeColors.secondary}10)`;
@@ -520,23 +512,17 @@ export default function ProductsAdminPage() {
                               {initials}
                             </motion.div>
                             <div>
-                              <div 
-                                className="font-semibold text-sm"
-                                style={{ color: themeColors.text.primary }}
-                              >
+                              <div className="font-semibold text-sm" style={{ color: themeColors.text.primary }}>
                                 {product.name}
                               </div>
-                              <div 
-                                className="text-xs"
-                                style={{ color: themeColors.text.secondary }}
-                              >
-                                {typeof product.brand === 'object' && product.brand !== null ? (product.brand as any).name : product.brand}
+                              <div className="text-xs" style={{ color: themeColors.text.secondary }}>
+                                {typeof product.brand === 'object' && product.brand !== null ? (product.brand as Record<string, unknown>).name as string : product.brand}
                               </div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-5">
-                          <code 
+                          <code
                             className="text-sm font-mono px-3 py-1.5 rounded-lg inline-block"
                             style={{
                               backgroundColor: themeColors.secondary + "20",
@@ -548,18 +534,18 @@ export default function ProductsAdminPage() {
                           </code>
                         </td>
                         <td className="px-6 py-5">
-                          <span 
+                          <span
                             className="text-sm font-medium px-2 py-1 rounded-md inline-block"
-                            style={{ 
+                            style={{
                               backgroundColor: themeColors.primary + "20",
-                              color: themeColors.text.primary 
+                              color: themeColors.text.primary
                             }}
                           >
-                            {typeof product.category === 'object' && product.category !== null ? (product.category as any).name : product.category}
+                            {typeof product.category === 'object' && product.category !== null ? (product.category as Record<string, unknown>).name as string : product.category}
                           </span>
                         </td>
                         <td className="px-6 py-5">
-                          <div 
+                          <div
                             className="text-lg font-bold bg-gradient-to-r bg-clip-text text-transparent"
                             style={{
                               backgroundImage: `linear-gradient(to right, ${productColor}, ${productColor}90)`
@@ -568,13 +554,19 @@ export default function ProductsAdminPage() {
                             {formatCurrency(product.price)}
                           </div>
                         </td>
+                        {/* Stock con badge de color */}
                         <td className="px-6 py-5">
-                          <div 
-                            className="text-lg font-semibold"
-                            style={{ color: themeColors.text.primary }}
+                          <button
+                            onClick={() => setStockEditTarget({
+                              productId: product.prodVirtaId,
+                              productName: product.name,
+                              currentStock: product.stockQuantity ?? 0,
+                            })}
+                            className="transition-opacity hover:opacity-80"
+                            title="Editar stock"
                           >
-                            {product.stockQuantity}
-                          </div>
+                            <StockBadge stock={product.stockQuantity ?? 0} />
+                          </button>
                         </td>
                         <td className="px-6 py-5">
                           <span
@@ -622,43 +614,31 @@ export default function ProductsAdminPage() {
                 </tbody>
               </table>
               </div>
-              
-              {/* Paginación */}
-              <div 
+
+              {/* Paginacion */}
+              <div
                 className="px-6 py-4 border-t flex items-center justify-between"
                 style={{
                   backgroundColor: themeColors.surface,
                   borderColor: themeColors.primary + "20"
                 }}
               >
-                <div 
-                  className="text-sm"
-                  style={{ color: themeColors.text.secondary }}
-                >
+                <div className="text-sm" style={{ color: themeColors.text.secondary }}>
                   Mostrando{" "}
-                  <span 
-                    className="font-semibold"
-                    style={{ color: themeColors.primary }}
-                  >
+                  <span className="font-semibold" style={{ color: themeColors.primary }}>
                     {(currentPage - 1) * itemsPerPage + 1}
                   </span>{" "}
                   a{" "}
-                  <span 
-                    className="font-semibold"
-                    style={{ color: themeColors.primary }}
-                  >
+                  <span className="font-semibold" style={{ color: themeColors.primary }}>
                     {Math.min(currentPage * itemsPerPage, totalProducts)}
                   </span>{" "}
                   de{" "}
-                  <span 
-                    className="font-semibold"
-                    style={{ color: themeColors.primary }}
-                  >
+                  <span className="font-semibold" style={{ color: themeColors.primary }}>
                     {totalProducts}
                   </span>{" "}
                   productos
                 </div>
-                
+
                 <div className="flex items-center gap-3">
                   <motion.button
                     whileHover={{ scale: 1.05, x: -2 }}
@@ -687,17 +667,15 @@ export default function ProductsAdminPage() {
                           onClick={() => handlePageChange(pageNum)}
                           className="w-10 h-10 rounded-xl text-sm font-semibold transition-all backdrop-blur-sm border"
                           style={{
-                            backgroundColor: isActive 
-                              ? `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})` 
+                            backgroundColor: isActive
+                              ? undefined
                               : themeColors.surface + "60",
-                            borderColor: isActive 
-                              ? themeColors.primary + "60" 
+                            borderColor: isActive
+                              ? themeColors.primary + "60"
                               : themeColors.primary + "30",
-                            color: isActive 
-                              ? "white" 
-                              : themeColors.text.primary,
-                            background: isActive 
-                              ? `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})` 
+                            color: isActive ? "white" : themeColors.text.primary,
+                            background: isActive
+                              ? `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`
                               : themeColors.surface + "60"
                           }}
                         >
@@ -728,11 +706,35 @@ export default function ProductsAdminPage() {
         </motion.div>
       </div>
 
-      {/* Modal de Importación */}
+      {/* Modales */}
       <ProductImportModal
         isOpen={showImportModal}
         onClose={() => setShowImportModal(false)}
         onSuccess={handleImportSuccess}
+      />
+
+      {stockEditTarget && (
+        <StockEditModal
+          isOpen={true}
+          onClose={() => setStockEditTarget(null)}
+          productId={stockEditTarget.productId}
+          productName={stockEditTarget.productName}
+          currentStock={stockEditTarget.currentStock}
+          onSuccess={(newStock) => {
+            handleStockUpdated(stockEditTarget.productId, newStock);
+            setStockEditTarget(null);
+          }}
+        />
+      )}
+
+      <BulkStockModal
+        isOpen={showBulkStockModal}
+        onClose={() => setShowBulkStockModal(false)}
+        products={products}
+        onSuccess={() => {
+          loadProducts();
+          setShowBulkStockModal(false);
+        }}
       />
     </AdminLayout>
   );

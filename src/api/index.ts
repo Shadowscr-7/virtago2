@@ -2169,6 +2169,96 @@ const addressApi = {
     http.delete(`/addresses/${addressId}`),
 };
 
+
+// ========================
+// SMART CART (IA)
+// ========================
+export interface SmartCartItem {
+  productId: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  reason: string;
+  confidence: 'high' | 'medium' | 'low';
+  stockQuantity?: number;
+  sku?: string;
+  distributorCode?: string;
+}
+
+export interface SmartCartResponse {
+  cart: SmartCartItem[];
+  summary: string;
+  generatedAt: string;
+  metadata: {
+    totalItems: number;
+    totalAmount: number;
+    basedOnOrders: number;
+  };
+}
+
+export interface PendingSuggestion {
+  id: string;
+  userId: string;
+  userEmail: string;
+  status: 'pending' | 'confirmed' | 'dismissed' | 'expired';
+  cart: SmartCartItem[];
+  summary: string;
+  generatedAt: string;
+  expiresAt: string;
+  createdAt: string;
+  metadata?: SmartCartResponse['metadata'];
+}
+
+const smartCartApi = {
+  generate: async (distributorId?: string): Promise<ApiResponse<SmartCartResponse>> =>
+    http.post('/suggestions/smart-cart', distributorId ? { distributorId } : {}),
+
+  getPending: async (): Promise<ApiResponse<PendingSuggestion | null>> =>
+    http.get('/suggestions/pending'),
+
+  confirm: async (id: string, finalCart?: SmartCartItem[]): Promise<ApiResponse<{ suggestionId: string; changes: Record<string, unknown> }>> =>
+    http.post(`/suggestions/${id}/confirm`, finalCart ? { finalCart } : {}),
+
+  dismiss: async (id: string): Promise<ApiResponse<{ message: string }>> =>
+    http.post(`/suggestions/${id}/dismiss`, {}),
+};
+
+// ========================
+// STOCK MANAGEMENT (Distribuidor)
+// ========================
+export interface StockInfo {
+  productId: string;
+  name: string;
+  sku: string;
+  stockQuantity: number;
+}
+
+export interface StockUpdateResult {
+  productId: string;
+  name: string;
+  sku: string;
+  previousStock: number;
+  newStock: number;
+  reason: string | null;
+  updatedAt: string;
+}
+
+export interface BulkStockUpdate {
+  productId: string;
+  stock: number;
+}
+
+const stockApi = {
+  getStock: async (productId: string): Promise<ApiResponse<StockInfo>> =>
+    http.get(`/distributor/products/${productId}/stock`),
+
+  updateStock: async (productId: string, stock: number, reason?: string): Promise<ApiResponse<StockUpdateResult>> =>
+    http.put(`/distributor/products/${productId}/stock`, { stock, ...(reason ? { reason } : {}) }),
+
+  bulkUpdate: async (updates: BulkStockUpdate[]): Promise<ApiResponse<{ updated: StockUpdateResult[]; errors: { productId: string; error: string }[] }>> =>
+    http.put('/distributor/products/stock/bulk', { updates }),
+};
+
 // Objeto principal API - para usar como api.auth.login(), api.user.getProfile(), etc.
 export const api = {
   auth: authApi,
@@ -2183,10 +2273,12 @@ export const api = {
   admin: adminApi,
   onboarding: onboardingApi,
   addresses: addressApi,
+  smartCart: smartCartApi,
+  stock: stockApi,
 };
 
-// Exportar también el cliente HTTP para casos especiales
+// Exportar tambien el cliente HTTP para casos especiales
 export { default as http } from './http-client';
 
-// Re-exportar tipos útiles
+// Re-exportar tipos utiles
 export type { ApiResponse, ApiError } from './http-client';
