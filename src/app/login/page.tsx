@@ -6,6 +6,7 @@ import { Eye, EyeOff, Mail, Lock, ArrowLeft } from "lucide-react";
 import { useAuthStore, getRedirectForRole, UserRole } from "@/store/auth";
 import { useTheme } from "@/contexts/theme-context";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { OTPVerification } from "@/components/auth/otp-verification";
 import { RoleSelection } from "@/components/auth/role-selection";
@@ -150,8 +151,8 @@ export default function LoginPage() {
             style={{ background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})` }}
           >
             <div className="text-center">
-              <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                <span className="text-2xl font-black text-white">V</span>
+              <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center mx-auto mb-3" style={{ backgroundColor: themeColors.primary }}>
+                <Image src="/images/logo.png" alt="Virtago" width={36} height={36} className="object-contain" />
               </div>
               <h1 className="text-2xl font-bold text-white">Bienvenido de vuelta</h1>
               <p className="text-white/80 text-sm mt-1">Accedé a tu cuenta de Virtago</p>

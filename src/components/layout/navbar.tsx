@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import {
   Search,
   User,
@@ -75,27 +76,19 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
           {/* Logo */}
           <Link href="/" onClick={() => setIsMobileMenuOpen(false)}>
             <motion.div whileHover={{ scale: 1.05 }} className="flex items-center space-x-2 flex-shrink-0">
-              <div className="relative">
-                <div className="w-8 h-8">
-                  <div
-                    className="absolute inset-0 rounded-lg"
-                    style={{
-                      background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.accent})`,
-                    }}
-                  />
-                  <div className="absolute inset-0.5 rounded-lg bg-background flex items-center justify-center">
-                    <span className="text-xs font-bold" style={{ color: themeColors.primary }}>
-                      V
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <span
-                className="text-xl font-bold bg-clip-text text-transparent"
-                style={{
-                  backgroundImage: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
-                }}
+              <div
+                className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ backgroundColor: themeColors.primary }}
               >
+                <Image
+                  src="/images/logo.png"
+                  alt="Virtago"
+                  width={24}
+                  height={24}
+                  className="object-contain"
+                />
+              </div>
+              <span className="text-xl font-bold" style={{ color: themeColors.primary }}>
                 VIRTAGO
               </span>
             </motion.div>

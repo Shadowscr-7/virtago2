@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import {
   Eye,
   EyeOff,
@@ -160,8 +161,8 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
           }}
         >
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-              <UserPlus className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: themeColors.primary }}>
+              <Image src="/images/logo.png" alt="Virtago" width={26} height={26} className="object-contain" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-white">Crear Cuenta</h1>
