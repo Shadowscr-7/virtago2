@@ -7,9 +7,6 @@ import { useTheme } from "@/contexts/theme-context";
 import { RegisterForm } from "./register-form";
 import { OTPVerification } from "./otp-verification";
 import { UserTypeSelection } from "./user-type-selection";
-import { PersonalInfoForm } from "./personal-info-form";
-import { BusinessInfoForm } from "./business-info-form";
-import { PlanSelection } from "./plan-selection";
 import { RegistrationSuccess } from "./registration-success";
 
 export function MultiStepRegistration() {
@@ -61,41 +58,6 @@ export function MultiStepRegistration() {
           />
         );
 
-      case "personalInfo":
-        return (
-          <PersonalInfoForm
-            key="personalInfo"
-            onBack={() => resetRegistration()}
-            onSuccess={() => {
-              // El store maneja el cambio de paso automáticamente
-            }}
-          />
-        );
-
-      case "businessInfo":
-        return (
-          <BusinessInfoForm
-            key="businessInfo"
-            onBack={() => resetRegistration()}
-            onSuccess={() => {
-              // El store maneja el cambio de paso automáticamente
-            }}
-          />
-        );
-
-      case "planSelection":
-        return (
-          <PlanSelection
-            key="planSelection"
-            onBack={() => resetRegistration()}
-            onPlanSelected={() => {
-              // NO llamar selectPlan aquí - ya se maneja en el componente PlanSelection
-              // Solo proceder al siguiente paso si llegamos aquí (significa que selectPlan fue exitoso)
-              console.log("✅ Plan seleccionado exitosamente, continuando al siguiente paso...");
-            }}
-          />
-        );
-
       case "completed":
         return <RegistrationSuccess key="success" />;
 
@@ -110,6 +72,9 @@ export function MultiStepRegistration() {
         );
     }
   };
+
+  // Active steps only — personalInfo/businessInfo/planSelection removed from flow
+  const activeSteps = ["initial", "otp", "userType", "completed"];
 
   return (
     <div
@@ -128,26 +93,10 @@ export function MultiStepRegistration() {
             boxShadow: `0 2px 12px ${themeColors.primary}15`,
           }}
         >
-          {[
-            "initial",
-            "otp",
-            "userType",
-            "personalInfo",
-            "businessInfo",
-            "planSelection",
-            "completed",
-          ].map((step, index) => {
+          {activeSteps.map((step, index) => {
             const isActive = registrationStep === step;
             const isCompleted =
-              [
-                "initial",
-                "otp",
-                "userType",
-                "personalInfo",
-                "businessInfo",
-                "planSelection",
-                "completed",
-              ].indexOf(registrationStep) > index;
+              activeSteps.indexOf(registrationStep) > index;
 
             return (
               <motion.div
@@ -172,7 +121,7 @@ export function MultiStepRegistration() {
       {/* Contenido principal */}
       <div className="relative z-10 w-full">
         <AnimatePresence mode="wait">{renderStep()}</AnimatePresence>
-        
+
         {/* Información adicional en el footer */}
         <div className="mt-8 flex justify-center">
           <motion.div

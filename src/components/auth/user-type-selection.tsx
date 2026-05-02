@@ -6,12 +6,14 @@ import {
   ArrowLeft,
   User,
   Building2,
-  UserCheck,
+  Briefcase,
+  ShoppingBag,
   ArrowRight,
   Check,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { useTheme } from "@/contexts/theme-context";
+import { useRouter } from "next/navigation";
 
 interface UserTypeSelectionProps {
   onBack: () => void;
@@ -20,7 +22,7 @@ interface UserTypeSelectionProps {
 
 const userTypes = [
   {
-    id: "client",
+    id: "client" as const,
     title: "Cliente",
     description: "Comprador final de productos",
     icon: User,
@@ -32,7 +34,7 @@ const userTypes = [
     ],
   },
   {
-    id: "distributor",
+    id: "distributor" as const,
     title: "Distribuidor",
     description: "Socio comercial con beneficios especiales",
     icon: Building2,
@@ -43,17 +45,51 @@ const userTypes = [
       "Comisiones y bonificaciones",
     ],
   },
+  {
+    id: "company" as const,
+    title: "Compañía",
+    description: "Empresa con acceso B2B",
+    icon: Briefcase,
+    features: [
+      "Precios exclusivos B2B",
+      "Dashboard empresarial",
+      "Múltiples usuarios",
+      "Reportes avanzados",
+    ],
+  },
+  {
+    id: "vendor" as const,
+    title: "Vendedor",
+    description: "Vendedor o representante comercial",
+    icon: ShoppingBag,
+    features: [
+      "Panel de ventas",
+      "Comisiones y metas",
+      "Gestión de clientes",
+      "Reportes de desempeño",
+    ],
+  },
 ];
 
 export function UserTypeSelection({ onBack, onSuccess }: UserTypeSelectionProps) {
   const [selectedType, setSelectedType] = useState<string>("");
-  const { setUserType, isLoading } = useAuthStore();
+  const { setUserType, isLoading, user } = useAuthStore();
   const { themeColors } = useTheme();
+  const router = useRouter();
 
   const handleContinue = async () => {
     if (!selectedType) return;
     try {
-      await setUserType(selectedType as "client" | "distributor");
+      await setUserType(selectedType as "client" | "distributor" | "company" | "vendor");
+      // Determine redirect based on selected type
+      const roleMap: Record<string, string> = {
+        client: "/",
+        distributor: "/admin",
+        company: "/admin",
+        vendor: "/admin",
+      };
+      const redirectPath = roleMap[selectedType] || "/";
+      router.push(redirectPath);
       onSuccess();
     } catch {
       // error shown via toast
@@ -90,11 +126,13 @@ export function UserTypeSelection({ onBack, onSuccess }: UserTypeSelectionProps)
             </button>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                <UserCheck className="w-5 h-5 text-white" />
+                <Check className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white">Tipo de Cuenta</h1>
-                <p className="text-white/80 text-sm">Selecciona cómo vas a usar Virtago</p>
+                <h1 className="text-xl font-bold text-white">
+                  {user?.firstName ? `¡Hola, ${user.firstName}!` : "Tipo de Cuenta"}
+                </h1>
+                <p className="text-white/80 text-sm">Seleccioná cómo vas a usar Virtago</p>
               </div>
             </div>
           </div>
@@ -102,11 +140,11 @@ export function UserTypeSelection({ onBack, onSuccess }: UserTypeSelectionProps)
 
         <div className="px-8 py-7">
           <p className="text-sm mb-6" style={{ color: themeColors.text.secondary }}>
-            Selecciona el tipo de cuenta que mejor se adapte a tus necesidades
+            Esta elección define tu experiencia en la plataforma. Es el último paso para empezar.
           </p>
 
           {/* Tipos de usuario */}
-          <div className="space-y-4 mb-6">
+          <div className="grid grid-cols-2 gap-3 mb-6">
             {userTypes.map((type, index) => {
               const Icon = type.icon;
               const isSelected = selectedType === type.id;
@@ -116,83 +154,90 @@ export function UserTypeSelection({ onBack, onSuccess }: UserTypeSelectionProps)
                   key={type.id}
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + index * 0.08 }}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
+                  transition={{ delay: 0.1 + index * 0.06 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => setSelectedType(type.id)}
-                  className="w-full p-5 rounded-xl border-2 text-left transition-all duration-200"
+                  className="p-4 rounded-xl border-2 text-left transition-all duration-200 relative"
                   style={{
                     borderColor: isSelected ? themeColors.primary : themeColors.border,
                     backgroundColor: isSelected ? `${themeColors.primary}08` : "#ffffff",
                     boxShadow: isSelected ? `0 0 0 3px ${themeColors.primary}20` : "none",
                   }}
                 >
-                  <div className="flex items-start gap-4">
-                    <div
-                      className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center transition-all"
-                      style={{
-                        background: isSelected
-                          ? `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`
-                          : themeColors.surface,
-                      }}
+                  {isSelected && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: themeColors.primary }}
                     >
-                      <Icon
-                        className="h-5 w-5"
-                        style={{ color: isSelected ? "#ffffff" : themeColors.primary }}
-                      />
-                    </div>
+                      <Check className="h-3 w-3 text-white" />
+                    </motion.div>
+                  )}
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <h3
-                          className="text-base font-semibold"
-                          style={{ color: themeColors.text.primary }}
-                        >
-                          {type.title}
-                        </h3>
-                        {isSelected && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="w-6 h-6 rounded-full flex items-center justify-center"
-                            style={{ backgroundColor: themeColors.primary }}
-                          >
-                            <Check className="h-3.5 w-3.5 text-white" />
-                          </motion.div>
-                        )}
-                      </div>
-
-                      <p className="text-sm mb-3" style={{ color: themeColors.text.secondary }}>
-                        {type.description}
-                      </p>
-
-                      <div className="grid grid-cols-2 gap-1.5">
-                        {type.features.map((feature, fi) => (
-                          <div
-                            key={fi}
-                            className="flex items-center gap-1.5 text-xs"
-                            style={{ color: themeColors.text.muted }}
-                          >
-                            <div
-                              className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                              style={{ backgroundColor: themeColors.primary }}
-                            />
-                            {feature}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-all"
+                    style={{
+                      background: isSelected
+                        ? `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`
+                        : themeColors.surface,
+                    }}
+                  >
+                    <Icon
+                      className="h-5 w-5"
+                      style={{ color: isSelected ? "#ffffff" : themeColors.primary }}
+                    />
                   </div>
+
+                  <h3
+                    className="text-sm font-bold mb-0.5"
+                    style={{ color: themeColors.text.primary }}
+                  >
+                    {type.title}
+                  </h3>
+                  <p className="text-xs" style={{ color: themeColors.text.muted }}>
+                    {type.description}
+                  </p>
                 </motion.button>
               );
             })}
           </div>
 
+          {/* Features del tipo seleccionado */}
+          {selectedType && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="mb-5 p-4 rounded-xl"
+              style={{ backgroundColor: themeColors.surface, border: `1px solid ${themeColors.border}` }}
+            >
+              <p className="text-xs font-semibold mb-2" style={{ color: themeColors.text.primary }}>
+                Con este tipo de cuenta tendrás:
+              </p>
+              <div className="grid grid-cols-2 gap-1.5">
+                {userTypes.find((t) => t.id === selectedType)?.features.map((feature, fi) => (
+                  <div
+                    key={fi}
+                    className="flex items-center gap-1.5 text-xs"
+                    style={{ color: themeColors.text.secondary }}
+                  >
+                    <div
+                      className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                      style={{ backgroundColor: themeColors.primary }}
+                    />
+                    {feature}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
           {/* Botón continuar */}
           <motion.button
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.35 }}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
             onClick={handleContinue}
@@ -206,11 +251,11 @@ export function UserTypeSelection({ onBack, onSuccess }: UserTypeSelectionProps)
             {isLoading ? (
               <>
                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Procesando...
+                Creando tu cuenta...
               </>
             ) : (
               <>
-                Continuar
+                Confirmar y entrar
                 <ArrowRight className="h-4 w-4" />
               </>
             )}

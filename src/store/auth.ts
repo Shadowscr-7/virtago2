@@ -85,6 +85,8 @@ export interface User {
   };
   // OAuth provider info
   oauthProvider?: 'google' | 'microsoft' | null;
+  // Profile completeness flag (invisible to user, for distributor/company)
+  profileComplete?: boolean;
 }
 
 interface AuthState {
@@ -147,8 +149,8 @@ interface AuthState {
   }) => Promise<void>;
   verifyOTP: (otp: string) => Promise<void>;
   resendOTP: () => Promise<void>;
-  setUserType: (userType: "client" | "distributor") => Promise<void>;
-  selectUserType: (userType: "client" | "distributor") => Promise<void>;
+  setUserType: (userType: "client" | "distributor" | "company" | "vendor") => Promise<void>;
+  selectUserType: (userType: "client" | "distributor" | "company" | "vendor") => Promise<void>;
   updatePersonalInfo: (data: Record<string, unknown>) => Promise<void>;
   updateBusinessInfo: (data: Record<string, unknown>) => Promise<void>;
   completeRegistration: () => Promise<void>;
@@ -444,7 +446,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      /** Assign role to a new user (post-login role selection) */
+      /** Assign role to a new user (post-login role selection for OAuth users) */
       assignRole: async (role: UserRole) => {
         set({ isLoading: true });
         try {
@@ -452,6 +454,9 @@ export const useAuthStore = create<AuthState>()(
 
           // Call backend to persist role
           await apiHelpers.setRole(role);
+
+          // For distributor and company: mark profileComplete=false (data pending, invisible to user)
+          const needsProfileCompletion = role === 'distributor' || role === 'company';
 
           const updatedUser: User = {
             ...user!,
@@ -461,6 +466,7 @@ export const useAuthStore = create<AuthState>()(
               role === 'vendor' ? 'vendor' :
               role === 'distributor' ? 'distributor' : 'client',
             isVerified: true,
+            profileComplete: needsProfileCompletion ? false : true,
           };
 
           set({
@@ -653,77 +659,64 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      selectUserType: async (userType: "client" | "distributor") => {
+      /**
+       * Selects user type during registration (normal email flow).
+       * All 4 types complete registration immediately — no extra steps.
+       * distributor and company get profileComplete=false (pending data, invisible to user).
+       */
+      selectUserType: async (userType: "client" | "distributor" | "company" | "vendor") => {
         set({ isLoading: true });
         try {
-          await new Promise((resolve) => setTimeout(resolve, 1000));
+          const { registrationData, user } = get();
 
-          const { registrationData } = get();
-
-          if (userType === "client") {
-            const tempToken = localStorage.getItem('temp_auth_token');
-            if (tempToken) {
-              localStorage.removeItem('temp_auth_token');
-              get().setToken(tempToken);
-            }
-
-            const newUser: User = {
-              id: Date.now().toString(),
-              email: registrationData?.email || "",
-              firstName: registrationData?.firstName || "",
-              lastName: registrationData?.lastName || "",
-              userType: "client",
-              role: "user",
-              isVerified: true,
-            };
-
-            set({
-              user: newUser,
-              token: tempToken || null,
-              isAuthenticated: true,
-              registrationStep: "completed",
-              isLoading: false,
-              isRegistering: false,
-            });
-
-            showToast({
-              title: "¡Registro completado!",
-              description: `Bienvenido a Virtago, ${newUser.firstName}`,
-              type: "success",
-            });
-          } else {
-            const { user } = get();
-
-            const tempToken = localStorage.getItem('temp_auth_token');
-            if (tempToken) {
-              localStorage.removeItem('temp_auth_token');
-              get().setToken(tempToken);
-            }
-
-            const updatedUser: User = {
-              ...user,
-              id: user?.id || Date.now().toString(),
-              email: registrationData?.email || user?.email || "",
-              firstName: registrationData?.firstName || user?.firstName || "",
-              lastName: registrationData?.lastName || user?.lastName || "",
-              userType: "distributor",
-              role: "distributor",
-              isVerified: user?.isVerified || true,
-            };
-
-            set({
-              user: updatedUser,
-              token: tempToken || get().token,
-              registrationStep: "personalInfo",
-              isLoading: false,
-            });
-
-            showToast({
-              title: "Tipo de cuenta seleccionado",
-              description: "Por favor completa tu información personal",
-              type: "info",
-            });
+          const tempToken = localStorage.getItem('temp_auth_token');
+          if (tempToken) {
+            localStorage.removeItem('temp_auth_token');
+            get().setToken(tempToken);
           }
+
+          // Map userType to role
+          const role: UserRole =
+            userType === 'client' ? 'user' :
+            userType === 'distributor' ? 'distributor' :
+            userType === 'company' ? 'company' : 'vendor';
+
+          // Call backend to persist role
+          await apiHelpers.setRole(role);
+
+          // distributor and company: mark profileComplete=false (pending extra data, invisible to user)
+          const needsProfileCompletion = userType === 'distributor' || userType === 'company';
+
+          const newUser: User = {
+            id: user?.id || Date.now().toString(),
+            email: registrationData?.email || user?.email || "",
+            firstName: registrationData?.firstName || user?.firstName || "",
+            lastName: registrationData?.lastName || user?.lastName || "",
+            userType,
+            role,
+            isVerified: true,
+            profileComplete: needsProfileCompletion ? false : true,
+          };
+
+          set({
+            user: newUser,
+            token: tempToken || get().token,
+            isAuthenticated: true,
+            registrationStep: "completed",
+            isLoading: false,
+            isRegistering: false,
+          });
+
+          const roleLabel =
+            userType === 'client' ? 'Cliente' :
+            userType === 'distributor' ? 'Distribuidor' :
+            userType === 'company' ? 'Compañía' : 'Vendedor';
+
+          showToast({
+            title: "¡Bienvenido a Virtago!",
+            description: `Cuenta creada como ${roleLabel}. Ya podés empezar a usar la plataforma.`,
+            type: "success",
+          });
         } catch (error) {
           set({ isLoading: false });
 
@@ -850,7 +843,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      setUserType: async (userType: "client" | "distributor") => {
+      setUserType: async (userType: "client" | "distributor" | "company" | "vendor") => {
         return get().selectUserType(userType);
       },
 
