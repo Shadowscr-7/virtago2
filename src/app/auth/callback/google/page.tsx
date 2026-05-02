@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore, getRedirectForRole, UserRole } from "@/store/auth";
 import { useTheme } from "@/contexts/theme-context";
 
-export default function GoogleCallbackPage() {
+function GoogleCallbackInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { loginWithOAuth, rolePending, user } = useAuthStore();
@@ -26,14 +26,9 @@ export default function GoogleCallbackPage() {
       return;
     }
 
-    // Exchange code for token via backend
     const exchangeCode = async () => {
       try {
-        // The backend endpoint POST /api/auth/google accepts the OAuth code
-        // and exchanges it with Google, returning a Virtago JWT
         await loginWithOAuth("google", code);
-        // loginWithOAuth sets rolePending and isAuthenticated in store
-        // The redirect is handled below
       } catch {
         router.push("/login?error=oauth_failed");
       }
@@ -42,12 +37,11 @@ export default function GoogleCallbackPage() {
     exchangeCode();
   }, [searchParams, loginWithOAuth, router]);
 
-  // Redirect after auth completes
   useEffect(() => {
     const { isAuthenticated, rolePending: rp } = useAuthStore.getState();
     if (isAuthenticated) {
       if (rp) {
-        router.push("/login"); // login page will show RoleSelection
+        router.push("/login");
       } else if (user?.role) {
         router.push(getRedirectForRole(user.role as UserRole));
       }
@@ -69,5 +63,13 @@ export default function GoogleCallbackPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function GoogleCallbackPage() {
+  return (
+    <Suspense fallback={null}>
+      <GoogleCallbackInner />
+    </Suspense>
   );
 }

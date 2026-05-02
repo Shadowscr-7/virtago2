@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore, getRedirectForRole, UserRole } from "@/store/auth";
 import { useTheme } from "@/contexts/theme-context";
 
-export default function MicrosoftCallbackPage() {
+function MicrosoftCallbackInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { loginWithOAuth, rolePending, user } = useAuthStore();
@@ -28,7 +28,6 @@ export default function MicrosoftCallbackPage() {
 
     const exchangeCode = async () => {
       try {
-        // The backend endpoint POST /api/auth/microsoft accepts the OAuth code
         await loginWithOAuth("microsoft", code);
       } catch {
         router.push("/login?error=oauth_failed");
@@ -64,5 +63,13 @@ export default function MicrosoftCallbackPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function MicrosoftCallbackPage() {
+  return (
+    <Suspense fallback={null}>
+      <MicrosoftCallbackInner />
+    </Suspense>
   );
 }
