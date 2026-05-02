@@ -102,13 +102,13 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.15 }}
             className="w-full overflow-hidden rounded-2xl"
-            style={{ aspectRatio: "1440 / 400" }}
+            style={{ aspectRatio: "1440 / 576" }}
           >
             <Image
               src="/images/banner.jpg"
               alt="Banner principal Virtago"
               width={1440}
-              height={400}
+              height={576}
               className="w-full h-full object-cover rounded-2xl"
               priority
             />
