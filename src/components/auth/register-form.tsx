@@ -43,6 +43,7 @@ interface RegisterFormProps {
 export function RegisterForm({ onSuccess }: RegisterFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState<"google" | "microsoft" | null>(null);
   const { themeColors } = useTheme();
 
   const { register: registerUser, isLoading } = useAuthStore();
@@ -70,6 +71,32 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
     } catch {
       // Los errores ya se muestran vía toast desde el store
     }
+  };
+
+  // OAuth registration — same flow as login: backend returns user+token,
+  // if user is new (isNew=true) they go to userType selection (rolePending=true via loginWithOAuth).
+  const handleGoogleRegister = () => {
+    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    if (!googleClientId) {
+      alert("Google OAuth no está configurado. El administrador debe agregar NEXT_PUBLIC_GOOGLE_CLIENT_ID al .env.");
+      return;
+    }
+    setOauthLoading("google");
+    const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback/google`);
+    const scope = encodeURIComponent("openid email profile");
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}&access_type=offline`;
+  };
+
+  const handleMicrosoftRegister = () => {
+    const msClientId = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID;
+    if (!msClientId) {
+      alert("Microsoft OAuth no está configurado. El administrador debe agregar NEXT_PUBLIC_MICROSOFT_CLIENT_ID al .env.");
+      return;
+    }
+    setOauthLoading("microsoft");
+    const redirectUri = encodeURIComponent(`${window.location.origin}/auth/callback/microsoft`);
+    const scope = encodeURIComponent("openid email profile User.Read");
+    window.location.href = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${msClientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
   };
 
   const getPasswordStrength = (password: string) => {
@@ -148,6 +175,73 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
 
         {/* Formulario */}
         <div className="px-8 py-7">
+          {/* OAuth Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="flex flex-col gap-3 mb-5"
+          >
+            {/* Google */}
+            <button
+              type="button"
+              onClick={handleGoogleRegister}
+              disabled={!!oauthLoading || isLoading}
+              className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-lg border-2 font-medium text-sm transition-all duration-200 hover:shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
+              style={{
+                borderColor: themeColors.border,
+                color: themeColors.text.primary,
+                backgroundColor: "#ffffff",
+              }}
+            >
+              {oauthLoading === "google" ? (
+                <span className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 48 48" fill="none">
+                  <path d="M47.532 24.5528C47.532 22.9214 47.3997 21.2811 47.1175 19.6761H24.48V28.9181H37.4434C36.9055 31.8988 35.177 34.5356 32.6461 36.2111V42.2078H40.3801C44.9217 38.0278 47.532 31.8547 47.532 24.5528Z" fill="#4285F4"/>
+                  <path d="M24.48 48.0016C30.9529 48.0016 36.4116 45.8764 40.3888 42.2078L32.6549 36.2111C30.5031 37.675 27.7252 38.5039 24.4888 38.5039C18.2275 38.5039 12.9187 34.2798 11.0139 28.6006H3.03296V34.7825C7.10718 42.8868 15.4056 48.0016 24.48 48.0016Z" fill="#34A853"/>
+                  <path d="M11.0051 28.6006C9.99973 25.6199 9.99973 22.3922 11.0051 19.4115V13.2296H3.03298C-0.371021 20.0112 -0.371021 28.0009 3.03298 34.7825L11.0051 28.6006Z" fill="#FBBC04"/>
+                  <path d="M24.48 9.49932C27.9016 9.44641 31.2086 10.7339 33.6866 13.0973L40.5387 6.24523C36.2 2.17101 30.4414 -0.068932 24.48 0.00161733C15.4055 0.00161733 7.10718 5.11644 3.03296 13.2296L11.005 19.4115C12.901 13.7235 18.2187 9.49932 24.48 9.49932Z" fill="#EA4335"/>
+                </svg>
+              )}
+              Registrarse con Google
+            </button>
+
+            {/* Microsoft */}
+            <button
+              type="button"
+              onClick={handleMicrosoftRegister}
+              disabled={!!oauthLoading || isLoading}
+              className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-lg border-2 font-medium text-sm transition-all duration-200 hover:shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
+              style={{
+                borderColor: themeColors.border,
+                color: themeColors.text.primary,
+                backgroundColor: "#ffffff",
+              }}
+            >
+              {oauthLoading === "microsoft" ? (
+                <span className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 21 21" fill="none">
+                  <path d="M0 0H10V10H0V0Z" fill="#F25022"/>
+                  <path d="M11 0H21V10H11V0Z" fill="#7FBA00"/>
+                  <path d="M0 11H10V21H0V11Z" fill="#00A4EF"/>
+                  <path d="M11 11H21V21H11V11Z" fill="#FFB900"/>
+                </svg>
+              )}
+              Registrarse con Microsoft
+            </button>
+          </motion.div>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3 mb-5">
+            <div className="flex-1 h-px" style={{ backgroundColor: themeColors.border }} />
+            <span className="text-xs font-medium" style={{ color: themeColors.text.muted }}>
+              o continuar con email
+            </span>
+            <div className="flex-1 h-px" style={{ backgroundColor: themeColors.border }} />
+          </div>
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {/* Nombre y Apellido */}
             <div className="grid grid-cols-2 gap-4">
@@ -384,7 +478,7 @@ export function RegisterForm({ onSuccess }: RegisterFormProps) {
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !!oauthLoading}
               className="w-full py-3 px-6 rounded-lg font-semibold text-white text-sm transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               style={{
                 background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,

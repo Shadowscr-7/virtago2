@@ -15,7 +15,7 @@ import { UnsavedChangesNotification } from "@/components/products/admin/unsaved-
 import { api } from "@/api";
 import { motion } from "framer-motion";
 
-const PRIMARY = "#1E3A61";
+const PRIMARY = "#C8102E";
 
 // Datos de ejemplo - después esto vendrá del servidor
 const mockProductData = {

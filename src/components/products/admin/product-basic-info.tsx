@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { Package, FileText, Tag, Building } from "lucide-react";
@@ -11,7 +11,7 @@ interface ProductBasicInfoProps {
   onChange: (updates: Partial<ProductData>) => void;
 }
 
-const PRIMARY = "#1E3A61";
+const PRIMARY = "#C8102E";
 
 export function ProductBasicInfo({
   productData,

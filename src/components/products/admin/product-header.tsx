@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { ArrowLeft, Edit, Save, X, Package, Star, TrendingUp, Eye } from "lucide-react";
@@ -14,7 +14,7 @@ interface ProductHeaderProps {
   onCancel: () => void;
 }
 
-const PRIMARY = "#1E3A61";
+const PRIMARY = "#C8102E";
 
 export function ProductHeader({
   productData,
@@ -88,7 +88,7 @@ export function ProductHeader({
               </div>
 
               <div className="flex items-center gap-4 text-sm text-gray-500">
-                <span className="bg-blue-50 px-2 py-1 rounded-md text-blue-700 font-mono">
+                <span className="bg-red-50 px-2 py-1 rounded-md text-red-700 font-mono">
                   {productData.sku}
                 </span>
                 <span>•</span>
@@ -134,7 +134,7 @@ export function ProductHeader({
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => window.open(`/productos/${productData.id}`, "_blank")}
-                className="flex items-center gap-2 px-5 py-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl transition-all border border-blue-100"
+                className="flex items-center gap-2 px-5 py-3 bg-red-50 hover:bg-blue-100 text-red-700 rounded-xl transition-all border border-blue-100"
               >
                 <Eye className="w-4 h-4" />
                 <span className="font-medium">Ver en tienda</span>

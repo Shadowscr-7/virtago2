@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,7 +19,7 @@ import { useAuthStore } from "@/store/auth";
 import { showToast } from "@/store/toast-helpers";
 import http from "@/api/http-client";
 
-const PRIMARY = "#1E3A61";
+const PRIMARY = "#C8102E";
 
 interface Commission {
   id: string;
@@ -321,7 +321,7 @@ export default function ComisionesAdminPage() {
               className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 max-w-lg w-full"
             >
               <div className="flex items-start gap-4 mb-5">
-                <div className="p-3 bg-blue-50 rounded-xl flex-shrink-0">
+                <div className="p-3 bg-red-50 rounded-xl flex-shrink-0">
                   <Upload className="w-6 h-6" style={{ color: PRIMARY }} />
                 </div>
                 <div className="flex-1">
@@ -363,7 +363,7 @@ export default function ComisionesAdminPage() {
                       onClick={() => setProofType("image")}
                       className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-all flex-1 ${
                         proofType === "image"
-                          ? "border-[#1E3A61] bg-blue-50 text-[#1E3A61]"
+                          ? "border-[#C8102E] bg-red-50 text-[#C8102E]"
                           : "border-gray-200 text-gray-600 hover:border-gray-300"
                       }`}
                     >
@@ -374,7 +374,7 @@ export default function ComisionesAdminPage() {
                       onClick={() => setProofType("pdf")}
                       className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-all flex-1 ${
                         proofType === "pdf"
-                          ? "border-[#1E3A61] bg-blue-50 text-[#1E3A61]"
+                          ? "border-[#C8102E] bg-red-50 text-[#C8102E]"
                           : "border-gray-200 text-gray-600 hover:border-gray-300"
                       }`}
                     >

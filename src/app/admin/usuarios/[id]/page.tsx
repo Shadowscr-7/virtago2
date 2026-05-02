@@ -21,7 +21,7 @@ import { useAuthStore } from "@/store/auth";
 import { showToast } from "@/store/toast-helpers";
 import http from "@/api/http-client";
 
-const PRIMARY = "#1E3A61";
+const PRIMARY = "#C8102E";
 
 interface AdminUser {
   id: string;

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -140,7 +140,7 @@ export function ProductSpecifications({
                 type="text"
                 value={newSpecKey}
                 onChange={(e) => setNewSpecKey(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1E3A61]/30 focus:border-[#1E3A61] transition-all"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E]/30 focus:border-[#C8102E] transition-all"
                 placeholder="Ej: Procesador, Pantalla, Memoria..."
               />
             </div>
@@ -153,7 +153,7 @@ export function ProductSpecifications({
                 type="text"
                 value={newSpecValue}
                 onChange={(e) => setNewSpecValue(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1E3A61]/30 focus:border-[#1E3A61] transition-all"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#C8102E]/30 focus:border-[#C8102E] transition-all"
                 placeholder="Ej: Intel Core i7, 15.6 pulgadas, 16GB..."
                 onKeyPress={(e) => {
                   if (e.key === "Enter") {
@@ -170,7 +170,7 @@ export function ProductSpecifications({
             onClick={addSpecification}
             disabled={!newSpecKey.trim() || !newSpecValue.trim()}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ backgroundColor: "#1E3A61" }}
+            style={{ backgroundColor: "#C8102E" }}
           >
             <Plus className="w-4 h-4" />
             <span>Agregar especificación</span>
@@ -221,13 +221,13 @@ function SpecificationItem({
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-blue-50 rounded-xl border border-blue-200"
+        className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-red-50 rounded-xl border border-blue-200"
       >
         <input
           type="text"
           value={editKey}
           onChange={(e) => setEditKey(e.target.value)}
-          className="px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1E3A61]/30 focus:border-[#1E3A61] transition-all"
+          className="px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8102E]/30 focus:border-[#C8102E] transition-all"
           placeholder="Característica"
         />
 
@@ -236,7 +236,7 @@ function SpecificationItem({
             type="text"
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
-            className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1E3A61]/30 focus:border-[#1E3A61] transition-all"
+            className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8102E]/30 focus:border-[#C8102E] transition-all"
             placeholder="Valor"
             onKeyPress={(e) => {
               if (e.key === "Enter") {
@@ -270,7 +270,7 @@ function SpecificationItem({
   return (
     <motion.div
       whileHover={{ scale: 1.01 }}
-      className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-[#1E3A61]/30 transition-all"
+      className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-[#C8102E]/30 transition-all"
     >
       <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -289,7 +289,7 @@ function SpecificationItem({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={onEdit}
-            className="p-2 text-[#1E3A61] hover:bg-blue-50 rounded-lg transition-all"
+            className="p-2 text-[#C8102E] hover:bg-red-50 rounded-lg transition-all"
             title="Editar especificación"
           >
             <Edit2 className="w-4 h-4" />

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion } from "framer-motion";
@@ -258,8 +258,8 @@ export function ProductImagesGallery({
               whileHover={{ scale: 1.05 }}
               className={`relative aspect-square rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${
                 selectedImageIndex === index
-                  ? "border-[#1E3A61] ring-2 ring-[#1E3A61]/20"
-                  : "border-gray-200 hover:border-[#1E3A61]/40"
+                  ? "border-[#C8102E] ring-2 ring-[#C8102E]/20"
+                  : "border-gray-200 hover:border-[#C8102E]/40"
               }`}
               onClick={() => setSelectedImageIndex(index)}
             >
@@ -343,7 +343,7 @@ export function ProductImagesGallery({
               key={uploadImg.id}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="relative aspect-square rounded-xl overflow-hidden border-2 border-[#1E3A61]/40"
+              className="relative aspect-square rounded-xl overflow-hidden border-2 border-[#C8102E]/40"
             >
               <Image
                 src={uploadImg.preview}
@@ -378,7 +378,7 @@ export function ProductImagesGallery({
           {isEditing && (
             <motion.label
               whileHover={{ scale: 1.05 }}
-              className={`relative aspect-square border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-[#1E3A61]/50 transition-colors flex items-center justify-center bg-gray-50 ${
+              className={`relative aspect-square border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:border-[#C8102E]/50 transition-colors flex items-center justify-center bg-gray-50 ${
                 isUploading ? 'opacity-50 pointer-events-none' : ''
               }`}
             >
@@ -455,7 +455,7 @@ export function ProductImagesGallery({
               : "Este producto no tiene imágenes configuradas"}
           </p>
           {isEditing && (
-            <label className="inline-flex items-center gap-2 px-4 py-2 text-white rounded-xl transition-all cursor-pointer" style={{ backgroundColor: "#1E3A61" }}>
+            <label className="inline-flex items-center gap-2 px-4 py-2 text-white rounded-xl transition-all cursor-pointer" style={{ backgroundColor: "#C8102E" }}>
               <Upload className="w-4 h-4" />
               <span>Subir imágenes</span>
               <input

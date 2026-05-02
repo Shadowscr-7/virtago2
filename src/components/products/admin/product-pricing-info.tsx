@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { DollarSign, TrendingUp, Percent } from "lucide-react";
@@ -10,7 +10,7 @@ interface ProductPricingInfoProps {
   onChange: (updates: Partial<ProductData>) => void;
 }
 
-const PRIMARY = "#1E3A61";
+const PRIMARY = "#C8102E";
 
 export function ProductPricingInfo({
   productData,
@@ -248,13 +248,13 @@ export function ProductPricingInfo({
             <div className="text-xs text-green-600/70">(Precio - Costo) / Precio</div>
           </div>
 
-          <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+          <div className="bg-red-50 rounded-xl p-4 border border-blue-100">
             <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="w-4 h-4 text-blue-600" />
-              <span className="text-sm font-medium text-blue-700">Markup</span>
+              <TrendingUp className="w-4 h-4 text-red-600" />
+              <span className="text-sm font-medium text-red-700">Markup</span>
             </div>
-            <div className="text-2xl font-bold text-blue-600">{markup.toFixed(1)}%</div>
-            <div className="text-xs text-blue-600/70">(Precio - Costo) / Costo</div>
+            <div className="text-2xl font-bold text-red-600">{markup.toFixed(1)}%</div>
+            <div className="text-xs text-red-600/70">(Precio - Costo) / Costo</div>
           </div>
 
           <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">

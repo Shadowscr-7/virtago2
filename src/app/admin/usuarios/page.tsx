@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -22,7 +22,7 @@ import { useTheme } from "@/contexts/theme-context";
 import { showToast } from "@/store/toast-helpers";
 import http from "@/api/http-client";
 
-const PRIMARY = "#1E3A61";
+const PRIMARY = "#C8102E";
 
 interface AdminUser {
   id: string;
@@ -311,7 +311,7 @@ export default function UsuariosAdminPage() {
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600">{u.email || "-"}</td>
                       <td className="px-4 py-3">
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-blue-100">
                           {getUserTypeLabel(u)}
                         </span>
                       </td>
@@ -333,7 +333,7 @@ export default function UsuariosAdminPage() {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => router.push(`/admin/usuarios/${u.id}`)}
-                            className="p-1.5 rounded-lg text-gray-500 hover:text-[#1E3A61] hover:bg-blue-50 transition-all"
+                            className="p-1.5 rounded-lg text-gray-500 hover:text-[#C8102E] hover:bg-red-50 transition-all"
                             title="Ver detalle"
                           >
                             <Eye className="w-4 h-4" />

@@ -31,7 +31,7 @@ export interface PlanInfo {
   supportLevel: string;
 }
 
-export type UserRole = 'user' | 'admin' | 'distributor' | 'company' | 'vendor';
+export type UserRole = 'user' | 'admin' | 'distributor' | 'company' | 'vendor' | 'superadmin';
 
 export interface User {
   id: string;
@@ -163,6 +163,8 @@ interface AuthState {
 /** Redirect destination based on assigned role */
 export function getRedirectForRole(role: UserRole): string {
   switch (role) {
+    case 'superadmin':
+      return '/superadmin';
     case 'admin':
     case 'distributor':
     case 'company':

@@ -23,6 +23,9 @@ import {
   MonitorDown,
   UserCog,
   BarChart3,
+  CreditCard,
+  UserCircle,
+  Star,
 } from "lucide-react";
 import { useTheme } from "@/contexts/theme-context";
 import { useAuthStore } from "@/store/auth";
@@ -127,6 +130,24 @@ const menuItems = [
     icon: BookOpen,
     href: "/redoc-es",
     external: true,
+  },
+  {
+    id: "perfil",
+    label: "Mi Perfil",
+    icon: UserCircle,
+    href: "/admin/perfil",
+  },
+  {
+    id: "facturacion-dist",
+    label: "Facturacion",
+    icon: CreditCard,
+    href: "/admin/facturacion",
+  },
+  {
+    id: "mi-plan",
+    label: "Mi Plan",
+    icon: Star,
+    href: "/admin/mi-plan",
   },
 ];
 

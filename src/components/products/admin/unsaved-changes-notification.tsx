@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { Save, RotateCcw, AlertTriangle } from "lucide-react";
@@ -53,7 +53,7 @@ export function UnsavedChangesNotification({
               whileTap={{ scale: 0.95 }}
               onClick={onSave}
               className="flex items-center gap-2 px-4 py-2 text-white rounded-xl transition-all"
-              style={{ backgroundColor: "#1E3A61" }}
+              style={{ backgroundColor: "#C8102E" }}
             >
               <Save className="w-4 h-4" />
               <span className="font-medium">Guardar cambios</span>

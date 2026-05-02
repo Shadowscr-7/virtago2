@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { ProductCard } from "@/components/products/product-card";
 import { useTheme } from "@/contexts/theme-context";
 import { AnimatedBackground } from "@/components/ui/animated-background";
@@ -107,14 +108,14 @@ export default function Home() {
             className="w-full overflow-hidden rounded-2xl"
             style={{ aspectRatio: "1440 / 400" }}
           >
-            <div
-              className="w-full h-full flex items-center justify-center rounded-2xl"
-              style={{ backgroundColor: "#F5F5F5" }}
-            >
-              <span className="text-xl font-medium" style={{ color: "#9CA3AF" }}>
-                Banner principal
-              </span>
-            </div>
+            <Image
+              src="/banner.jpg"
+              alt="Banner principal Virtago"
+              width={1440}
+              height={400}
+              className="w-full h-full object-cover rounded-2xl"
+              priority
+            />
           </motion.div>
 
           {/* Texto con flechas debajo del banner */}
