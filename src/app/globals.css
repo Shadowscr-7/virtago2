@@ -3,15 +3,15 @@
 /* Variables CSS personalizadas para temas de Virtago */
 /* Defaults: light-red (rojo primario #C8102E) — sobreescritas en runtime por ThemeProvider */
 :root {
-  --theme-primary: #C8102E;
-  --theme-secondary: #E8354A;
-  --theme-accent: #A00C24;
+  --theme-primary: #B91C1C;
+  --theme-secondary: #DC2626;
+  --theme-accent: #991B1B;
   --theme-background: #ffffff;
-  --theme-surface: #fff5f5;
-  --theme-border: #fecdd3;
-  --theme-text-primary: #1a0205;
-  --theme-text-secondary: #475569;
-  --theme-text-muted: #94a3b8;
+  --theme-surface: #ffffff;
+  --theme-border: #e5e7eb;
+  --theme-text-primary: #111827;
+  --theme-text-secondary: #4b5563;
+  --theme-text-muted: #9ca3af;
 }
 
 /* Variables originales del sistema */

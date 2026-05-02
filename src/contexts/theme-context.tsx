@@ -36,25 +36,25 @@ export interface ThemeColors {
 
 const RED_THEME: ThemeColors = {
   name: "Rojo",
-  primary: "#C8102E",
-  secondary: "#E8354A",
-  accent: "#A00C24",
+  primary: "#B91C1C",   // red-700 — rojo profundo, claramente rojo sin rosado
+  secondary: "#DC2626", // red-600
+  accent: "#991B1B",    // red-800
   background: "#ffffff",
-  surface: "#fff5f5",
-  border: "#fecdd3",
+  surface: "#ffffff",   // blanco puro, sin tinte rosado
+  border: "#e5e7eb",    // gris neutro, sin rosa
   text: {
-    primary: "#1a0205",
-    secondary: "#475569",
-    muted: "#94a3b8",
+    primary: "#111827",
+    secondary: "#4b5563",
+    muted: "#9ca3af",
   },
   gradients: {
-    primary: "from-red-700 to-red-500",
-    secondary: "from-red-500 to-rose-400",
-    accent: "from-red-800 to-red-600",
+    primary: "from-red-700 to-red-600",
+    secondary: "from-red-600 to-red-500",
+    accent: "from-red-800 to-red-700",
   },
   glass: {
-    primary: "from-red-50/90 to-white/90",
-    secondary: "from-white/90 to-red-50/80",
+    primary: "from-white/95 to-gray-50/90",
+    secondary: "from-gray-50/90 to-white/95",
   },
 };
 
