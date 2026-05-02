@@ -105,7 +105,7 @@ export default function Home() {
             style={{ aspectRatio: "1440 / 400" }}
           >
             <Image
-              src="/banner.jpg"
+              src="/images/banner.jpg"
               alt="Banner principal Virtago"
               width={1440}
               height={400}
