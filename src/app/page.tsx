@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { ProductCard } from "@/components/products/product-card";
 import { useTheme } from "@/contexts/theme-context";
-import { AnimatedBackground } from "@/components/ui/animated-background";
 import { ChatDemo } from "@/components/chat/ChatDemo";
 import { useAuthStore } from "@/store/auth";
 import { useRouter } from "next/navigation";
@@ -69,9 +68,8 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background relative">
-      <AnimatedBackground />
-      <main className="container mx-auto px-4 py-8 space-y-12 relative z-10">
+    <div className="min-h-screen bg-white">
+      <main className="container mx-auto px-4 py-8 space-y-12">
         {/* Smart Cart Banner — solo visible para clientes con plan GOLD/PLATINUM */}
         {isAuthenticated && (
           <div className="mb-2">
@@ -88,10 +86,8 @@ export default function Home() {
             className="text-center mb-4 md:mb-8"
           >
             <h1
-              className="text-2xl sm:text-4xl md:text-6xl font-bold bg-clip-text text-transparent mb-3 md:mb-4"
-              style={{
-                backgroundImage: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.accent})`,
-              }}
+              className="text-2xl sm:text-4xl md:text-6xl font-bold mb-3 md:mb-4"
+              style={{ color: themeColors.primary }}
             >
               Estás en Virtago
             </h1>

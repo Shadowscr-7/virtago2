@@ -22,24 +22,24 @@
   --card-foreground: 240 10% 3.9%;
   --popover: 0 0% 100%;
   --popover-foreground: 240 10% 3.9%;
-  --primary: 349 85% 44%;
+  --primary: 0 72% 41%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 240 4.8% 95.9%;
-  --secondary-foreground: 240 5.9% 10%;
-  --muted: 240 4.8% 95.9%;
-  --muted-foreground: 240 3.8% 46.1%;
-  --accent: 240 4.8% 95.9%;
-  --accent-foreground: 240 5.9% 10%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 351 100% 93%;
-  --input: 351 100% 93%;
-  --ring: 349 85% 44%;
+  --secondary: 220 13% 95%;
+  --secondary-foreground: 220 9% 10%;
+  --muted: 220 13% 96%;
+  --muted-foreground: 220 9% 46%;
+  --accent: 220 13% 95%;
+  --accent-foreground: 220 9% 10%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --ring: 0 72% 41%;
   --radius: 0.75rem;
 
   /* Custom gradients */
-  --gradient-primary: linear-gradient(135deg, #C8102E 0%, #E8354A 100%);
-  --gradient-secondary: linear-gradient(135deg, #E8354A 0%, #f5576c 100%);
+  --gradient-primary: linear-gradient(135deg, #B91C1C 0%, #DC2626 100%);
+  --gradient-secondary: linear-gradient(135deg, #DC2626 0%, #EF4444 100%);
   --gradient-dark: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
 }
 

@@ -88,6 +88,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     root.style.setProperty("--theme-text-primary", theme.text.primary);
     root.style.setProperty("--theme-text-secondary", theme.text.secondary);
     root.style.setProperty("--theme-text-muted", theme.text.muted);
+    // Force white background — removes any residual tint
+    root.style.setProperty("--background", "0 0% 100%");
+    root.style.setProperty("--border", "220 13% 91%");
+    root.style.setProperty("--primary", "0 72% 41%");
+    root.style.backgroundColor = "#ffffff";
 
     // Clear any stale saved theme so future loads also use red
     try {
