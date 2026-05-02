@@ -113,26 +113,8 @@ export function MultiStepRegistration() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4 pb-8"
-      style={{
-        background: `linear-gradient(135deg, ${themeColors.background}, ${themeColors.primary}20, ${themeColors.background})`,
-      }}
+      className="min-h-screen flex items-center justify-center p-4 pb-8 bg-white"
     >
-      {/* Partículas de fondo */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div
-          className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-10"
-          style={{ backgroundColor: themeColors.primary }}
-        />
-        <div
-          className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-10"
-          style={{ backgroundColor: themeColors.accent }}
-        />
-        <div
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl opacity-10"
-          style={{ backgroundColor: themeColors.secondary }}
-        />
-      </div>
 
       {/* Indicador de progreso */}
       <div className="absolute top-8 left-1/2 transform -translate-x-1/2 z-10">
