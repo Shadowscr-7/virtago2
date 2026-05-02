@@ -31,13 +31,15 @@ export interface PlanInfo {
   supportLevel: string;
 }
 
+export type UserRole = 'user' | 'admin' | 'distributor' | 'company' | 'vendor';
+
 export interface User {
   id: string;
   email: string;
   firstName: string;
   lastName: string;
-  userType?: "client" | "distributor";
-  role?: 'user' | 'admin' | 'distributor';
+  userType?: "client" | "distributor" | "company" | "vendor";
+  role?: UserRole;
   isVerified: boolean;
   profile?: {
     phone?: string;
@@ -81,6 +83,8 @@ export interface User {
     currency: string;
     billingCycle: string;
   };
+  // OAuth provider info
+  oauthProvider?: 'google' | 'microsoft' | null;
 }
 
 interface AuthState {
@@ -109,6 +113,13 @@ interface AuthState {
     | "planSelection"
     | "completed";
 
+  // Login con OTP (post-login para usuarios existentes)
+  loginOtpStep: boolean;
+  loginEmail: string | null;
+
+  // Rol pendiente de asignación (usuarios nuevos sin rol)
+  rolePending: boolean;
+
   // Acciones
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
@@ -124,6 +135,9 @@ interface AuthState {
 
   // Helpers
   login: (email: string, password: string) => Promise<void>;
+  loginWithOAuth: (provider: 'google' | 'microsoft', token: string) => Promise<void>;
+  verifyLoginOTP: (otp: string) => Promise<void>;
+  assignRole: (role: UserRole) => Promise<void>;
   logout: () => void;
   register: (data: {
     firstName: string;
@@ -146,6 +160,20 @@ interface AuthState {
   resetRegistration: () => void;
 }
 
+/** Redirect destination based on assigned role */
+export function getRedirectForRole(role: UserRole): string {
+  switch (role) {
+    case 'admin':
+    case 'distributor':
+    case 'company':
+    case 'vendor':
+      return '/admin';
+    case 'user':
+    default:
+      return '/';
+  }
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -162,12 +190,19 @@ export const useAuthStore = create<AuthState>()(
       otpVerified: false,
       registrationStep: "initial",
 
+      // Login OTP step
+      loginOtpStep: false,
+      loginEmail: null,
+
+      // Role pending
+      rolePending: false,
+
       // Setters básicos
       setUser: (user) => set({ user }),
       setToken: (token) => {
         set({ token });
         if (token) {
-          localStorage.setItem("token", token); // ✅ Clave correcta
+          localStorage.setItem("token", token);
           localStorage.setItem("auth_token", token); // Compatibilidad
         } else {
           localStorage.removeItem("token");
@@ -195,94 +230,69 @@ export const useAuthStore = create<AuthState>()(
       login: async (email: string, password: string) => {
         set({ isLoading: true });
         try {
-          // Llamar a la API real de login
           const response = await apiHelpers.login({ email, password });
 
-          console.log("🔵 Login exitoso:", response.data);
-          
-          // 🔧 El backend devuelve: { success, message, data: { token, user } }
-          // Necesitamos acceder a response.data.data para obtener token y user
+          console.log("Login exitoso:", response.data);
+
           const loginData = (response.data as any).data || response.data;
-          
-          console.log("🔵 Token recibido:", loginData.token);
-          console.log("🔵 User recibido:", loginData.user);
-          console.log("🔵 Role del user:", loginData.user?.role);
-          console.log("🔵 distributorCode del user:", loginData.user?.distributorCode);
-          console.log("🔵 distributorCode tipo:", typeof loginData.user?.distributorCode, "| valor:", JSON.stringify(loginData.user?.distributorCode));
 
           const { token, user } = loginData;
 
-          // Determinar userType basado en múltiples criterios
-          const userType: 'client' | 'distributor' = 
-            user.distributorCode || 
-            user.role === 'distributor' || 
-            (user.planName && user.planName !== 'free') 
-            ? 'distributor' 
+          const userType: User["userType"] =
+            user.role === 'company' ? 'company' :
+            user.role === 'vendor' ? 'vendor' :
+            (user.distributorCode || user.role === 'distributor' || (user.planName && user.planName !== 'free'))
+            ? 'distributor'
             : 'client';
 
-          // Crear el usuario con la estructura esperada
           const loggedUser: User = {
-            id: user.email, // Usar email como ID ya que no viene ID en la respuesta
+            id: user.email,
             email: user.email,
             firstName: user.firstName,
             lastName: user.lastName,
             userType,
             isVerified: user.isVerified,
-            role: user.role,
+            role: user.role as UserRole,
             plan: user.planId ? {
               id: user.planId,
               name: user.planName,
               displayName: user.planDisplayName,
-              price: 0, // No viene en la respuesta, poner default
+              price: 0,
               currency: 'USD',
               billingCycle: 'monthly',
             } : undefined,
-            // Mapear distributorCode (el único campo que viene en la respuesta de login)
             distributorInfo: user.distributorCode ? {
               distributorCode: user.distributorCode,
             } : undefined,
+            oauthProvider: null,
           };
 
-          console.log("🔵 Usuario creado para el store:", loggedUser);
-          console.log("🔵 Role guardado en loggedUser:", loggedUser.role);
+          // Store temp token; login page will trigger OTP step
+          localStorage.setItem("temp_auth_token", token);
+          localStorage.setItem("user", JSON.stringify(loggedUser));
 
           set({
-            user: loggedUser,
-            token,
-            isAuthenticated: true,
             isLoading: false,
+            loginOtpStep: true,
+            loginEmail: email,
+            // Store user temporarily to have it available after OTP
+            user: loggedUser,
           });
 
-          console.log("🔵 Estado actualizado en el store");
-
-          // 🔧 Guardar token y usuario en localStorage con las claves correctas
-          localStorage.setItem("token", token); // ✅ Clave correcta para auth guard
-          localStorage.setItem("user", JSON.stringify(loggedUser)); // ✅ Guardar usuario también
-          localStorage.setItem("auth_token", token); // Mantener por compatibilidad
-          
-          console.log("✅ Token y usuario guardados en localStorage");
-
-          // Mostrar notificación de éxito
-          showToast({
-            title: "¡Bienvenido!",
-            description: `Sesión iniciada como ${loggedUser.firstName} ${loggedUser.lastName}`,
-            type: "success",
-          });
         } catch (error: unknown) {
           console.error("Error en login:", error);
           set({ isLoading: false });
-          
-          // Mostrar notificación de error
-          const errorMessage = error instanceof Error 
-            ? error.message 
+
+          const errorMessage = error instanceof Error
+            ? error.message
             : "Error al iniciar sesión. Verifica tus credenciales.";
-          
+
           showToast({
             title: "Error de autenticación",
             description: errorMessage,
             type: "error",
           });
-          
+
           if (error instanceof Error) {
             throw error;
           } else {
@@ -291,9 +301,201 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      /** Verify OTP sent after email+password login */
+      verifyLoginOTP: async (otp: string) => {
+        set({ isLoading: true });
+        try {
+          const { loginEmail, user } = get();
+
+          if (!loginEmail) {
+            throw new Error("No se encontraron datos de login");
+          }
+
+          const response = await apiHelpers.verifyOTP({
+            email: loginEmail,
+            otp,
+          });
+
+          const verifyData = (response.data as any).data || response.data;
+          console.log("Login OTP verificado:", verifyData);
+
+          const tempToken = localStorage.getItem('temp_auth_token');
+          if (tempToken) {
+            localStorage.removeItem('temp_auth_token');
+            get().setToken(tempToken);
+          }
+
+          // Check if role is already assigned
+          const rolePending = !user?.role || user.role === 'user' && !user.isVerified;
+          // More accurate check: only show role selection if this is truly a new unverified user
+          // For existing verified users, always skip role selection
+          const isNewUser = user && !user.isVerified;
+
+          set({
+            isLoading: false,
+            loginOtpStep: false,
+            loginEmail: null,
+            isAuthenticated: true,
+            rolePending: !!isNewUser,
+          });
+
+          if (!isNewUser) {
+            showToast({
+              title: "¡Bienvenido!",
+              description: `Sesión iniciada como ${user?.firstName} ${user?.lastName}`,
+              type: "success",
+            });
+          }
+
+        } catch (error: unknown) {
+          console.error("Error verificando OTP de login:", error);
+          set({ isLoading: false });
+
+          const errorMessage = error instanceof Error
+            ? error.message
+            : "Código incorrecto. Inténtalo de nuevo.";
+
+          showToast({
+            title: "Código incorrecto",
+            description: errorMessage,
+            type: "error",
+          });
+
+          if (error instanceof Error) {
+            throw error;
+          } else {
+            throw new Error("Código incorrecto. Inténtalo de nuevo.");
+          }
+        }
+      },
+
+      /** Authenticate via Google or Microsoft OAuth token */
+      loginWithOAuth: async (provider: 'google' | 'microsoft', providerToken: string) => {
+        set({ isLoading: true });
+        try {
+          const endpoint = provider === 'google' ? 'google' : 'microsoft';
+          const response = await apiHelpers.oauthLogin(endpoint, providerToken);
+
+          const loginData = (response.data as any).data || response.data;
+          const { token, user } = loginData;
+
+          const userType: User["userType"] =
+            user.role === 'company' ? 'company' :
+            user.role === 'vendor' ? 'vendor' :
+            (user.distributorCode || user.role === 'distributor') ? 'distributor' : 'client';
+
+          const loggedUser: User = {
+            id: user.id || user.email,
+            email: user.email,
+            firstName: user.firstName || '',
+            lastName: user.lastName || '',
+            userType,
+            isVerified: true, // OAuth users are auto-verified
+            role: user.role as UserRole,
+            oauthProvider: provider,
+            plan: user.planId ? {
+              id: user.planId,
+              name: user.planName,
+              displayName: user.planDisplayName,
+              price: 0,
+              currency: 'USD',
+              billingCycle: 'monthly',
+            } : undefined,
+          };
+
+          get().setToken(token);
+          localStorage.setItem("user", JSON.stringify(loggedUser));
+
+          // Determine if role selection needed (new OAuth user)
+          const isNewUser = user.isNew === true || !user.role;
+
+          set({
+            user: loggedUser,
+            isAuthenticated: true,
+            isLoading: false,
+            rolePending: isNewUser,
+            loginOtpStep: false,
+          });
+
+          if (!isNewUser) {
+            showToast({
+              title: "¡Bienvenido!",
+              description: `Sesión iniciada con ${provider === 'google' ? 'Google' : 'Microsoft'}`,
+              type: "success",
+            });
+          }
+        } catch (error: unknown) {
+          console.error(`Error en OAuth ${provider}:`, error);
+          set({ isLoading: false });
+
+          const errorMessage = error instanceof Error
+            ? error.message
+            : `Error al autenticar con ${provider === 'google' ? 'Google' : 'Microsoft'}`;
+
+          showToast({
+            title: "Error de autenticación",
+            description: errorMessage,
+            type: "error",
+          });
+
+          throw error instanceof Error ? error : new Error(errorMessage);
+        }
+      },
+
+      /** Assign role to a new user (post-login role selection) */
+      assignRole: async (role: UserRole) => {
+        set({ isLoading: true });
+        try {
+          const { user } = get();
+
+          // Call backend to persist role
+          await apiHelpers.setRole(role);
+
+          const updatedUser: User = {
+            ...user!,
+            role,
+            userType:
+              role === 'company' ? 'company' :
+              role === 'vendor' ? 'vendor' :
+              role === 'distributor' ? 'distributor' : 'client',
+            isVerified: true,
+          };
+
+          set({
+            user: updatedUser,
+            rolePending: false,
+            isLoading: false,
+          });
+
+          localStorage.setItem("user", JSON.stringify(updatedUser));
+
+          showToast({
+            title: "¡Bienvenido a Virtago!",
+            description: `Cuenta configurada como ${
+              role === 'user' ? 'Cliente' :
+              role === 'distributor' ? 'Distribuidor' :
+              role === 'company' ? 'Compañía' :
+              role === 'vendor' ? 'Vendedor' : role
+            }`,
+            type: "success",
+          });
+        } catch (error: unknown) {
+          console.error("Error asignando rol:", error);
+          set({ isLoading: false });
+
+          showToast({
+            title: "Error",
+            description: "No se pudo asignar el rol. Inténtalo de nuevo.",
+            type: "error",
+          });
+
+          throw error instanceof Error ? error : new Error("Error asignando rol");
+        }
+      },
+
       logout: () => {
         const { user } = get();
-        
+
         set({
           user: null,
           token: null,
@@ -303,19 +505,20 @@ export const useAuthStore = create<AuthState>()(
           otpSent: false,
           otpVerified: false,
           registrationStep: "initial",
+          loginOtpStep: false,
+          loginEmail: null,
+          rolePending: false,
         });
-        
-        // 🔧 Limpiar todas las claves de localStorage
+
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         localStorage.removeItem("auth_token");
         localStorage.removeItem("temp_auth_token");
 
-        // Mostrar notificación de despedida
         showToast({
           title: "Sesión cerrada",
-          description: user 
-            ? `¡Hasta luego, ${user.firstName}!` 
+          description: user
+            ? `¡Hasta luego, ${user.firstName}!`
             : "Has cerrado sesión exitosamente",
           type: "info",
         });
@@ -324,35 +527,30 @@ export const useAuthStore = create<AuthState>()(
       register: async (data) => {
         set({ isLoading: true, isRegistering: true });
         try {
-          // Preparar los datos con passwordConfirmation
           const registerData = {
             firstName: data.firstName,
             lastName: data.lastName,
             email: data.email,
             password: data.password,
-            passwordConfirmation: data.password, // Agregar confirmación
+            passwordConfirmation: data.password,
           };
 
-          // Llamar a la API real
           const response = await apiHelpers.register(registerData);
 
-          // 🔧 El backend devuelve: { success, message, data: { otp, token, user } }
           const registerResponse = (response.data as any).data || response.data;
           const { user, token, otp } = registerResponse;
 
-          // Guardar el token temporal para verificación
           if (token) {
             localStorage.setItem('temp_auth_token', token);
           }
 
-          // Crear usuario temporal con los datos de la respuesta
           const registeredUser: User = {
-            id: user.email, // Usar email como id temporal hasta que tengamos un id real
+            id: user.email,
             email: user.email,
             firstName: user.firstName,
             lastName: user.lastName,
             isVerified: user.isVerified || false,
-            userType: undefined, // Se definirá después de la verificación OTP
+            userType: undefined,
           };
 
           set({
@@ -363,26 +561,21 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
           });
 
-          // Mostrar notificación de éxito con el OTP en desarrollo (solo para debugging)
           showToast({
             title: "¡Registro exitoso!",
             description: `Código de verificación enviado a ${data.email}`,
             type: "success",
           });
 
-          // En desarrollo, mostrar el OTP en consola
-          console.log("🔐 OTP para desarrollo:", otp);
+          console.log("OTP para desarrollo:", otp);
         } catch (error: unknown) {
           set({ isLoading: false, isRegistering: false });
-          
-          // Extraer mensaje de error del backend
+
           let errorMessage = "Error al registrar usuario. Inténtalo de nuevo.";
           let errorTitle = "Error en el registro";
-          
+
           if (error instanceof Error) {
             errorMessage = error.message;
-            
-            // Personalizar el título según el tipo de error
             const errorData = (error as Error & { data?: { errorCode?: string; email?: string } }).data;
             if (errorData?.errorCode === 'EMAIL_ALREADY_EXISTS') {
               errorTitle = "Correo ya registrado";
@@ -391,14 +584,13 @@ export const useAuthStore = create<AuthState>()(
           } else if (typeof error === 'object' && error !== null && 'message' in error) {
             errorMessage = String((error as { message: unknown }).message);
           }
-          
+
           showToast({
             title: errorTitle,
             description: errorMessage,
             type: "error",
           });
-          
-          // Lanzar error con mensaje más específico
+
           if (error instanceof Error) {
             throw error;
           } else if (typeof error === 'object' && error !== null && 'message' in error) {
@@ -413,18 +605,16 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           const { registrationData } = get();
-          
+
           if (!registrationData?.email) {
             throw new Error("No se encontraron datos de registro");
           }
 
-          // Verificar OTP con la API real
           const response = await apiHelpers.verifyOTP({
             email: registrationData.email,
             otp: otp,
           });
 
-          // 🔧 El backend devuelve: { success, message, data: {...} }
           const verifyData = (response.data as any).data || response.data;
           console.log("OTP verificado:", verifyData);
 
@@ -434,7 +624,6 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
           });
 
-          // Mostrar notificación de éxito
           showToast({
             title: "¡Código verificado!",
             description: "Tu cuenta ha sido verificada exitosamente",
@@ -443,18 +632,17 @@ export const useAuthStore = create<AuthState>()(
         } catch (error: unknown) {
           console.error("Error verificando OTP:", error);
           set({ isLoading: false });
-          
-          // Mostrar notificación de error
-          const errorMessage = error instanceof Error 
-            ? error.message 
+
+          const errorMessage = error instanceof Error
+            ? error.message
             : "Error al verificar OTP. Inténtalo de nuevo.";
-          
+
           showToast({
             title: "Código incorrecto",
             description: errorMessage,
             type: "error",
           });
-          
+
           if (error instanceof Error) {
             throw error;
           } else {
@@ -471,19 +659,12 @@ export const useAuthStore = create<AuthState>()(
           const { registrationData } = get();
 
           if (userType === "client") {
-            // 🔐 Obtener el token temporal y moverlo a auth_token permanente
             const tempToken = localStorage.getItem('temp_auth_token');
             if (tempToken) {
               localStorage.removeItem('temp_auth_token');
-              
-              // Usar setToken para guardar correctamente en ambas claves
               get().setToken(tempToken);
-              console.log("✅ Token movido de temp_auth_token a auth_token para cliente usando setToken");
-            } else {
-              console.warn("⚠️ No se encontró temp_auth_token al completar registro de cliente");
             }
 
-            // Si es cliente, completar registro automáticamente
             const newUser: User = {
               id: Date.now().toString(),
               email: registrationData?.email || "",
@@ -503,23 +684,18 @@ export const useAuthStore = create<AuthState>()(
               isRegistering: false,
             });
 
-            // Mostrar notificación de bienvenida para clientes
             showToast({
               title: "¡Registro completado!",
               description: `Bienvenido a Virtago, ${newUser.firstName}`,
               type: "success",
             });
           } else {
-            // Si es distribuidor, crear/actualizar usuario con el tipo y continuar al siguiente paso
             const { user } = get();
 
-            // 🔐 Mover el token temporal para que las siguientes llamadas a la API
-            // (personalInfo, businessInfo, planSelection) se hagan con autenticación
             const tempToken = localStorage.getItem('temp_auth_token');
             if (tempToken) {
               localStorage.removeItem('temp_auth_token');
               get().setToken(tempToken);
-              console.log("✅ Token temporal movido a auth para flujo de distribuidor");
             }
 
             const updatedUser: User = {
@@ -540,7 +716,6 @@ export const useAuthStore = create<AuthState>()(
               isLoading: false,
             });
 
-            // Mostrar notificación informativa para distribuidores
             showToast({
               title: "Tipo de cuenta seleccionado",
               description: "Por favor completa tu información personal",
@@ -549,13 +724,13 @@ export const useAuthStore = create<AuthState>()(
           }
         } catch (error) {
           set({ isLoading: false });
-          
+
           showToast({
             title: "Error",
             description: "Error al seleccionar tipo de usuario",
             type: "error",
           });
-          
+
           throw error;
         }
       },
@@ -588,7 +763,6 @@ export const useAuthStore = create<AuthState>()(
 
           const { user, registrationData } = get();
 
-          // Completar registro del distribuidor
           const completedUser: User = {
             id: Date.now().toString(),
             email: registrationData?.email || user?.email || "",
@@ -624,24 +798,20 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      // Nuevos métodos requeridos por los componentes
       resendOTP: async () => {
         set({ isLoading: true });
         try {
           const { registrationData } = get();
-          
+
           if (!registrationData?.email) {
             throw new Error("No se encontraron datos de registro");
           }
 
-          // Reenviar OTP con la API real
           const response = await apiHelpers.resendOTP(registrationData.email);
 
-          // 🔧 El backend devuelve: { success, message, data: { otp, token, user } }
           const resendData = (response.data as any).data || response.data;
           console.log("OTP reenviado:", resendData);
 
-          // La API devuelve: { success, message, data: { otp, token, user } }
           const { otp } = resendData;
 
           set({
@@ -649,30 +819,27 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
           });
 
-          // Mostrar notificación de éxito
           showToast({
             title: "Código reenviado",
             description: `Se envió un nuevo código de verificación a ${registrationData.email}`,
             type: "info",
           });
 
-          // En desarrollo, mostrar el nuevo OTP en consola
-          console.log("🔐 Nuevo OTP para desarrollo:", otp);
+          console.log("Nuevo OTP para desarrollo:", otp);
         } catch (error: unknown) {
           console.error("Error reenviando OTP:", error);
           set({ isLoading: false });
-          
-          // Mostrar notificación de error
-          const errorMessage = error instanceof Error 
-            ? error.message 
+
+          const errorMessage = error instanceof Error
+            ? error.message
             : "Error al reenviar OTP. Inténtalo de nuevo.";
-          
+
           showToast({
             title: "Error al reenviar",
             description: errorMessage,
             type: "error",
           });
-          
+
           if (error instanceof Error) {
             throw error;
           } else {
@@ -690,7 +857,6 @@ export const useAuthStore = create<AuthState>()(
         try {
           await new Promise((resolve) => setTimeout(resolve, 1000));
 
-          // Actualizar datos del usuario con información personal preservando userType y role
           const { user } = get();
           if (user) {
             const updatedUser: User = {
@@ -702,13 +868,11 @@ export const useAuthStore = create<AuthState>()(
             set({ user: updatedUser });
           }
 
-          // Pasar al siguiente paso
           set({
             registrationStep: "businessInfo",
             isLoading: false,
           });
 
-          // Mostrar notificación de éxito
           showToast({
             title: "Información personal guardada",
             description: "Ahora completa tu información empresarial",
@@ -716,13 +880,13 @@ export const useAuthStore = create<AuthState>()(
           });
         } catch (error) {
           set({ isLoading: false });
-          
+
           showToast({
             title: "Error",
             description: "Error al guardar información personal",
             type: "error",
           });
-          
+
           throw error;
         }
       },
@@ -732,7 +896,6 @@ export const useAuthStore = create<AuthState>()(
         try {
           await new Promise((resolve) => setTimeout(resolve, 1000));
 
-          // Actualizar información de negocio preservando userType y role
           const { user } = get();
           if (user) {
             const updatedUser: User = {
@@ -744,13 +907,11 @@ export const useAuthStore = create<AuthState>()(
             set({ user: updatedUser });
           }
 
-          // Pasar al siguiente paso: selección de plan
           set({
             registrationStep: "planSelection",
             isLoading: false,
           });
 
-          // Mostrar notificación de éxito
           showToast({
             title: "Información empresarial guardada",
             description: "Ahora selecciona tu plan de suscripción",
@@ -758,35 +919,29 @@ export const useAuthStore = create<AuthState>()(
           });
         } catch (error) {
           set({ isLoading: false });
-          
+
           showToast({
             title: "Error",
             description: "Error al guardar información empresarial",
             type: "error",
           });
-          
+
           throw error;
         }
       },
 
       selectPlan: async (plan: Plan) => {
-        console.log("🟡 Store: Iniciando selectPlan para plan:", plan.displayName);
+        console.log("Store: Iniciando selectPlan para plan:", plan.displayName);
         set({ isLoading: true });
         try {
-          // Recopilar todos los datos del distribuidor
           const { user, registrationData } = get();
-          console.log("🟡 Store: Datos recopilados, creando payload...");
-          
-          // Verificar que tenemos un token válido
+
           const currentToken = localStorage.getItem('auth_token') || localStorage.getItem('temp_auth_token');
           if (!currentToken) {
             throw new Error('No se encontró un token de autenticación válido. Por favor inicia sesión nuevamente.');
           }
-          console.log("🟡 Store: Token encontrado:", currentToken ? 'Presente' : 'No presente');
-          
-          // Crear el payload completo del distribuidor
+
           const distributorPayload = {
-            // Información personal
             firstName: registrationData?.firstName || user?.firstName || "",
             lastName: registrationData?.lastName || user?.lastName || "",
             email: registrationData?.email || user?.email || "",
@@ -795,8 +950,6 @@ export const useAuthStore = create<AuthState>()(
             address: user?.profile?.address || "",
             city: user?.profile?.city || "",
             country: user?.profile?.country || "Uruguay",
-            
-            // Información empresarial
             businessName: user?.distributorInfo?.businessName || "",
             businessType: user?.distributorInfo?.businessType || "",
             ruc: user?.distributorInfo?.ruc || "",
@@ -810,8 +963,6 @@ export const useAuthStore = create<AuthState>()(
             description: user?.distributorInfo?.description || "",
             yearsInBusiness: parseInt(user?.distributorInfo?.yearsInBusiness as string || "0"),
             numberOfEmployees: user?.distributorInfo?.numberOfEmployees || "",
-            
-            // Plan seleccionado
             selectedPlan: {
               id: plan.id,
               name: plan.name,
@@ -822,33 +973,10 @@ export const useAuthStore = create<AuthState>()(
             },
           };
 
-          // Llamar SOLO a la API para crear el distribuidor completo (incluye el plan)
-          console.log("🟡 Store: Llamando a apiHelpers.createDistributor...");
-          console.log("🟡 Store: Payload enviado:", distributorPayload);
-          
-          let apiResult;
-          try {
-            apiResult = await apiHelpers.createDistributor(distributorPayload);
-            console.log("✅ Store: createDistributor exitoso, respuesta:", apiResult);
-            
-            // 🔧 El backend devuelve: { success, message, data: { distributor } }
-            const distributorData = (apiResult.data as any).data || apiResult.data;
-            
-            console.log("✅ Store: distributorCode recibido del backend:", distributorData.distributor?.distributorCode);
-            console.log("✅ Store: Actualizando estado...");
-          } catch (apiError) {
-            console.error("❌ Store: Error específico de la API:", apiError);
-            console.log("❌ Store: Tipo de error:", typeof apiError);
-            console.log("❌ Store: Error props:", Object.keys(apiError || {}));
-            throw apiError; // Re-lanzar para que sea capturado por el catch principal
-          }
+          const apiResult = await apiHelpers.createDistributor(distributorPayload);
 
-          // SOLO si la API fue exitosa, actualizar el estado
-          
-          // 🔧 Extraer el objeto distributor de la respuesta correcta
           const distributorData = (apiResult.data as any).data || apiResult.data;
-          
-          // Actualizar usuario con el plan seleccionado, role, userType Y distributorCode del backend
+
           if (user && distributorData?.distributor) {
             const backendDistributor = distributorData.distributor;
             const updatedUser: User = {
@@ -866,58 +994,45 @@ export const useAuthStore = create<AuthState>()(
               },
               distributorInfo: {
                 ...user.distributorInfo,
-                distributorCode: backendDistributor.distributorCode, // 🔥 GUARDAR el distributorCode del backend
+                distributorCode: backendDistributor.distributorCode,
               },
             };
-            console.log("✅ Store: Usuario actualizado con distributorCode:", updatedUser.distributorInfo?.distributorCode);
             set({ user: updatedUser });
           }
 
-          // IMPORTANTE: Usar el token existente (del registro), no crear uno mock
-          const finalToken = currentToken;
-          
-          // Si había un temp_auth_token, moverlo a auth_token permanente usando setToken
           if (localStorage.getItem('temp_auth_token')) {
             const tempToken = localStorage.getItem('temp_auth_token')!;
             localStorage.removeItem('temp_auth_token');
-            
-            // Usar setToken para guardar correctamente en ambas claves
             get().setToken(tempToken);
-            console.log("✅ Store: Token temporal movido a auth_token permanente usando setToken");
           }
 
-          // Pasar al paso final
           set({
-            token: finalToken,
+            token: currentToken,
             registrationStep: "completed",
             isLoading: false,
             isRegistering: false,
             isAuthenticated: true,
           });
 
-          // Mostrar notificación de éxito
           showToast({
             title: "¡Registro completado!",
             description: `Bienvenido a Virtago con el plan ${plan.displayName}. Tu cuenta está lista.`,
             type: "success",
           });
         } catch (error) {
-          console.error("❌ Store: Error en selectPlan:", error);
-          console.log("❌ Store: Restableciendo isLoading a false");
+          console.error("Error en selectPlan:", error);
           set({ isLoading: false });
-          
-          // Mostrar notificación de error
-          const errorMessage = error instanceof Error 
-            ? error.message 
+
+          const errorMessage = error instanceof Error
+            ? error.message
             : "Error al seleccionar el plan";
-          
+
           showToast({
             title: "Error al seleccionar plan",
             description: errorMessage,
             type: "error",
           });
-          
-          console.log("❌ Store: Haciendo throw del error para propagarlo al componente");
+
           throw error;
         }
       },
@@ -929,7 +1044,6 @@ export const useAuthStore = create<AuthState>()(
 
           const { registrationData, user } = get();
 
-          // Crear usuario final con toda la información
           const completedUser: User = {
             id: Date.now().toString(),
             email: registrationData?.email || user?.email || "",
@@ -942,21 +1056,16 @@ export const useAuthStore = create<AuthState>()(
             distributorInfo: user?.distributorInfo,
           };
 
-          // Usar el token existente del registro/verificación, no crear uno mock
           const existingToken = localStorage.getItem('auth_token') || localStorage.getItem('temp_auth_token');
-          
+
           if (!existingToken) {
             throw new Error('No se encontró un token de autenticación válido. Por favor inicia sesión nuevamente.');
           }
 
-          // Si había un temp_auth_token, moverlo a auth_token permanente usando setToken
           if (localStorage.getItem('temp_auth_token')) {
             const tempToken = localStorage.getItem('temp_auth_token')!;
             localStorage.removeItem('temp_auth_token');
-            
-            // Usar setToken para guardar correctamente en ambas claves
             get().setToken(tempToken);
-            console.log("✅ Store: Token temporal movido a auth_token permanente en completeRegistration");
           }
 
           set({
@@ -968,7 +1077,6 @@ export const useAuthStore = create<AuthState>()(
             isRegistering: false,
           });
 
-          // Mostrar notificación de finalización exitosa
           showToast({
             title: "¡Registro completado!",
             description: `Bienvenido a Virtago, ${completedUser.firstName}. Tu cuenta de distribuidor está lista.`,
@@ -976,13 +1084,13 @@ export const useAuthStore = create<AuthState>()(
           });
         } catch (error) {
           set({ isLoading: false });
-          
+
           showToast({
             title: "Error",
             description: "Error al completar el registro",
             type: "error",
           });
-          
+
           throw error;
         }
       },

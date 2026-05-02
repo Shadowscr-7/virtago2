@@ -45,7 +45,7 @@ export interface LoginResponse {
       blurDataURL: string;
     };
     recoveryPassword: boolean;
-    role: 'user' | 'admin' | 'distributor';
+    role: 'user' | 'admin' | 'distributor' | 'company' | 'vendor';
     lastOtpSentAt: string;
     isVerified: boolean;
     otp: string | null;
@@ -1118,35 +1118,69 @@ export interface PriceListBulkCreateResponse {
   };
 }
 
+// Tipos OAuth
+export interface OAuthLoginResponse {
+  success: boolean;
+  message: string;
+  data: {
+    token: string;
+    user: {
+      id?: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+      isVerified: boolean;
+      isNew?: boolean;
+      distributorCode?: string | null;
+      planId?: string;
+      planName?: string;
+      planDisplayName?: string;
+    };
+  };
+}
+
 // Repositorio de APIs de Autenticación
 export const authApi = {
   // Registro inicial (timeout extendido para envío de correo)
   register: async (data: RegisterData): Promise<ApiResponse<RegisterResponse>> => 
-    http.post("/auth/register-simple", data, { timeout: 60000 }),
+    http.post('/auth/register-simple', data, { timeout: 60000 }),
 
   // Verificar OTP
   verifyOTP: async (data: OTPVerifyData): Promise<ApiResponse<OTPVerifyResponse>> => 
-    http.post("/auth/verify-otp", data),
+    http.post('/auth/verify-otp', data),
 
   // Reenviar OTP (timeout extendido para envío de correo)
   resendOTP: async (email: string): Promise<ApiResponse<RegisterResponse>> => 
-    http.post("/auth/resend-otp", { email }, { timeout: 60000 }),
+    http.post('/auth/resend-otp', { email }, { timeout: 60000 }),
 
   // Login
   login: async (data: LoginData): Promise<ApiResponse<LoginResponse>> => 
-    http.post("/auth/login", data),
+    http.post('/auth/login', data),
+
+  // OAuth Google login
+  loginGoogle: async (googleToken: string): Promise<ApiResponse<OAuthLoginResponse>> =>
+    http.post('/auth/google', { token: googleToken }),
+
+  // OAuth Microsoft login
+  loginMicrosoft: async (microsoftToken: string): Promise<ApiResponse<OAuthLoginResponse>> =>
+    http.post('/auth/microsoft', { token: microsoftToken }),
+
+  // Assign role post-login (nuevos usuarios sin rol asignado)
+  setRole: async (role: string): Promise<ApiResponse<{ success: boolean; message: string }>> =>
+    http.post('/auth/set-role', { role }),
 
   // Logout
   logout: async (): Promise<ApiResponse<{ message: string }>> => 
-    http.post("/auth/logout"),
+    http.post('/auth/logout'),
 
   // Refresh token
   refreshToken: async (): Promise<ApiResponse<{ access_token: string }>> => 
-    http.post("/auth/refresh"),
+    http.post('/auth/refresh'),
 
   // Verificar token
   verifyToken: async (): Promise<ApiResponse<{ valid: boolean }>> => 
-    http.get("/auth/verify"),
+    http.get('/auth/verify'),
 };
 
 // Repositorio de APIs de Distribuidores

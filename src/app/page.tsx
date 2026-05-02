@@ -152,51 +152,27 @@ export default function Home() {
           </motion.div>
         </section>
 
-        {/* Mensaje de autenticación si no está logueado */}
+        {/* CTA "Empezar gratis" — solo visible si no está autenticado */}
         {!isAuthenticated && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.6 }}
-            className="border rounded-xl p-6 text-center"
-            style={{
-              background: `linear-gradient(135deg, ${themeColors.primary}10, ${themeColors.secondary}10)`,
-              borderColor: themeColors.primary + "30",
-            }}
+            className="flex justify-center"
           >
-            <h3
-              className="text-lg font-semibold mb-2"
-              style={{ color: themeColors.primary }}
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => router.push("/register")}
+              className="px-10 py-4 rounded-2xl font-bold text-lg tracking-wide shadow-lg transition-all"
+              style={{
+                backgroundColor: "#F5C518",
+                color: "#1A1A1A",
+                boxShadow: "0 6px 24px rgba(245,197,24,0.45)",
+              }}
             >
-              ¿Eres una empresa? Accede a precios exclusivos B2B
-            </h3>
-            <p className="mb-4" style={{ color: themeColors.text.secondary }}>
-              Regístrate o inicia sesión para ver precios mayoristas y
-              descuentos especiales
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => router.push("/login")}
-                className="px-6 py-2 text-white rounded-lg font-medium transition-all"
-                style={{ backgroundColor: themeColors.primary }}
-              >
-                Iniciar Sesión
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => router.push("/register")}
-                className="px-6 py-2 border rounded-lg font-medium transition-all"
-                style={{
-                  borderColor: themeColors.primary,
-                  color: themeColors.primary,
-                }}
-              >
-                Registrarse
-              </motion.button>
-            </div>
+              Empezar gratis
+            </motion.button>
           </motion.div>
         )}
 

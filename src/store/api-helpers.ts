@@ -1,5 +1,6 @@
 // Helper para importaciones seguras de la API
 import type { LoginData, RegisterData, OTPVerifyData, CreateDistributorData } from '@/api';
+import type { UserRole } from './auth';
 
 // Funciones wrapper para evitar problemas de chunks
 export const apiHelpers = {
@@ -34,6 +35,28 @@ export const apiHelpers = {
     try {
       const { api } = await import('@/api');
       return await api.auth.resendOTP(email);
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async oauthLogin(provider: 'google' | 'microsoft', providerToken: string) {
+    try {
+      const { api } = await import('@/api');
+      if (provider === 'google') {
+        return await api.auth.loginGoogle(providerToken);
+      } else {
+        return await api.auth.loginMicrosoft(providerToken);
+      }
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async setRole(role: UserRole) {
+    try {
+      const { api } = await import('@/api');
+      return await api.auth.setRole(role);
     } catch (error) {
       throw error;
     }

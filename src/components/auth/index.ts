@@ -5,3 +5,5 @@ export { PersonalInfoForm } from "./personal-info-form";
 export { BusinessInfoForm } from "./business-info-form";
 export { RegistrationSuccess } from "./registration-success";
 export { MultiStepRegistration } from "./multi-step-registration";
+export { RoleSelection } from "./role-selection";
+export { PlanSelection } from "./plan-selection";

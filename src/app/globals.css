@@ -1,14 +1,15 @@
 @import "tailwindcss";
 
 /* Variables CSS personalizadas para temas de Virtago */
+/* Defaults: light-red (rojo primario #C8102E) — sobreescritas en runtime por ThemeProvider */
 :root {
-  --theme-primary: #1E3A61;
-  --theme-secondary: #3A5A94;
-  --theme-accent: #2A4D89;
+  --theme-primary: #C8102E;
+  --theme-secondary: #E8354A;
+  --theme-accent: #A00C24;
   --theme-background: #ffffff;
-  --theme-surface: #f1f5f9;
-  --theme-border: #e2e8f0;
-  --theme-text-primary: #0f172a;
+  --theme-surface: #fff5f5;
+  --theme-border: #fecdd3;
+  --theme-text-primary: #1a0205;
   --theme-text-secondary: #475569;
   --theme-text-muted: #94a3b8;
 }
@@ -21,8 +22,8 @@
   --card-foreground: 240 10% 3.9%;
   --popover: 0 0% 100%;
   --popover-foreground: 240 10% 3.9%;
-  --primary: 262 90% 50%;
-  --primary-foreground: 210 40% 98%;
+  --primary: 349 85% 44%;
+  --primary-foreground: 0 0% 100%;
   --secondary: 240 4.8% 95.9%;
   --secondary-foreground: 240 5.9% 10%;
   --muted: 240 4.8% 95.9%;
@@ -31,14 +32,14 @@
   --accent-foreground: 240 5.9% 10%;
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
-  --border: 240 5.9% 90%;
-  --input: 240 5.9% 90%;
-  --ring: 262 90% 50%;
+  --border: 351 100% 93%;
+  --input: 351 100% 93%;
+  --ring: 349 85% 44%;
   --radius: 0.75rem;
 
   /* Custom gradients */
-  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-primary: linear-gradient(135deg, #C8102E 0%, #E8354A 100%);
+  --gradient-secondary: linear-gradient(135deg, #E8354A 0%, #f5576c 100%);
   --gradient-dark: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
 }
 
@@ -49,8 +50,8 @@
   --card-foreground: 0 0% 98%;
   --popover: 240 10% 3.9%;
   --popover-foreground: 0 0% 98%;
-  --primary: 262 90% 50%;
-  --primary-foreground: 210 40% 98%;
+  --primary: 349 85% 44%;
+  --primary-foreground: 0 0% 100%;
   --secondary: 240 3.7% 15.9%;
   --secondary-foreground: 0 0% 98%;
   --muted: 240 3.7% 15.9%;
@@ -61,7 +62,7 @@
   --destructive-foreground: 0 0% 98%;
   --border: 240 3.7% 15.9%;
   --input: 240 3.7% 15.9%;
-  --ring: 262 90% 50%;
+  --ring: 349 85% 44%;
 }
 
 * {
