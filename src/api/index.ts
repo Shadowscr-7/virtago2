@@ -1159,8 +1159,14 @@ export const authApi = {
     http.post('/auth/login', data),
 
   // OAuth Google login
-  loginGoogle: async (googleToken: string): Promise<ApiResponse<OAuthLoginResponse>> =>
-    http.post('/auth/google', { token: googleToken }),
+  loginGoogle: async (googleToken: string): Promise<ApiResponse<OAuthLoginResponse>> => {
+    const redirectUri =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/auth/callback/google`
+        : undefined;
+
+    return http.post('/auth/google', { token: googleToken, code: googleToken, redirectUri });
+  },
 
   // OAuth Microsoft login
   loginMicrosoft: async (microsoftToken: string): Promise<ApiResponse<OAuthLoginResponse>> =>
