@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 export function CartButton() {
   const { getTotalItems, openCart } = useCartStore();
   const [mounted, setMounted] = useState(false);
+  const solidRed = "#C8102E";
 
   useEffect(() => {
     setMounted(true);
@@ -19,7 +20,8 @@ export function CartButton() {
   return (
     <motion.button
       onClick={openCart}
-      className="relative p-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl group"
+      className="relative p-3 text-white rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl group"
+      style={{ backgroundColor: solidRed }}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
     >
@@ -36,7 +38,8 @@ export function CartButton() {
         <motion.span
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
-          className="absolute -top-2 -right-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg"
+          className="absolute -top-2 -right-2 flex h-6 w-6 items-center justify-center rounded-full border-2 border-white text-xs font-bold text-white shadow-lg"
+          style={{ backgroundColor: solidRed }}
         >
           {totalItems > 99 ? "99+" : totalItems}
         </motion.span>
