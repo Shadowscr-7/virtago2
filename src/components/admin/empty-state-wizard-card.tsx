@@ -1,26 +1,25 @@
 /**
- * Empty State para invitar al usuario a configurar el sistema por primera vez
- * Se muestra cuando el distribuidor no tiene datos cargados
+ * Empty state para invitar al usuario a configurar el sistema por primera vez.
+ * Se muestra cuando el distribuidor no tiene datos cargados.
  */
 
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { 
-  Sparkles, 
-  Rocket, 
-  Package, 
-  Users, 
-  DollarSign,
+import Image from "next/image";
+import {
   ArrowRight,
   CheckCircle2,
   Circle,
-  Zap
+  DollarSign,
+  Package,
+  Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/contexts/theme-context";
+import { useAuthStore } from "@/store/auth";
 import { OnboardingStatus } from "@/services/onboarding.service";
-import { useState, useEffect } from "react";
 
 interface EmptyStateWizardCardProps {
   onboardingStatus: OnboardingStatus;
@@ -29,32 +28,15 @@ interface EmptyStateWizardCardProps {
 export function EmptyStateWizardCard({ onboardingStatus }: EmptyStateWizardCardProps) {
   const router = useRouter();
   const { themeColors } = useTheme();
+  const { user } = useAuthStore();
   const [isHovered, setIsHovered] = useState(false);
-
-  // Generar partículas solo en cliente
-  const [particles, setParticles] = useState<Array<{
-    id: number;
-    left: number;
-    top: number;
-    delay: number;
-  }>>([]);
-
-  useEffect(() => {
-    setParticles(
-      Array.from({ length: 12 }, (_, i) => ({
-        id: i,
-        left: Math.random() * 100,
-        top: Math.random() * 100,
-        delay: i * 0.2,
-      }))
-    );
-  }, []);
+  const userName = [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "Usuario";
 
   const steps = [
     {
       icon: Package,
       title: "Importar Productos",
-      description: "Carga tu catálogo completo",
+      description: "Carga tu catalogo completo",
       isComplete: onboardingStatus.details.products.hasData,
       count: onboardingStatus.details.products.count,
     },
@@ -83,141 +65,47 @@ export function EmptyStateWizardCard({ onboardingStatus }: EmptyStateWizardCardP
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="relative overflow-hidden rounded-3xl shadow-2xl backdrop-blur-xl border-2"
-      style={{
-        background: `linear-gradient(135deg, 
-          ${themeColors.surface}95 0%, 
-          ${themeColors.primary}15 50%, 
-          ${themeColors.secondary}15 100%)`,
-        borderColor: `${themeColors.primary}30`,
-      }}
+      className="relative overflow-hidden rounded-3xl border bg-white shadow-xl"
+      style={{ borderColor: `${themeColors.primary}30` }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Partículas flotantes de fondo */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {particles.map((particle) => (
-          <motion.div
-            key={particle.id}
-            className="absolute w-2 h-2 rounded-full"
-            style={{
-              left: `${particle.left}%`,
-              top: `${particle.top}%`,
-              background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`,
-            }}
-            animate={{
-              y: [-20, -60, -20],
-              opacity: [0.2, 0.8, 0.2],
-              scale: [0.8, 1.2, 0.8],
-            }}
-            transition={{
-              duration: 4,
-              repeat: Infinity,
-              delay: particle.delay,
-              ease: "easeInOut",
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Brillo animado en hover */}
-      <motion.div
-        className="absolute inset-0 opacity-0 pointer-events-none"
-        animate={{ opacity: isHovered ? 0.1 : 0 }}
-        style={{
-          background: `radial-gradient(circle at 50% 50%, ${themeColors.primary}, transparent 70%)`,
-        }}
-      />
-
       <div className="relative p-8 md:p-12">
-        {/* Header con icono */}
-        <div className="text-center mb-8">
-          <motion.div
-            className="inline-flex items-center justify-center w-24 h-24 rounded-full mb-6 relative"
-            style={{
-              background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
-            }}
-            animate={{
-              scale: isHovered ? 1.1 : 1,
-              rotate: isHovered ? 5 : 0,
-            }}
-            transition={{ duration: 0.3 }}
-          >
-            <Rocket className="w-12 h-12 text-white" />
-            
-            {/* Sparkles animados */}
-            <motion.div
-              className="absolute -top-2 -right-2"
-              animate={{
-                rotate: [0, 180, 360],
-                scale: [1, 1.2, 1],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "linear",
-              }}
+        <div className="mb-8 grid gap-6 md:grid-cols-[1fr_220px] md:items-center">
+          <div>
+            <h2
+              className="mb-3 text-3xl font-bold md:text-4xl"
+              style={{ color: themeColors.primary }}
             >
-              <Sparkles 
-                className="w-6 h-6" 
-                style={{ color: themeColors.accent }}
-              />
-            </motion.div>
-
-            <motion.div
-              className="absolute -bottom-1 -left-1"
-              animate={{
-                rotate: [360, 180, 0],
-                scale: [1, 1.3, 1],
-              }}
-              transition={{
-                duration: 2.5,
-                repeat: Infinity,
-                ease: "linear",
-              }}
+              {userName} ya estas en Virtago. Deja que Kairos te asista en esta instancia.
+            </h2>
+            <p
+              className="text-base md:text-lg"
+              style={{ color: themeColors.text.secondary }}
             >
-              <Zap 
-                className="w-5 h-5" 
-                style={{ color: themeColors.secondary }}
-              />
-            </motion.div>
-          </motion.div>
+              Inicia nuestra carga asistida de informacion directo de tu RP.
+            </p>
+          </div>
 
-          <motion.h2
-            className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r bg-clip-text text-transparent"
-            style={{
-              backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
-            }}
-            animate={{
-              backgroundPosition: isHovered ? ["0%", "100%"] : "0%",
-            }}
-          >
-            ¡Bienvenido a Virtago!
-          </motion.h2>
-
-          <p
-            className="text-lg md:text-xl mb-2"
-            style={{ color: themeColors.text.primary }}
-          >
-            Estás a <span className="font-bold">3 pasos</span> de comenzar a operar
-          </p>
-          
-          <p
-            className="text-sm md:text-base"
-            style={{ color: themeColors.text.secondary }}
-          >
-            Usa nuestro asistente inteligente para configurar todo en minutos
-          </p>
+          <div className="flex min-h-64 items-center justify-center">
+            <Image
+              src="/images/asist.png"
+              alt="Kairos"
+              width={180}
+              height={260}
+              className="h-64 w-auto object-contain"
+              priority
+            />
+          </div>
         </div>
 
-        {/* Progress Bar */}
         <div className="mb-8">
-          <div className="flex justify-between items-center mb-3">
+          <div className="mb-3 flex items-center justify-between">
             <span
               className="text-sm font-medium"
               style={{ color: themeColors.text.secondary }}
             >
-              Progreso de configuración
+              Progreso de configuracion
             </span>
             <span
               className="text-sm font-bold"
@@ -226,16 +114,14 @@ export function EmptyStateWizardCard({ onboardingStatus }: EmptyStateWizardCardP
               {onboardingStatus.completionPercentage}%
             </span>
           </div>
-          
+
           <div
-            className="h-3 rounded-full overflow-hidden"
+            className="h-3 overflow-hidden rounded-full"
             style={{ backgroundColor: `${themeColors.surface}60` }}
           >
             <motion.div
               className="h-full rounded-full"
-              style={{
-                background: `linear-gradient(90deg, ${themeColors.primary}, ${themeColors.secondary})`,
-              }}
+              style={{ backgroundColor: themeColors.primary }}
               initial={{ width: 0 }}
               animate={{ width: `${onboardingStatus.completionPercentage}%` }}
               transition={{ duration: 1, ease: "easeOut" }}
@@ -243,43 +129,38 @@ export function EmptyStateWizardCard({ onboardingStatus }: EmptyStateWizardCardP
           </div>
         </div>
 
-        {/* Steps */}
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
+        <div className="mb-8 grid gap-4 md:grid-cols-3">
           {steps.map((step, index) => (
             <motion.div
-              key={index}
+              key={step.title}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * index, duration: 0.4 }}
-              className="relative p-4 rounded-xl backdrop-blur-sm border"
+              className="relative rounded-xl border bg-white p-4"
               style={{
-                backgroundColor: step.isComplete
-                  ? `${themeColors.primary}15`
-                  : `${themeColors.surface}40`,
                 borderColor: step.isComplete
                   ? `${themeColors.primary}40`
-                  : `${themeColors.surface}60`,
+                  : themeColors.border,
               }}
             >
               <div className="flex items-start gap-3">
                 <div
-                  className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center"
+                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg"
                   style={{
-                    background: step.isComplete
-                      ? `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`
-                      : `${themeColors.surface}80`,
+                    backgroundColor: step.isComplete ? themeColors.primary : "#ffffff",
+                    border: step.isComplete ? "none" : `1px solid ${themeColors.border}`,
                   }}
                 >
                   <step.icon
-                    className="w-5 h-5"
+                    className="h-5 w-5"
                     style={{
-                      color: step.isComplete ? "white" : themeColors.text.secondary,
+                      color: step.isComplete ? "#ffffff" : themeColors.text.secondary,
                     }}
                   />
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex items-center gap-2">
                     <h3
                       className="text-sm font-semibold"
                       style={{ color: themeColors.text.primary }}
@@ -288,24 +169,24 @@ export function EmptyStateWizardCard({ onboardingStatus }: EmptyStateWizardCardP
                     </h3>
                     {step.isComplete ? (
                       <CheckCircle2
-                        className="w-4 h-4 flex-shrink-0"
+                        className="h-4 w-4 flex-shrink-0"
                         style={{ color: themeColors.primary }}
                       />
                     ) : (
                       <Circle
-                        className="w-4 h-4 flex-shrink-0"
+                        className="h-4 w-4 flex-shrink-0"
                         style={{ color: themeColors.text.secondary }}
                       />
                     )}
                   </div>
-                  
+
                   <p
-                    className="text-xs mb-1"
+                    className="mb-1 text-xs"
                     style={{ color: themeColors.text.secondary }}
                   >
                     {step.description}
                   </p>
-                  
+
                   {step.count > 0 && (
                     <span
                       className="text-xs font-medium"
@@ -320,38 +201,27 @@ export function EmptyStateWizardCard({ onboardingStatus }: EmptyStateWizardCardP
           ))}
         </div>
 
-        {/* CTA Button */}
         <div className="text-center">
           <motion.button
             onClick={handleStartWizard}
-            className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-xl font-bold text-lg text-white overflow-hidden shadow-lg"
-            style={{
-              background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
-            }}
+            className="group relative inline-flex items-center gap-3 overflow-hidden rounded-xl px-8 py-4 text-lg font-bold text-white shadow-lg"
+            style={{ backgroundColor: themeColors.primary }}
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.2 }}
           >
-            {/* Brillo animado en el botón */}
-            <motion.div
-              className="absolute inset-0 bg-white"
-              initial={{ x: "-100%", opacity: 0 }}
-              whileHover={{ x: "100%", opacity: 0.2 }}
-              transition={{ duration: 0.6 }}
-            />
-
             <span className="relative z-10">
               {onboardingStatus.completionPercentage > 0
-                ? "Continuar Configuración"
+                ? "Continuar Configuracion"
                 : "Comenzar Ahora"}
             </span>
-            
+
             <motion.div
               className="relative z-10"
               animate={{ x: isHovered ? 5 : 0 }}
               transition={{ duration: 0.3 }}
             >
-              <ArrowRight className="w-6 h-6" />
+              <ArrowRight className="h-6 w-6" />
             </motion.div>
           </motion.button>
 
@@ -359,29 +229,28 @@ export function EmptyStateWizardCard({ onboardingStatus }: EmptyStateWizardCardP
             className="mt-4 text-sm"
             style={{ color: themeColors.text.secondary }}
           >
-            ⚡ Configuración guiada paso a paso • Solo toma 5-10 minutos
+            Configuracion guiada paso a paso. Solo toma 5-10 minutos.
           </p>
         </div>
 
-        {/* Next Steps Hints */}
         {onboardingStatus.nextSteps.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="mt-8 pt-6 border-t"
+            className="mt-8 border-t pt-6"
             style={{ borderColor: `${themeColors.primary}20` }}
           >
             <p
-              className="text-sm font-medium mb-3"
+              className="mb-3 text-sm font-medium"
               style={{ color: themeColors.text.secondary }}
             >
-              Próximos pasos sugeridos:
+              Proximos pasos sugeridos:
             </p>
             <ul className="space-y-2">
               {onboardingStatus.nextSteps.map((step, index) => (
                 <motion.li
-                  key={index}
+                  key={step}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.6 + index * 0.1 }}
@@ -389,7 +258,7 @@ export function EmptyStateWizardCard({ onboardingStatus }: EmptyStateWizardCardP
                   style={{ color: themeColors.text.primary }}
                 >
                   <div
-                    className="w-1.5 h-1.5 rounded-full"
+                    className="h-1.5 w-1.5 rounded-full"
                     style={{ backgroundColor: themeColors.primary }}
                   />
                   {step}

@@ -439,7 +439,7 @@ export default function AdminDashboard() {
           className="mb-8"
         >
           <div className="flex items-center justify-between">
-            <div>
+            <div className={onboardingStatus && !onboardingStatus.hasData ? "hidden" : ""}>
               <h1 
                 className="text-3xl font-bold"
                 style={{
