@@ -43,10 +43,7 @@ export const PriceFilters: React.FC<PriceFiltersProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="backdrop-blur-xl border border-white/20 dark:border-gray-700/30 rounded-2xl p-6 shadow-xl"
-      style={{
-        background: `linear-gradient(135deg, ${themeColors.surface}80, ${themeColors.surface}70)`,
-      }}
+      className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm"
     >
       {/* Búsqueda, filtros y botones en una sola fila */}
       <div className="flex flex-col xl:flex-row gap-4">
@@ -61,9 +58,9 @@ export const PriceFilters: React.FC<PriceFiltersProps> = ({
             placeholder="Buscar por código, nombre o proveedor..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-white/60 dark:bg-slate-700/60 border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all placeholder-gray-400 backdrop-blur-sm"
+            className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all placeholder-gray-400"
             style={{
-              "--tw-ring-color": `${themeColors.primary}50`,
+              "--tw-ring-color": `${themeColors.primary}40`,
             } as React.CSSProperties}
           />
         </div>
@@ -128,43 +125,30 @@ export const PriceFilters: React.FC<PriceFiltersProps> = ({
         {/* Botones de acción */}
         <div className="flex flex-col sm:flex-row gap-3 xl:flex-shrink-0">
           <motion.button
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={onDownloadFormat}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all backdrop-blur-sm border font-medium"
-            style={{
-              backgroundColor: themeColors.accent + "20",
-              color: themeColors.text.primary,
-              borderColor: themeColors.accent + "40"
-            }}
+            className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all border border-gray-200 font-medium text-gray-700 bg-white hover:bg-gray-50"
           >
             <Download className="w-4 h-4" />
             <span className="hidden sm:inline">Exportar</span>
           </motion.button>
 
           <motion.button
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={onImport}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all backdrop-blur-sm border font-medium"
-            style={{
-              backgroundColor: themeColors.secondary + "20",
-              color: themeColors.text.primary,
-              borderColor: themeColors.secondary + "40"
-            }}
+            className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all border border-gray-200 font-medium text-gray-700 bg-white hover:bg-gray-50"
           >
             <Upload className="w-4 h-4" />
             <span className="hidden sm:inline">Importar</span>
           </motion.button>
 
           <motion.button
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={onAddPrice}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all text-white font-medium"
-            style={{
-              background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`
-            }}
+            className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all text-white font-medium bg-red-700 hover:bg-red-800"
           >
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Agregar</span>

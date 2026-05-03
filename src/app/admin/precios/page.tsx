@@ -85,9 +85,9 @@ export default function PreciosAdminPage() {
         const response = await http.get(`/price/?${params.toString()}`);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const result = response.data as any;
-        
+
         console.log("📦 Respuesta del API de precios:", result);
-        
+
         // Mapear datos del backend al formato del frontend
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const pricesData = (result.data || []).map((item: any) => ({
@@ -107,9 +107,9 @@ export default function PreciosAdminPage() {
           category: item.category || "",
           supplier: item.supplier || "",
         }));
-        
+
         setPrices(pricesData);
-        
+
         // Actualizar información de paginación
         if (result.pagination) {
           setPagination({
@@ -121,7 +121,7 @@ export default function PreciosAdminPage() {
             hasPrevPage: result.pagination.hasPrevPage || false,
           });
         }
-        
+
         console.log("✅ Precios cargados:", pricesData.length);
       } catch (error) {
         console.error("❌ Error cargando precios:", error);
@@ -190,24 +190,16 @@ export default function PreciosAdminPage() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="backdrop-blur-xl border border-white/20 dark:border-gray-700/30 rounded-3xl p-6 shadow-2xl"
-          style={{
-            background: `linear-gradient(135deg, ${themeColors.surface}95, ${themeColors.surface}90)`,
-          }}
+          className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm"
         >
           <div>
             <h1
               className="text-3xl font-bold"
-              style={{
-                backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
+              style={{ color: themeColors.text.primary }}
             >
               Precios
             </h1>
-            <p className="text-gray-600 dark:text-gray-300 mt-1">
+            <p className="text-gray-500 mt-1">
               Administra y gestiona los precios de tus productos
             </p>
           </div>
@@ -242,10 +234,10 @@ export default function PreciosAdminPage() {
           >
             <div className="text-center">
               <div
-                className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4"
-                style={{ borderColor: themeColors.primary }}
+                className="animate-spin rounded-full h-10 w-10 border-2 border-gray-200 mx-auto mb-4"
+                style={{ borderTopColor: themeColors.primary }}
               ></div>
-              <p className="text-gray-600 dark:text-gray-300">
+              <p className="text-gray-500">
                 Cargando precios...
               </p>
             </div>

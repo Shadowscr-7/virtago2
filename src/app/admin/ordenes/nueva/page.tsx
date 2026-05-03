@@ -79,10 +79,10 @@ export default function NewOrderPage() {
 
   const addOrderItem = (product: typeof mockProducts[0]) => {
     const existingItem = orderItems.find(item => item.productId === product.id);
-    
+
     if (existingItem) {
-      setOrderItems(orderItems.map(item => 
-        item.productId === product.id 
+      setOrderItems(orderItems.map(item =>
+        item.productId === product.id
           ? { ...item, quantity: item.quantity + 1 }
           : item
       ));
@@ -109,7 +109,7 @@ export default function NewOrderPage() {
       removeOrderItem(itemId);
       return;
     }
-    setOrderItems(orderItems.map(item => 
+    setOrderItems(orderItems.map(item =>
       item.id === itemId ? { ...item, quantity } : item
     ));
   };
@@ -141,7 +141,7 @@ export default function NewOrderPage() {
     try {
       // Simular creación de orden
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       const orderData = {
         ...data,
         items: orderItems,
@@ -149,7 +149,7 @@ export default function NewOrderPage() {
         shippingFee,
         total,
       };
-      
+
       console.log("Nueva orden creada:", orderData);
       router.push("/admin/ordenes");
     } catch (error) {
@@ -173,11 +173,8 @@ export default function NewOrderPage() {
               <button
                 type="button"
                 onClick={() => router.push("/admin/ordenes")}
-                className="p-2 rounded-xl transition-all duration-200 hover:scale-105"
-                style={{
-                  backgroundColor: `${themeColors.surface}80`,
-                  color: themeColors.text.primary,
-                }}
+                className="p-2 rounded-xl transition-all duration-200 hover:scale-105 bg-white border border-gray-200"
+                style={{ color: themeColors.text.primary }}
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
@@ -190,16 +187,13 @@ export default function NewOrderPage() {
                 </p>
               </div>
             </div>
-            
+
             <motion.button
               type="submit"
               disabled={loading || orderItems.length === 0}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="px-6 py-2 text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-lg disabled:opacity-50"
-              style={{
-                background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
-              }}
+              className="px-6 py-2 text-white rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-sm disabled:opacity-50 bg-red-700 hover:bg-red-800"
             >
               {loading ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -218,16 +212,12 @@ export default function NewOrderPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="backdrop-blur-xl p-6 rounded-2xl border"
-                style={{
-                  backgroundColor: `${themeColors.surface}70`,
-                  borderColor: `${themeColors.primary}30`,
-                }}
+                className="bg-white p-6 rounded-2xl border border-gray-200"
               >
                 <h3 className="text-lg font-bold mb-4" style={{ color: themeColors.text.primary }}>
                   Información del Cliente
                 </h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>
@@ -255,7 +245,7 @@ export default function NewOrderPage() {
                       </p>
                     )}
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>
                       Método de Pago *
@@ -286,16 +276,12 @@ export default function NewOrderPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="backdrop-blur-xl p-6 rounded-2xl border"
-                style={{
-                  backgroundColor: `${themeColors.surface}70`,
-                  borderColor: `${themeColors.primary}30`,
-                }}
+                className="bg-white p-6 rounded-2xl border border-gray-200"
               >
                 <h3 className="text-lg font-bold mb-4" style={{ color: themeColors.text.primary }}>
                   Agregar Productos
                 </h3>
-                
+
                 <div className="relative mb-4">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" style={{ color: themeColors.text.secondary }} />
                   <input
@@ -303,12 +289,8 @@ export default function NewOrderPage() {
                     placeholder="Buscar productos..."
                     value={productSearch}
                     onChange={(e) => setProductSearch(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2"
-                    style={{
-                      backgroundColor: `${themeColors.surface}50`,
-                      borderColor: `${themeColors.primary}30`,
-                      color: themeColors.text.primary,
-                    }}
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-700/20 focus:border-red-700"
+                    style={{ color: themeColors.text.primary }}
                   />
                 </div>
 
@@ -316,11 +298,7 @@ export default function NewOrderPage() {
                   {filteredProducts.map((product) => (
                     <div
                       key={product.id}
-                      className="p-3 rounded-xl border cursor-pointer transition-all duration-200 hover:scale-[1.02]"
-                      style={{
-                        backgroundColor: `${themeColors.surface}50`,
-                        borderColor: `${themeColors.primary}20`,
-                      }}
+                      className="p-3 rounded-xl border border-gray-200 cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:border-red-200 hover:bg-red-50"
                       onClick={() => addOrderItem(product)}
                     >
                       <div className="flex items-center justify-between">
@@ -338,8 +316,7 @@ export default function NewOrderPage() {
                           </p>
                           <button
                             type="button"
-                            className="p-1 rounded-lg mt-1"
-                            style={{ backgroundColor: `${themeColors.primary}20`, color: themeColors.primary }}
+                            className="p-1 rounded-lg mt-1 bg-red-700/10 text-red-700"
                           >
                             <Plus className="w-4 h-4" />
                           </button>
@@ -357,11 +334,7 @@ export default function NewOrderPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 + (0.1 * index) }}
-                  className="backdrop-blur-xl rounded-2xl border overflow-hidden"
-                  style={{
-                    backgroundColor: `${themeColors.surface}70`,
-                    borderColor: `${themeColors.primary}30`,
-                  }}
+                  className="bg-white rounded-2xl border border-gray-200 overflow-hidden"
                 >
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -372,13 +345,12 @@ export default function NewOrderPage() {
                         {supplierData.items.length} item(s)
                       </div>
                     </div>
-                    
+
                     <div className="space-y-3">
                       {supplierData.items.map((item) => (
                         <div
                           key={item.id}
-                          className="flex items-center justify-between p-3 rounded-xl"
-                          style={{ backgroundColor: `${themeColors.primary}10` }}
+                          className="flex items-center justify-between p-3 rounded-xl bg-red-50"
                         >
                           <div className="flex-1">
                             <p className="font-medium" style={{ color: themeColors.text.primary }}>
@@ -393,8 +365,8 @@ export default function NewOrderPage() {
                               <button
                                 type="button"
                                 onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
-                                className="w-8 h-8 rounded-lg flex items-center justify-center"
-                                style={{ backgroundColor: `${themeColors.surface}80` }}
+                                className="w-8 h-8 rounded-lg flex items-center justify-center border border-gray-200 bg-white"
+                                style={{ color: themeColors.text.primary }}
                               >
                                 -
                               </button>
@@ -404,8 +376,8 @@ export default function NewOrderPage() {
                               <button
                                 type="button"
                                 onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
-                                className="w-8 h-8 rounded-lg flex items-center justify-center"
-                                style={{ backgroundColor: `${themeColors.surface}80` }}
+                                className="w-8 h-8 rounded-lg flex items-center justify-center border border-gray-200 bg-white"
+                                style={{ color: themeColors.text.primary }}
                               >
                                 +
                               </button>
@@ -416,7 +388,7 @@ export default function NewOrderPage() {
                             <button
                               type="button"
                               onClick={() => removeOrderItem(item.id)}
-                              className="p-2 rounded-lg text-red-500 hover:bg-red-50"
+                              className="p-2 rounded-lg text-red-500 hover:bg-red-100"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -424,8 +396,8 @@ export default function NewOrderPage() {
                         </div>
                       ))}
                     </div>
-                    
-                    <div className="flex justify-between items-center mt-4 pt-4 border-t" style={{ borderColor: `${themeColors.primary}20` }}>
+
+                    <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
                       <span className="font-medium" style={{ color: themeColors.text.primary }}>
                         Subtotal {supplierData.supplierName}:
                       </span>
@@ -444,16 +416,12 @@ export default function NewOrderPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="backdrop-blur-xl p-6 rounded-2xl border"
-                style={{
-                  backgroundColor: `${themeColors.surface}70`,
-                  borderColor: `${themeColors.primary}30`,
-                }}
+                className="bg-white p-6 rounded-2xl border border-gray-200"
               >
                 <h3 className="text-lg font-bold mb-4" style={{ color: themeColors.text.primary }}>
                   Resumen de Orden
                 </h3>
-                
+
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span style={{ color: themeColors.text.secondary }}>Subtotal:</span>
@@ -463,7 +431,7 @@ export default function NewOrderPage() {
                     <span style={{ color: themeColors.text.secondary }}>Envío:</span>
                     <span style={{ color: themeColors.text.primary }}>${shippingFee.toFixed(2)}</span>
                   </div>
-                  <hr style={{ borderColor: `${themeColors.primary}20` }} />
+                  <hr className="border-gray-100" />
                   <div className="flex justify-between text-lg font-bold">
                     <span style={{ color: themeColors.text.primary }}>Total:</span>
                     <span style={{ color: themeColors.text.primary }}>${total.toFixed(2)}</span>
@@ -475,16 +443,12 @@ export default function NewOrderPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="backdrop-blur-xl p-6 rounded-2xl border"
-                style={{
-                  backgroundColor: `${themeColors.surface}70`,
-                  borderColor: `${themeColors.primary}30`,
-                }}
+                className="bg-white p-6 rounded-2xl border border-gray-200"
               >
                 <h3 className="text-lg font-bold mb-4" style={{ color: themeColors.text.primary }}>
                   Notas (Opcional)
                 </h3>
-                
+
                 <Controller
                   name="notes"
                   control={control}
@@ -493,12 +457,8 @@ export default function NewOrderPage() {
                       {...field}
                       rows={4}
                       placeholder="Agregar notas adicionales para esta orden..."
-                      className="w-full px-4 py-3 rounded-xl border resize-none transition-all duration-200 focus:outline-none focus:ring-2"
-                      style={{
-                        backgroundColor: `${themeColors.surface}50`,
-                        borderColor: `${themeColors.primary}30`,
-                        color: themeColors.text.primary,
-                      }}
+                      className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 resize-none transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-700/20 focus:border-red-700"
+                      style={{ color: themeColors.text.primary }}
                     />
                   )}
                 />

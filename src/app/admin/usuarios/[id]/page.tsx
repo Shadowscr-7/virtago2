@@ -18,10 +18,9 @@ import {
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/admin-layout";
 import { useAuthStore } from "@/store/auth";
+import { useTheme } from "@/contexts/theme-context";
 import { showToast } from "@/store/toast-helpers";
 import http from "@/api/http-client";
-
-const PRIMARY = "#C8102E";
 
 interface AdminUser {
   id: string;
@@ -43,6 +42,7 @@ export default function UsuarioDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { user: currentUser } = useAuthStore();
+  const { themeColors } = useTheme();
 
   const [userData, setUserData] = useState<AdminUser | null>(null);
   const [ordersCount, setOrdersCount] = useState(0);
@@ -134,7 +134,7 @@ export default function UsuarioDetailPage() {
       <AdminLayout>
         <div className="flex items-center justify-center h-64">
           <AlertTriangle className="w-8 h-8 text-amber-500 mr-3" />
-          <p className="text-gray-700">Acceso restringido</p>
+          <p style={{ color: themeColors.text.secondary }}>Acceso restringido</p>
         </div>
       </AdminLayout>
     );
@@ -146,7 +146,10 @@ export default function UsuarioDetailPage() {
         {/* Back button */}
         <button
           onClick={() => router.push("/admin/usuarios")}
-          className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 transition-colors"
+          className="flex items-center gap-2 text-sm transition-colors"
+          style={{ color: themeColors.text.secondary }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = themeColors.text.primary; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = themeColors.text.secondary; }}
         >
           <ArrowLeft className="w-4 h-4" />
           Volver a usuarios
@@ -154,10 +157,10 @@ export default function UsuarioDetailPage() {
 
         {isLoading ? (
           <div className="flex items-center justify-center h-48">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: PRIMARY }} />
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: themeColors.primary }} />
           </div>
         ) : !userData ? (
-          <div className="flex items-center justify-center h-48 text-gray-400">
+          <div className="flex items-center justify-center h-48" style={{ color: themeColors.text.muted }}>
             <p>Usuario no encontrado</p>
           </div>
         ) : (
@@ -166,22 +169,23 @@ export default function UsuarioDetailPage() {
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6"
+              className="bg-white rounded-2xl border shadow-sm p-6"
+              style={{ borderColor: themeColors.border }}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div
                     className="w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-bold flex-shrink-0"
-                    style={{ backgroundColor: PRIMARY }}
+                    style={{ backgroundColor: themeColors.primary }}
                   >
                     {(userData.firstName?.[0] || userData.email?.[0] || "?").toUpperCase()}
                   </div>
                   <div>
-                    <h1 className="text-xl font-bold text-gray-900">
+                    <h1 className="text-xl font-bold" style={{ color: themeColors.text.primary }}>
                       {`${userData.firstName || ""} ${userData.lastName || ""}`.trim() || userData.email}
                     </h1>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="text-sm px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                      <span className="text-sm px-2 py-0.5 rounded-full bg-red-50 border" style={{ color: themeColors.primary, borderColor: `${themeColors.primary}30` }}>
                         {getUserTypeLabel(userData)}
                       </span>
                       {isActive ? (
@@ -190,8 +194,8 @@ export default function UsuarioDetailPage() {
                           Activo
                         </span>
                       ) : (
-                        <span className="text-sm px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-100 flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                        <span className="text-sm px-2 py-0.5 rounded-full bg-red-50 border border-red-100 flex items-center gap-1" style={{ color: themeColors.primary }}>
+                          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: themeColors.primary }} />
                           Inactivo
                         </span>
                       )}
@@ -213,7 +217,8 @@ export default function UsuarioDetailPage() {
                     <button
                       onClick={() => setDeactivateModal(true)}
                       disabled={isActioning}
-                      className="flex items-center gap-2 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg text-sm font-medium transition-all border border-red-200 disabled:opacity-50"
+                      className="flex items-center gap-2 px-3 py-2 bg-red-50 hover:bg-red-100 rounded-lg text-sm font-medium transition-all border border-red-200 disabled:opacity-50"
+                      style={{ color: themeColors.primary }}
                     >
                       <UserX className="w-4 h-4" />
                       Dar de baja
@@ -239,19 +244,20 @@ export default function UsuarioDetailPage() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-white rounded-xl border border-gray-200 shadow-sm p-5"
+                className="bg-white rounded-xl border shadow-sm p-5"
+                style={{ borderColor: themeColors.border }}
               >
-                <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4 flex items-center gap-2">
-                  <User className="w-4 h-4" style={{ color: PRIMARY }} />
+                <h2 className="text-sm font-semibold uppercase tracking-wide mb-4 flex items-center gap-2" style={{ color: themeColors.text.secondary }}>
+                  <User className="w-4 h-4" style={{ color: themeColors.primary }} />
                   Datos personales
                 </h2>
                 <div className="space-y-3">
-                  <InfoRow label="Nombre" value={`${userData.firstName || ""} ${userData.lastName || ""}`.trim() || "-"} />
-                  <InfoRow label="Email" value={userData.email || "-"} icon={<Mail className="w-3.5 h-3.5 text-gray-400" />} />
-                  <InfoRow label="Teléfono" value={userData.phone || "-"} icon={<Phone className="w-3.5 h-3.5 text-gray-400" />} />
-                  <InfoRow label="Ciudad" value={userData.city || "-"} />
-                  <InfoRow label="País" value={userData.country || "-"} />
-                  <InfoRow label="Género" value={userData.gender || "-"} />
+                  <InfoRow label="Nombre" value={`${userData.firstName || ""} ${userData.lastName || ""}`.trim() || "-"} themeColors={themeColors} />
+                  <InfoRow label="Email" value={userData.email || "-"} icon={<Mail className="w-3.5 h-3.5" style={{ color: themeColors.text.muted }} />} themeColors={themeColors} />
+                  <InfoRow label="Teléfono" value={userData.phone || "-"} icon={<Phone className="w-3.5 h-3.5" style={{ color: themeColors.text.muted }} />} themeColors={themeColors} />
+                  <InfoRow label="Ciudad" value={userData.city || "-"} themeColors={themeColors} />
+                  <InfoRow label="País" value={userData.country || "-"} themeColors={themeColors} />
+                  <InfoRow label="Género" value={userData.gender || "-"} themeColors={themeColors} />
                 </div>
               </motion.div>
 
@@ -260,21 +266,23 @@ export default function UsuarioDetailPage() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
-                className="bg-white rounded-xl border border-gray-200 shadow-sm p-5"
+                className="bg-white rounded-xl border shadow-sm p-5"
+                style={{ borderColor: themeColors.border }}
               >
-                <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4 flex items-center gap-2">
-                  <ShoppingCart className="w-4 h-4" style={{ color: PRIMARY }} />
+                <h2 className="text-sm font-semibold uppercase tracking-wide mb-4 flex items-center gap-2" style={{ color: themeColors.text.secondary }}>
+                  <ShoppingCart className="w-4 h-4" style={{ color: themeColors.primary }} />
                   Actividad
                 </h2>
                 <div className="space-y-3">
                   <InfoRow
                     label="Fecha de registro"
                     value={formatDate(userData.createdAt)}
-                    icon={<Calendar className="w-3.5 h-3.5 text-gray-400" />}
+                    icon={<Calendar className="w-3.5 h-3.5" style={{ color: themeColors.text.muted }} />}
+                    themeColors={themeColors}
                   />
-                  <InfoRow label="Pedidos realizados" value={String(ordersCount)} icon={<ShoppingCart className="w-3.5 h-3.5 text-gray-400" />} />
-                  <InfoRow label="Rol" value={getUserTypeLabel(userData)} icon={<Tag className="w-3.5 h-3.5 text-gray-400" />} />
-                  <InfoRow label="Estado de cuenta" value={isActive ? "Activa" : "Suspendida"} />
+                  <InfoRow label="Pedidos realizados" value={String(ordersCount)} icon={<ShoppingCart className="w-3.5 h-3.5" style={{ color: themeColors.text.muted }} />} themeColors={themeColors} />
+                  <InfoRow label="Rol" value={getUserTypeLabel(userData)} icon={<Tag className="w-3.5 h-3.5" style={{ color: themeColors.text.muted }} />} themeColors={themeColors} />
+                  <InfoRow label="Estado de cuenta" value={isActive ? "Activa" : "Suspendida"} themeColors={themeColors} />
                 </div>
               </motion.div>
             </div>
@@ -295,37 +303,39 @@ export default function UsuarioDetailPage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 max-w-md w-full"
+              className="bg-white rounded-2xl shadow-2xl border p-6 max-w-md w-full"
+              style={{ borderColor: themeColors.border }}
             >
               <div className="flex items-start gap-4">
                 <div className="p-3 bg-red-50 rounded-xl flex-shrink-0">
                   <AlertTriangle className="w-6 h-6 text-red-600" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-900">Dar de baja al usuario</h3>
-                  <p className="text-gray-600 text-sm mt-2">
+                  <h3 className="text-lg font-bold" style={{ color: themeColors.text.primary }}>Dar de baja al usuario</h3>
+                  <p className="text-sm mt-2" style={{ color: themeColors.text.secondary }}>
                     Esta acción desactivará la cuenta de{" "}
-                    <span className="font-semibold">
+                    <span className="font-semibold" style={{ color: themeColors.text.primary }}>
                       {`${userData?.firstName || ""} ${userData?.lastName || ""}`.trim() || userData?.email}
                     </span>
                     . El usuario no podrá ingresar mientras esté inactivo.
                   </p>
                 </div>
-                <button onClick={() => setDeactivateModal(false)} className="p-1 text-gray-400 hover:text-gray-600">
+                <button onClick={() => setDeactivateModal(false)} className="p-1 transition-colors" style={{ color: themeColors.text.muted }}>
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <div className="flex items-center gap-3 mt-6 pt-4 border-t border-gray-100">
+              <div className="flex items-center gap-3 mt-6 pt-4 border-t" style={{ borderColor: themeColors.border }}>
                 <button
                   onClick={() => setDeactivateModal(false)}
-                  className="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium text-sm"
+                  className="flex-1 px-4 py-2.5 rounded-xl font-medium text-sm transition-all"
+                  style={{ backgroundColor: "#f3f4f6", color: themeColors.text.secondary }}
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleDeactivate}
                   disabled={isActioning}
-                  className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium text-sm disabled:opacity-50"
+                  className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium text-sm transition-all disabled:opacity-50"
                 >
                   {isActioning ? "Procesando..." : "Confirmar baja"}
                 </button>
@@ -342,18 +352,20 @@ function InfoRow({
   label,
   value,
   icon,
+  themeColors,
 }: {
   label: string;
   value: string;
   icon?: React.ReactNode;
+  themeColors: { text: { primary: string; secondary: string; muted: string }; border: string };
 }) {
   return (
-    <div className="flex items-center justify-between py-1.5 border-b border-gray-50 last:border-0">
-      <span className="text-sm text-gray-500 flex items-center gap-1.5">
+    <div className="flex items-center justify-between py-1.5 border-b last:border-0" style={{ borderColor: `${themeColors.border}60` }}>
+      <span className="text-sm flex items-center gap-1.5" style={{ color: themeColors.text.secondary }}>
         {icon}
         {label}
       </span>
-      <span className="text-sm text-gray-900 font-medium">{value}</span>
+      <span className="text-sm font-medium" style={{ color: themeColors.text.primary }}>{value}</span>
     </div>
   );
 }

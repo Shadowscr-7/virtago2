@@ -307,16 +307,16 @@ export default function ClientDetail({
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-6">
+      <div className="min-h-screen bg-white p-6">
         <div className="max-w-7xl mx-auto">
           {/* Loading State */}
           {isLoading ? (
             <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-              <Loader2 className="w-12 h-12 animate-spin text-purple-600" />
-              <p className="text-lg text-gray-600 dark:text-gray-400">
+              <Loader2 className="w-12 h-12 animate-spin" style={{ color: "#B91C1C" }} />
+              <p className="text-lg text-gray-600">
                 Cargando datos del cliente...
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-500">
+              <p className="text-sm text-gray-500">
                 Client ID: {clientId}
               </p>
             </div>

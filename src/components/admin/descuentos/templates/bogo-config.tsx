@@ -30,30 +30,33 @@ export function BOGOConfigComponent({ config, onChange }: BOGOConfigProps) {
     }
   };
 
+  const inputClass = "w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-300 transition-all";
+  const selectClass = "w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-red-200 focus:border-red-300 transition-all";
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: "linear-gradient(135deg, #F38181, #F08080)" }}>
-          <ShoppingBag className="w-6 h-6 text-white" />
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-red-50">
+          <ShoppingBag className="w-6 h-6 text-red-700" />
         </div>
         <div>
-          <h3 className="text-xl font-bold" style={{ color: themeColors.text.primary }}>Configuración: BOGO</h3>
-          <p className="text-sm" style={{ color: themeColors.text.secondary }}>Buy One Get One</p>
+          <h3 className="text-xl font-bold text-gray-900">Configuración: BOGO</h3>
+          <p className="text-sm text-gray-500">Buy One Get One</p>
         </div>
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-4 rounded-xl border flex items-start gap-3" style={{ backgroundColor: "#F3818115", borderColor: "#F3818130" }}>
-        <Info className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "#F38181" }} />
-        <div className="text-sm" style={{ color: themeColors.text.secondary }}>
-          <p className="font-medium mb-1" style={{ color: themeColors.text.primary }}>¿Cómo funciona?</p>
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-4 rounded-xl border border-red-100 bg-red-50 flex items-start gap-3">
+        <Info className="w-5 h-5 flex-shrink-0 mt-0.5 text-red-700" />
+        <div className="text-sm text-gray-600">
+          <p className="font-medium mb-1 text-gray-900">¿Cómo funciona?</p>
           <p>Compra un producto y obtén otro gratis o con descuento. Ejemplo: Compra 1, Lleva 1 Gratis (100% desc. en el segundo).</p>
         </div>
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>Tipo de BOGO *</label>
-          <select value={config.bogo_type} onChange={(e) => updateField("bogo_type", e.target.value)} className="w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2" style={{ backgroundColor: themeColors.surface + "50", borderColor: "#F3818130", color: themeColors.text.primary }}>
+          <label className="block text-sm font-medium mb-2 text-gray-700">Tipo de BOGO *</label>
+          <select value={config.bogo_type} onChange={(e) => updateField("bogo_type", e.target.value)} className={selectClass}>
             <option value="free">Gratis (100% desc.)</option>
             <option value="percentage">Porcentaje</option>
             <option value="fixed">Monto Fijo</option>
@@ -61,24 +64,24 @@ export function BOGOConfigComponent({ config, onChange }: BOGOConfigProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>Descuento a Obtener *</label>
-          <input type="number" min="0" value={config.get_discount} onChange={(e) => updateField("get_discount", Number(e.target.value))} placeholder="Ej: 100 para gratis, 50 para 50%" className="w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2" style={{ backgroundColor: themeColors.surface + "50", borderColor: themeColors.primary + "30", color: themeColors.text.primary }} />
+          <label className="block text-sm font-medium mb-2 text-gray-700">Descuento a Obtener *</label>
+          <input type="number" min="0" value={config.get_discount} onChange={(e) => updateField("get_discount", Number(e.target.value))} placeholder="Ej: 100 para gratis, 50 para 50%" className={inputClass} />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>Cantidad a Comprar *</label>
-          <input type="number" min="1" value={config.buy_quantity} onChange={(e) => updateField("buy_quantity", Number(e.target.value))} placeholder="Ej: 1" className="w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2" style={{ backgroundColor: themeColors.surface + "50", borderColor: themeColors.primary + "30", color: themeColors.text.primary }} />
+          <label className="block text-sm font-medium mb-2 text-gray-700">Cantidad a Comprar *</label>
+          <input type="number" min="1" value={config.buy_quantity} onChange={(e) => updateField("buy_quantity", Number(e.target.value))} placeholder="Ej: 1" className={inputClass} />
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>Cantidad a Obtener *</label>
-          <input type="number" min="1" value={config.get_quantity} onChange={(e) => updateField("get_quantity", Number(e.target.value))} placeholder="Ej: 1" className="w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2" style={{ backgroundColor: themeColors.surface + "50", borderColor: themeColors.primary + "30", color: themeColors.text.primary }} />
+          <label className="block text-sm font-medium mb-2 text-gray-700">Cantidad a Obtener *</label>
+          <input type="number" min="1" value={config.get_quantity} onChange={(e) => updateField("get_quantity", Number(e.target.value))} placeholder="Ej: 1" className={inputClass} />
         </div>
       </div>
 
-      <div className="p-4 rounded-xl border-2 border-dashed" style={{ backgroundColor: "#10B98115", borderColor: "#10B98130" }}>
-        <p className="text-sm font-medium mb-1" style={{ color: themeColors.text.primary }}>Vista Previa:</p>
-        <p className="text-2xl font-bold" style={{ color: "#10B981" }}>
+      <div className="p-4 rounded-xl border border-gray-200 bg-gray-50">
+        <p className="text-sm font-medium mb-1 text-gray-900">Vista Previa:</p>
+        <p className="text-2xl font-bold text-red-700">
           Compra {config.buy_quantity || "?"}, Lleva {config.get_quantity || "?"} {config.bogo_type === "free" ? "Gratis" : `al ${config.get_discount}%`}
         </p>
       </div>
@@ -86,10 +89,10 @@ export function BOGOConfigComponent({ config, onChange }: BOGOConfigProps) {
       {(["applicable_categories", "applicable_products", "applicable_brands"] as const).map((field) => (
         <div key={field}>
           <div className="flex items-center justify-between mb-3">
-            <label className="text-sm font-medium" style={{ color: themeColors.text.primary }}>
+            <label className="text-sm font-medium text-gray-700">
               {field === "applicable_categories" ? "Categorías" : field === "applicable_products" ? "Productos" : "Marcas"} (Opcional)
             </label>
-            <motion.button type="button" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => manageList(field, "add")} className="px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1" style={{ backgroundColor: themeColors.primary + "20", color: themeColors.primary }}>
+            <motion.button type="button" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => manageList(field, "add")} className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium bg-red-50 text-red-700 hover:bg-red-100 transition-colors">
               <Plus className="w-4 h-4" />Agregar
             </motion.button>
           </div>
@@ -97,15 +100,15 @@ export function BOGOConfigComponent({ config, onChange }: BOGOConfigProps) {
             <div className="space-y-2">
               {(config[field] as string[]).map((item, index) => (
                 <div key={index} className="flex items-center gap-2">
-                  <input type="text" value={item} onChange={(e) => manageList(field, "update", index, e.target.value)} placeholder={`ID ${field === "applicable_categories" ? "categoría" : field === "applicable_products" ? "producto" : "marca"}`} className="flex-1 px-4 py-2.5 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2" style={{ backgroundColor: themeColors.surface + "50", borderColor: themeColors.primary + "30", color: themeColors.text.primary }} />
-                  <motion.button type="button" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => manageList(field, "remove", index)} className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                  <input type="text" value={item} onChange={(e) => manageList(field, "update", index, e.target.value)} placeholder={`ID ${field === "applicable_categories" ? "categoría" : field === "applicable_products" ? "producto" : "marca"}`} className={inputClass} />
+                  <motion.button type="button" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => manageList(field, "remove", index)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
                     <Trash2 className="w-4 h-4" />
                   </motion.button>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-center py-4" style={{ color: themeColors.text.secondary }}>Sin {field === "applicable_categories" ? "categorías" : field === "applicable_products" ? "productos" : "marcas"}.</p>
+            <p className="text-sm text-center py-4 text-gray-400">Sin {field === "applicable_categories" ? "categorías" : field === "applicable_products" ? "productos" : "marcas"}.</p>
           )}
         </div>
       ))}

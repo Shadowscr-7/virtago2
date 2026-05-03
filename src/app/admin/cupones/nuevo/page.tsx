@@ -10,7 +10,6 @@ import {
   ArrowLeft,
   Save,
   X,
-  Calendar,
   DollarSign,
   Percent,
   Ticket,
@@ -27,17 +26,31 @@ import { AdminLayout } from "@/components/admin/admin-layout";
 import { EnhancedSelect } from "@/components/ui/enhanced-select";
 import { EnhancedDatePicker } from "@/components/ui/enhanced-datepicker";
 
-// Schema de validación
 const couponSchema = z.object({
-  code: z.string().min(3, "El código debe tener al menos 3 caracteres").max(20, "El código no puede tener más de 20 caracteres"),
-  name: z.string().min(1, "El nombre es requerido").max(100, "El nombre no puede tener más de 100 caracteres"),
-  description: z.string().max(500, "La descripción no puede tener más de 500 caracteres").optional(),
+  code: z
+    .string()
+    .min(3, "El código debe tener al menos 3 caracteres")
+    .max(20, "El código no puede tener más de 20 caracteres"),
+  name: z
+    .string()
+    .min(1, "El nombre es requerido")
+    .max(100, "El nombre no puede tener más de 100 caracteres"),
+  description: z
+    .string()
+    .max(500, "La descripción no puede tener más de 500 caracteres")
+    .optional(),
   type: z.enum(["PERCENTAGE", "FIXED_AMOUNT", "FREE_SHIPPING"], {
     message: "Selecciona un tipo de descuento",
   }),
   value: z.number().min(0, "El valor debe ser mayor a 0"),
-  minOrderAmount: z.number().min(0, "El monto mínimo debe ser mayor o igual a 0").optional(),
-  maxUses: z.number().min(1, "El límite de usos debe ser al menos 1").optional(),
+  minOrderAmount: z
+    .number()
+    .min(0, "El monto mínimo debe ser mayor o igual a 0")
+    .optional(),
+  maxUses: z
+    .number()
+    .min(1, "El límite de usos debe ser al menos 1")
+    .optional(),
   startDate: z.string().min(1, "La fecha de inicio es requerida"),
   endDate: z.string().min(1, "La fecha de fin es requerida"),
   status: z.enum(["ACTIVE", "INACTIVE"]),
@@ -100,7 +113,7 @@ const couponTemplates = [
 export default function NewCouponPage() {
   const { themeColors } = useTheme();
   const router = useRouter();
-  
+
   const [saving, setSaving] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
@@ -111,13 +124,14 @@ export default function NewCouponPage() {
     formState: { errors },
     watch,
     setValue,
-    reset,
   } = useForm<CouponForm>({
     resolver: zodResolver(couponSchema),
     defaultValues: {
       status: "ACTIVE",
-      startDate: new Date().toISOString().split('T')[0],
-      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 días
+      startDate: new Date().toISOString().split("T")[0],
+      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0],
     },
   });
 
@@ -125,14 +139,12 @@ export default function NewCouponPage() {
 
   const onSubmit = async (data: CouponForm) => {
     setSaving(true);
-    
     try {
-      // Simular guardado
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      console.log("Datos del nuevo cupón:", { ...data, categories: selectedCategories });
-      
-      // Redirigir a la lista de cupones
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      console.log("Datos del nuevo cupón:", {
+        ...data,
+        categories: selectedCategories,
+      });
       router.push("/admin/cupones");
     } catch (error) {
       console.error("Error al crear el cupón:", error);
@@ -141,23 +153,19 @@ export default function NewCouponPage() {
     }
   };
 
-  const applyTemplate = (template: typeof couponTemplates[0]) => {
+  const applyTemplate = (template: (typeof couponTemplates)[0]) => {
     setSelectedTemplate(template.id);
     setValue("type", template.type);
     setValue("value", template.value);
-    
-    // Generar código automático basado en el template
     const randomSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const code = `${template.id.toUpperCase()}_${randomSuffix}`;
-    setValue("code", code);
+    setValue("code", `${template.id.toUpperCase()}_${randomSuffix}`);
     setValue("name", template.name);
     setValue("description", template.description);
   };
 
   const generateRandomCode = () => {
-    const prefix = "COUPON";
     const randomSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
-    return `${prefix}_${randomSuffix}`;
+    return `COUPON_${randomSuffix}`;
   };
 
   const getTypeIcon = (type: string) => {
@@ -174,35 +182,35 @@ export default function NewCouponPage() {
   };
 
   const toggleCategory = (categoryId: string) => {
-    setSelectedCategories(prev => 
-      prev.includes(categoryId) 
-        ? prev.filter(id => id !== categoryId)
+    setSelectedCategories((prev) =>
+      prev.includes(categoryId)
+        ? prev.filter((id) => id !== categoryId)
         : [...prev, categoryId]
     );
   };
 
   return (
     <AdminLayout>
-      <div className="p-6">
+      <div className="space-y-6">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-8"
+          className="flex items-center justify-between"
         >
           <div className="flex items-center gap-4">
             <button
               onClick={() => router.push("/admin/cupones")}
-              className="p-2 rounded-xl transition-all duration-200 hover:scale-105"
-              style={{
-                backgroundColor: `${themeColors.surface}80`,
-                color: themeColors.text.primary,
-              }}
+              className="p-2 rounded-xl border border-gray-200 transition-all hover:bg-gray-50"
+              style={{ color: themeColors.text.primary }}
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold" style={{ color: themeColors.text.primary }}>
+              <h1
+                className="text-2xl font-bold"
+                style={{ color: themeColors.text.primary }}
+              >
                 Crear Nuevo Cupón
               </h1>
               <p className="text-sm" style={{ color: themeColors.text.secondary }}>
@@ -220,19 +228,19 @@ export default function NewCouponPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="backdrop-blur-xl p-6 rounded-2xl border"
-              style={{
-                backgroundColor: `${themeColors.surface}70`,
-                borderColor: `${themeColors.primary}30`,
-              }}
+              className="bg-white p-6 rounded-2xl border border-gray-200"
             >
-              <h3 className="text-lg font-bold mb-4" style={{ color: themeColors.text.primary }}>
+              <h3
+                className="text-lg font-bold mb-2"
+                style={{ color: themeColors.text.primary }}
+              >
                 Plantillas de Cupones
               </h3>
-              <p className="text-sm mb-6" style={{ color: themeColors.text.secondary }}>
-                Selecciona una plantilla para empezar rápidamente o crea tu cupón desde cero.
+              <p className="text-sm mb-5" style={{ color: themeColors.text.secondary }}>
+                Selecciona una plantilla para empezar rápidamente o crea tu
+                cupón desde cero.
               </p>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {couponTemplates.map((template) => (
                   <motion.button
@@ -243,43 +251,60 @@ export default function NewCouponPage() {
                     whileTap={{ scale: 0.98 }}
                     className="p-4 rounded-xl border-2 text-left transition-all duration-200"
                     style={{
-                      borderColor: selectedTemplate === template.id ? template.color : `${themeColors.primary}30`,
-                      backgroundColor: selectedTemplate === template.id ? `${template.color}20` : `${themeColors.surface}50`,
+                      borderColor:
+                        selectedTemplate === template.id
+                          ? template.color
+                          : "#e5e7eb",
+                      backgroundColor:
+                        selectedTemplate === template.id
+                          ? `${template.color}10`
+                          : "white",
                     }}
                   >
                     <div className="flex items-start gap-3">
                       <div
                         className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                         style={{
-                          backgroundColor: `${template.color}20`,
+                          backgroundColor: `${template.color}15`,
                           color: template.color,
                         }}
                       >
                         {template.icon}
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold mb-1" style={{ color: themeColors.text.primary }}>
+                        <h4
+                          className="font-semibold mb-1"
+                          style={{ color: themeColors.text.primary }}
+                        >
                           {template.name}
                         </h4>
-                        <p className="text-sm" style={{ color: themeColors.text.secondary }}>
+                        <p
+                          className="text-sm"
+                          style={{ color: themeColors.text.secondary }}
+                        >
                           {template.description}
                         </p>
                         <div className="flex items-center gap-2 mt-2">
-                          <span 
-                            className="text-xs px-2 py-1 rounded"
-                            style={{ 
-                              backgroundColor: `${template.color}20`,
+                          <span
+                            className="text-xs px-2 py-1 rounded font-medium"
+                            style={{
+                              backgroundColor: `${template.color}15`,
                               color: template.color,
                             }}
                           >
-                            {template.type === "PERCENTAGE" ? `${template.value}%` : 
-                             template.type === "FIXED_AMOUNT" ? `$${template.value}` : 
-                             "Gratis"}
+                            {template.type === "PERCENTAGE"
+                              ? `${template.value}%`
+                              : template.type === "FIXED_AMOUNT"
+                              ? `$${template.value}`
+                              : "Gratis"}
                           </span>
                         </div>
                       </div>
                       {selectedTemplate === template.id && (
-                        <CheckCircle className="w-5 h-5" style={{ color: template.color }} />
+                        <CheckCircle
+                          className="w-5 h-5 flex-shrink-0"
+                          style={{ color: template.color }}
+                        />
                       )}
                     </div>
                   </motion.button>
@@ -293,29 +318,30 @@ export default function NewCouponPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="backdrop-blur-xl p-6 rounded-2xl border"
-                style={{
-                  backgroundColor: `${themeColors.surface}70`,
-                  borderColor: `${themeColors.primary}30`,
-                }}
+                className="bg-white p-6 rounded-2xl border border-gray-200"
               >
-                <h3 className="text-lg font-bold mb-6" style={{ color: themeColors.text.primary }}>
+                <h3
+                  className="text-lg font-bold mb-6"
+                  style={{ color: themeColors.text.primary }}
+                >
                   Información Básica
                 </h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: themeColors.text.primary }}
+                    >
                       Código del Cupón *
                     </label>
                     <div className="flex gap-2">
                       <input
                         {...register("code")}
                         type="text"
-                        className="flex-1 px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2"
+                        className="flex-1 px-4 py-3 rounded-xl border bg-gray-50 transition-all focus:outline-none focus:ring-2 focus:ring-red-700/20 focus:border-red-700"
                         style={{
-                          backgroundColor: `${themeColors.surface}50`,
-                          borderColor: errors.code ? "#ef4444" : `${themeColors.primary}30`,
+                          borderColor: errors.code ? "#ef4444" : "#e5e7eb",
                           color: themeColors.text.primary,
                         }}
                         placeholder="Ej: BLACKFRIDAY25"
@@ -323,12 +349,8 @@ export default function NewCouponPage() {
                       <button
                         type="button"
                         onClick={() => setValue("code", generateRandomCode())}
-                        className="px-4 py-3 rounded-xl border transition-all duration-200"
-                        style={{
-                          backgroundColor: `${themeColors.primary}20`,
-                          borderColor: `${themeColors.primary}30`,
-                          color: themeColors.primary,
-                        }}
+                        className="px-4 py-3 rounded-xl border border-gray-200 text-sm font-medium transition-all hover:bg-gray-50"
+                        style={{ color: themeColors.primary }}
                       >
                         Auto
                       </button>
@@ -342,16 +364,18 @@ export default function NewCouponPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: themeColors.text.primary }}
+                    >
                       Nombre del Cupón *
                     </label>
                     <input
                       {...register("name")}
                       type="text"
-                      className="w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2"
+                      className="w-full px-4 py-3 rounded-xl border bg-gray-50 transition-all focus:outline-none focus:ring-2 focus:ring-red-700/20 focus:border-red-700"
                       style={{
-                        backgroundColor: `${themeColors.surface}50`,
-                        borderColor: errors.name ? "#ef4444" : `${themeColors.primary}30`,
+                        borderColor: errors.name ? "#ef4444" : "#e5e7eb",
                         color: themeColors.text.primary,
                       }}
                       placeholder="Ej: Black Friday 25%"
@@ -366,16 +390,18 @@ export default function NewCouponPage() {
                 </div>
 
                 <div className="mt-6">
-                  <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>
+                  <label
+                    className="block text-sm font-medium mb-2"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     Descripción
                   </label>
                   <textarea
                     {...register("description")}
                     rows={4}
-                    className="w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2 resize-none"
+                    className="w-full px-4 py-3 rounded-xl border bg-gray-50 transition-all focus:outline-none focus:ring-2 focus:ring-red-700/20 focus:border-red-700 resize-none"
                     style={{
-                      backgroundColor: `${themeColors.surface}50`,
-                      borderColor: errors.description ? "#ef4444" : `${themeColors.primary}30`,
+                      borderColor: errors.description ? "#ef4444" : "#e5e7eb",
                       color: themeColors.text.primary,
                     }}
                     placeholder="Descripción del cupón..."
@@ -394,28 +420,46 @@ export default function NewCouponPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="backdrop-blur-xl p-6 rounded-2xl border"
-                style={{
-                  backgroundColor: `${themeColors.surface}70`,
-                  borderColor: `${themeColors.primary}30`,
-                }}
+                className="bg-white p-6 rounded-2xl border border-gray-200"
               >
-                <h3 className="text-lg font-bold mb-6" style={{ color: themeColors.text.primary }}>
+                <h3
+                  className="text-lg font-bold mb-6"
+                  style={{ color: themeColors.text.primary }}
+                >
                   Configuración del Descuento
                 </h3>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   {[
-                    { value: "PERCENTAGE", label: "Porcentaje", icon: <Percent className="w-5 h-5" />, color: "#3b82f6" },
-                    { value: "FIXED_AMOUNT", label: "Monto Fijo", icon: <DollarSign className="w-5 h-5" />, color: "#10b981" },
-                    { value: "FREE_SHIPPING", label: "Envío Gratis", icon: <Ticket className="w-5 h-5" />, color: "#8b5cf6" },
+                    {
+                      value: "PERCENTAGE",
+                      label: "Porcentaje",
+                      icon: <Percent className="w-5 h-5" />,
+                      color: "#3b82f6",
+                    },
+                    {
+                      value: "FIXED_AMOUNT",
+                      label: "Monto Fijo",
+                      icon: <DollarSign className="w-5 h-5" />,
+                      color: "#10b981",
+                    },
+                    {
+                      value: "FREE_SHIPPING",
+                      label: "Envío Gratis",
+                      icon: <Ticket className="w-5 h-5" />,
+                      color: "#8b5cf6",
+                    },
                   ].map((type) => (
                     <label
                       key={type.value}
                       className="relative flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 hover:scale-105"
                       style={{
-                        borderColor: watchType === type.value ? type.color : `${themeColors.primary}30`,
-                        backgroundColor: watchType === type.value ? `${type.color}20` : `${themeColors.surface}50`,
+                        borderColor:
+                          watchType === type.value ? type.color : "#e5e7eb",
+                        backgroundColor:
+                          watchType === type.value
+                            ? `${type.color}10`
+                            : "white",
                       }}
                     >
                       <input
@@ -428,19 +472,25 @@ export default function NewCouponPage() {
                         <div
                           className="w-10 h-10 rounded-xl flex items-center justify-center"
                           style={{
-                            backgroundColor: `${type.color}20`,
+                            backgroundColor: `${type.color}15`,
                             color: type.color,
                           }}
                         >
                           {type.icon}
                         </div>
-                        <span className="font-medium" style={{ color: themeColors.text.primary }}>
+                        <span
+                          className="font-medium"
+                          style={{ color: themeColors.text.primary }}
+                        >
                           {type.label}
                         </span>
                       </div>
                       {watchType === type.value && (
                         <div className="absolute top-2 right-2">
-                          <CheckCircle className="w-5 h-5" style={{ color: type.color }} />
+                          <CheckCircle
+                            className="w-5 h-5"
+                            style={{ color: type.color }}
+                          />
                         </div>
                       )}
                     </label>
@@ -456,13 +506,19 @@ export default function NewCouponPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>
-                      {watchType === "PERCENTAGE" ? "Porcentaje (%)" : 
-                       watchType === "FIXED_AMOUNT" ? "Monto ($)" : 
-                       "Valor"} *
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: themeColors.text.primary }}
+                    >
+                      {watchType === "PERCENTAGE"
+                        ? "Porcentaje (%)"
+                        : watchType === "FIXED_AMOUNT"
+                        ? "Monto ($)"
+                        : "Valor"}{" "}
+                      *
                     </label>
                     <div className="relative">
-                      <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                      <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
                         {getTypeIcon(watchType)}
                       </div>
                       <input
@@ -472,13 +528,12 @@ export default function NewCouponPage() {
                         min="0"
                         max={watchType === "PERCENTAGE" ? "100" : undefined}
                         disabled={watchType === "FREE_SHIPPING"}
-                        className="w-full pl-12 pr-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2"
+                        className="w-full pl-12 pr-4 py-3 rounded-xl border bg-gray-50 transition-all focus:outline-none focus:ring-2 focus:ring-red-700/20 focus:border-red-700 disabled:opacity-50"
                         style={{
-                          backgroundColor: watchType === "FREE_SHIPPING" ? `${themeColors.surface}30` : `${themeColors.surface}50`,
-                          borderColor: errors.value ? "#ef4444" : `${themeColors.primary}30`,
+                          borderColor: errors.value ? "#ef4444" : "#e5e7eb",
                           color: themeColors.text.primary,
                         }}
-                        placeholder={watchType === "FREE_SHIPPING" ? "0" : "0"}
+                        placeholder="0"
                       />
                     </div>
                     {errors.value && (
@@ -490,7 +545,10 @@ export default function NewCouponPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: themeColors.text.primary }}
+                    >
                       Compra Mínima ($)
                     </label>
                     <input
@@ -498,74 +556,74 @@ export default function NewCouponPage() {
                       type="number"
                       min="0"
                       step="1000"
-                      className="w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2"
+                      className="w-full px-4 py-3 rounded-xl border bg-gray-50 transition-all focus:outline-none focus:ring-2 focus:ring-red-700/20 focus:border-red-700"
                       style={{
-                        backgroundColor: `${themeColors.surface}50`,
-                        borderColor: errors.minOrderAmount ? "#ef4444" : `${themeColors.primary}30`,
+                        borderColor: errors.minOrderAmount
+                          ? "#ef4444"
+                          : "#e5e7eb",
                         color: themeColors.text.primary,
                       }}
                       placeholder="0"
                     />
-                    {errors.minOrderAmount && (
-                      <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                        <AlertCircle className="w-4 h-4" />
-                        {errors.minOrderAmount.message}
-                      </p>
-                    )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>
+                    <label
+                      className="block text-sm font-medium mb-2"
+                      style={{ color: themeColors.text.primary }}
+                    >
                       Límite de Usos
                     </label>
                     <input
                       {...register("maxUses", { valueAsNumber: true })}
                       type="number"
                       min="1"
-                      className="w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2"
+                      className="w-full px-4 py-3 rounded-xl border bg-gray-50 transition-all focus:outline-none focus:ring-2 focus:ring-red-700/20 focus:border-red-700"
                       style={{
-                        backgroundColor: `${themeColors.surface}50`,
-                        borderColor: errors.maxUses ? "#ef4444" : `${themeColors.primary}30`,
+                        borderColor: errors.maxUses ? "#ef4444" : "#e5e7eb",
                         color: themeColors.text.primary,
                       }}
                       placeholder="Sin límite"
                     />
-                    {errors.maxUses && (
-                      <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                        <AlertCircle className="w-4 h-4" />
-                        {errors.maxUses.message}
-                      </p>
-                    )}
                   </div>
                 </div>
               </motion.div>
 
-              {/* Categorías Aplicables */}
+              {/* Categorías */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="backdrop-blur-xl p-6 rounded-2xl border"
-                style={{
-                  backgroundColor: `${themeColors.surface}70`,
-                  borderColor: `${themeColors.primary}30`,
-                }}
+                className="bg-white p-6 rounded-2xl border border-gray-200"
               >
-                <h3 className="text-lg font-bold mb-4" style={{ color: themeColors.text.primary }}>
+                <h3
+                  className="text-lg font-bold mb-2"
+                  style={{ color: themeColors.text.primary }}
+                >
                   Categorías Aplicables
                 </h3>
-                <p className="text-sm mb-6" style={{ color: themeColors.text.secondary }}>
-                  Selecciona las categorías donde se puede aplicar este cupón. Si no seleccionas ninguna, se aplicará a todos los productos.
+                <p
+                  className="text-sm mb-5"
+                  style={{ color: themeColors.text.secondary }}
+                >
+                  Selecciona las categorías donde se puede aplicar este cupón.
+                  Si no seleccionas ninguna, se aplicará a todos los productos.
                 </p>
-                
+
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {availableCategories.map((category) => (
                     <label
                       key={category.id}
-                      className="flex items-center p-3 rounded-xl border cursor-pointer transition-all duration-200 hover:scale-105"
+                      className="flex items-center p-3 rounded-xl border cursor-pointer transition-all duration-200"
                       style={{
-                        borderColor: selectedCategories.includes(category.id) ? themeColors.primary : `${themeColors.primary}30`,
-                        backgroundColor: selectedCategories.includes(category.id) ? `${themeColors.primary}20` : `${themeColors.surface}50`,
+                        borderColor: selectedCategories.includes(category.id)
+                          ? themeColors.primary
+                          : "#e5e7eb",
+                        backgroundColor: selectedCategories.includes(
+                          category.id
+                        )
+                          ? `${themeColors.primary}10`
+                          : "white",
                       }}
                     >
                       <input
@@ -574,25 +632,29 @@ export default function NewCouponPage() {
                         onChange={() => toggleCategory(category.id)}
                         className="sr-only"
                       />
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
                         <div
-                          className="w-8 h-8 rounded-lg flex items-center justify-center"
+                          className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                           style={{
-                            backgroundColor: selectedCategories.includes(category.id) ? themeColors.primary : `${themeColors.primary}20`,
-                            color: selectedCategories.includes(category.id) ? "white" : themeColors.primary,
+                            backgroundColor: selectedCategories.includes(
+                              category.id
+                            )
+                              ? themeColors.primary
+                              : "#f3f4f6",
+                            color: selectedCategories.includes(category.id)
+                              ? "white"
+                              : themeColors.text.secondary,
                           }}
                         >
                           <Package className="w-4 h-4" />
                         </div>
-                        <span className="text-sm font-medium" style={{ color: themeColors.text.primary }}>
+                        <span
+                          className="text-sm font-medium"
+                          style={{ color: themeColors.text.primary }}
+                        >
                           {category.name}
                         </span>
                       </div>
-                      {selectedCategories.includes(category.id) && (
-                        <div className="ml-auto">
-                          <CheckCircle className="w-4 h-4" style={{ color: themeColors.primary }} />
-                        </div>
-                      )}
                     </label>
                   ))}
                 </div>
@@ -607,74 +669,96 @@ export default function NewCouponPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="backdrop-blur-xl p-6 rounded-2xl border"
-              style={{
-                backgroundColor: `${themeColors.surface}70`,
-                borderColor: `${themeColors.primary}30`,
-              }}
+              className="bg-white p-6 rounded-2xl border border-gray-200"
             >
-              <h3 className="text-lg font-bold mb-6" style={{ color: themeColors.text.primary }}>
+              <h3
+                className="text-lg font-bold mb-6"
+                style={{ color: themeColors.text.primary }}
+              >
                 Estado y Vigencia
               </h3>
-              
+
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>
+                  <label
+                    className="block text-sm font-medium mb-2"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     Estado *
                   </label>
                   <EnhancedSelect
                     options={[
-                      { value: "ACTIVE", label: "Activo", icon: <CheckCircle className="w-4 h-4" /> },
-                      { value: "INACTIVE", label: "Inactivo", icon: <Clock className="w-4 h-4" /> },
+                      {
+                        value: "ACTIVE",
+                        label: "Activo",
+                        icon: <CheckCircle className="w-4 h-4" />,
+                      },
+                      {
+                        value: "INACTIVE",
+                        label: "Inactivo",
+                        icon: <Clock className="w-4 h-4" />,
+                      },
                     ]}
                     value={watch("status")}
-                    onChange={(value) => setValue("status", value as "ACTIVE" | "INACTIVE")}
+                    onChange={(value) =>
+                      setValue("status", value as "ACTIVE" | "INACTIVE")
+                    }
                     placeholder="Seleccionar estado"
                     error={!!errors.status}
                   />
-                  {errors.status && (
-                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-4 h-4" />
-                      {errors.status.message}
-                    </p>
-                  )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>
+                  <label
+                    className="block text-sm font-medium mb-2"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     Fecha de Inicio *
                   </label>
                   <EnhancedDatePicker
-                    value={watch("startDate") ? new Date(watch("startDate")).toISOString() : ""}
-                    onChange={(date) => setValue("startDate", date ? new Date(date).toISOString().split('T')[0] : "")}
+                    value={
+                      watch("startDate")
+                        ? new Date(watch("startDate")).toISOString()
+                        : ""
+                    }
+                    onChange={(date) =>
+                      setValue(
+                        "startDate",
+                        date
+                          ? new Date(date).toISOString().split("T")[0]
+                          : ""
+                      )
+                    }
                     placeholder="Seleccionar fecha de inicio"
                     error={!!errors.startDate}
                   />
-                  {errors.startDate && (
-                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-4 h-4" />
-                      {errors.startDate.message}
-                    </p>
-                  )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>
+                  <label
+                    className="block text-sm font-medium mb-2"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     Fecha de Fin *
                   </label>
                   <EnhancedDatePicker
-                    value={watch("endDate") ? new Date(watch("endDate")).toISOString() : ""}
-                    onChange={(date) => setValue("endDate", date ? new Date(date).toISOString().split('T')[0] : "")}
+                    value={
+                      watch("endDate")
+                        ? new Date(watch("endDate")).toISOString()
+                        : ""
+                    }
+                    onChange={(date) =>
+                      setValue(
+                        "endDate",
+                        date
+                          ? new Date(date).toISOString().split("T")[0]
+                          : ""
+                      )
+                    }
                     placeholder="Seleccionar fecha de fin"
                     error={!!errors.endDate}
                     minDate={watch("startDate")}
                   />
-                  {errors.endDate && (
-                    <p className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                      <AlertCircle className="w-4 h-4" />
-                      {errors.endDate.message}
-                    </p>
-                  )}
                 </div>
               </div>
             </motion.div>
@@ -692,11 +776,7 @@ export default function NewCouponPage() {
                 whileHover={{ scale: saving ? 1 : 1.02 }}
                 whileTap={{ scale: saving ? 1 : 0.98 }}
                 onClick={handleSubmit(onSubmit)}
-                className="w-full px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-3"
-                style={{
-                  backgroundColor: saving ? `${themeColors.primary}60` : themeColors.primary,
-                  color: "white",
-                }}
+                className="w-full px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-3 text-white bg-red-700 hover:bg-red-800 disabled:opacity-60"
               >
                 {saving ? (
                   <>
@@ -716,12 +796,8 @@ export default function NewCouponPage() {
                 onClick={() => router.push("/admin/cupones")}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-3"
-                style={{
-                  backgroundColor: `${themeColors.surface}80`,
-                  color: themeColors.text.primary,
-                  border: `1px solid ${themeColors.primary}30`,
-                }}
+                className="w-full px-6 py-3 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-3 border border-gray-200 bg-white hover:bg-gray-50"
+                style={{ color: themeColors.text.primary }}
               >
                 <X className="w-5 h-5" />
                 Cancelar

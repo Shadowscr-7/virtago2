@@ -1,15 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { 
-  ShoppingBag, 
-  Clock, 
-  DollarSign, 
-  TrendingUp, 
+import {
+  ShoppingBag,
+  Clock,
+  DollarSign,
+  TrendingUp,
   TrendingDown,
   Package,
   Truck,
-  CheckCircle 
+  CheckCircle
 } from "lucide-react";
 import { useTheme } from "@/contexts/theme-context";
 
@@ -108,11 +108,7 @@ export function OrderStats({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 * index }}
-          className="backdrop-blur-xl p-6 rounded-2xl border"
-          style={{
-            backgroundColor: `${themeColors.surface}70`,
-            borderColor: `${themeColors.primary}30`,
-          }}
+          className="bg-white p-6 rounded-2xl border border-gray-200"
         >
           <div className="flex items-center justify-between">
             <div>
@@ -125,7 +121,7 @@ export function OrderStats({
             </div>
             <div
               className="w-12 h-12 rounded-xl flex items-center justify-center"
-              style={{ backgroundColor: `${stat.color}20` }}
+              style={{ backgroundColor: `${stat.color}15` }}
             >
               <stat.icon className="w-6 h-6" style={{ color: stat.color }} />
             </div>

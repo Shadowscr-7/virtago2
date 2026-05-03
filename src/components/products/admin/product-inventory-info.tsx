@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { motion } from "framer-motion";
 import {
@@ -18,7 +18,7 @@ interface ProductInventoryInfoProps {
   onChange: (updates: Partial<ProductData>) => void;
 }
 
-const PRIMARY = "#C8102E";
+const PRIMARY = "#B91C1C";
 
 export function ProductInventoryInfo({
   productData,
@@ -256,7 +256,7 @@ export function ProductInventoryInfo({
       <div className="mt-6 pt-6 border-t border-gray-100">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Configuraciones de Inventario</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="flex items-center justify-between p-4 bg-red-50 rounded-xl border border-blue-100">
+          <div className="flex items-center justify-between p-4 bg-red-50 rounded-xl border border-red-100">
             <div>
               <div className="font-medium text-gray-900">Seguimiento de stock</div>
               <div className="text-sm text-gray-500">Controlar automáticamente el inventario</div>
@@ -268,7 +268,7 @@ export function ProductInventoryInfo({
             />
           </div>
 
-          <div className="flex items-center justify-between p-4 bg-orange-50 rounded-xl border border-orange-100">
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
             <div>
               <div className="font-medium text-gray-900">Permitir pedidos sin stock</div>
               <div className="text-sm text-gray-500">Backorder cuando no hay stock</div>
@@ -365,7 +365,7 @@ export function ProductInventoryInfo({
           </div>
         </div>
         {!isEditing && productData.unitsPerPackage > 1 && (
-          <div className="mt-4 p-4 bg-red-50 rounded-xl border border-blue-100">
+          <div className="mt-4 p-4 bg-red-50 rounded-xl border border-red-100">
             <p className="text-sm text-red-700">
               <strong>Configuración activa</strong>
             </p>

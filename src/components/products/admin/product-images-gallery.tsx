@@ -184,8 +184,8 @@ export function ProductImagesGallery({
       className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6"
     >
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-3 bg-pink-50 rounded-xl">
-          <ImageIcon className="w-6 h-6 text-pink-600" />
+        <div className="p-3 rounded-xl" style={{ backgroundColor: "#B91C1C15" }}>
+          <ImageIcon className="w-6 h-6" style={{ color: "#B91C1C" }} />
         </div>
         <div>
           <h2 className="text-xl font-bold text-gray-900">
@@ -220,7 +220,7 @@ export function ProductImagesGallery({
                   <div className="w-32 h-32 mx-auto mb-4 bg-gray-200 rounded-3xl flex items-center justify-center shadow-sm">
                     <ImageIcon className="w-16 h-16 text-gray-400" />
                   </div>
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
+                  <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center shadow-sm" style={{ backgroundColor: "#B91C1C20" }}>
                     <span className="text-xl">📷</span>
                   </div>
                 </motion.div>
@@ -236,7 +236,7 @@ export function ProductImagesGallery({
 
           {primaryImage && (
             <div className="absolute top-3 left-3">
-              <span className="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+              <span className="text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1" style={{ backgroundColor: "#B91C1C" }}>
                 <Star className="w-3 h-3 fill-current" />
                 Principal
               </span>

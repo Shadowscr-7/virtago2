@@ -10,7 +10,6 @@ import {
   Download,
   Eye,
   Copy,
-  QrCode,
   Calendar,
   DollarSign,
   TrendingUp,
@@ -206,14 +205,14 @@ export default function CouponsPage() {
   };
 
   const filteredCoupons = mockCoupons.filter(coupon => {
-    const matchesSearch = 
+    const matchesSearch =
       coupon.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
       coupon.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       coupon.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesStatus = statusFilter === "ALL" || coupon.status === statusFilter;
     const matchesType = typeFilter === "ALL" || coupon.type === typeFilter;
-    
+
     return matchesSearch && matchesStatus && matchesType;
   });
 
@@ -225,7 +224,6 @@ export default function CouponsPage() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    // Aquí podrías agregar una notificación toast
   };
 
   return (
@@ -249,12 +247,8 @@ export default function CouponsPage() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center gap-2"
-              style={{
-                backgroundColor: `${themeColors.surface}80`,
-                color: themeColors.text.primary,
-                border: `1px solid ${themeColors.primary}30`,
-              }}
+              className="px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 bg-white border border-gray-200"
+              style={{ color: themeColors.text.primary }}
             >
               <Download className="w-4 h-4" />
               Exportar
@@ -263,10 +257,7 @@ export default function CouponsPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => router.push("/admin/cupones/nuevo")}
-              className="px-6 py-2 rounded-xl font-medium text-white transition-all duration-200 flex items-center gap-2"
-              style={{
-                background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
-              }}
+              className="px-6 py-2 rounded-xl font-medium text-white transition-all duration-200 flex items-center gap-2 bg-red-700 hover:bg-red-800"
             >
               <Plus className="w-4 h-4" />
               Nuevo Cupón
@@ -280,11 +271,7 @@ export default function CouponsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="backdrop-blur-xl p-6 rounded-2xl border"
-            style={{
-              backgroundColor: `${themeColors.surface}70`,
-              borderColor: `${themeColors.primary}30`,
-            }}
+            className="bg-white p-6 rounded-2xl border border-gray-200"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -297,7 +284,7 @@ export default function CouponsPage() {
               </div>
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: `${themeColors.primary}20` }}
+                style={{ backgroundColor: `${themeColors.primary}15` }}
               >
                 <Ticket className="w-6 h-6" style={{ color: themeColors.primary }} />
               </div>
@@ -312,11 +299,7 @@ export default function CouponsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="backdrop-blur-xl p-6 rounded-2xl border"
-            style={{
-              backgroundColor: `${themeColors.surface}70`,
-              borderColor: `${themeColors.primary}30`,
-            }}
+            className="bg-white p-6 rounded-2xl border border-gray-200"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -329,7 +312,7 @@ export default function CouponsPage() {
               </div>
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: "#10b98120" }}
+                style={{ backgroundColor: "#10b98115" }}
               >
                 <CheckCircle className="w-6 h-6" style={{ color: "#10b981" }} />
               </div>
@@ -344,11 +327,7 @@ export default function CouponsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="backdrop-blur-xl p-6 rounded-2xl border"
-            style={{
-              backgroundColor: `${themeColors.surface}70`,
-              borderColor: `${themeColors.primary}30`,
-            }}
+            className="bg-white p-6 rounded-2xl border border-gray-200"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -361,7 +340,7 @@ export default function CouponsPage() {
               </div>
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: `${themeColors.secondary}20` }}
+                style={{ backgroundColor: `${themeColors.secondary}15` }}
               >
                 <Users className="w-6 h-6" style={{ color: themeColors.secondary }} />
               </div>
@@ -376,11 +355,7 @@ export default function CouponsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="backdrop-blur-xl p-6 rounded-2xl border"
-            style={{
-              backgroundColor: `${themeColors.surface}70`,
-              borderColor: `${themeColors.primary}30`,
-            }}
+            className="bg-white p-6 rounded-2xl border border-gray-200"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -393,7 +368,7 @@ export default function CouponsPage() {
               </div>
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: "#3b82f620" }}
+                style={{ backgroundColor: "#3b82f615" }}
               >
                 <BarChart3 className="w-6 h-6" style={{ color: "#3b82f6" }} />
               </div>
@@ -410,11 +385,7 @@ export default function CouponsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="backdrop-blur-xl p-6 rounded-2xl border mb-6"
-          style={{
-            backgroundColor: `${themeColors.surface}70`,
-            borderColor: `${themeColors.primary}30`,
-          }}
+          className="bg-white p-6 rounded-2xl border border-gray-200 mb-6"
         >
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1">
@@ -425,12 +396,8 @@ export default function CouponsPage() {
                   placeholder="Buscar por código, nombre o descripción..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2"
-                  style={{
-                    backgroundColor: `${themeColors.surface}50`,
-                    borderColor: `${themeColors.primary}30`,
-                    color: themeColors.text.primary,
-                  }}
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-700/20 focus:border-red-700"
+                  style={{ color: themeColors.text.primary }}
                 />
               </div>
             </div>
@@ -461,12 +428,8 @@ export default function CouponsPage() {
                 className="min-w-[200px]"
               />
               <button
-                className="p-3 rounded-xl border transition-all duration-200 hover:scale-105"
-                style={{
-                  backgroundColor: `${themeColors.surface}50`,
-                  borderColor: `${themeColors.primary}30`,
-                  color: themeColors.text.primary,
-                }}
+                className="p-3 rounded-xl border border-gray-200 bg-gray-50 transition-all duration-200 hover:scale-105"
+                style={{ color: themeColors.text.primary }}
               >
                 <Filter className="w-5 h-5" />
               </button>
@@ -479,35 +442,31 @@ export default function CouponsPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="rounded-2xl border overflow-hidden"
-          style={{
-            backgroundColor: `${themeColors.surface}70`,
-            borderColor: `${themeColors.primary}30`,
-          }}
+          className="bg-white rounded-2xl border border-gray-200 overflow-hidden"
         >
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr style={{ backgroundColor: `${themeColors.primary}10` }}>
-                  <th className="text-left p-4 font-semibold" style={{ color: themeColors.text.primary }}>
+                <tr className="border-b border-gray-200 bg-gray-50">
+                  <th className="text-left p-4 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>
                     Cupón
                   </th>
-                  <th className="text-left p-4 font-semibold" style={{ color: themeColors.text.primary }}>
+                  <th className="text-left p-4 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>
                     Tipo
                   </th>
-                  <th className="text-left p-4 font-semibold" style={{ color: themeColors.text.primary }}>
+                  <th className="text-left p-4 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>
                     Valor
                   </th>
-                  <th className="text-left p-4 font-semibold" style={{ color: themeColors.text.primary }}>
+                  <th className="text-left p-4 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>
                     Usos
                   </th>
-                  <th className="text-left p-4 font-semibold" style={{ color: themeColors.text.primary }}>
+                  <th className="text-left p-4 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>
                     Estado
                   </th>
-                  <th className="text-left p-4 font-semibold" style={{ color: themeColors.text.primary }}>
+                  <th className="text-left p-4 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>
                     Válido hasta
                   </th>
-                  <th className="text-left p-4 font-semibold" style={{ color: themeColors.text.primary }}>
+                  <th className="text-left p-4 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>
                     Acciones
                   </th>
                 </tr>
@@ -519,17 +478,14 @@ export default function CouponsPage() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.1 * index }}
-                    className="border-t transition-colors duration-200 hover:bg-opacity-50"
-                    style={{ 
-                      borderColor: `${themeColors.primary}20`,
-                    }}
+                    className="border-t border-gray-100 transition-colors duration-200 hover:bg-red-50"
                   >
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div
                           className="w-10 h-10 rounded-xl flex items-center justify-center"
                           style={{
-                            backgroundColor: `${getTypeColor(coupon.type)}20`,
+                            backgroundColor: `${getTypeColor(coupon.type)}15`,
                             color: getTypeColor(coupon.type),
                           }}
                         >
@@ -566,8 +522,8 @@ export default function CouponsPage() {
                     </td>
                     <td className="p-4">
                       <p className="font-semibold" style={{ color: themeColors.text.primary }}>
-                        {coupon.type === "PERCENTAGE" ? `${coupon.value}%` : 
-                         coupon.type === "FIXED_AMOUNT" ? `$${coupon.value}` : 
+                        {coupon.type === "PERCENTAGE" ? `${coupon.value}%` :
+                         coupon.type === "FIXED_AMOUNT" ? `$${coupon.value}` :
                          "Gratis"}
                       </p>
                     </td>
@@ -577,10 +533,10 @@ export default function CouponsPage() {
                           {coupon.currentUses}{coupon.maxUses ? ` / ${coupon.maxUses}` : ""}
                         </p>
                         {coupon.maxUses && (
-                          <div className="w-20 bg-gray-200 rounded-full h-1.5 mt-1">
-                            <div 
+                          <div className="w-20 bg-gray-100 rounded-full h-1.5 mt-1">
+                            <div
                               className="h-1.5 rounded-full"
-                              style={{ 
+                              style={{
                                 width: `${Math.min((coupon.currentUses / coupon.maxUses) * 100, 100)}%`,
                                 backgroundColor: getStatusColor(coupon.status)
                               }}
@@ -593,7 +549,7 @@ export default function CouponsPage() {
                       <div className="flex items-center gap-2">
                         <div
                           className="p-2 rounded-lg"
-                          style={{ backgroundColor: `${getStatusColor(coupon.status)}20` }}
+                          style={{ backgroundColor: `${getStatusColor(coupon.status)}15` }}
                         >
                           <div style={{ color: getStatusColor(coupon.status) }}>
                             {getStatusIcon(coupon.status)}
@@ -621,7 +577,7 @@ export default function CouponsPage() {
                           onClick={() => router.push(`/admin/cupones/${coupon.id}`)}
                           className="p-2 rounded-lg transition-all duration-200 hover:scale-105"
                           style={{
-                            backgroundColor: `${themeColors.primary}20`,
+                            backgroundColor: `${themeColors.primary}15`,
                             color: themeColors.primary,
                           }}
                           title="Ver detalles"
@@ -632,7 +588,7 @@ export default function CouponsPage() {
                           onClick={() => router.push(`/admin/cupones/${coupon.id}/editar`)}
                           className="p-2 rounded-lg transition-all duration-200 hover:scale-105"
                           style={{
-                            backgroundColor: `${themeColors.secondary}20`,
+                            backgroundColor: `${themeColors.secondary}15`,
                             color: themeColors.secondary,
                           }}
                           title="Editar"
@@ -642,7 +598,7 @@ export default function CouponsPage() {
                         <button
                           className="p-2 rounded-lg transition-all duration-200 hover:scale-105"
                           style={{
-                            backgroundColor: "#ef444420",
+                            backgroundColor: "#ef444415",
                             color: "#ef4444",
                           }}
                           title="Eliminar"

@@ -134,7 +134,7 @@ export function ProductHeader({
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => window.open(`/productos/${productData.id}`, "_blank")}
-                className="flex items-center gap-2 px-5 py-3 bg-red-50 hover:bg-blue-100 text-red-700 rounded-xl transition-all border border-blue-100"
+                className="flex items-center gap-2 px-5 py-3 rounded-xl transition-all border" style={{ backgroundColor: "#FEF2F2", color: "#B91C1C", borderColor: "#FECACA" }}
               >
                 <Eye className="w-4 h-4" />
                 <span className="font-medium">Ver en tienda</span>

@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import {
   ArrowLeft,
   Edit,
-  Trash2,
   Copy,
   QrCode,
   Calendar,
@@ -44,7 +43,6 @@ interface CouponDetails {
   createdAt: string;
   updatedAt: string;
   categories?: string[];
-  products?: string[];
   usageHistory: {
     date: string;
     uses: number;
@@ -59,12 +57,12 @@ interface CouponDetails {
   };
 }
 
-// Mock data para un cupón
 const mockCouponDetails: CouponDetails = {
   id: "1",
   code: "BLACKFRIDAY25",
   name: "Black Friday 25%",
-  description: "Descuento especial del 25% para Black Friday. Válido para productos seleccionados de las categorías de electrónicos y ropa. Compra mínima de $50.000.",
+  description:
+    "Descuento especial del 25% para Black Friday. Válido para productos seleccionados de las categorías de electrónicos y ropa. Compra mínima de $50.000.",
   type: "PERCENTAGE",
   value: 25,
   minOrderAmount: 50000,
@@ -96,19 +94,17 @@ export default function CouponDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const couponId = params.id as string;
-  
+
   const [coupon, setCoupon] = useState<CouponDetails | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadCoupon = async () => {
       setLoading(true);
-      // Simular carga
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setCoupon(mockCouponDetails);
       setLoading(false);
     };
-
     loadCoupon();
   }, [couponId]);
 
@@ -192,7 +188,10 @@ export default function CouponDetailsPage() {
     return (
       <AdminLayout>
         <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: themeColors.primary }}></div>
+          <div
+            className="animate-spin rounded-full h-12 w-12 border-b-2"
+            style={{ borderColor: themeColors.primary }}
+          />
         </div>
       </AdminLayout>
     );
@@ -202,16 +201,15 @@ export default function CouponDetailsPage() {
     return (
       <AdminLayout>
         <div className="p-6">
-          <h2 className="text-2xl font-bold mb-4" style={{ color: themeColors.text.primary }}>
+          <h2
+            className="text-2xl font-bold mb-4"
+            style={{ color: themeColors.text.primary }}
+          >
             Cupón no encontrado
           </h2>
           <button
             onClick={() => router.push("/admin/cupones")}
-            className="px-4 py-2 rounded-lg"
-            style={{
-              backgroundColor: themeColors.primary,
-              color: "white",
-            }}
+            className="px-4 py-2 rounded-lg text-white bg-red-700 hover:bg-red-800 transition-all"
           >
             Volver a Cupones
           </button>
@@ -222,44 +220,43 @@ export default function CouponDetailsPage() {
 
   return (
     <AdminLayout>
-      <div className="p-6">
+      <div className="space-y-6">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-8"
+          className="flex items-center justify-between"
         >
           <div className="flex items-center gap-4">
             <button
               onClick={() => router.push("/admin/cupones")}
-              className="p-2 rounded-xl transition-all duration-200 hover:scale-105"
-              style={{
-                backgroundColor: `${themeColors.surface}80`,
-                color: themeColors.text.primary,
-              }}
+              className="p-2 rounded-xl border border-gray-200 transition-all hover:bg-gray-50"
+              style={{ color: themeColors.text.primary }}
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-2xl font-bold" style={{ color: themeColors.text.primary }}>
+              <h1
+                className="text-2xl font-bold"
+                style={{ color: themeColors.text.primary }}
+              >
                 Detalles del Cupón
               </h1>
-              <p className="text-sm" style={{ color: themeColors.text.secondary }}>
-                Dashboard → Cupones → Detalles del cupón
+              <p
+                className="text-sm"
+                style={{ color: themeColors.text.secondary }}
+              >
+                Dashboard → Cupones → Detalles
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center gap-2"
-              style={{
-                backgroundColor: `${themeColors.surface}80`,
-                color: themeColors.text.primary,
-                border: `1px solid ${themeColors.primary}30`,
-              }}
+              className="px-4 py-2 rounded-xl font-medium border border-gray-200 bg-white transition-all flex items-center gap-2"
+              style={{ color: themeColors.text.primary }}
             >
               <Share2 className="w-4 h-4" />
               Compartir
@@ -267,12 +264,8 @@ export default function CouponDetailsPage() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center gap-2"
-              style={{
-                backgroundColor: `${themeColors.surface}80`,
-                color: themeColors.text.primary,
-                border: `1px solid ${themeColors.primary}30`,
-              }}
+              className="px-4 py-2 rounded-xl font-medium border border-gray-200 bg-white transition-all flex items-center gap-2"
+              style={{ color: themeColors.text.primary }}
             >
               <Download className="w-4 h-4" />
               Exportar
@@ -281,12 +274,7 @@ export default function CouponDetailsPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => router.push(`/admin/cupones/${couponId}/editar`)}
-              className="px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center gap-2"
-              style={{
-                backgroundColor: `${themeColors.primary}20`,
-                color: themeColors.primary,
-                border: `1px solid ${themeColors.primary}30`,
-              }}
+              className="px-4 py-2 rounded-xl font-medium text-white transition-all flex items-center gap-2 bg-red-700 hover:bg-red-800"
             >
               <Edit className="w-4 h-4" />
               Editar
@@ -297,23 +285,19 @@ export default function CouponDetailsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Cupón Information */}
+            {/* Coupon Info */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="backdrop-blur-xl p-6 rounded-2xl border"
-              style={{
-                backgroundColor: `${themeColors.surface}70`,
-                borderColor: `${themeColors.primary}30`,
-              }}
+              className="bg-white p-6 rounded-2xl border border-gray-200"
             >
               <div className="flex items-start justify-between mb-6">
                 <div className="flex items-center gap-4">
                   <div
                     className="w-16 h-16 rounded-2xl flex items-center justify-center"
                     style={{
-                      backgroundColor: `${getTypeColor(coupon.type)}20`,
+                      backgroundColor: `${getTypeColor(coupon.type)}15`,
                       color: getTypeColor(coupon.type),
                     }}
                   >
@@ -321,98 +305,100 @@ export default function CouponDetailsPage() {
                   </div>
                   <div>
                     <div className="flex items-center gap-3 mb-2">
-                      <h2 className="text-2xl font-bold font-mono" style={{ color: themeColors.text.primary }}>
+                      <h2
+                        className="text-2xl font-bold font-mono"
+                        style={{ color: themeColors.text.primary }}
+                      >
                         {coupon.code}
                       </h2>
                       <button
                         onClick={() => copyToClipboard(coupon.code)}
-                        className="p-2 rounded-lg transition-all duration-200 hover:scale-105"
-                        style={{
-                          backgroundColor: `${themeColors.primary}20`,
-                          color: themeColors.primary,
-                        }}
+                        className="p-2 rounded-lg transition-all hover:bg-gray-100"
+                        style={{ color: themeColors.text.secondary }}
                         title="Copiar código"
                       >
                         <Copy className="w-4 h-4" />
                       </button>
                       <button
-                        className="p-2 rounded-lg transition-all duration-200 hover:scale-105"
-                        style={{
-                          backgroundColor: `${themeColors.secondary}20`,
-                          color: themeColors.secondary,
-                        }}
+                        className="p-2 rounded-lg transition-all hover:bg-gray-100"
+                        style={{ color: themeColors.text.secondary }}
                         title="Generar QR"
                       >
                         <QrCode className="w-4 h-4" />
                       </button>
                     </div>
-                    <h3 className="text-lg font-semibold mb-1" style={{ color: themeColors.text.primary }}>
+                    <h3
+                      className="text-lg font-semibold mb-2"
+                      style={{ color: themeColors.text.primary }}
+                    >
                       {coupon.name}
                     </h3>
                     <div className="flex items-center gap-2">
-                      <div
-                        className="px-3 py-1 rounded-lg text-sm font-medium flex items-center gap-2"
-                        style={{ backgroundColor: `${getStatusColor(coupon.status)}20`, color: getStatusColor(coupon.status) }}
+                      <span
+                        className="px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1.5"
+                        style={{
+                          backgroundColor: `${getStatusColor(coupon.status)}15`,
+                          color: getStatusColor(coupon.status),
+                        }}
                       >
                         {getStatusIcon(coupon.status)}
                         {getStatusLabel(coupon.status)}
-                      </div>
-                      <div
-                        className="px-3 py-1 rounded-lg text-sm font-medium flex items-center gap-2"
-                        style={{ backgroundColor: `${getTypeColor(coupon.type)}20`, color: getTypeColor(coupon.type) }}
+                      </span>
+                      <span
+                        className="px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1.5"
+                        style={{
+                          backgroundColor: `${getTypeColor(coupon.type)}15`,
+                          color: getTypeColor(coupon.type),
+                        }}
                       >
                         {getTypeIcon(coupon.type)}
                         {getTypeLabel(coupon.type)}
-                      </div>
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="mb-6">
-                <h4 className="font-semibold mb-2" style={{ color: themeColors.text.primary }}>
-                  Descripción
-                </h4>
-                <p style={{ color: themeColors.text.secondary }}>
-                  {coupon.description}
-                </p>
-              </div>
+              <p className="text-sm mb-6" style={{ color: themeColors.text.secondary }}>
+                {coupon.description}
+              </p>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center p-4 rounded-xl" style={{ backgroundColor: `${themeColors.primary}10` }}>
-                  <div className="text-2xl font-bold mb-1" style={{ color: themeColors.text.primary }}>
-                    {coupon.type === "PERCENTAGE" ? `${coupon.value}%` : 
-                     coupon.type === "FIXED_AMOUNT" ? `$${coupon.value}` : 
-                     "Gratis"}
+                {[
+                  {
+                    label: "Descuento",
+                    value:
+                      coupon.type === "PERCENTAGE"
+                        ? `${coupon.value}%`
+                        : coupon.type === "FIXED_AMOUNT"
+                        ? `$${coupon.value}`
+                        : "Gratis",
+                  },
+                  { label: "Usos actuales", value: coupon.currentUses },
+                  { label: "Límite de usos", value: coupon.maxUses || "Sin límite" },
+                  {
+                    label: "Compra mínima",
+                    value: `$${coupon.minOrderAmount?.toLocaleString() || "0"}`,
+                  },
+                ].map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="text-center p-4 rounded-xl bg-gray-50"
+                  >
+                    <div
+                      className="text-2xl font-bold mb-1"
+                      style={{ color: themeColors.text.primary }}
+                    >
+                      {stat.value}
+                    </div>
+                    <div
+                      className="text-sm"
+                      style={{ color: themeColors.text.secondary }}
+                    >
+                      {stat.label}
+                    </div>
                   </div>
-                  <div className="text-sm" style={{ color: themeColors.text.secondary }}>
-                    Descuento
-                  </div>
-                </div>
-                <div className="text-center p-4 rounded-xl" style={{ backgroundColor: `${themeColors.primary}10` }}>
-                  <div className="text-2xl font-bold mb-1" style={{ color: themeColors.text.primary }}>
-                    {coupon.currentUses}
-                  </div>
-                  <div className="text-sm" style={{ color: themeColors.text.secondary }}>
-                    Usos actuales
-                  </div>
-                </div>
-                <div className="text-center p-4 rounded-xl" style={{ backgroundColor: `${themeColors.primary}10` }}>
-                  <div className="text-2xl font-bold mb-1" style={{ color: themeColors.text.primary }}>
-                    {coupon.maxUses || "∞"}
-                  </div>
-                  <div className="text-sm" style={{ color: themeColors.text.secondary }}>
-                    Límite de usos
-                  </div>
-                </div>
-                <div className="text-center p-4 rounded-xl" style={{ backgroundColor: `${themeColors.primary}10` }}>
-                  <div className="text-2xl font-bold mb-1" style={{ color: themeColors.text.primary }}>
-                    ${coupon.minOrderAmount?.toLocaleString() || "0"}
-                  </div>
-                  <div className="text-sm" style={{ color: themeColors.text.secondary }}>
-                    Compra mínima
-                  </div>
-                </div>
+                ))}
               </div>
             </motion.div>
 
@@ -421,28 +407,33 @@ export default function CouponDetailsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="backdrop-blur-xl p-6 rounded-2xl border"
-              style={{
-                backgroundColor: `${themeColors.surface}70`,
-                borderColor: `${themeColors.primary}30`,
-              }}
+              className="bg-white p-6 rounded-2xl border border-gray-200"
             >
-              <h3 className="text-lg font-bold mb-6" style={{ color: themeColors.text.primary }}>
+              <h3
+                className="text-lg font-bold mb-6"
+                style={{ color: themeColors.text.primary }}
+              >
                 Analytics del Cupón
               </h3>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 <div className="text-center">
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3"
-                    style={{ backgroundColor: "#10b98120" }}
+                    style={{ backgroundColor: "#10b98115" }}
                   >
                     <DollarSign className="w-6 h-6" style={{ color: "#10b981" }} />
                   </div>
-                  <div className="text-2xl font-bold mb-1" style={{ color: themeColors.text.primary }}>
+                  <div
+                    className="text-2xl font-bold mb-1"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     ${coupon.analytics.totalSavings.toLocaleString()}
                   </div>
-                  <div className="text-sm" style={{ color: themeColors.text.secondary }}>
+                  <div
+                    className="text-sm"
+                    style={{ color: themeColors.text.secondary }}
+                  >
                     Ahorros Totales
                   </div>
                   <div className="flex items-center justify-center gap-1 mt-2">
@@ -454,14 +445,20 @@ export default function CouponDetailsPage() {
                 <div className="text-center">
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3"
-                    style={{ backgroundColor: `${themeColors.primary}20` }}
+                    style={{ backgroundColor: `${themeColors.primary}15` }}
                   >
                     <Package className="w-6 h-6" style={{ color: themeColors.primary }} />
                   </div>
-                  <div className="text-2xl font-bold mb-1" style={{ color: themeColors.text.primary }}>
+                  <div
+                    className="text-2xl font-bold mb-1"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     {coupon.analytics.totalOrders}
                   </div>
-                  <div className="text-sm" style={{ color: themeColors.text.secondary }}>
+                  <div
+                    className="text-sm"
+                    style={{ color: themeColors.text.secondary }}
+                  >
                     Órdenes Totales
                   </div>
                   <div className="flex items-center justify-center gap-1 mt-2">
@@ -473,14 +470,20 @@ export default function CouponDetailsPage() {
                 <div className="text-center">
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3"
-                    style={{ backgroundColor: `${themeColors.secondary}20` }}
+                    style={{ backgroundColor: "#3b82f615" }}
                   >
-                    <BarChart3 className="w-6 h-6" style={{ color: themeColors.secondary }} />
+                    <BarChart3 className="w-6 h-6" style={{ color: "#3b82f6" }} />
                   </div>
-                  <div className="text-2xl font-bold mb-1" style={{ color: themeColors.text.primary }}>
+                  <div
+                    className="text-2xl font-bold mb-1"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     {coupon.analytics.conversionRate}%
                   </div>
-                  <div className="text-sm" style={{ color: themeColors.text.secondary }}>
+                  <div
+                    className="text-sm"
+                    style={{ color: themeColors.text.secondary }}
+                  >
                     Tasa Conversión
                   </div>
                   <div className="flex items-center justify-center gap-1 mt-2">
@@ -492,14 +495,20 @@ export default function CouponDetailsPage() {
                 <div className="text-center">
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3"
-                    style={{ backgroundColor: "#3b82f620" }}
+                    style={{ backgroundColor: "#8b5cf615" }}
                   >
-                    <Users className="w-6 h-6" style={{ color: "#3b82f6" }} />
+                    <Users className="w-6 h-6" style={{ color: "#8b5cf6" }} />
                   </div>
-                  <div className="text-2xl font-bold mb-1" style={{ color: themeColors.text.primary }}>
+                  <div
+                    className="text-2xl font-bold mb-1"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     ${coupon.analytics.averageOrderValue.toLocaleString()}
                   </div>
-                  <div className="text-sm" style={{ color: themeColors.text.secondary }}>
+                  <div
+                    className="text-sm"
+                    style={{ color: themeColors.text.secondary }}
+                  >
                     Orden Promedio
                   </div>
                   <div className="flex items-center justify-center gap-1 mt-2">
@@ -515,49 +524,60 @@ export default function CouponDetailsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="backdrop-blur-xl rounded-2xl border overflow-hidden"
-              style={{
-                backgroundColor: `${themeColors.surface}70`,
-                borderColor: `${themeColors.primary}30`,
-              }}
+              className="bg-white rounded-2xl border border-gray-200 overflow-hidden"
             >
-              <div className="p-6">
-                <h3 className="text-lg font-bold mb-4" style={{ color: themeColors.text.primary }}>
+              <div className="p-6 border-b border-gray-100">
+                <h3
+                  className="text-lg font-bold"
+                  style={{ color: themeColors.text.primary }}
+                >
                   Historial de Uso
                 </h3>
               </div>
-              
+
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr style={{ backgroundColor: `${themeColors.primary}10` }}>
-                      <th className="text-left p-4 font-semibold" style={{ color: themeColors.text.primary }}>
-                        Fecha
-                      </th>
-                      <th className="text-left p-4 font-semibold" style={{ color: themeColors.text.primary }}>
-                        Usos
-                      </th>
-                      <th className="text-left p-4 font-semibold" style={{ color: themeColors.text.primary }}>
-                        Órdenes
-                      </th>
-                      <th className="text-left p-4 font-semibold" style={{ color: themeColors.text.primary }}>
-                        Ahorros
-                      </th>
+                    <tr className="bg-gray-50 border-b border-gray-100">
+                      {["Fecha", "Usos", "Órdenes", "Ahorros"].map((h) => (
+                        <th
+                          key={h}
+                          className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide"
+                          style={{ color: themeColors.text.secondary }}
+                        >
+                          {h}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
                     {coupon.usageHistory.map((day, index) => (
-                      <tr key={index} className="border-t" style={{ borderColor: `${themeColors.primary}20` }}>
-                        <td className="p-4" style={{ color: themeColors.text.primary }}>
+                      <tr
+                        key={index}
+                        className="border-t border-gray-100 hover:bg-red-50 transition-colors"
+                      >
+                        <td
+                          className="px-4 py-3 text-sm"
+                          style={{ color: themeColors.text.primary }}
+                        >
                           {new Date(day.date).toLocaleDateString()}
                         </td>
-                        <td className="p-4 font-medium" style={{ color: themeColors.text.primary }}>
+                        <td
+                          className="px-4 py-3 text-sm font-medium"
+                          style={{ color: themeColors.text.primary }}
+                        >
                           {day.uses}
                         </td>
-                        <td className="p-4" style={{ color: themeColors.text.primary }}>
+                        <td
+                          className="px-4 py-3 text-sm"
+                          style={{ color: themeColors.text.primary }}
+                        >
                           {day.orders}
                         </td>
-                        <td className="p-4 font-semibold" style={{ color: themeColors.text.primary }}>
+                        <td
+                          className="px-4 py-3 text-sm font-semibold"
+                          style={{ color: themeColors.primary }}
+                        >
                           ${day.savings.toLocaleString()}
                         </td>
                       </tr>
@@ -575,41 +595,66 @@ export default function CouponDetailsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="backdrop-blur-xl p-6 rounded-2xl border"
-              style={{
-                backgroundColor: `${themeColors.surface}70`,
-                borderColor: `${themeColors.primary}30`,
-              }}
+              className="bg-white p-6 rounded-2xl border border-gray-200"
             >
               <div className="flex items-center gap-3 mb-4">
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ backgroundColor: `${themeColors.primary}20` }}
+                  style={{ backgroundColor: `${themeColors.primary}15` }}
                 >
-                  <Calendar className="w-5 h-5" style={{ color: themeColors.primary }} />
+                  <Calendar
+                    className="w-5 h-5"
+                    style={{ color: themeColors.primary }}
+                  />
                 </div>
-                <h3 className="text-lg font-bold" style={{ color: themeColors.text.primary }}>
+                <h3
+                  className="text-lg font-bold"
+                  style={{ color: themeColors.text.primary }}
+                >
                   Período de Validez
                 </h3>
               </div>
-              
-              <div className="space-y-4">
+
+              <div className="space-y-3 text-sm">
                 <div>
-                  <p className="text-sm mb-1" style={{ color: themeColors.text.secondary }}>Fecha de inicio:</p>
-                  <p className="font-medium" style={{ color: themeColors.text.primary }}>
+                  <p style={{ color: themeColors.text.secondary }}>
+                    Fecha de inicio:
+                  </p>
+                  <p
+                    className="font-medium mt-0.5"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     {new Date(coupon.startDate).toLocaleDateString()}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm mb-1" style={{ color: themeColors.text.secondary }}>Fecha de fin:</p>
-                  <p className="font-medium" style={{ color: themeColors.text.primary }}>
+                  <p style={{ color: themeColors.text.secondary }}>
+                    Fecha de fin:
+                  </p>
+                  <p
+                    className="font-medium mt-0.5"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     {new Date(coupon.endDate).toLocaleDateString()}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm mb-1" style={{ color: themeColors.text.secondary }}>Días restantes:</p>
-                  <p className="font-medium" style={{ color: themeColors.text.primary }}>
-                    {Math.max(0, Math.ceil((new Date(coupon.endDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))} días
+                  <p style={{ color: themeColors.text.secondary }}>
+                    Días restantes:
+                  </p>
+                  <p
+                    className="font-medium mt-0.5"
+                    style={{ color: themeColors.text.primary }}
+                  >
+                    {Math.max(
+                      0,
+                      Math.ceil(
+                        (new Date(coupon.endDate).getTime() -
+                          new Date().getTime()) /
+                          (1000 * 60 * 60 * 24)
+                      )
+                    )}{" "}
+                    días
                   </p>
                 </div>
               </div>
@@ -620,48 +665,62 @@ export default function CouponDetailsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="backdrop-blur-xl p-6 rounded-2xl border"
-              style={{
-                backgroundColor: `${themeColors.surface}70`,
-                borderColor: `${themeColors.primary}30`,
-              }}
+              className="bg-white p-6 rounded-2xl border border-gray-200"
             >
               <div className="flex items-center gap-3 mb-4">
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ backgroundColor: `${themeColors.secondary}20` }}
+                  style={{ backgroundColor: "#3b82f615" }}
                 >
-                  <BarChart3 className="w-5 h-5" style={{ color: themeColors.secondary }} />
+                  <BarChart3 className="w-5 h-5" style={{ color: "#3b82f6" }} />
                 </div>
-                <h3 className="text-lg font-bold" style={{ color: themeColors.text.primary }}>
+                <h3
+                  className="text-lg font-bold"
+                  style={{ color: themeColors.text.primary }}
+                >
                   Progreso de Uso
                 </h3>
               </div>
-              
+
               {coupon.maxUses ? (
                 <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span style={{ color: themeColors.text.secondary }}>Progreso:</span>
-                    <span className="font-medium" style={{ color: themeColors.text.primary }}>
+                  <div className="flex justify-between items-center mb-2 text-sm">
+                    <span style={{ color: themeColors.text.secondary }}>
+                      Progreso:
+                    </span>
+                    <span
+                      className="font-medium"
+                      style={{ color: themeColors.text.primary }}
+                    >
                       {coupon.currentUses} / {coupon.maxUses}
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
-                    <div 
-                      className="h-3 rounded-full transition-all duration-300"
-                      style={{ 
-                        width: `${Math.min((coupon.currentUses / coupon.maxUses) * 100, 100)}%`,
-                        backgroundColor: getStatusColor(coupon.status)
+                  <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+                    <div
+                      className="h-2.5 rounded-full transition-all duration-300"
+                      style={{
+                        width: `${Math.min(
+                          (coupon.currentUses / coupon.maxUses) * 100,
+                          100
+                        )}%`,
+                        backgroundColor: getStatusColor(coupon.status),
                       }}
-                    ></div>
+                    />
                   </div>
-                  <p className="text-sm" style={{ color: themeColors.text.secondary }}>
-                    {((coupon.currentUses / coupon.maxUses) * 100).toFixed(1)}% utilizado
+                  <p
+                    className="text-sm"
+                    style={{ color: themeColors.text.secondary }}
+                  >
+                    {((coupon.currentUses / coupon.maxUses) * 100).toFixed(1)}%
+                    utilizado
                   </p>
                 </div>
               ) : (
                 <div className="text-center py-4">
-                  <p className="text-2xl font-bold mb-2" style={{ color: themeColors.text.primary }}>
+                  <p
+                    className="text-2xl font-bold mb-1"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     {coupon.currentUses}
                   </p>
                   <p style={{ color: themeColors.text.secondary }}>
@@ -677,32 +736,34 @@ export default function CouponDetailsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="backdrop-blur-xl p-6 rounded-2xl border"
-                style={{
-                  backgroundColor: `${themeColors.surface}70`,
-                  borderColor: `${themeColors.primary}30`,
-                }}
+                className="bg-white p-6 rounded-2xl border border-gray-200"
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div
                     className="w-10 h-10 rounded-xl flex items-center justify-center"
-                    style={{ backgroundColor: "#3b82f620" }}
+                    style={{ backgroundColor: "#3b82f615" }}
                   >
-                    <Tag className="w-5 h-5" style={{ color: "#3b82f6" }} />
+                    <Tag
+                      className="w-5 h-5"
+                      style={{ color: "#3b82f6" }}
+                    />
                   </div>
-                  <h3 className="text-lg font-bold" style={{ color: themeColors.text.primary }}>
+                  <h3
+                    className="text-lg font-bold"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     Categorías Aplicables
                   </h3>
                 </div>
-                
+
                 <div className="flex flex-wrap gap-2">
                   {coupon.categories.map((category, index) => (
                     <span
                       key={index}
-                      className="px-3 py-1 rounded-lg text-sm font-medium"
+                      className="px-3 py-1 rounded-full text-sm font-medium"
                       style={{
-                        backgroundColor: `${themeColors.accent}20`,
-                        color: themeColors.accent,
+                        backgroundColor: `${themeColors.primary}10`,
+                        color: themeColors.primary,
                       }}
                     >
                       {category}
@@ -717,29 +778,39 @@ export default function CouponDetailsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="backdrop-blur-xl p-6 rounded-2xl border"
-              style={{
-                backgroundColor: `${themeColors.surface}70`,
-                borderColor: `${themeColors.primary}30`,
-              }}
+              className="bg-white p-6 rounded-2xl border border-gray-200"
             >
-              <h3 className="text-lg font-bold mb-4" style={{ color: themeColors.text.primary }}>
+              <h3
+                className="text-lg font-bold mb-4"
+                style={{ color: themeColors.text.primary }}
+              >
                 Información del Sistema
               </h3>
-              
+
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span style={{ color: themeColors.text.secondary }}>ID del cupón:</span>
-                  <span className="font-mono" style={{ color: themeColors.text.primary }}>{coupon.id}</span>
+                  <span style={{ color: themeColors.text.secondary }}>
+                    ID del cupón:
+                  </span>
+                  <span
+                    className="font-mono"
+                    style={{ color: themeColors.text.primary }}
+                  >
+                    {coupon.id}
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span style={{ color: themeColors.text.secondary }}>Creado:</span>
+                  <span style={{ color: themeColors.text.secondary }}>
+                    Creado:
+                  </span>
                   <span style={{ color: themeColors.text.primary }}>
                     {new Date(coupon.createdAt).toLocaleDateString()}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span style={{ color: themeColors.text.secondary }}>Última actualización:</span>
+                  <span style={{ color: themeColors.text.secondary }}>
+                    Última actualización:
+                  </span>
                   <span style={{ color: themeColors.text.primary }}>
                     {new Date(coupon.updatedAt).toLocaleDateString()}
                   </span>

@@ -1,11 +1,11 @@
-ï»¿"use client";
+"use client";
 
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Settings, Plus, X, Edit2 } from "lucide-react";
 import type { ProductData } from "@/app/admin/productos/[id]/page";
 
-// Tipo para las especificaciones - flexible para permitir agregar/eliminar dinÃ¡micamente
+// Tipo para las especificaciones - flexible para permitir agregar/eliminar dinámicamente
 type ProductSpecifications = Record<string, string>;
 
 interface ProductSpecificationsProps {
@@ -53,7 +53,7 @@ export function ProductSpecifications({
       ...productData.specifications,
     };
 
-    // Si cambiÃ³ la clave, eliminar la anterior
+    // Si cambió la clave, eliminar la anterior
     if (oldKey !== newKey) {
       delete updatedSpecs[oldKey];
     }
@@ -73,15 +73,15 @@ export function ProductSpecifications({
       className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6"
     >
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-3 bg-indigo-50 rounded-xl">
-          <Settings className="w-6 h-6 text-indigo-600" />
+        <div className="p-3 rounded-xl" style={{ backgroundColor: "#B91C1C15" }}>
+          <Settings className="w-6 h-6" style={{ color: "#B91C1C" }} />
         </div>
         <div>
           <h2 className="text-xl font-bold text-gray-900">
-            Especificaciones TÃ©cnicas
+            Especificaciones Técnicas
           </h2>
           <p className="text-sm text-gray-500">
-            CaracterÃ­sticas y detalles tÃ©cnicos
+            Características y detalles técnicos
           </p>
         </div>
       </div>
@@ -112,14 +112,14 @@ export function ProductSpecifications({
             </h3>
             <p className="text-gray-500">
               {isEditing
-                ? "Agrega especificaciones tÃ©cnicas del producto"
+                ? "Agrega especificaciones técnicas del producto"
                 : "Este producto no tiene especificaciones definidas"}
             </p>
           </div>
         )}
       </div>
 
-      {/* Formulario para agregar nueva especificaciÃ³n */}
+      {/* Formulario para agregar nueva especificación */}
       {isEditing && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}
@@ -128,13 +128,13 @@ export function ProductSpecifications({
         >
           <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <Plus className="w-5 h-5" />
-            Agregar EspecificaciÃ³n
+            Agregar Especificación
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                CaracterÃ­stica
+                Característica
               </label>
               <input
                 type="text"
@@ -173,7 +173,7 @@ export function ProductSpecifications({
             style={{ backgroundColor: "#C8102E" }}
           >
             <Plus className="w-4 h-4" />
-            <span>Agregar especificaciÃ³n</span>
+            <span>Agregar especificación</span>
           </motion.button>
         </motion.div>
       )}
@@ -221,14 +221,14 @@ function SpecificationItem({
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-red-50 rounded-xl border border-blue-200"
+        className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-red-50 rounded-xl border border-red-200"
       >
         <input
           type="text"
           value={editKey}
           onChange={(e) => setEditKey(e.target.value)}
           className="px-3 py-2 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C8102E]/30 focus:border-[#C8102E] transition-all"
-          placeholder="CaracterÃ­stica"
+          placeholder="Característica"
         />
 
         <div className="flex gap-2">
@@ -251,7 +251,7 @@ function SpecificationItem({
             onClick={handleSave}
             className="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all"
           >
-            âœ“
+            ?
           </motion.button>
 
           <motion.button
@@ -260,7 +260,7 @@ function SpecificationItem({
             onClick={handleCancel}
             className="px-3 py-2 bg-gray-400 hover:bg-gray-500 text-white rounded-lg transition-all"
           >
-            âœ•
+            ?
           </motion.button>
         </div>
       </motion.div>
@@ -290,7 +290,7 @@ function SpecificationItem({
             whileTap={{ scale: 0.9 }}
             onClick={onEdit}
             className="p-2 text-[#C8102E] hover:bg-red-50 rounded-lg transition-all"
-            title="Editar especificaciÃ³n"
+            title="Editar especificación"
           >
             <Edit2 className="w-4 h-4" />
           </motion.button>
@@ -300,7 +300,7 @@ function SpecificationItem({
             whileTap={{ scale: 0.9 }}
             onClick={onRemove}
             className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all"
-            title="Eliminar especificaciÃ³n"
+            title="Eliminar especificación"
           >
             <X className="w-4 h-4" />
           </motion.button>

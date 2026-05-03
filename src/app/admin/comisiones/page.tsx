@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,10 +16,9 @@ import {
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/admin-layout";
 import { useAuthStore } from "@/store/auth";
+import { useTheme } from "@/contexts/theme-context";
 import { showToast } from "@/store/toast-helpers";
 import http from "@/api/http-client";
-
-const PRIMARY = "#C8102E";
 
 interface Commission {
   id: string;
@@ -39,16 +38,15 @@ interface Commission {
 export default function ComisionesAdminPage() {
   const router = useRouter();
   const { user } = useAuthStore();
+  const { themeColors } = useTheme();
 
   const [commissions, setCommissions] = useState<Commission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Mes seleccionado
   const now = new Date();
   const defaultMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const [selectedMonth, setSelectedMonth] = useState(defaultMonth);
 
-  // Modal de registrar pago
   const [payModal, setPayModal] = useState<{
     show: boolean;
     commissionId: string;
@@ -116,7 +114,6 @@ export default function ComisionesAdminPage() {
 
   const formatPercent = (rate: number) => `${(rate * 100).toFixed(2)}%`;
 
-  // Generar lista de meses (últimos 12)
   const monthOptions = Array.from({ length: 12 }, (_, i) => {
     const d = new Date();
     d.setMonth(d.getMonth() - i);
@@ -138,7 +135,7 @@ export default function ComisionesAdminPage() {
       <AdminLayout>
         <div className="flex items-center justify-center h-64">
           <AlertTriangle className="w-8 h-8 text-amber-500 mr-3" />
-          <p className="text-gray-700">Acceso restringido</p>
+          <p style={{ color: themeColors.text.secondary }}>Acceso restringido</p>
         </div>
       </AdminLayout>
     );
@@ -150,32 +147,37 @@ export default function ComisionesAdminPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Panel de Comisiones</h1>
-            <p className="text-gray-500 text-sm mt-1">
+            <h1 className="text-2xl font-bold" style={{ color: themeColors.text.primary }}>Panel de Comisiones</h1>
+            <p className="text-sm mt-1" style={{ color: themeColors.text.secondary }}>
               Comisiones por transacciones entre clientes y distribuidores
             </p>
           </div>
-          <div className="p-3 rounded-xl" style={{ backgroundColor: `${PRIMARY}15` }}>
-            <DollarSign className="w-6 h-6" style={{ color: PRIMARY }} />
+          <div className="p-3 rounded-xl" style={{ backgroundColor: `${themeColors.primary}15` }}>
+            <DollarSign className="w-6 h-6" style={{ color: themeColors.primary }} />
           </div>
         </div>
 
         {/* Summary + month filter */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Pendiente de cobro</p>
+          <div className="bg-white rounded-xl border p-4" style={{ borderColor: themeColors.border }}>
+            <p className="text-xs uppercase tracking-wide mb-1" style={{ color: themeColors.text.muted }}>Pendiente de cobro</p>
             <p className="text-2xl font-bold text-amber-600">{formatCurrency(totalPending)}</p>
           </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Cobrado este mes</p>
+          <div className="bg-white rounded-xl border p-4" style={{ borderColor: themeColors.border }}>
+            <p className="text-xs uppercase tracking-wide mb-1" style={{ color: themeColors.text.muted }}>Cobrado este mes</p>
             <p className="text-2xl font-bold text-green-600">{formatCurrency(totalPaid)}</p>
           </div>
-          <div className="bg-white rounded-xl border border-gray-200 p-4">
-            <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Filtrar por mes</p>
+          <div className="bg-white rounded-xl border p-4" style={{ borderColor: themeColors.border }}>
+            <p className="text-xs uppercase tracking-wide mb-2" style={{ color: themeColors.text.muted }}>Filtrar por mes</p>
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 transition-all"
+              className="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none transition-all"
+              style={{
+                backgroundColor: "#f9fafb",
+                borderColor: themeColors.border,
+                color: themeColors.text.primary,
+              }}
             >
               {monthOptions.map((m) => (
                 <option key={m.value} value={m.value}>
@@ -187,13 +189,13 @@ export default function ComisionesAdminPage() {
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl border shadow-sm overflow-hidden" style={{ borderColor: themeColors.border }}>
           {isLoading ? (
             <div className="flex items-center justify-center h-48">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: PRIMARY }} />
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: themeColors.primary }} />
             </div>
           ) : commissions.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-48 text-gray-400">
+            <div className="flex flex-col items-center justify-center h-48" style={{ color: themeColors.text.muted }}>
               <DollarSign className="w-10 h-10 mb-2" />
               <p className="text-sm">No hay comisiones para este mes</p>
             </div>
@@ -201,59 +203,60 @@ export default function ComisionesAdminPage() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-100" style={{ backgroundColor: `${PRIMARY}08` }}>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                  <tr className="border-b" style={{ backgroundColor: `${themeColors.primary}08`, borderColor: themeColors.border }}>
+                    <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>
                       Distribuidor
                     </th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>
                       Mes
                     </th>
-                    <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>
                       Total transacc.
                     </th>
-                    <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>
                       % Comisión
                     </th>
-                    <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>
                       Monto a cobrar
                     </th>
-                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>
                       Estado
                     </th>
-                    <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    <th className="text-right px-4 py-3 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>
                       Acciones
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody>
                   {commissions.map((c, idx) => (
                     <motion.tr
                       key={c.id}
                       initial={{ opacity: 0, y: 4 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.04 }}
-                      className="hover:bg-gray-50 transition-colors cursor-pointer"
+                      className="border-t transition-colors cursor-pointer hover:bg-red-50"
+                      style={{ borderColor: `${themeColors.primary}10` }}
                       onClick={() => router.push(`/admin/comisiones/${c.id}`)}
                     >
                       <td className="px-4 py-3">
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{c.distributorName}</p>
-                          <p className="text-xs text-gray-400">{c.distributorCode}</p>
+                          <p className="text-sm font-medium" style={{ color: themeColors.text.primary }}>{c.distributorName}</p>
+                          <p className="text-xs" style={{ color: themeColors.text.muted }}>{c.distributorCode}</p>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
+                      <td className="px-4 py-3 text-sm" style={{ color: themeColors.text.secondary }}>
                         {new Date(`${c.month}-01`).toLocaleDateString("es-UY", {
                           year: "numeric",
                           month: "long",
                         })}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-900 font-medium text-right">
+                      <td className="px-4 py-3 text-sm font-medium text-right" style={{ color: themeColors.text.primary }}>
                         {formatCurrency(c.totalTransactions)}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700 text-right">
+                      <td className="px-4 py-3 text-sm text-right" style={{ color: themeColors.text.secondary }}>
                         {formatPercent(c.commissionRate)}
                       </td>
-                      <td className="px-4 py-3 text-sm font-bold text-right" style={{ color: PRIMARY }}>
+                      <td className="px-4 py-3 text-sm font-bold text-right" style={{ color: themeColors.primary }}>
                         {formatCurrency(c.commissionAmount)}
                       </td>
                       <td className="px-4 py-3">
@@ -281,15 +284,24 @@ export default function ComisionesAdminPage() {
                                   amount: c.commissionAmount,
                                 })
                               }
-                              className="px-3 py-1.5 text-xs font-medium text-white rounded-lg transition-all"
-                              style={{ backgroundColor: PRIMARY }}
+                              className="px-3 py-1.5 text-xs font-medium text-white rounded-lg transition-all hover:opacity-90"
+                              style={{ backgroundColor: themeColors.primary }}
                             >
                               Registrar pago
                             </button>
                           )}
                           <button
                             onClick={() => router.push(`/admin/comisiones/${c.id}`)}
-                            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all"
+                            className="p-1.5 rounded-lg transition-all"
+                            style={{ color: themeColors.text.muted }}
+                            onMouseEnter={(e) => {
+                              (e.currentTarget as HTMLButtonElement).style.color = themeColors.text.primary;
+                              (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#f3f4f6";
+                            }}
+                            onMouseLeave={(e) => {
+                              (e.currentTarget as HTMLButtonElement).style.color = themeColors.text.muted;
+                              (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent";
+                            }}
                             title="Ver detalle"
                           >
                             <ChevronRight className="w-4 h-4" />
@@ -318,21 +330,22 @@ export default function ComisionesAdminPage() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-2xl shadow-2xl border border-gray-200 p-6 max-w-lg w-full"
+              className="bg-white rounded-2xl shadow-2xl border p-6 max-w-lg w-full"
+              style={{ borderColor: themeColors.border }}
             >
               <div className="flex items-start gap-4 mb-5">
                 <div className="p-3 bg-red-50 rounded-xl flex-shrink-0">
-                  <Upload className="w-6 h-6" style={{ color: PRIMARY }} />
+                  <Upload className="w-6 h-6" style={{ color: themeColors.primary }} />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-900">Registrar pago de comisión</h3>
-                  <p className="text-gray-600 text-sm mt-1">
+                  <h3 className="text-lg font-bold" style={{ color: themeColors.text.primary }}>Registrar pago de comisión</h3>
+                  <p className="text-sm mt-1" style={{ color: themeColors.text.secondary }}>
                     Distribuidor:{" "}
-                    <span className="font-semibold text-gray-900">{payModal.distributorName}</span>
+                    <span className="font-semibold" style={{ color: themeColors.text.primary }}>{payModal.distributorName}</span>
                   </p>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-sm" style={{ color: themeColors.text.secondary }}>
                     Monto:{" "}
-                    <span className="font-semibold" style={{ color: PRIMARY }}>
+                    <span className="font-semibold" style={{ color: themeColors.primary }}>
                       {new Intl.NumberFormat("es-UY", {
                         style: "currency",
                         currency: "UYU",
@@ -346,37 +359,39 @@ export default function ComisionesAdminPage() {
                     setPayModal({ show: false, commissionId: "", distributorName: "", amount: 0 });
                     setProofUrl("");
                   }}
-                  className="p-1 text-gray-400 hover:text-gray-600"
+                  className="p-1 transition-colors"
+                  style={{ color: themeColors.text.muted }}
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="space-y-4">
-                {/* Tipo de comprobante */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>
                     Tipo de comprobante
                   </label>
                   <div className="flex gap-3">
                     <button
                       onClick={() => setProofType("image")}
-                      className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-all flex-1 ${
-                        proofType === "image"
-                          ? "border-[#C8102E] bg-red-50 text-[#C8102E]"
-                          : "border-gray-200 text-gray-600 hover:border-gray-300"
-                      }`}
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-all flex-1"
+                      style={{
+                        borderColor: proofType === "image" ? themeColors.primary : themeColors.border,
+                        backgroundColor: proofType === "image" ? `${themeColors.primary}10` : "transparent",
+                        color: proofType === "image" ? themeColors.primary : themeColors.text.secondary,
+                      }}
                     >
                       <ImageIcon className="w-4 h-4" />
                       Imagen
                     </button>
                     <button
                       onClick={() => setProofType("pdf")}
-                      className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-all flex-1 ${
-                        proofType === "pdf"
-                          ? "border-[#C8102E] bg-red-50 text-[#C8102E]"
-                          : "border-gray-200 text-gray-600 hover:border-gray-300"
-                      }`}
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-all flex-1"
+                      style={{
+                        borderColor: proofType === "pdf" ? themeColors.primary : themeColors.border,
+                        backgroundColor: proofType === "pdf" ? `${themeColors.primary}10` : "transparent",
+                        color: proofType === "pdf" ? themeColors.primary : themeColors.text.secondary,
+                      }}
                     >
                       <FileText className="w-4 h-4" />
                       PDF
@@ -384,9 +399,8 @@ export default function ComisionesAdminPage() {
                   </div>
                 </div>
 
-                {/* URL del comprobante */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium mb-2" style={{ color: themeColors.text.primary }}>
                     URL del comprobante
                   </label>
                   <input
@@ -394,29 +408,43 @@ export default function ComisionesAdminPage() {
                     placeholder="https://..."
                     value={proofUrl}
                     onChange={(e) => setProofUrl(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:border-transparent transition-all"
+                    className="w-full px-4 py-2.5 rounded-lg border text-sm focus:outline-none transition-all"
+                    style={{
+                      backgroundColor: "#f9fafb",
+                      borderColor: themeColors.border,
+                      color: themeColors.text.primary,
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = themeColors.primary;
+                      e.target.style.boxShadow = `0 0 0 3px ${themeColors.primary}20`;
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = themeColors.border;
+                      e.target.style.boxShadow = "none";
+                    }}
                   />
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs mt-1" style={{ color: themeColors.text.muted }}>
                     Subí el comprobante a Cloudinary o drive y pegá la URL aquí
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 mt-6 pt-4 border-t border-gray-100">
+              <div className="flex items-center gap-3 mt-6 pt-4 border-t" style={{ borderColor: themeColors.border }}>
                 <button
                   onClick={() => {
                     setPayModal({ show: false, commissionId: "", distributorName: "", amount: 0 });
                     setProofUrl("");
                   }}
-                  className="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium text-sm"
+                  className="flex-1 px-4 py-2.5 rounded-xl font-medium text-sm transition-all"
+                  style={{ backgroundColor: "#f3f4f6", color: themeColors.text.secondary }}
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleMarkPaid}
                   disabled={isActioning || !proofUrl.trim()}
-                  className="flex-1 px-4 py-2.5 text-white rounded-xl font-medium text-sm transition-all disabled:opacity-50"
-                  style={{ backgroundColor: PRIMARY }}
+                  className="flex-1 px-4 py-2.5 text-white rounded-xl font-medium text-sm transition-all disabled:opacity-50 hover:opacity-90"
+                  style={{ backgroundColor: themeColors.primary }}
                 >
                   {isActioning ? "Registrando..." : "Confirmar pago"}
                 </button>

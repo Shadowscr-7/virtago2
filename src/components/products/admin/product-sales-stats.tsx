@@ -81,16 +81,9 @@ export function ProductSalesStats({ productData }: ProductSalesStatsProps) {
     },
   ];
 
-  const getColorClasses = (color: string) => {
-    const colors = {
-      purple: "bg-purple-50 border-purple-200 text-purple-700",
-      green: "bg-green-50 border-green-200 text-green-700",
-      yellow: "bg-yellow-50 border-yellow-200 text-yellow-700",
-      blue: "bg-red-50 border-blue-200 text-red-700",
-      red: "bg-red-50 border-red-200 text-red-700",
-      indigo: "bg-indigo-50 border-indigo-200 text-indigo-700",
-    };
-    return colors[color as keyof typeof colors] || colors.purple;
+  const getColorClasses = (_color: string) => {
+    // Unified design system: all stat cards use neutral gray with red accent
+    return "bg-gray-50 border-gray-200 text-gray-700";
   };
 
   return (
@@ -101,8 +94,8 @@ export function ProductSalesStats({ productData }: ProductSalesStatsProps) {
       className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6"
     >
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-3 bg-orange-50 rounded-xl">
-          <TrendingUp className="w-6 h-6 text-orange-600" />
+        <div className="p-3 rounded-xl" style={{ backgroundColor: "#B91C1C15" }}>
+          <TrendingUp className="w-6 h-6" style={{ color: "#B91C1C" }} />
         </div>
         <div>
           <h2 className="text-xl font-bold text-gray-900">

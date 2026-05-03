@@ -189,13 +189,13 @@ export default function OrdersPage() {
   };
 
   const filteredOrders = mockOrders.filter(order => {
-    const matchesSearch = 
+    const matchesSearch =
       order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesStatus = statusFilter === "ALL" || order.status === statusFilter;
-    
+
     return matchesSearch && matchesStatus;
   });
 
@@ -228,13 +228,9 @@ export default function OrdersPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleConfigClick}
-              className="p-2 rounded-xl font-medium transition-all duration-200"
+              className="p-2 rounded-xl font-medium transition-all duration-200 border border-gray-200 bg-white"
               title="Configurar exportación al ERP"
-              style={{
-                backgroundColor: `${themeColors.surface}80`,
-                color: themeColors.text.secondary,
-                border: `1px solid ${themeColors.primary}30`,
-              }}
+              style={{ color: themeColors.text.secondary }}
             >
               <Settings className="w-4 h-4" />
             </motion.button>
@@ -242,12 +238,8 @@ export default function OrdersPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleExportClick}
-              className="px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center gap-2"
-              style={{
-                backgroundColor: `${themeColors.surface}80`,
-                color: themeColors.text.primary,
-                border: `1px solid ${themeColors.primary}30`,
-              }}
+              className="px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 bg-white border border-gray-200"
+              style={{ color: themeColors.text.primary }}
             >
               <Download className="w-4 h-4" />
               {selectedIds.length > 0 ? `Exportar (${selectedIds.length})` : "Exportar al ERP"}
@@ -256,10 +248,7 @@ export default function OrdersPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => router.push("/admin/ordenes/nueva")}
-              className="px-6 py-2 rounded-xl font-medium text-white transition-all duration-200 flex items-center gap-2"
-              style={{
-                background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
-              }}
+              className="px-6 py-2 rounded-xl font-medium text-white transition-all duration-200 flex items-center gap-2 bg-red-700 hover:bg-red-800"
             >
               <Plus className="w-4 h-4" />
               Nueva Orden
@@ -273,11 +262,7 @@ export default function OrdersPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="backdrop-blur-xl p-6 rounded-2xl border"
-            style={{
-              backgroundColor: `${themeColors.surface}70`,
-              borderColor: `${themeColors.primary}30`,
-            }}
+            className="bg-white p-6 rounded-2xl border border-gray-200"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -290,7 +275,7 @@ export default function OrdersPage() {
               </div>
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: `${themeColors.primary}20` }}
+                style={{ backgroundColor: `${themeColors.primary}15` }}
               >
                 <ShoppingBag className="w-6 h-6" style={{ color: themeColors.primary }} />
               </div>
@@ -305,11 +290,7 @@ export default function OrdersPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="backdrop-blur-xl p-6 rounded-2xl border"
-            style={{
-              backgroundColor: `${themeColors.surface}70`,
-              borderColor: `${themeColors.primary}30`,
-            }}
+            className="bg-white p-6 rounded-2xl border border-gray-200"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -322,7 +303,7 @@ export default function OrdersPage() {
               </div>
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: "#f59e0b20" }}
+                style={{ backgroundColor: "#f59e0b15" }}
               >
                 <Clock className="w-6 h-6" style={{ color: "#f59e0b" }} />
               </div>
@@ -337,11 +318,7 @@ export default function OrdersPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="backdrop-blur-xl p-6 rounded-2xl border"
-            style={{
-              backgroundColor: `${themeColors.surface}70`,
-              borderColor: `${themeColors.primary}30`,
-            }}
+            className="bg-white p-6 rounded-2xl border border-gray-200"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -354,7 +331,7 @@ export default function OrdersPage() {
               </div>
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: "#10b98120" }}
+                style={{ backgroundColor: "#10b98115" }}
               >
                 <DollarSign className="w-6 h-6" style={{ color: "#10b981" }} />
               </div>
@@ -369,11 +346,7 @@ export default function OrdersPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="backdrop-blur-xl p-6 rounded-2xl border"
-            style={{
-              backgroundColor: `${themeColors.surface}70`,
-              borderColor: `${themeColors.primary}30`,
-            }}
+            className="bg-white p-6 rounded-2xl border border-gray-200"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -386,7 +359,7 @@ export default function OrdersPage() {
               </div>
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: `${themeColors.secondary}20` }}
+                style={{ backgroundColor: `${themeColors.secondary}15` }}
               >
                 <TrendingUp className="w-6 h-6" style={{ color: themeColors.secondary }} />
               </div>
@@ -403,11 +376,7 @@ export default function OrdersPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="backdrop-blur-xl p-6 rounded-2xl border mb-6"
-          style={{
-            backgroundColor: `${themeColors.surface}70`,
-            borderColor: `${themeColors.primary}30`,
-          }}
+          className="bg-white p-6 rounded-2xl border border-gray-200 mb-6"
         >
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1">
@@ -418,12 +387,8 @@ export default function OrdersPage() {
                   placeholder="Buscar por número de orden, cliente..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2"
-                  style={{
-                    backgroundColor: `${themeColors.surface}50`,
-                    borderColor: `${themeColors.primary}30`,
-                    color: themeColors.text.primary,
-                  }}
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-700/20 focus:border-red-700"
+                  style={{ color: themeColors.text.primary }}
                 />
               </div>
             </div>
@@ -431,12 +396,8 @@ export default function OrdersPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2"
-                style={{
-                  backgroundColor: `${themeColors.surface}50`,
-                  borderColor: `${themeColors.primary}30`,
-                  color: themeColors.text.primary,
-                }}
+                className="px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-700/20 focus:border-red-700"
+                style={{ color: themeColors.text.primary }}
               >
                 <option value="ALL">Todos los estados</option>
                 <option value="PENDING">Pendiente</option>
@@ -446,12 +407,8 @@ export default function OrdersPage() {
                 <option value="CANCELLED">Cancelado</option>
               </select>
               <button
-                className="p-3 rounded-xl border transition-all duration-200 hover:scale-105"
-                style={{
-                  backgroundColor: `${themeColors.surface}50`,
-                  borderColor: `${themeColors.primary}30`,
-                  color: themeColors.text.primary,
-                }}
+                className="p-3 rounded-xl border border-gray-200 bg-gray-50 transition-all duration-200 hover:scale-105"
+                style={{ color: themeColors.text.primary }}
               >
                 <Filter className="w-5 h-5" />
               </button>
@@ -464,16 +421,12 @@ export default function OrdersPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
-          className="rounded-2xl border overflow-hidden"
-          style={{
-            backgroundColor: `${themeColors.surface}70`,
-            borderColor: `${themeColors.primary}30`,
-          }}
+          className="bg-white rounded-2xl border border-gray-200 overflow-hidden"
         >
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr style={{ backgroundColor: `${themeColors.primary}10` }}>
+                <tr className="border-b border-gray-200 bg-gray-50">
                   <th className="p-4 w-10">
                     <input
                       type="checkbox"
@@ -488,22 +441,22 @@ export default function OrdersPage() {
                       className="rounded"
                     />
                   </th>
-                  <th className="text-left p-4 font-semibold" style={{ color: themeColors.text.primary }}>
+                  <th className="text-left p-4 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>
                     Usuario
                   </th>
-                  <th className="text-left p-4 font-semibold" style={{ color: themeColors.text.primary }}>
+                  <th className="text-left p-4 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>
                     Total
                   </th>
-                  <th className="text-left p-4 font-semibold" style={{ color: themeColors.text.primary }}>
+                  <th className="text-left p-4 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>
                     Items
                   </th>
-                  <th className="text-left p-4 font-semibold" style={{ color: themeColors.text.primary }}>
+                  <th className="text-left p-4 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>
                     Estado
                   </th>
-                  <th className="text-left p-4 font-semibold" style={{ color: themeColors.text.primary }}>
+                  <th className="text-left p-4 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>
                     Fecha
                   </th>
-                  <th className="text-left p-4 font-semibold" style={{ color: themeColors.text.primary }}>
+                  <th className="text-left p-4 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>
                     Acciones
                   </th>
                 </tr>
@@ -515,10 +468,7 @@ export default function OrdersPage() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.1 * index }}
-                    className="border-t transition-colors duration-200 hover:bg-opacity-50"
-                    style={{
-                      borderColor: `${themeColors.primary}20`,
-                    }}
+                    className="border-t border-gray-100 transition-colors duration-200 hover:bg-red-50"
                   >
                     <td className="p-4 w-10">
                       <input
@@ -531,10 +481,7 @@ export default function OrdersPage() {
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div
-                          className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white"
-                          style={{
-                            background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
-                          }}
+                          className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white bg-red-700"
                         >
                           {order.user.name.charAt(0)}
                         </div>
@@ -562,7 +509,7 @@ export default function OrdersPage() {
                       <div className="flex items-center gap-2">
                         <div
                           className="p-2 rounded-lg"
-                          style={{ backgroundColor: `${getStatusColor(order.status)}20` }}
+                          style={{ backgroundColor: `${getStatusColor(order.status)}15` }}
                         >
                           <div style={{ color: getStatusColor(order.status) }}>
                             {getStatusIcon(order.status)}
@@ -586,7 +533,7 @@ export default function OrdersPage() {
                         onClick={() => router.push(`/admin/ordenes/${order.id}`)}
                         className="p-2 rounded-lg transition-all duration-200 hover:scale-105"
                         style={{
-                          backgroundColor: `${themeColors.primary}20`,
+                          backgroundColor: `${themeColors.primary}15`,
                           color: themeColors.primary,
                         }}
                       >

@@ -19,29 +19,29 @@ export const PriceStatistics: React.FC<PriceStatisticsProps> = ({ stats }) => {
   const { themeColors } = useTheme();
 
   const statItems = [
-    { 
-      title: "Total Precios", 
-      value: stats.total, 
-      icon: Package, 
-      colorKey: "primary" as const 
+    {
+      title: "Total Precios",
+      value: stats.total,
+      icon: Package,
+      colorKey: "primary" as const
     },
-    { 
-      title: "Activos", 
-      value: stats.activos, 
-      icon: TrendingUp, 
-      colorKey: "secondary" as const 
+    {
+      title: "Activos",
+      value: stats.activos,
+      icon: TrendingUp,
+      colorKey: "secondary" as const
     },
-    { 
-      title: "Inactivos", 
-      value: stats.inactivos, 
-      icon: TrendingDown, 
-      colorKey: "accent" as const 
+    {
+      title: "Inactivos",
+      value: stats.inactivos,
+      icon: TrendingDown,
+      colorKey: "accent" as const
     },
-    { 
-      title: "Valor Total", 
-      value: `$${stats.totalValue.toLocaleString()}`, 
-      icon: DollarSign, 
-      colorKey: "primary" as const 
+    {
+      title: "Valor Total",
+      value: `$${stats.totalValue.toLocaleString()}`,
+      icon: DollarSign,
+      colorKey: "primary" as const
     },
   ];
 
@@ -55,24 +55,20 @@ export const PriceStatistics: React.FC<PriceStatisticsProps> = ({ stats }) => {
       {statItems.map((stat, index) => (
         <motion.div
           key={stat.title}
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1 + index * 0.05 }}
           whileHover={{ scale: 1.02, y: -2 }}
-          className="p-6 backdrop-blur-xl rounded-2xl border shadow-lg"
-          style={{
-            backgroundColor: themeColors.surface + "70",
-            borderColor: themeColors.primary + "30",
-          }}
+          className="p-6 bg-white rounded-2xl border border-gray-200 shadow-sm"
         >
           <div className="flex items-center justify-between mb-3">
             <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg"
+              className="w-12 h-12 rounded-xl flex items-center justify-center"
               style={{
-                backgroundImage: `linear-gradient(to right, ${themeColors[stat.colorKey]}, ${themeColors.secondary})`,
+                backgroundColor: themeColors[stat.colorKey] + "15",
               }}
             >
-              <stat.icon className="w-6 h-6 text-white" />
+              <stat.icon className="w-6 h-6" style={{ color: themeColors[stat.colorKey] }} />
             </div>
             <div className="text-right">
               <p

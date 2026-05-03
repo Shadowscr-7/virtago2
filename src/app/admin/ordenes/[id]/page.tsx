@@ -305,8 +305,7 @@ export default function OrderDetailsPage() {
           </h2>
           <button
             onClick={() => router.push("/admin/ordenes")}
-            className="px-4 py-2 rounded-lg"
-            style={{ backgroundColor: themeColors.primary, color: "white" }}
+            className="px-4 py-2 rounded-lg text-white bg-red-700 hover:bg-red-800"
           >
             Volver a Ordenes
           </button>
@@ -329,11 +328,8 @@ export default function OrderDetailsPage() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => router.push("/admin/ordenes")}
-              className="p-2 rounded-xl transition-all duration-200 hover:scale-105"
-              style={{
-                backgroundColor: `${themeColors.surface}80`,
-                color: themeColors.text.primary,
-              }}
+              className="p-2 rounded-xl transition-all duration-200 hover:scale-105 bg-white border border-gray-200"
+              style={{ color: themeColors.text.primary }}
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -352,12 +348,8 @@ export default function OrderDetailsPage() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="px-4 py-2 rounded-xl font-medium flex items-center gap-2"
-              style={{
-                backgroundColor: `${themeColors.surface}80`,
-                color: themeColors.text.primary,
-                border: `1px solid ${themeColors.primary}30`,
-              }}
+              className="px-4 py-2 rounded-xl font-medium flex items-center gap-2 bg-white border border-gray-200"
+              style={{ color: themeColors.text.primary }}
             >
               <Download className="w-4 h-4" />
               Descargar
@@ -371,7 +363,7 @@ export default function OrderDetailsPage() {
                 onClick={enterEditMode}
                 className="px-4 py-2 rounded-xl font-medium flex items-center gap-2"
                 style={{
-                  backgroundColor: `${themeColors.primary}20`,
+                  backgroundColor: `${themeColors.primary}15`,
                   color: themeColors.primary,
                   border: `1px solid ${themeColors.primary}30`,
                 }}
@@ -388,12 +380,8 @@ export default function OrderDetailsPage() {
                   whileTap={{ scale: 0.98 }}
                   onClick={cancelEditMode}
                   disabled={saving || confirming}
-                  className="px-4 py-2 rounded-xl font-medium flex items-center gap-2 disabled:opacity-50"
-                  style={{
-                    backgroundColor: "#6b728020",
-                    color: "#6b7280",
-                    border: "1px solid #6b728030",
-                  }}
+                  className="px-4 py-2 rounded-xl font-medium flex items-center gap-2 disabled:opacity-50 bg-white border border-gray-200"
+                  style={{ color: "#6b7280" }}
                 >
                   <X className="w-4 h-4" />
                   Cancelar
@@ -406,7 +394,7 @@ export default function OrderDetailsPage() {
                   disabled={saving || confirming || changelog.length === 0}
                   className="px-4 py-2 rounded-xl font-medium flex items-center gap-2 disabled:opacity-50"
                   style={{
-                    backgroundColor: "#10b98120",
+                    backgroundColor: "#10b98115",
                     color: "#10b981",
                     border: "1px solid #10b98130",
                   }}
@@ -427,7 +415,7 @@ export default function OrderDetailsPage() {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               className="mb-6 p-4 rounded-xl flex items-center gap-3"
-              style={{ backgroundColor: `${themeColors.primary}15`, border: `1px solid ${themeColors.primary}30` }}
+              style={{ backgroundColor: `${themeColors.primary}10`, border: `1px solid ${themeColors.primary}25` }}
             >
               <AlertTriangle className="w-5 h-5 flex-shrink-0" style={{ color: themeColors.primary }} />
               <p className="text-sm" style={{ color: themeColors.text.primary }}>
@@ -445,7 +433,7 @@ export default function OrderDetailsPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               className="mb-6 p-4 rounded-xl"
-              style={{ backgroundColor: "#ef444420", border: "1px solid #ef444430" }}
+              style={{ backgroundColor: "#ef444415", border: "1px solid #ef444430" }}
             >
               <p className="text-sm" style={{ color: "#ef4444" }}>{editError}</p>
             </motion.div>
@@ -459,11 +447,7 @@ export default function OrderDetailsPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl border overflow-hidden"
-              style={{
-                backgroundColor: `${themeColors.surface}70`,
-                borderColor: `${themeColors.primary}30`,
-              }}
+              className="bg-white rounded-2xl border border-gray-200 overflow-hidden"
             >
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -477,7 +461,7 @@ export default function OrderDetailsPage() {
                       onClick={() => setShowAddModal(true)}
                       className="px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5"
                       style={{
-                        backgroundColor: `${themeColors.primary}20`,
+                        backgroundColor: `${themeColors.primary}15`,
                         color: themeColors.primary,
                         border: `1px solid ${themeColors.primary}30`,
                       }}
@@ -491,12 +475,12 @@ export default function OrderDetailsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr style={{ backgroundColor: `${themeColors.primary}10` }}>
-                        <th className="text-left p-3 text-sm font-semibold" style={{ color: themeColors.text.primary }}>Producto</th>
-                        <th className="text-left p-3 text-sm font-semibold" style={{ color: themeColors.text.primary }}>Cantidad</th>
-                        <th className="text-left p-3 text-sm font-semibold" style={{ color: themeColors.text.primary }}>Precio unit.</th>
-                        <th className="text-left p-3 text-sm font-semibold" style={{ color: themeColors.text.primary }}>Descuento %</th>
-                        <th className="text-left p-3 text-sm font-semibold" style={{ color: themeColors.text.primary }}>Total</th>
+                      <tr className="border-b border-gray-200 bg-gray-50">
+                        <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>Producto</th>
+                        <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>Cantidad</th>
+                        <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>Precio unit.</th>
+                        <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>Descuento %</th>
+                        <th className="text-left p-3 text-xs font-semibold uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>Total</th>
                         {editMode && <th className="p-3" />}
                       </tr>
                     </thead>
@@ -525,11 +509,7 @@ export default function OrderDetailsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="p-6 rounded-2xl border"
-              style={{
-                backgroundColor: `${themeColors.surface}70`,
-                borderColor: `${themeColors.primary}30`,
-              }}
+              className="p-6 bg-white rounded-2xl border border-gray-200"
             >
               <h3 className="text-lg font-bold mb-4" style={{ color: themeColors.text.primary }}>
                 Resumen de Orden
@@ -563,7 +543,7 @@ export default function OrderDetailsPage() {
                   <span style={{ color: themeColors.text.secondary }}>Envio:</span>
                   <span style={{ color: themeColors.text.primary }}>${order.shipping.toFixed(2)}</span>
                 </div>
-                <hr style={{ borderColor: `${themeColors.primary}20` }} />
+                <hr className="border-gray-100" />
                 <div className="flex justify-between text-lg font-bold">
                   <span style={{ color: themeColors.text.primary }}>Total:</span>
                   <span style={{ color: themeColors.primary }}>
@@ -574,7 +554,7 @@ export default function OrderDetailsPage() {
 
               {/* Seccion de cambios realizados (en factura) */}
               {changelog.length > 0 && (
-                <div className="mt-6 pt-4 border-t" style={{ borderColor: `${themeColors.primary}20` }}>
+                <div className="mt-6 pt-4 border-t border-gray-100">
                   <p className="text-sm font-semibold mb-2" style={{ color: themeColors.text.secondary }}>
                     Cambios realizados por el distribuidor:
                   </p>
@@ -605,14 +585,10 @@ export default function OrderDetailsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="p-6 rounded-2xl border"
-              style={{
-                backgroundColor: `${themeColors.surface}70`,
-                borderColor: `${themeColors.primary}30`,
-              }}
+              className="p-6 bg-white rounded-2xl border border-gray-200"
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${themeColors.primary}20` }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${themeColors.primary}15` }}>
                   <User className="w-5 h-5" style={{ color: themeColors.primary }} />
                 </div>
                 <h3 className="text-lg font-bold" style={{ color: themeColors.text.primary }}>
@@ -660,14 +636,10 @@ export default function OrderDetailsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="p-6 rounded-2xl border"
-              style={{
-                backgroundColor: `${themeColors.surface}70`,
-                borderColor: `${themeColors.primary}30`,
-              }}
+              className="p-6 bg-white rounded-2xl border border-gray-200"
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${themeColors.secondary}20` }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${themeColors.secondary}15` }}>
                   <DollarSign className="w-5 h-5" style={{ color: themeColors.secondary }} />
                 </div>
                 <h3 className="text-lg font-bold" style={{ color: themeColors.text.primary }}>
@@ -699,16 +671,12 @@ export default function OrderDetailsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="p-6 rounded-2xl border"
-              style={{
-                backgroundColor: `${themeColors.surface}70`,
-                borderColor: `${themeColors.primary}30`,
-              }}
+              className="p-6 bg-white rounded-2xl border border-gray-200"
             >
               <div className="flex items-center gap-3 mb-4">
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ backgroundColor: `${getStatusColor(order.status)}20` }}
+                  style={{ backgroundColor: `${getStatusColor(order.status)}15` }}
                 >
                   <div style={{ color: getStatusColor(order.status) }}>
                     {getStatusIcon(order.status)}
@@ -775,17 +743,16 @@ function EditableItemRow({ item, index, editMode, saving, themeColors, onFieldCh
 
   return (
     <tr
-      className="border-t"
+      className="border-t border-gray-100 hover:bg-red-50 transition-colors"
       style={{
-        borderColor: `${themeColors.primary}20`,
-        backgroundColor: item.addedByDistributor ? `${themeColors.primary}08` : undefined,
+        backgroundColor: item.addedByDistributor ? `${themeColors.primary}05` : undefined,
       }}
     >
       <td className="p-3">
         <p className="font-medium" style={{ color: themeColors.text.primary }}>
           {item.name}
           {item.addedByDistributor && (
-            <span className="ml-2 text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: `${themeColors.primary}20`, color: themeColors.primary }}>
+            <span className="ml-2 text-xs px-1.5 py-0.5 rounded" style={{ backgroundColor: `${themeColors.primary}15`, color: themeColors.primary }}>
               Agregado
             </span>
           )}
@@ -802,12 +769,8 @@ function EditableItemRow({ item, index, editMode, saving, themeColors, onFieldCh
             step="1"
             value={item.quantity}
             onChange={(e) => handleChange("quantity", e.target.value)}
-            className="w-20 px-2 py-1 rounded-lg text-sm border"
-            style={{
-              backgroundColor: `${themeColors.surface}`,
-              color: themeColors.text.primary,
-              borderColor: `${themeColors.primary}40`,
-            }}
+            className="w-20 px-2 py-1 rounded-lg text-sm border border-gray-200 bg-white"
+            style={{ color: themeColors.text.primary }}
           />
         ) : (
           <span style={{ color: themeColors.text.primary }}>{item.quantity}</span>
@@ -823,12 +786,8 @@ function EditableItemRow({ item, index, editMode, saving, themeColors, onFieldCh
             step="0.01"
             value={item.finalPrice}
             onChange={(e) => handleChange("finalPrice", e.target.value)}
-            className="w-24 px-2 py-1 rounded-lg text-sm border"
-            style={{
-              backgroundColor: `${themeColors.surface}`,
-              color: themeColors.text.primary,
-              borderColor: `${themeColors.primary}40`,
-            }}
+            className="w-24 px-2 py-1 rounded-lg text-sm border border-gray-200 bg-white"
+            style={{ color: themeColors.text.primary }}
           />
         ) : (
           <span style={{ color: themeColors.text.primary }}>${item.finalPrice}</span>
@@ -845,12 +804,8 @@ function EditableItemRow({ item, index, editMode, saving, themeColors, onFieldCh
             step="0.5"
             value={item.discountPercentage}
             onChange={(e) => handleChange("discountPercentage", e.target.value)}
-            className="w-20 px-2 py-1 rounded-lg text-sm border"
-            style={{
-              backgroundColor: `${themeColors.surface}`,
-              color: themeColors.text.primary,
-              borderColor: `${themeColors.primary}40`,
-            }}
+            className="w-20 px-2 py-1 rounded-lg text-sm border border-gray-200 bg-white"
+            style={{ color: themeColors.text.primary }}
           />
         ) : (
           <span style={{ color: themeColors.text.primary }}>{item.discountPercentage}%</span>
@@ -872,7 +827,7 @@ function EditableItemRow({ item, index, editMode, saving, themeColors, onFieldCh
                 disabled={saving}
                 title="Guardar cambios de este item"
                 className="p-1.5 rounded-lg disabled:opacity-50"
-                style={{ backgroundColor: "#10b98120", color: "#10b981" }}
+                style={{ backgroundColor: "#10b98115", color: "#10b981" }}
               >
                 <Save className="w-4 h-4" />
               </button>
@@ -882,7 +837,7 @@ function EditableItemRow({ item, index, editMode, saving, themeColors, onFieldCh
               disabled={saving}
               title="Eliminar item"
               className="p-1.5 rounded-lg disabled:opacity-50"
-              style={{ backgroundColor: "#ef444420", color: "#ef4444" }}
+              style={{ backgroundColor: "#ef444415", color: "#ef4444" }}
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -906,11 +861,7 @@ function ChangelogPanel({ changelog, themeColors }: ChangelogPanelProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="p-6 rounded-2xl border"
-      style={{
-        backgroundColor: `${themeColors.surface}70`,
-        borderColor: `${themeColors.primary}30`,
-      }}
+      className="p-6 bg-white rounded-2xl border border-gray-200"
     >
       <div className="flex items-center gap-3 mb-4">
         <History className="w-5 h-5" style={{ color: themeColors.primary }} />
@@ -923,8 +874,7 @@ function ChangelogPanel({ changelog, themeColors }: ChangelogPanelProps) {
         {[...changelog].reverse().map((entry) => (
           <div
             key={entry.id}
-            className="flex items-start gap-3 p-3 rounded-xl"
-            style={{ backgroundColor: `${themeColors.primary}08` }}
+            className="flex items-start gap-3 p-3 rounded-xl bg-gray-50"
           >
             <div
               className="w-2 h-2 rounded-full mt-2 flex-shrink-0"
@@ -978,8 +928,7 @@ function AddItemModal({ addForm, addError, addSaving, themeColors, onChange, onC
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="w-full max-w-md p-6 rounded-2xl shadow-2xl"
-        style={{ backgroundColor: themeColors.surface }}
+        className="w-full max-w-md p-6 rounded-2xl shadow-2xl bg-white border border-gray-200"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
@@ -998,12 +947,8 @@ function AddItemModal({ addForm, addError, addSaving, themeColors, onChange, onC
               type="text"
               value={addForm.name}
               onChange={(e) => onChange("name", e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border text-sm"
-              style={{
-                backgroundColor: `${themeColors.surface}80`,
-                color: themeColors.text.primary,
-                borderColor: `${themeColors.primary}40`,
-              }}
+              className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-red-700/20 focus:border-red-700"
+              style={{ color: themeColors.text.primary }}
               placeholder="Nombre del producto"
             />
           </div>
@@ -1013,12 +958,8 @@ function AddItemModal({ addForm, addError, addSaving, themeColors, onChange, onC
               type="text"
               value={addForm.sku || ""}
               onChange={(e) => onChange("sku", e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border text-sm"
-              style={{
-                backgroundColor: `${themeColors.surface}80`,
-                color: themeColors.text.primary,
-                borderColor: `${themeColors.primary}40`,
-              }}
+              className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-red-700/20 focus:border-red-700"
+              style={{ color: themeColors.text.primary }}
               placeholder="SKU (opcional)"
             />
           </div>
@@ -1030,12 +971,8 @@ function AddItemModal({ addForm, addError, addSaving, themeColors, onChange, onC
                 min="1"
                 value={addForm.quantity}
                 onChange={(e) => onChange("quantity", Number(e.target.value))}
-                className="w-full px-3 py-2 rounded-xl border text-sm"
-                style={{
-                  backgroundColor: `${themeColors.surface}80`,
-                  color: themeColors.text.primary,
-                  borderColor: `${themeColors.primary}40`,
-                }}
+                className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-red-700/20 focus:border-red-700"
+                style={{ color: themeColors.text.primary }}
               />
             </div>
             <div>
@@ -1046,12 +983,8 @@ function AddItemModal({ addForm, addError, addSaving, themeColors, onChange, onC
                 step="0.01"
                 value={addForm.finalPrice}
                 onChange={(e) => onChange("finalPrice", Number(e.target.value))}
-                className="w-full px-3 py-2 rounded-xl border text-sm"
-                style={{
-                  backgroundColor: `${themeColors.surface}80`,
-                  color: themeColors.text.primary,
-                  borderColor: `${themeColors.primary}40`,
-                }}
+                className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-red-700/20 focus:border-red-700"
+                style={{ color: themeColors.text.primary }}
               />
             </div>
             <div>
@@ -1062,12 +995,8 @@ function AddItemModal({ addForm, addError, addSaving, themeColors, onChange, onC
                 max="100"
                 value={addForm.discountPercentage || 0}
                 onChange={(e) => onChange("discountPercentage", Number(e.target.value))}
-                className="w-full px-3 py-2 rounded-xl border text-sm"
-                style={{
-                  backgroundColor: `${themeColors.surface}80`,
-                  color: themeColors.text.primary,
-                  borderColor: `${themeColors.primary}40`,
-                }}
+                className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-red-700/20 focus:border-red-700"
+                style={{ color: themeColors.text.primary }}
               />
             </div>
           </div>
@@ -1080,16 +1009,15 @@ function AddItemModal({ addForm, addError, addSaving, themeColors, onChange, onC
         <div className="flex gap-3 mt-6">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 rounded-xl font-medium text-sm"
-            style={{ backgroundColor: "#6b728020", color: "#6b7280" }}
+            className="flex-1 px-4 py-2 rounded-xl font-medium text-sm bg-white border border-gray-200"
+            style={{ color: "#6b7280" }}
           >
             Cancelar
           </button>
           <button
             onClick={onConfirm}
             disabled={addSaving}
-            className="flex-1 px-4 py-2 rounded-xl font-medium text-sm disabled:opacity-50"
-            style={{ backgroundColor: themeColors.primary, color: "white" }}
+            className="flex-1 px-4 py-2 rounded-xl font-medium text-sm text-white disabled:opacity-50 bg-red-700 hover:bg-red-800"
           >
             {addSaving ? "Agregando..." : "Agregar"}
           </button>

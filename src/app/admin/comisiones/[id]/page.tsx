@@ -13,10 +13,9 @@ import {
 } from "lucide-react";
 import { AdminLayout } from "@/components/admin/admin-layout";
 import { useAuthStore } from "@/store/auth";
+import { useTheme } from "@/contexts/theme-context";
 import { showToast } from "@/store/toast-helpers";
 import http from "@/api/http-client";
-
-const PRIMARY = "#C8102E";
 
 interface Commission {
   id: string;
@@ -53,6 +52,7 @@ export default function ComisionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { user } = useAuthStore();
+  const { themeColors } = useTheme();
 
   const [detail, setDetail] = useState<CommissionDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,7 +71,6 @@ export default function ComisionDetailPage() {
         setIsLoading(false);
       }
     };
-
     if (id) loadDetail();
   }, [id]);
 
@@ -98,7 +97,9 @@ export default function ComisionDetailPage() {
       <AdminLayout>
         <div className="flex items-center justify-center h-64">
           <AlertTriangle className="w-8 h-8 text-amber-500 mr-3" />
-          <p className="text-gray-700">Acceso restringido</p>
+          <p style={{ color: themeColors.text.secondary }}>
+            Acceso restringido
+          </p>
         </div>
       </AdminLayout>
     );
@@ -110,7 +111,8 @@ export default function ComisionDetailPage() {
         {/* Back */}
         <button
           onClick={() => router.push("/admin/comisiones")}
-          className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 transition-colors"
+          className="flex items-center gap-2 text-sm transition-colors hover:opacity-80"
+          style={{ color: themeColors.text.secondary }}
         >
           <ArrowLeft className="w-4 h-4" />
           Volver a comisiones
@@ -118,15 +120,21 @@ export default function ComisionDetailPage() {
 
         {isLoading ? (
           <div className="flex items-center justify-center h-48">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: PRIMARY }} />
+            <div
+              className="animate-spin rounded-full h-8 w-8 border-b-2"
+              style={{ borderColor: themeColors.primary }}
+            />
           </div>
         ) : !detail ? (
-          <div className="flex items-center justify-center h-48 text-gray-400">
+          <div
+            className="flex items-center justify-center h-48"
+            style={{ color: themeColors.text.muted }}
+          >
             <p>Comisión no encontrada</p>
           </div>
         ) : (
           <>
-            {/* Header */}
+            {/* Header card */}
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
@@ -136,16 +144,27 @@ export default function ComisionDetailPage() {
                 <div className="flex items-center gap-4">
                   <div
                     className="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: `${PRIMARY}15` }}
+                    style={{ backgroundColor: `${themeColors.primary}15` }}
                   >
-                    <DollarSign className="w-7 h-7" style={{ color: PRIMARY }} />
+                    <DollarSign
+                      className="w-7 h-7"
+                      style={{ color: themeColors.primary }}
+                    />
                   </div>
                   <div>
-                    <h1 className="text-xl font-bold text-gray-900">
+                    <h1
+                      className="text-xl font-bold"
+                      style={{ color: themeColors.text.primary }}
+                    >
                       {detail.commission.distributorName}
                     </h1>
-                    <p className="text-gray-500 text-sm">
-                      {new Date(`${detail.commission.month}-01`).toLocaleDateString("es-UY", {
+                    <p
+                      className="text-sm mt-0.5"
+                      style={{ color: themeColors.text.secondary }}
+                    >
+                      {new Date(
+                        `${detail.commission.month}-01`
+                      ).toLocaleDateString("es-UY", {
                         year: "numeric",
                         month: "long",
                       })}
@@ -154,14 +173,14 @@ export default function ComisionDetailPage() {
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
+                <div>
                   {detail.commission.status === "paid" ? (
-                    <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-green-50 text-green-700 border border-green-100">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-green-50 text-green-700 border border-green-100">
                       <CheckCircle className="w-4 h-4" />
                       Pagado
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium bg-amber-50 text-amber-700 border border-amber-100">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-amber-50 text-amber-700 border border-amber-100">
                       <Clock className="w-4 h-4" />
                       Pendiente
                     </span>
@@ -172,54 +191,97 @@ export default function ComisionDetailPage() {
               {/* Summary metrics */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-5 border-t border-gray-100">
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">Total transacciones</p>
-                  <p className="text-lg font-bold text-gray-900">
+                  <p
+                    className="text-xs uppercase tracking-wide mb-1"
+                    style={{ color: themeColors.text.muted }}
+                  >
+                    Total transacciones
+                  </p>
+                  <p
+                    className="text-lg font-bold"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     {formatCurrency(detail.periodTotal)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">% Comisión</p>
-                  <p className="text-lg font-bold text-gray-900">
+                  <p
+                    className="text-xs uppercase tracking-wide mb-1"
+                    style={{ color: themeColors.text.muted }}
+                  >
+                    % Comisión
+                  </p>
+                  <p
+                    className="text-lg font-bold"
+                    style={{ color: themeColors.text.primary }}
+                  >
                     {(detail.commission.commissionRate * 100).toFixed(2)}%
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">Monto comisión</p>
-                  <p className="text-lg font-bold" style={{ color: PRIMARY }}>
+                  <p
+                    className="text-xs uppercase tracking-wide mb-1"
+                    style={{ color: themeColors.text.muted }}
+                  >
+                    Monto comisión
+                  </p>
+                  <p
+                    className="text-lg font-bold"
+                    style={{ color: themeColors.primary }}
+                  >
                     {formatCurrency(detail.commissionTotal)}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">Órdenes incluidas</p>
-                  <p className="text-lg font-bold text-gray-900">{detail.totalOrders}</p>
+                  <p
+                    className="text-xs uppercase tracking-wide mb-1"
+                    style={{ color: themeColors.text.muted }}
+                  >
+                    Órdenes incluidas
+                  </p>
+                  <p
+                    className="text-lg font-bold"
+                    style={{ color: themeColors.text.primary }}
+                  >
+                    {detail.totalOrders}
+                  </p>
                 </div>
               </div>
 
               {/* Payment proof */}
-              {detail.commission.status === "paid" && detail.commission.paymentProofUrl && (
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                  <p className="text-xs text-gray-500 mb-2">Comprobante de pago</p>
-                  <div className="flex items-center gap-3">
-                    <a
-                      href={detail.commission.paymentProofUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-sm font-medium transition-all border border-blue-100"
+              {detail.commission.status === "paid" &&
+                detail.commission.paymentProofUrl && (
+                  <div className="mt-4 pt-4 border-t border-gray-100">
+                    <p
+                      className="text-xs uppercase tracking-wide mb-2"
+                      style={{ color: themeColors.text.muted }}
                     >
-                      <ExternalLink className="w-4 h-4" />
-                      Ver comprobante ({detail.commission.paymentProofType})
-                    </a>
-                    {detail.commission.paidAt && (
-                      <span className="text-xs text-gray-400">
-                        Registrado el {formatDate(detail.commission.paidAt)}
-                      </span>
-                    )}
+                      Comprobante de pago
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <a
+                        href={detail.commission.paymentProofUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all border border-blue-100 bg-blue-50 hover:bg-blue-100 text-blue-700"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        Ver comprobante ({detail.commission.paymentProofType})
+                      </a>
+                      {detail.commission.paidAt && (
+                        <span
+                          className="text-xs"
+                          style={{ color: themeColors.text.muted }}
+                        >
+                          Registrado el {formatDate(detail.commission.paidAt)}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </motion.div>
 
-            {/* Orders detail table */}
+            {/* Orders table */}
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
@@ -227,61 +289,88 @@ export default function ComisionDetailPage() {
               className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden"
             >
               <div className="px-5 py-4 border-b border-gray-100">
-                <h2 className="text-sm font-semibold text-gray-900">
+                <h2
+                  className="text-sm font-semibold"
+                  style={{ color: themeColors.text.primary }}
+                >
                   Desglose por órdenes ({detail.totalOrders})
                 </h2>
               </div>
 
               {detail.orders.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-32 text-gray-400">
-                  <p className="text-sm">No hay órdenes completadas en este período</p>
+                <div
+                  className="flex flex-col items-center justify-center h-32"
+                  style={{ color: themeColors.text.muted }}
+                >
+                  <p className="text-sm">
+                    No hay órdenes completadas en este período
+                  </p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
-                      <tr className="border-b border-gray-100 bg-gray-50">
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                          N° Orden
-                        </th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                          Fecha
-                        </th>
-                        <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                          Monto subtotal
-                        </th>
-                        <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                          % Comisión
-                        </th>
-                        <th className="text-right px-4 py-3 text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                          Monto comisión
-                        </th>
+                      <tr
+                        className="border-b"
+                        style={{
+                          backgroundColor: `${themeColors.primary}08`,
+                          borderColor: themeColors.border,
+                        }}
+                      >
+                        {[
+                          "N° Orden",
+                          "Fecha",
+                          "Monto subtotal",
+                          "% Comisión",
+                          "Monto comisión",
+                        ].map((h) => (
+                          <th
+                            key={h}
+                            className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wide"
+                            style={{ color: themeColors.text.secondary }}
+                          >
+                            {h}
+                          </th>
+                        ))}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-50">
+                    <tbody>
                       {detail.orders.map((o, idx) => (
                         <motion.tr
                           key={o.orderId}
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: idx * 0.03 }}
-                          className="hover:bg-gray-50 transition-colors"
+                          className="border-t hover:bg-red-50 transition-colors"
+                          style={{ borderColor: `${themeColors.primary}10` }}
                         >
-                          <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                          <td
+                            className="px-4 py-3 text-sm font-medium"
+                            style={{ color: themeColors.text.primary }}
+                          >
                             {o.orderNo || o.orderId}
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-500">
+                          <td
+                            className="px-4 py-3 text-sm"
+                            style={{ color: themeColors.text.secondary }}
+                          >
                             {formatDate(o.createdAt)}
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-900 text-right">
+                          <td
+                            className="px-4 py-3 text-sm"
+                            style={{ color: themeColors.text.primary }}
+                          >
                             {formatCurrency(o.subTotal)}
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-600 text-right">
+                          <td
+                            className="px-4 py-3 text-sm"
+                            style={{ color: themeColors.text.secondary }}
+                          >
                             {(o.commissionRate * 100).toFixed(2)}%
                           </td>
                           <td
-                            className="px-4 py-3 text-sm font-semibold text-right"
-                            style={{ color: PRIMARY }}
+                            className="px-4 py-3 text-sm font-semibold"
+                            style={{ color: themeColors.primary }}
                           >
                             {formatCurrency(o.commissionAmount)}
                           </td>
@@ -289,17 +378,27 @@ export default function ComisionDetailPage() {
                       ))}
                     </tbody>
                     <tfoot>
-                      <tr className="border-t-2 border-gray-200 bg-gray-50">
-                        <td colSpan={2} className="px-4 py-3 text-sm font-semibold text-gray-900">
+                      <tr
+                        className="border-t-2 bg-gray-50"
+                        style={{ borderColor: themeColors.border }}
+                      >
+                        <td
+                          colSpan={2}
+                          className="px-4 py-3 text-sm font-semibold"
+                          style={{ color: themeColors.text.primary }}
+                        >
                           Total del período
                         </td>
-                        <td className="px-4 py-3 text-sm font-bold text-gray-900 text-right">
+                        <td
+                          className="px-4 py-3 text-sm font-bold"
+                          style={{ color: themeColors.text.primary }}
+                        >
                           {formatCurrency(detail.periodTotal)}
                         </td>
                         <td />
                         <td
-                          className="px-4 py-3 text-sm font-bold text-right"
-                          style={{ color: PRIMARY }}
+                          className="px-4 py-3 text-sm font-bold"
+                          style={{ color: themeColors.primary }}
                         >
                           {formatCurrency(detail.commissionTotal)}
                         </td>

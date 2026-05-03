@@ -22,43 +22,47 @@ import {
   Tag,
 } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
+import { useTheme } from "@/contexts/theme-context";
 import { api } from "@/api";
 import { Order } from "@/api";
 import Link from "next/link";
 
-const statusConfig: Record<string, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
+const statusConfig: Record<string, { label: string; color: string; bg: string; icon: React.ComponentType<{ className?: string }> }> = {
   pending: {
     label: "Pendiente",
-    color:
-      "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400",
+    color: "#92400e",
+    bg: "#fef3c7",
     icon: Clock,
   },
   processing: {
     label: "Procesando",
-    color: "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400",
+    color: "#1e40af",
+    bg: "#dbeafe",
     icon: Package,
   },
   shipped: {
     label: "Enviado",
-    color:
-      "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400",
+    color: "#5b21b6",
+    bg: "#ede9fe",
     icon: Truck,
   },
   delivered: {
     label: "Entregado",
-    color:
-      "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400",
+    color: "#166534",
+    bg: "#dcfce7",
     icon: CheckCircle2,
   },
   cancelled: {
     label: "Cancelado",
-    color: "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400",
+    color: "#991b1b",
+    bg: "#fee2e2",
     icon: XCircle,
   },
 };
 
 export default function OrdersPage() {
   const { user } = useAuthStore();
+  const { themeColors } = useTheme();
   const [orders, setOrders] = useState<Order[]>([]);
   const [totalOrders, setTotalOrders] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -113,35 +117,47 @@ export default function OrdersPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-        <div className="flex items-center justify-center min-h-[80vh]">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center p-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20"
+      <div
+        className="min-h-screen flex items-center justify-center p-4"
+        style={{
+          background: `linear-gradient(135deg, ${themeColors.surface} 0%, #ffffff 40%, ${themeColors.primary}10 100%)`,
+        }}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center p-8 rounded-2xl"
+          style={{
+            backgroundColor: "#ffffff",
+            boxShadow: `0 20px 60px ${themeColors.primary}20`,
+            border: `1px solid ${themeColors.border}`,
+          }}
+        >
+          <div
+            className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
+            style={{ background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})` }}
           >
-            <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-              <ShoppingBag className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="text-2xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Acceso Denegado
-            </h1>
-            <p className="text-muted-foreground mb-6">
-              Debes iniciar sesión para ver tus pedidos
-            </p>
-            <Link
-              href="/login"
-              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
-            >
-              Iniciar Sesión
-            </Link>
-          </motion.div>
-        </div>
+            <ShoppingBag className="w-8 h-8 text-white" />
+          </div>
+          <h1 className="text-2xl font-bold mb-4" style={{ color: themeColors.text.primary }}>
+            Acceso Denegado
+          </h1>
+          <p className="mb-6" style={{ color: themeColors.text.secondary }}>
+            Debes iniciar sesión para ver tus pedidos
+          </p>
+          <Link
+            href="/login"
+            className="inline-block px-6 py-3 rounded-lg font-semibold text-white transition-all"
+            style={{ background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})` }}
+          >
+            Iniciar Sesión
+          </Link>
+        </motion.div>
       </div>
     );
   }
 
-  // Client-side search filter (API doesn't support search param)
+  // Client-side search filter
   const filteredOrders = searchQuery
     ? orders.filter((order) => {
         const q = searchQuery.toLowerCase();
@@ -160,8 +176,24 @@ export default function OrdersPage() {
   ).length;
   const totalSpent = orders.reduce((sum, o) => sum + (o.total || 0), 0);
 
+  const statCards = [
+    { label: "Total Pedidos", value: totalOrders, icon: Package },
+    { label: "Completados", value: completedCount, icon: CheckCircle2 },
+    { label: "En Proceso", value: inProcessCount, icon: Clock },
+    {
+      label: "Total Gastado",
+      value: `$${totalSpent.toLocaleString("es-UY", { minimumFractionDigits: 2 })}`,
+      icon: Star,
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 pt-6">
+    <div
+      className="min-h-screen pt-6"
+      style={{
+        background: `linear-gradient(135deg, ${themeColors.surface} 0%, #ffffff 50%, ${themeColors.primary}08 100%)`,
+      }}
+    >
       <div className="container mx-auto px-4 py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -174,7 +206,8 @@ export default function OrdersPage() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4"
+              className="text-4xl font-bold mb-4"
+              style={{ color: themeColors.text.primary }}
             >
               Mis Pedidos
             </motion.h1>
@@ -182,7 +215,8 @@ export default function OrdersPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="text-slate-600 dark:text-slate-400 text-lg"
+              className="text-lg"
+              style={{ color: themeColors.text.secondary }}
             >
               Historial completo de tus pedidos en VIRTAGO
             </motion.p>
@@ -195,32 +229,7 @@ export default function OrdersPage() {
             transition={{ delay: 0.3 }}
             className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
           >
-            {[
-              {
-                label: "Total Pedidos",
-                value: totalOrders,
-                color: "from-blue-500 to-cyan-500",
-                icon: Package,
-              },
-              {
-                label: "Completados",
-                value: completedCount,
-                color: "from-green-500 to-emerald-500",
-                icon: CheckCircle2,
-              },
-              {
-                label: "En Proceso",
-                value: inProcessCount,
-                color: "from-purple-500 to-pink-500",
-                icon: Clock,
-              },
-              {
-                label: "Total Gastado",
-                value: `$${totalSpent.toLocaleString("es-UY", { minimumFractionDigits: 2 })}`,
-                color: "from-orange-500 to-red-500",
-                icon: Star,
-              },
-            ].map((stat, index) => {
+            {statCards.map((stat, index) => {
               const Icon = stat.icon;
               return (
                 <motion.div
@@ -228,24 +237,25 @@ export default function OrdersPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 + index * 0.1 }}
-                  className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-lg border border-white/20 p-6 relative overflow-hidden"
+                  className="rounded-2xl p-6 relative overflow-hidden"
+                  style={{
+                    backgroundColor: "#ffffff",
+                    border: `1px solid ${themeColors.border}`,
+                    boxShadow: `0 4px 16px ${themeColors.primary}10`,
+                  }}
                 >
                   <div
-                    className={`absolute inset-0 bg-gradient-to-r ${stat.color} opacity-5`}
-                  />
-                  <div className="relative">
-                    <div
-                      className={`w-12 h-12 bg-gradient-to-r ${stat.color} rounded-xl flex items-center justify-center mb-4`}
-                    >
-                      <Icon className="w-6 h-6 text-white" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">
-                      {stat.value}
-                    </h3>
-                    <p className="text-slate-600 dark:text-slate-400 text-sm">
-                      {stat.label}
-                    </p>
+                    className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+                    style={{ background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})` }}
+                  >
+                    <Icon className="w-6 h-6 text-white" />
                   </div>
+                  <h3 className="text-2xl font-bold mb-1" style={{ color: themeColors.text.primary }}>
+                    {stat.value}
+                  </h3>
+                  <p className="text-sm" style={{ color: themeColors.text.secondary }}>
+                    {stat.label}
+                  </p>
                 </motion.div>
               );
             })}
@@ -256,28 +266,42 @@ export default function OrdersPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
-            className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-3xl shadow-xl border border-white/20 p-6 mb-8"
+            className="rounded-2xl p-6 mb-8"
+            style={{
+              backgroundColor: "#ffffff",
+              border: `1px solid ${themeColors.border}`,
+              boxShadow: `0 4px 20px ${themeColors.primary}10`,
+            }}
           >
             <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
               <div className="flex items-center gap-4 w-full lg:w-auto">
                 <div className="relative flex-1 lg:w-80">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                  <Search
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4"
+                    style={{ color: themeColors.text.muted }}
+                  />
                   <input
                     type="text"
                     placeholder="Buscar por número de pedido o producto..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/50 dark:bg-slate-700/50 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                    className="w-full pl-10 pr-4 py-3 border-2 rounded-xl text-sm transition-all focus:outline-none bg-white"
+                    style={{ borderColor: themeColors.border, color: themeColors.text.primary }}
+                    onFocus={(e) => { e.target.style.borderColor = themeColors.primary; e.target.style.boxShadow = `0 0 0 3px ${themeColors.primary}20`; }}
+                    onBlur={(e) => { e.target.style.borderColor = themeColors.border; e.target.style.boxShadow = "none"; }}
                   />
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <Filter className="w-4 h-4 text-slate-500" />
+                <Filter className="w-4 h-4" style={{ color: themeColors.text.muted }} />
                 <select
                   value={selectedStatus}
                   onChange={(e) => setSelectedStatus(e.target.value)}
-                  className="px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl bg-white/50 dark:bg-slate-700/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                  className="px-4 py-3 border-2 rounded-xl text-sm transition-all focus:outline-none bg-white"
+                  style={{ borderColor: themeColors.border, color: themeColors.text.primary }}
+                  onFocus={(e) => { (e.target as HTMLSelectElement).style.borderColor = themeColors.primary; }}
+                  onBlur={(e) => { (e.target as HTMLSelectElement).style.borderColor = themeColors.border; }}
                 >
                   <option value="all">Todos los estados</option>
                   <option value="pending">Pendiente</option>
@@ -294,8 +318,11 @@ export default function OrdersPage() {
           {loading && (
             <div className="flex items-center justify-center py-16">
               <div className="text-center">
-                <Loader2 className="w-10 h-10 text-purple-500 animate-spin mx-auto mb-4" />
-                <p className="text-slate-600 dark:text-slate-400">Cargando pedidos...</p>
+                <Loader2
+                  className="w-10 h-10 animate-spin mx-auto mb-4"
+                  style={{ color: themeColors.primary }}
+                />
+                <p style={{ color: themeColors.text.secondary }}>Cargando pedidos...</p>
               </div>
             </div>
           )}
@@ -305,16 +332,18 @@ export default function OrdersPage() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-12 bg-red-50 dark:bg-red-900/10 rounded-3xl border border-red-200 dark:border-red-800 mb-8"
+              className="text-center py-12 rounded-2xl border mb-8"
+              style={{ backgroundColor: "#fef2f2", borderColor: "#fecaca" }}
             >
-              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-red-800 dark:text-red-400 mb-2">
+              <AlertCircle className="w-12 h-12 mx-auto mb-4" style={{ color: themeColors.primary }} />
+              <h3 className="text-lg font-semibold mb-2" style={{ color: themeColors.text.primary }}>
                 Error al cargar pedidos
               </h3>
-              <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
+              <p className="mb-4" style={{ color: themeColors.text.secondary }}>{error}</p>
               <button
                 onClick={fetchOrders}
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg transition-colors"
+                className="px-6 py-2 rounded-lg text-white transition-colors"
+                style={{ backgroundColor: themeColors.primary }}
               >
                 Reintentar
               </button>
@@ -328,13 +357,18 @@ export default function OrdersPage() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-center py-12 bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-3xl shadow-xl border border-white/20"
+                  className="text-center py-12 rounded-2xl"
+                  style={{
+                    backgroundColor: "#ffffff",
+                    border: `1px solid ${themeColors.border}`,
+                    boxShadow: `0 4px 20px ${themeColors.primary}10`,
+                  }}
                 >
-                  <Package className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+                  <Package className="w-16 h-16 mx-auto mb-4" style={{ color: themeColors.text.muted }} />
+                  <h3 className="text-xl font-semibold mb-2" style={{ color: themeColors.text.primary }}>
                     No se encontraron pedidos
                   </h3>
-                  <p className="text-slate-600 dark:text-slate-400">
+                  <p style={{ color: themeColors.text.secondary }}>
                     {searchQuery || selectedStatus !== "all"
                       ? "Prueba a ajustar los filtros de búsqueda"
                       : "Aún no has realizado ningún pedido"}
@@ -353,32 +387,44 @@ export default function OrdersPage() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.05 * index }}
-                      className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-3xl shadow-xl border border-white/20 p-6 hover:shadow-2xl transition-all group"
+                      className="rounded-2xl p-6 transition-all hover:shadow-lg"
+                      style={{
+                        backgroundColor: "#ffffff",
+                        border: `1px solid ${themeColors.border}`,
+                        boxShadow: `0 4px 16px ${themeColors.primary}08`,
+                      }}
                     >
                       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                         {/* Order Info */}
                         <div className="flex-1">
                           <div className="flex items-center gap-4 mb-4">
-                            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                            <div
+                              className="w-12 h-12 rounded-xl flex items-center justify-center"
+                              style={{ background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})` }}
+                            >
                               <Package className="w-6 h-6 text-white" />
                             </div>
                             <div>
-                              <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                              <h3 className="text-xl font-bold" style={{ color: themeColors.text.primary }}>
                                 Pedido #{displayOrderNo}
                               </h3>
-                              <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600 dark:text-slate-400">
-                                <div className="flex items-center gap-1">
+                              <div className="flex flex-wrap items-center gap-3 text-sm mt-1">
+                                <div className="flex items-center gap-1" style={{ color: themeColors.text.secondary }}>
                                   <Calendar className="w-4 h-4" />
                                   {new Date(order.createdAt).toLocaleDateString("es-UY")}
                                 </div>
                                 {order.distributorCode && (
-                                  <div className="flex items-center gap-1 px-2 py-0.5 bg-slate-100 dark:bg-slate-700 rounded-md text-xs">
+                                  <div
+                                    className="flex items-center gap-1 px-2 py-0.5 rounded-md text-xs"
+                                    style={{ backgroundColor: themeColors.surface, color: themeColors.text.secondary, border: `1px solid ${themeColors.border}` }}
+                                  >
                                     <Tag className="w-3 h-3" />
                                     {order.distributorCode}
                                   </div>
                                 )}
                                 <div
-                                  className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${config.color}`}
+                                  className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium"
+                                  style={{ backgroundColor: config.bg, color: config.color }}
                                 >
                                   <StatusIcon className="w-3 h-3" />
                                   {config.label}
@@ -393,28 +439,31 @@ export default function OrdersPage() {
                               {order.items.slice(0, 3).map((item, itemIndex) => (
                                 <div
                                   key={itemIndex}
-                                  className="w-10 h-10 bg-slate-100 dark:bg-slate-700 rounded-lg border-2 border-white dark:border-slate-800 flex items-center justify-center"
+                                  className="w-10 h-10 rounded-lg border-2 border-white flex items-center justify-center"
+                                  style={{ backgroundColor: themeColors.surface }}
                                 >
-                                  <Package className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                                  <Package className="w-5 h-5" style={{ color: themeColors.text.muted }} />
                                 </div>
                               ))}
                               {order.items.length > 3 && (
-                                <div className="w-10 h-10 bg-slate-200 dark:bg-slate-600 rounded-lg border-2 border-white dark:border-slate-800 flex items-center justify-center">
-                                  <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                                <div
+                                  className="w-10 h-10 rounded-lg border-2 border-white flex items-center justify-center"
+                                  style={{ backgroundColor: themeColors.surface }}
+                                >
+                                  <span className="text-xs font-medium" style={{ color: themeColors.text.secondary }}>
                                     +{order.items.length - 3}
                                   </span>
                                 </div>
                               )}
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-slate-900 dark:text-white">
+                              <p className="text-sm font-medium" style={{ color: themeColors.text.primary }}>
                                 {order.totalItems || order.items.length} producto
                                 {(order.totalItems || order.items.length) !== 1 ? "s" : ""}
                               </p>
-                              <p className="text-xs text-slate-600 dark:text-slate-400">
+                              <p className="text-xs" style={{ color: themeColors.text.secondary }}>
                                 {order.items[0]?.name}
-                                {order.items.length > 1 &&
-                                  ` y ${order.items.length - 1} más`}
+                                {order.items.length > 1 && ` y ${order.items.length - 1} más`}
                               </p>
                             </div>
                           </div>
@@ -422,15 +471,15 @@ export default function OrdersPage() {
                           {/* Price and Savings */}
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                              <p className="text-2xl font-bold" style={{ color: themeColors.text.primary }}>
                                 ${(order.total || 0).toLocaleString("es-UY", { minimumFractionDigits: 2 })}
                               </p>
                               <div className="flex items-center gap-3">
-                                <p className="text-sm text-slate-600 dark:text-slate-400">
+                                <p className="text-sm" style={{ color: themeColors.text.secondary }}>
                                   Total del pedido
                                 </p>
                                 {order.itemDiscountTotal > 0 && (
-                                  <span className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded-full">
+                                  <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "#dcfce7", color: "#166534" }}>
                                     Ahorro: ${order.itemDiscountTotal.toLocaleString("es-UY", { minimumFractionDigits: 2 })}
                                   </span>
                                 )}
@@ -439,11 +488,15 @@ export default function OrdersPage() {
 
                             <Link
                               href={`/mis-pedidos/${order.id}`}
-                              className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-6 py-3 rounded-xl transition-all group-hover:shadow-lg"
+                              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold transition-all"
+                              style={{
+                                background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
+                                boxShadow: `0 4px 12px ${themeColors.primary}30`,
+                              }}
                             >
                               <Eye className="w-4 h-4" />
                               Ver Detalles
-                              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                              <ArrowRight className="w-4 h-4" />
                             </Link>
                           </div>
                         </div>
@@ -463,18 +516,28 @@ export default function OrdersPage() {
                   <button
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
-                    className="flex items-center gap-1 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                    className="flex items-center gap-1 px-4 py-2 rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    style={{
+                      backgroundColor: "#ffffff",
+                      borderColor: themeColors.border,
+                      color: themeColors.text.secondary,
+                    }}
                   >
                     <ChevronLeft className="w-4 h-4" />
                     Anterior
                   </button>
-                  <span className="text-sm text-slate-600 dark:text-slate-400">
+                  <span className="text-sm" style={{ color: themeColors.text.secondary }}>
                     Página {currentPage} de {totalPages}
                   </span>
                   <button
                     onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                     disabled={currentPage === totalPages}
-                    className="flex items-center gap-1 px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                    className="flex items-center gap-1 px-4 py-2 rounded-lg border disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    style={{
+                      backgroundColor: "#ffffff",
+                      borderColor: themeColors.border,
+                      color: themeColors.text.secondary,
+                    }}
                   >
                     Siguiente
                     <ChevronRight className="w-4 h-4" />

@@ -170,13 +170,13 @@ export default function NewProductPage() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-800 dark:to-purple-900">
+      <div className="min-h-screen bg-white">
         <div className="container mx-auto px-4 py-8 space-y-8">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl rounded-2xl border border-white/30 shadow-xl p-6"
+            className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6"
           >
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               {/* Left side - Product info */}
@@ -186,23 +186,23 @@ export default function NewProductPage() {
                   whileHover={{ scale: 1.05, x: -2 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleCancel}
-                  className="p-3 bg-white/60 dark:bg-slate-700/60 rounded-xl border border-white/30 hover:bg-white/80 dark:hover:bg-slate-600/80 transition-all backdrop-blur-sm"
+                  className="p-3 bg-white rounded-xl border border-gray-200 hover:bg-gray-50 transition-all"
                 >
-                  <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                  <ArrowLeft className="w-5 h-5 text-gray-600" />
                 </motion.button>
 
                 {/* Product icon and info */}
                 <div className="flex items-start gap-4">
                   <motion.div
                     whileHover={{ scale: 1.05 }}
-                    className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center text-white shadow-lg"
+                    className="w-20 h-20 rounded-xl flex items-center justify-center text-white shadow-sm" style={{ background: "linear-gradient(135deg, #B91C1C, #DC2626)" }}
                   >
                     <Package className="w-10 h-10" />
                   </motion.div>
 
                   <div className="space-y-2">
                     <div className="flex items-center gap-3">
-                      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                      <h1 className="text-2xl font-bold text-gray-900">
                         Nuevo Producto
                       </h1>
                       <span className="px-3 py-1 rounded-lg text-sm font-medium border backdrop-blur-sm bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-700 dark:text-yellow-300 border-yellow-500/30">
@@ -210,7 +210,7 @@ export default function NewProductPage() {
                       </span>
                     </div>
 
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                    <div className="text-sm text-gray-500">
                       Completa la información básica para crear el producto
                     </div>
                   </div>
@@ -223,7 +223,7 @@ export default function NewProductPage() {
                   whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleCancel}
-                  className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-gray-500/20 to-slate-500/20 hover:from-gray-500/30 hover:to-slate-500/30 text-gray-700 dark:text-gray-300 rounded-xl transition-all backdrop-blur-sm border border-gray-500/20"
+                  className="flex items-center gap-2 px-5 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-xl transition-all border border-gray-200"
                 >
                   <span className="font-medium">Cancelar</span>
                 </motion.button>
@@ -233,11 +233,12 @@ export default function NewProductPage() {
                   whileTap={{ scale: 0.95 }}
                   onClick={handleSave}
                   disabled={!canSave || isSaving}
-                  className={`flex items-center gap-2 px-5 py-3 rounded-xl transition-all backdrop-blur-sm border font-medium ${
+                  className={`flex items-center gap-2 px-5 py-3 rounded-xl transition-all border font-medium ${
                     canSave && !isSaving
-                      ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 hover:from-green-500/30 hover:to-emerald-500/30 text-green-700 dark:text-green-300 border-green-500/20"
-                      : "bg-gray-100/50 dark:bg-slate-700/50 text-gray-400 dark:text-gray-500 border-gray-300/30 cursor-not-allowed"
+                      ? "text-white border-red-800"
+                      : "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
                   }`}
+                  style={canSave && !isSaving ? { backgroundColor: "#B91C1C" } : {}}
                 >
                   <Save className="w-4 h-4" />
                   <span>{isSaving ? "Guardando..." : "Crear producto"}</span>

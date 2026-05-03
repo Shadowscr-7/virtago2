@@ -5,11 +5,11 @@ import { motion } from "framer-motion";
 import { useTheme } from "@/contexts/theme-context";
 import { AdminLayout } from "@/components/admin/admin-layout";
 import SetupWizard from "@/components/admin/quick-setup/setup-wizard";
-import { 
-  Zap, 
-  Users, 
-  Package, 
-  DollarSign, 
+import {
+  Zap,
+  Users,
+  Package,
+  DollarSign,
   FileText,
   ArrowRight,
   CheckCircle,
@@ -33,28 +33,28 @@ export default function ConfiguracionRapidaPage() {
     {
       title: "Configurar Clientes",
       description: "Importa tu base de clientes existente",
-      icon: <Users className="w-6 h-6" />,
+      icon: <Users className="w-6 h-6" style={{ color: themeColors.primary }} />,
       status: 'pending',
       onClick: () => setShowWizard(true),
     },
     {
       title: "Cargar Productos",
       description: "Agrega tu catálogo de productos",
-      icon: <Package className="w-6 h-6" />,
+      icon: <Package className="w-6 h-6" style={{ color: themeColors.primary }} />,
       status: 'pending',
       onClick: () => setShowWizard(true),
     },
     {
       title: "Configurar Precios",
       description: "Define tus listas de precios",
-      icon: <DollarSign className="w-6 h-6" />,
+      icon: <DollarSign className="w-6 h-6" style={{ color: themeColors.primary }} />,
       status: 'pending',
       onClick: () => setShowWizard(true),
     },
     {
       title: "Crear Listas de Precios",
       description: "Organiza tus diferentes listas",
-      icon: <FileText className="w-6 h-6" />,
+      icon: <FileText className="w-6 h-6" style={{ color: themeColors.primary }} />,
       status: 'pending',
       onClick: () => setShowWizard(true),
     },
@@ -95,9 +95,9 @@ export default function ConfiguracionRapidaPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center"
         >
-          <div 
+          <div
             className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-            style={{ backgroundColor: `${themeColors.primary}20` }}
+            style={{ backgroundColor: `${themeColors.primary}15` }}
           >
             <Zap className="w-8 h-8" style={{ color: themeColors.primary }} />
           </div>
@@ -114,34 +114,38 @@ export default function ConfiguracionRapidaPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border"
-          style={{ borderColor: `${themeColors.primary}30` }}
+          className="rounded-2xl p-6"
+          style={{
+            backgroundColor: "#ffffff",
+            border: `1px solid ${themeColors.border}`,
+            boxShadow: `0 4px 20px ${themeColors.primary}10`,
+          }}
         >
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold" style={{ color: themeColors.text.primary }}>
               Progreso General
             </h2>
-            <span 
+            <span
               className="text-sm px-3 py-1 rounded-full"
-              style={{ 
-                backgroundColor: `${themeColors.primary}20`,
-                color: themeColors.primary 
+              style={{
+                backgroundColor: `${themeColors.primary}15`,
+                color: themeColors.primary
               }}
             >
               0 de 4 completadas
             </span>
           </div>
-          
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-4">
+
+          <div className="w-full rounded-full h-2 mb-4" style={{ backgroundColor: themeColors.border }}>
             <div
               className="h-2 rounded-full transition-all duration-500"
-              style={{ 
+              style={{
                 backgroundColor: themeColors.primary,
-                width: '0%' 
+                width: '0%'
               }}
             />
           </div>
-          
+
           <p className="text-sm" style={{ color: themeColors.text.secondary }}>
             Completa estas configuraciones para comenzar a usar tu tienda
           </p>
@@ -157,34 +161,46 @@ export default function ConfiguracionRapidaPage() {
               transition={{ delay: 0.2 + index * 0.1 }}
               whileHover={{ y: -4, scale: 1.02 }}
               onClick={card.onClick}
-              className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border cursor-pointer transition-all duration-300 group"
-              style={{ borderColor: `${themeColors.primary}30` }}
+              className="rounded-2xl p-6 cursor-pointer transition-all duration-300 group"
+              style={{
+                backgroundColor: "#ffffff",
+                border: `1px solid ${themeColors.border}`,
+                boxShadow: `0 4px 16px ${themeColors.primary}08`,
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = themeColors.primary;
+                (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 24px ${themeColors.primary}20`;
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = themeColors.border;
+                (e.currentTarget as HTMLElement).style.boxShadow = `0 4px 16px ${themeColors.primary}08`;
+              }}
             >
               <div className="flex items-start justify-between mb-4">
-                <div 
+                <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300"
-                  style={{ backgroundColor: `${themeColors.primary}20` }}
+                  style={{ backgroundColor: `${themeColors.primary}12` }}
                 >
                   {card.icon}
                 </div>
                 <div className="flex items-center gap-2">
                   {getStatusIcon(card.status)}
-                  <ArrowRight 
-                    className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" 
+                  <ArrowRight
+                    className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300"
                     style={{ color: getStatusColor(card.status) }}
                   />
                 </div>
               </div>
-              
+
               <h3 className="text-lg font-semibold mb-2" style={{ color: themeColors.text.primary }}>
                 {card.title}
               </h3>
               <p style={{ color: themeColors.text.secondary }}>
                 {card.description}
               </p>
-              
-              <div className="mt-4 pt-4 border-t" style={{ borderColor: `${themeColors.primary}20` }}>
-                <span 
+
+              <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${themeColors.border}` }}>
+                <span
                   className="text-sm font-medium"
                   style={{ color: getStatusColor(card.status) }}
                 >
@@ -208,10 +224,10 @@ export default function ConfiguracionRapidaPage() {
             onClick={() => setShowWizard(true)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300"
+            className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold text-lg text-white transition-all duration-300"
             style={{
-              backgroundColor: themeColors.primary,
-              color: 'white',
+              background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
+              boxShadow: `0 4px 16px ${themeColors.primary}40`,
             }}
           >
             <Play className="w-6 h-6" />

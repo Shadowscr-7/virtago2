@@ -1,4 +1,4 @@
-Ôªø"use client";
+"use client";
 
 import { motion } from "framer-motion";
 import { DollarSign, TrendingUp, Percent } from "lucide-react";
@@ -51,12 +51,12 @@ export function ProductPricingInfo({
       className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6"
     >
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-3 rounded-xl" style={{ backgroundColor: "#16a34a15" }}>
-          <DollarSign className="w-6 h-6 text-green-600" />
+        <div className="p-3 rounded-xl" style={{ backgroundColor: "#B91C1C15" }}>
+          <DollarSign className="w-6 h-6" style={{ color: "#B91C1C" }} />
         </div>
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Informaci√≥n de Precios</h2>
-          <p className="text-sm text-gray-500">Gesti√≥n de precios y m√°rgenes</p>
+          <h2 className="text-xl font-bold text-gray-900">InformaciÛn de Precios</h2>
+          <p className="text-sm text-gray-500">GestiÛn de precios y m·rgenes</p>
         </div>
       </div>
 
@@ -82,7 +82,7 @@ export function ProductPricingInfo({
             </div>
           ) : (
             <div className={readonlyClass}>
-              <span className="text-2xl font-bold text-green-600">
+              <span className="text-2xl font-bold" style={{ color: "#B91C1C" }}>
                 {formatCurrency(productData.price)}
               </span>
             </div>
@@ -183,9 +183,9 @@ export function ProductPricingInfo({
           )}
         </div>
 
-        {/* Precio m√≠nimo */}
+        {/* Precio mÌnimo */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Precio m√≠nimo</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Precio mÌnimo</label>
           {isEditing ? (
             <div className="relative">
               <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">$</span>
@@ -210,16 +210,16 @@ export function ProductPricingInfo({
           )}
         </div>
 
-        {/* C√≥digo del proveedor */}
+        {/* CÛdigo del proveedor */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">C√≥digo del proveedor</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">CÛdigo del proveedor</label>
           {isEditing ? (
             <input
               type="text"
               value={productData.supplierCode || ""}
               onChange={(e) => onChange({ supplierCode: e.target.value })}
               className={inputClass}
-              placeholder="C√≥digo del proveedor"
+              placeholder="CÛdigo del proveedor"
             />
           ) : (
             <div className={readonlyClass}>
@@ -231,11 +231,11 @@ export function ProductPricingInfo({
         </div>
       </div>
 
-      {/* M√©tricas calculadas */}
+      {/* MÈtricas calculadas */}
       <div className="mt-6 pt-6 border-t border-gray-100">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
           <TrendingUp className="w-5 h-5" />
-          M√©tricas de Rentabilidad
+          MÈtricas de Rentabilidad
         </h3>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -244,11 +244,11 @@ export function ProductPricingInfo({
               <Percent className="w-4 h-4 text-green-600" />
               <span className="text-sm font-medium text-green-700">Margen</span>
             </div>
-            <div className="text-2xl font-bold text-green-600">{margin.toFixed(1)}%</div>
+            <div className="text-2xl font-bold" style={{ color: "#B91C1C" }}>{margin.toFixed(1)}%</div>
             <div className="text-xs text-green-600/70">(Precio - Costo) / Precio</div>
           </div>
 
-          <div className="bg-red-50 rounded-xl p-4 border border-blue-100">
+          <div className="bg-red-50 rounded-xl p-4 border border-red-100">
             <div className="flex items-center gap-2 mb-2">
               <TrendingUp className="w-4 h-4 text-red-600" />
               <span className="text-sm font-medium text-red-700">Markup</span>

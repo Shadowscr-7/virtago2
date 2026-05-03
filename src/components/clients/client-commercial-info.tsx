@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { CreditCard, Calendar, DollarSign } from "lucide-react";
 import { StyledSelect } from "@/components/ui/styled-select";
+import { useTheme } from "@/contexts/theme-context";
 
 interface ClientCommercialData {
   taxStatus: string;
@@ -25,28 +26,56 @@ export function ClientCommercialInfo({
   isEditing,
   onInputChange,
 }: ClientCommercialInfoProps) {
+  const { themeColors } = useTheme();
+
+  const inputClass =
+    "w-full h-full pl-12 pr-4 rounded-xl border focus:outline-none focus:ring-2 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed placeholder-gray-400";
+
+  const inputStyle = {
+    backgroundColor: "white",
+    borderColor: themeColors.border,
+    color: themeColors.text.primary,
+  } as React.CSSProperties;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
-      className="bg-white/70 dark:bg-slate-800/70 rounded-2xl border border-white/30 p-6 shadow-xl overflow-visible"
+      className="bg-white rounded-2xl border p-6 shadow-sm overflow-visible"
+      style={{ borderColor: themeColors.border }}
     >
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-3 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl border border-green-500/30">
-          <CreditCard className="w-6 h-6 text-green-600" />
+        <div
+          className="p-2.5 rounded-xl"
+          style={{
+            backgroundColor: themeColors.primary + "15",
+            border: `1px solid ${themeColors.primary}30`,
+          }}
+        >
+          <CreditCard
+            className="w-5 h-5"
+            style={{ color: themeColors.primary }}
+          />
         </div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+        <h2
+          className="text-lg font-semibold"
+          style={{ color: themeColors.text.primary }}
+        >
           Información Comercial
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="group">
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {/* Situación Fiscal */}
+        <div>
+          <label
+            className="block text-sm font-medium mb-2"
+            style={{ color: themeColors.text.secondary }}
+          >
             Situación Fiscal
           </label>
-          <div className="relative h-14">
+          <div className="relative h-11">
             <StyledSelect
               value={clientData.taxStatus}
               onChange={(value) => onInputChange("taxStatus", value)}
@@ -60,12 +89,19 @@ export function ClientCommercialInfo({
           </div>
         </div>
 
-        <div className="group">
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+        {/* Plazo de Pago */}
+        <div>
+          <label
+            className="block text-sm font-medium mb-2"
+            style={{ color: themeColors.text.secondary }}
+          >
             Plazo de Pago (días)
           </label>
-          <div className="relative h-14">
-            <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 transition-colors group-hover:text-purple-500 z-10" />
+          <div className="relative h-11">
+            <Calendar
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4"
+              style={{ color: themeColors.text.muted }}
+            />
             <input
               type="number"
               value={clientData.paymentTerm}
@@ -73,7 +109,8 @@ export function ClientCommercialInfo({
                 onInputChange("paymentTerm", parseInt(e.target.value))
               }
               disabled={!isEditing}
-              className="w-full h-full pl-12 pr-4 bg-white/80 dark:bg-slate-700/80 border-2 border-white/40 dark:border-slate-600/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:border-purple-400/40 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 shadow-lg shadow-purple-500/5"
+              className={inputClass}
+              style={inputStyle}
               placeholder="30"
               min="0"
               max="365"
@@ -81,12 +118,19 @@ export function ClientCommercialInfo({
           </div>
         </div>
 
-        <div className="group">
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+        {/* Límite de Crédito */}
+        <div>
+          <label
+            className="block text-sm font-medium mb-2"
+            style={{ color: themeColors.text.secondary }}
+          >
             Límite de Crédito
           </label>
-          <div className="relative h-14">
-            <DollarSign className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 transition-colors group-hover:text-purple-500 z-10" />
+          <div className="relative h-11">
+            <DollarSign
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4"
+              style={{ color: themeColors.text.muted }}
+            />
             <input
               type="number"
               value={clientData.creditLimit}
@@ -94,18 +138,23 @@ export function ClientCommercialInfo({
                 onInputChange("creditLimit", parseInt(e.target.value) || 0)
               }
               disabled={!isEditing}
-              className="w-full h-full pl-12 pr-4 bg-white/80 dark:bg-slate-700/80 border-2 border-white/40 dark:border-slate-600/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed hover:border-purple-400/40 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 shadow-lg shadow-purple-500/5"
+              className={inputClass}
+              style={inputStyle}
               placeholder="500000"
               min="0"
             />
           </div>
         </div>
 
-        <div className="group">
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+        {/* Moneda */}
+        <div>
+          <label
+            className="block text-sm font-medium mb-2"
+            style={{ color: themeColors.text.secondary }}
+          >
             Moneda
           </label>
-          <div className="relative h-14 z-10">
+          <div className="relative h-11 z-10">
             <StyledSelect
               value={clientData.currencyCode}
               onChange={(value) => onInputChange("currencyCode", value)}

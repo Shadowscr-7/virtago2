@@ -86,10 +86,10 @@ export const PriceTable: React.FC<PriceTableProps> = ({
   const confirmStatusChange = async () => {
     const priceId = showConfirmDialog.priceId;
     const currentStatus = showConfirmDialog.currentState;
-    
+
     // TODO: Implementar cambio de estado en el backend
     console.log(`Cambiar estado del precio ${priceId} de ${currentStatus ? "ACTIVO" : "INACTIVO"} a ${currentStatus ? "INACTIVO" : "ACTIVO"}`);
-    
+
     // Cerrar modal
     setShowConfirmDialog({ show: false, priceId: "", currentState: false });
   };
@@ -107,26 +107,31 @@ export const PriceTable: React.FC<PriceTableProps> = ({
     });
   };
 
+  const getStatusStyles = (status: string) => {
+    switch (status) {
+      case "ACTIVO":
+        return "bg-green-50 text-green-700 border border-green-200";
+      case "INACTIVO":
+        return "bg-gray-100 text-gray-600 border border-gray-200";
+      case "VENCIDO":
+        return "bg-red-50 text-red-700 border border-red-200";
+      case "PROGRAMADO":
+        return "bg-blue-50 text-blue-700 border border-blue-200";
+      default:
+        return "bg-gray-100 text-gray-600 border border-gray-200";
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
-      className="rounded-2xl border shadow-lg overflow-hidden"
-      style={{
-        backgroundColor: themeColors.surface + "70",
-        borderColor: themeColors.primary + "30",
-      }}
+      className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden"
     >
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead
-            className="backdrop-blur-sm"
-            style={{
-              backgroundColor: themeColors.surface + "80",
-              borderColor: themeColors.primary + "20",
-            }}
-          >
+          <thead className="bg-gray-50 border-b border-red-100">
             <tr>
               <th className="px-4 py-3 text-left">
                 <div className="flex items-center">
@@ -138,15 +143,15 @@ export const PriceTable: React.FC<PriceTableProps> = ({
                       className="sr-only peer"
                     />
                     <div
-                      className="relative w-5 h-5 bg-white/50 dark:bg-slate-600/50 border-2 border-gray-300 dark:border-gray-500 rounded-md transition-all duration-200 peer-hover:border-purple-400"
+                      className="relative w-5 h-5 bg-white border-2 border-gray-300 rounded-md transition-all duration-200"
                       style={{
                         borderColor:
                           selectedPrices.length === prices.length && prices.length > 0
                             ? themeColors.primary
                             : undefined,
-                        background:
+                        backgroundColor:
                           selectedPrices.length === prices.length && prices.length > 0
-                            ? `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+                            ? themeColors.primary
                             : undefined,
                       }}
                     >
@@ -155,46 +160,40 @@ export const PriceTable: React.FC<PriceTableProps> = ({
                   </label>
                 </div>
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                 Cod. Producto
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                 Min. Cant. Venta
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                 Precio
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                 Moneda
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                 Fecha Fin
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                 Inc. IVA
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">
                 Estado
               </th>
-              <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider" style={{ color: themeColors.text.secondary }}>
+              <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-gray-500">
                 Acciones
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200/50 dark:divide-gray-700/50">
+          <tbody className="divide-y divide-gray-100">
             {prices.map((price, index) => (
               <motion.tr
                 key={price.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className="group hover:bg-opacity-10 transition-all duration-300 backdrop-blur-sm"
-                style={{
-                  background: "transparent",
-                }}
-                whileHover={{
-                  background: `linear-gradient(to right, ${themeColors.primary}10, ${themeColors.secondary}10)`,
-                }}
+                className="hover:bg-red-50 transition-colors duration-150"
               >
                 <td className="px-4 py-3">
                   <label className="relative inline-flex items-center cursor-pointer">
@@ -205,12 +204,10 @@ export const PriceTable: React.FC<PriceTableProps> = ({
                       className="sr-only peer"
                     />
                     <div
-                      className="relative w-5 h-5 bg-white/50 dark:bg-slate-600/50 border-2 border-gray-300 dark:border-gray-500 rounded-md transition-all duration-200 peer-hover:border-purple-400 group-hover:border-purple-300"
+                      className="relative w-5 h-5 bg-white border-2 border-gray-300 rounded-md transition-all duration-200"
                       style={{
                         borderColor: selectedPrices.includes(price.id) ? themeColors.primary : undefined,
-                        background: selectedPrices.includes(price.id)
-                          ? `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
-                          : undefined,
+                        backgroundColor: selectedPrices.includes(price.id) ? themeColors.primary : undefined,
                       }}
                     >
                       <Check className="absolute inset-0 w-3 h-3 m-auto text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-200" />
@@ -220,12 +217,10 @@ export const PriceTable: React.FC<PriceTableProps> = ({
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg"
-                      style={{
-                        backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
-                      }}
+                      className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                      style={{ backgroundColor: themeColors.primary + "15" }}
                     >
-                      <Package className="w-5 h-5" />
+                      <Package className="w-4 h-4" style={{ color: themeColors.primary }} />
                     </div>
                     <div>
                       <div
@@ -235,19 +230,19 @@ export const PriceTable: React.FC<PriceTableProps> = ({
                       >
                         {price.productCode}
                       </div>
-                      <div className="text-xs" style={{ color: themeColors.text.secondary }}>
+                      <div className="text-xs text-gray-500">
                         {price.productName}
                       </div>
                     </div>
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <span className="text-sm font-medium" style={{ color: themeColors.text.primary }}>
                       {price.minQuantity}
                     </span>
-                    <span className="text-xs" style={{ color: themeColors.text.secondary }}>
-                      unidades
+                    <span className="text-xs text-gray-400">
+                      uds
                     </span>
                   </div>
                 </td>
@@ -258,11 +253,7 @@ export const PriceTable: React.FC<PriceTableProps> = ({
                     </span>
                     {price.margin && (
                       <span
-                        className="text-xs px-2 py-1 rounded-full"
-                        style={{
-                          backgroundColor: `${themeColors.secondary}20`,
-                          color: themeColors.secondary,
-                        }}
+                        className="text-xs px-1.5 py-0.5 rounded-full bg-red-50 text-red-700"
                       >
                         +{price.margin}%
                       </span>
@@ -275,67 +266,52 @@ export const PriceTable: React.FC<PriceTableProps> = ({
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4" style={{ color: themeColors.text.secondary }} />
-                    <span className="text-sm" style={{ color: themeColors.text.primary }}>
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                    <span className="text-sm text-gray-600">
                       {formatDate(price.endDate)}
                     </span>
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     {price.includeIVA ? (
                       <div className="flex items-center gap-1">
-                        <Check className="w-4 h-4 text-green-500" />
-                        <span className="text-sm text-green-600 dark:text-green-400">Sí</span>
+                        <Check className="w-4 h-4 text-green-600" />
+                        <span className="text-sm text-green-700">Sí</span>
                       </div>
                     ) : (
                       <div className="flex items-center gap-1">
-                        <AlertTriangle className="w-4 h-4 text-red-500" />
-                        <span className="text-sm text-red-600 dark:text-red-400">No</span>
+                        <AlertTriangle className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm text-gray-500">No</span>
                       </div>
                     )}
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                  <button
                     onClick={() => handleStatusClick(price.id, price.status)}
-                    className="inline-flex items-center px-4 py-2 rounded-xl text-xs font-semibold transition-all backdrop-blur-sm border cursor-pointer"
-                    style={{
-                      backgroundColor: price.status === "ACTIVO"
-                        ? themeColors.accent + "20"
-                        : themeColors.primary + "20",
-                      color: themeColors.text.primary,
-                      borderColor: price.status === "ACTIVO"
-                        ? themeColors.accent + "40"
-                        : themeColors.primary + "40",
-                    }}
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold cursor-pointer transition-all ${getStatusStyles(price.status)}`}
                   >
                     {price.status}
-                  </motion.button>
+                  </button>
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                  <div className="flex items-center justify-center gap-1.5">
+                    <button
                       onClick={() => router.push(`/admin/precios/${price.id}`)}
-                      className="p-2 rounded-lg bg-pink-500/10 hover:bg-pink-500/20 text-pink-500 transition-colors duration-200"
+                      className="p-1.5 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-700 transition-colors duration-150"
                       title="Ver"
                     >
                       <Eye className="w-4 h-4" />
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                    </button>
+                    <button
                       onClick={() => router.push(`/admin/precios/${price.id}/editar`)}
-                      className="p-2 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-500 transition-colors duration-200"
+                      className="p-1.5 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-700 transition-colors duration-150"
                       title="Editar"
                     >
                       <Edit className="w-4 h-4" />
-                    </motion.button>
+                    </button>
                   </div>
                 </td>
               </motion.tr>
@@ -346,63 +322,46 @@ export const PriceTable: React.FC<PriceTableProps> = ({
 
       {/* Paginación */}
       {totalPages > 1 && (
-        <div className="px-6 py-4 border-t" style={{ borderColor: themeColors.primary + "20" }}>
+        <div className="px-6 py-4 border-t border-gray-100">
           <div className="flex items-center justify-between">
-            <div className="text-sm" style={{ color: themeColors.text.secondary }}>
+            <div className="text-sm text-gray-500">
               Mostrando {startIndex + 1} a {Math.min(startIndex + itemsPerPage, totalItems)} de{" "}
               {totalItems} resultados
             </div>
 
-            <div className="flex items-center gap-2">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+            <div className="flex items-center gap-1">
+              <button
                 onClick={onPreviousPage}
                 disabled={currentPage === 1}
-                className="p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  color: currentPage === 1 ? themeColors.text.secondary : themeColors.text.primary,
-                }}
+                className="p-2 rounded-lg transition-colors text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <ChevronLeft className="w-4 h-4" />
-              </motion.button>
+              </button>
 
               <div className="flex gap-1">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <motion.button
+                  <button
                     key={page}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
                     onClick={() => onPageChange(page)}
                     className="w-8 h-8 rounded-lg text-sm font-medium transition-all"
-                    style={{
-                      ...(currentPage === page && {
-                        backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`,
-                        color: "white",
-                        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                      }),
-                      ...(currentPage !== page && {
-                        color: themeColors.text.secondary,
-                      }),
-                    }}
+                    style={
+                      currentPage === page
+                        ? { backgroundColor: themeColors.primary, color: "white" }
+                        : { color: themeColors.text.secondary }
+                    }
                   >
                     {page}
-                  </motion.button>
+                  </button>
                 ))}
               </div>
 
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              <button
                 onClick={onNextPage}
                 disabled={currentPage === totalPages}
-                className="p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{
-                  color: currentPage === totalPages ? themeColors.text.secondary : themeColors.text.primary,
-                }}
+                className="p-2 rounded-lg transition-colors text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <ChevronRight className="w-4 h-4" />
-              </motion.button>
+              </button>
             </div>
           </div>
         </div>
@@ -410,93 +369,52 @@ export const PriceTable: React.FC<PriceTableProps> = ({
 
       {/* Modal de Confirmación - Cambio de Estado */}
       {showConfirmDialog.show && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
           onClick={() => setShowConfirmDialog({ show: false, priceId: "", currentState: false })}
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
+            initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             onClick={(e) => e.stopPropagation()}
-            className="rounded-2xl p-6 max-w-md w-full border"
-            style={{
-              backgroundColor: themeColors.surface + "95",
-              borderColor: themeColors.primary + "30",
-            }}
+            className="bg-white rounded-2xl p-6 max-w-md w-full border border-gray-200 shadow-xl"
           >
             <div className="flex items-center gap-3 mb-4">
-              <div
-                className="p-3 rounded-xl"
-                style={{
-                  backgroundColor: themeColors.accent + "20",
-                }}
-              >
-                <AlertTriangle
-                  className="w-6 h-6"
-                  style={{ color: themeColors.accent }}
-                />
+              <div className="p-2.5 rounded-xl bg-red-50">
+                <AlertTriangle className="w-5 h-5 text-red-700" />
               </div>
               <div>
-                <h3
-                  className="text-lg font-semibold"
-                  style={{ color: themeColors.text.primary }}
-                >
+                <h3 className="text-lg font-semibold" style={{ color: themeColors.text.primary }}>
                   Confirmar Cambio de Estado
                 </h3>
-                <p
-                  className="text-sm"
-                  style={{ color: themeColors.text.secondary }}
-                >
+                <p className="text-sm text-gray-500">
                   Esta acción afectará el acceso del cliente
                 </p>
               </div>
             </div>
 
-            <p
-              className="mb-6"
-              style={{ color: themeColors.text.secondary }}
-            >
+            <p className="mb-6 text-gray-600">
               ¿Estás seguro que deseas{" "}
-              {showConfirmDialog.currentState ? "desactivar" : "activar"} este
-              precio?
+              {showConfirmDialog.currentState ? "desactivar" : "activar"} este precio?
             </p>
 
             <div className="flex gap-3 justify-end">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() =>
-                  setShowConfirmDialog({
-                    show: false,
-                    priceId: "",
-                    currentState: false,
-                  })
-                }
-                className="px-4 py-2 rounded-lg transition-all"
-                style={{
-                  color: themeColors.text.secondary,
-                  backgroundColor: themeColors.surface + "50",
-                }}
+              <button
+                onClick={() => setShowConfirmDialog({ show: false, priceId: "", currentState: false })}
+                className="px-4 py-2 rounded-lg text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
               >
                 Cancelar
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+              </button>
+              <button
                 onClick={confirmStatusChange}
-                className="px-4 py-2 text-white rounded-lg transition-all"
-                style={{
-                  background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`,
-                }}
+                className="px-4 py-2 text-white rounded-lg bg-red-700 hover:bg-red-800 transition-colors"
               >
                 Confirmar
-              </motion.button>
+              </button>
             </div>
           </motion.div>
-        </motion.div>
+        </div>
       )}
     </motion.div>
   );

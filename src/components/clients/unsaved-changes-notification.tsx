@@ -21,7 +21,7 @@ export function UnsavedChangesNotification({
       initial={{ opacity: 0, y: 50, scale: 0.9 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 50, scale: 0.9 }}
-      className="fixed bottom-6 right-6 bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 z-50 backdrop-blur-sm border border-orange-400/30"
+      className="fixed bottom-6 right-6 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 z-50 border" style={{ backgroundColor: "#B91C1C", borderColor: "#991B1B" }}
     >
       <div className="p-2 bg-white/20 rounded-lg">
         <AlertTriangle className="w-5 h-5" />

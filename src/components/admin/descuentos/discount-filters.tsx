@@ -37,11 +37,7 @@ export const DiscountFilters: React.FC<DiscountFiltersProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
-      className="p-6 backdrop-blur-xl rounded-2xl border shadow-lg"
-      style={{
-        backgroundColor: themeColors.surface + "70",
-        borderColor: themeColors.primary + "30",
-      }}
+      className="p-6 bg-white rounded-2xl border border-gray-200 shadow-sm"
     >
       {/* Búsqueda */}
       <div className="mb-4">
@@ -55,12 +51,10 @@ export const DiscountFilters: React.FC<DiscountFiltersProps> = ({
             placeholder="Buscar por nombre o descripción..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all placeholder-gray-400 backdrop-blur-sm"
+            className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all placeholder-gray-400"
             style={{
-              backgroundColor: themeColors.surface + "60",
-              borderColor: themeColors.primary + "30",
               color: themeColors.text.primary,
-              "--tw-ring-color": `${themeColors.primary}50`,
+              "--tw-ring-color": `${themeColors.primary}40`,
             } as React.CSSProperties}
           />
         </div>

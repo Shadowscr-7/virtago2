@@ -436,7 +436,7 @@ export default function ProductDetailPage() {
   if (isLoading) {
     return (
       <AdminLayout>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="text-center">
             <motion.div
               animate={{ rotate: 360 }}
@@ -455,7 +455,7 @@ export default function ProductDetailPage() {
   if (error || !productData) {
     return (
       <AdminLayout>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-white flex items-center justify-center">
           <div className="text-center max-w-md">
             <div className="text-6xl mb-4">❌</div>
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
@@ -479,7 +479,7 @@ export default function ProductDetailPage() {
 
   return (
     <AdminLayout>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         <div className="container mx-auto px-4 py-8 space-y-8">
           <ProductHeader
             productData={productData}

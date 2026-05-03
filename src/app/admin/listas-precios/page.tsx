@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect, useCallback } from "react"
 import { motion } from "framer-motion"
@@ -175,11 +175,7 @@ export default function ListasPreciosAdminPage() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-center p-8 backdrop-blur-lg rounded-2xl shadow-xl border"
-            style={{
-              backgroundColor: themeColors.surface + "80",
-              borderColor: themeColors.primary + "20"
-            }}
+            className="text-center p-8 bg-white rounded-2xl shadow-sm border border-gray-200"}
           >
             <div 
               className="w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center"
@@ -375,11 +371,7 @@ export default function ListasPreciosAdminPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="flex flex-col lg:flex-row gap-4 p-6 rounded-2xl border shadow-lg"
-          style={{
-            backgroundColor: themeColors.surface + "70",
-            borderColor: themeColors.primary + "30"
-          }}
+          className="flex flex-col lg:flex-row gap-4 p-6 rounded-2xl border border-gray-200 bg-white shadow-sm"}
         >
           {/* Búsqueda - Más ancha */}
           <div className="flex-1 lg:flex-[3] relative">
@@ -392,7 +384,7 @@ export default function ListasPreciosAdminPage() {
               placeholder="Buscar por nombre, moneda o tipo de cliente..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all placeholder-gray-400 backdrop-blur-sm"
+              className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all placeholder-gray-400"
               style={{
                 backgroundColor: themeColors.surface + "60",
                 borderColor: themeColors.primary + "30",
@@ -502,20 +494,12 @@ export default function ListasPreciosAdminPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="rounded-2xl border shadow-lg overflow-hidden"
-          style={{
-            backgroundColor: themeColors.surface + "70",
-            borderColor: themeColors.primary + "30"
-          }}
+          className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden"}
         >
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead 
-                className="backdrop-blur-sm"
-                style={{
-                  backgroundColor: themeColors.surface + "80",
-                  borderColor: themeColors.primary + "20"
-                }}
+                className="bg-gray-50 border-b border-red-100"}
               >
                 <tr>
                   <th className="px-4 py-3 text-left">
@@ -528,7 +512,7 @@ export default function ListasPreciosAdminPage() {
                           className="sr-only peer"
                         />
                         <div 
-                          className="relative w-5 h-5 bg-white/50 dark:bg-slate-600/50 border-2 border-gray-300 dark:border-gray-500 rounded-md transition-all duration-200 peer-hover:border-purple-400"
+                          className="relative w-5 h-5 bg-white border-2 border-gray-300 rounded-md transition-all duration-200 peer-hover:border-red-400"
                           style={{
                             borderColor: selectedLists.length === currentLists.length && currentLists.length > 0 ? themeColors.primary : undefined,
                             background: selectedLists.length === currentLists.length && currentLists.length > 0 ? `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})` : undefined
@@ -559,7 +543,7 @@ export default function ListasPreciosAdminPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200/50 dark:divide-gray-700/50">
+              <tbody className="divide-y divide-gray-100">
                 {/* Loading state */}
                 {isLoading && (
                   <tr>
@@ -606,12 +590,11 @@ export default function ListasPreciosAdminPage() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className="group hover:bg-opacity-10 transition-all duration-300 backdrop-blur-sm"
+                    className="transition-colors duration-150 hover:bg-red-50"
                     style={{
                       background: 'transparent'
                     }}
-                    whileHover={{
-                      background: `linear-gradient(to right, ${themeColors.primary}10, ${themeColors.secondary}10)`
+                    10)`
                     }}
                   >
                     <td className="px-6 py-5">
@@ -771,19 +754,11 @@ export default function ListasPreciosAdminPage() {
 
           {/* Paginación */}
           <div 
-            className="px-6 py-5 border-t backdrop-blur-sm"
-            style={{
-              borderColor: themeColors.primary + "30",
-              backgroundColor: themeColors.surface + "30"
-            }}
+            className="px-6 py-4 border-t border-gray-100"}
           >
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div 
-                className="text-sm px-3 py-2 rounded-lg backdrop-blur-sm"
-                style={{
-                  backgroundColor: themeColors.surface + "50",
-                  color: themeColors.text.secondary
-                }}
+                className="text-sm text-gray-500"}
               >
                 Mostrando{" "}
                 <span 
@@ -815,12 +790,7 @@ export default function ListasPreciosAdminPage() {
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
-                  className="p-3 rounded-xl border disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm"
-                  style={{
-                    backgroundColor: themeColors.surface + "60",
-                    borderColor: themeColors.primary + "30",
-                    color: themeColors.text.primary
-                  }}
+                  className="p-2 rounded-lg transition-colors text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"}
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </motion.button>
@@ -864,12 +834,7 @@ export default function ListasPreciosAdminPage() {
                     handlePageChange(Math.min(totalPages, currentPage + 1))
                   }
                   disabled={currentPage === totalPages}
-                  className="p-3 rounded-xl border disabled:opacity-50 disabled:cursor-not-allowed transition-all backdrop-blur-sm"
-                  style={{
-                    backgroundColor: themeColors.surface + "60",
-                    borderColor: themeColors.primary + "30",
-                    color: themeColors.text.primary
-                  }}
+                  className="p-2 rounded-lg transition-colors text-gray-500 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"}
                 >
                   <ChevronRight className="w-4 h-4" />
                 </motion.button>
@@ -889,11 +854,7 @@ export default function ListasPreciosAdminPage() {
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="rounded-2xl p-6 max-w-md w-full border"
-              style={{
-                backgroundColor: themeColors.surface + "95",
-                borderColor: themeColors.primary + "30"
-              }}
+              className="rounded-2xl p-6 max-w-md w-full bg-white border border-gray-200 shadow-xl"}
             >
               <div className="flex items-center gap-3 mb-4">
                 <div 
@@ -969,3 +930,4 @@ export default function ListasPreciosAdminPage() {
     </AdminLayout>
   )
 }
+
