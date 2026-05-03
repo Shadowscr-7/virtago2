@@ -104,68 +104,28 @@ function ToastContent({ toast, onRemove }: { toast: Toast; onRemove: () => void 
 
   const getIcon = () => {
     const iconProps = { className: "h-5 w-5 flex-shrink-0" };
-    
+
     switch (toast.type) {
       case "success":
-        return <CheckCircle {...iconProps} style={{ color: "#10b981" }} />;
+        return <CheckCircle {...iconProps} style={{ color: "#ffffff" }} />;
       case "error":
-        return <XCircle {...iconProps} style={{ color: "#ef4444" }} />;
+        return <XCircle {...iconProps} style={{ color: "#ffffff" }} />;
       case "warning":
-        return <AlertTriangle {...iconProps} style={{ color: "#f59e0b" }} />;
+        return <AlertTriangle {...iconProps} style={{ color: "#ffffff" }} />;
       case "info":
-        return <Info {...iconProps} style={{ color: themeColors.primary }} />;
+        return <Info {...iconProps} style={{ color: "#ffffff" }} />;
       case "loading":
-        return <Loader2 {...iconProps} className="animate-spin" style={{ color: themeColors.secondary }} />;
+        return <Loader2 {...iconProps} className="animate-spin" style={{ color: "#ffffff" }} />;
       default:
-        return <Info {...iconProps} />;
+        return <Info {...iconProps} style={{ color: "#ffffff" }} />;
     }
   };
 
   const getTypeStyles = () => {
-    switch (toast.type) {
-      case "success":
-        return {
-          gradient: "linear-gradient(135deg, #10b98120, #059669120)",
-          border: "#10b981",
-          glow: "rgba(16, 185, 129, 0.3)",
-          accent: "#10b981",
-        };
-      case "error":
-        return {
-          gradient: "linear-gradient(135deg, #ef444420, #dc262620)",
-          border: "#ef4444",
-          glow: "rgba(239, 68, 68, 0.3)", 
-          accent: "#ef4444",
-        };
-      case "warning":
-        return {
-          gradient: "linear-gradient(135deg, #f59e0b20, #d9770620)",
-          border: "#f59e0b",
-          glow: "rgba(245, 158, 11, 0.3)",
-          accent: "#f59e0b",
-        };
-      case "info":
-        return {
-          gradient: `linear-gradient(135deg, ${themeColors.primary}20, ${themeColors.secondary}20)`,
-          border: themeColors.primary,
-          glow: `${themeColors.primary}50`,
-          accent: themeColors.primary,
-        };
-      case "loading":
-        return {
-          gradient: `linear-gradient(135deg, ${themeColors.secondary}20, ${themeColors.accent}20)`,
-          border: themeColors.secondary,
-          glow: `${themeColors.secondary}50`,
-          accent: themeColors.secondary,
-        };
-      default:
-        return {
-          gradient: `linear-gradient(135deg, ${themeColors.primary}20, ${themeColors.secondary}20)`,
-          border: themeColors.primary,
-          glow: `${themeColors.primary}50`,
-          accent: themeColors.primary,
-        };
-    }
+    return {
+      border: themeColors.accent,
+      accent: themeColors.primary,
+    };
   };
 
   const typeStyles = getTypeStyles();
@@ -183,46 +143,16 @@ function ToastContent({ toast, onRemove }: { toast: Toast; onRemove: () => void 
         opacity: { duration: 0.2 }
       }}
       whileHover={{ scale: 1.02, y: -2 }}
-      className="relative overflow-hidden rounded-2xl min-w-[320px] max-w-[400px] backdrop-blur-xl"
+      className="relative overflow-hidden rounded-2xl min-w-[320px] max-w-[400px]"
       style={{
-        background: `${themeColors.surface}f0`,
-        border: `1px solid ${typeStyles.border}40`,
+        background: themeColors.primary,
+        border: `1px solid ${typeStyles.border}`,
         boxShadow: `
-          0 0 0 1px ${typeStyles.border}20,
-          0 20px 40px -12px rgba(0, 0, 0, 0.6),
-          0 0 30px ${typeStyles.glow}
+          0 12px 28px -12px rgba(0, 0, 0, 0.45),
+          0 0 0 1px ${typeStyles.border}
         `,
       }}
     >
-      {/* Gradient overlay */}
-      <div 
-        className="absolute inset-0 opacity-60"
-        style={{ background: typeStyles.gradient }}
-      />
-
-      {/* Animated shine effect */}
-      <motion.div
-        className="absolute inset-0 opacity-20"
-        style={{
-          background: `linear-gradient(135deg, transparent, ${typeStyles.accent}60, transparent)`,
-        }}
-        animate={{
-          x: ["-100%", "100%"],
-        }}
-        transition={{
-          duration: 2.5,
-          repeat: Infinity,
-          repeatDelay: 4,
-          ease: "easeInOut",
-        }}
-      />
-
-      {/* Left accent bar */}
-      <div 
-        className="absolute left-0 top-0 bottom-0 w-1"
-        style={{ background: typeStyles.accent }}
-      />
-
       {/* Content */}
       <div className="relative p-4">
         <div className="flex items-start gap-3">
@@ -246,7 +176,7 @@ function ToastContent({ toast, onRemove }: { toast: Toast; onRemove: () => void 
                 transition={{ delay: 0.3, duration: 0.6 }}
                 className="absolute -top-1 -right-1"
               >
-                <Sparkles className="h-3 w-3 text-yellow-400" />
+                <Sparkles className="h-3 w-3 text-white" />
               </motion.div>
             )}
           </motion.div>
@@ -258,7 +188,7 @@ function ToastContent({ toast, onRemove }: { toast: Toast; onRemove: () => void 
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
               className="font-semibold text-sm leading-5"
-              style={{ color: themeColors.text.primary }}
+              style={{ color: "#ffffff" }}
             >
               {toast.title}
             </motion.h4>
@@ -269,7 +199,7 @@ function ToastContent({ toast, onRemove }: { toast: Toast; onRemove: () => void 
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
                 className="text-sm leading-5 mt-1"
-                style={{ color: themeColors.text.secondary }}
+                style={{ color: "#ffffff" }}
               >
                 {toast.description}
               </motion.p>
@@ -284,8 +214,8 @@ function ToastContent({ toast, onRemove }: { toast: Toast; onRemove: () => void 
                 onClick={toast.action.onClick}
                 className="mt-3 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 hover:scale-105"
                 style={{
-                  background: typeStyles.accent,
-                  color: "white",
+                  background: "#ffffff",
+                  color: themeColors.primary,
                 }}
               >
                 {toast.action.label}
@@ -303,7 +233,7 @@ function ToastContent({ toast, onRemove }: { toast: Toast; onRemove: () => void 
               whileTap={{ scale: 0.9 }}
               onClick={onRemove}
               className="p-1.5 rounded-full transition-all duration-200 hover:bg-white/10"
-              style={{ color: themeColors.text.secondary }}
+              style={{ color: "#ffffff" }}
             >
               <X className="h-4 w-4" />
             </motion.button>
@@ -315,7 +245,7 @@ function ToastContent({ toast, onRemove }: { toast: Toast; onRemove: () => void 
       {!toast.persistent && toast.duration && (
         <motion.div
           className="absolute bottom-0 left-0 h-1 rounded-full"
-          style={{ background: typeStyles.accent }}
+          style={{ background: "#ffffff" }}
           initial={{ width: "100%" }}
           animate={{ width: "0%" }}
           transition={{ duration: toast.duration / 1000, ease: "linear" }}

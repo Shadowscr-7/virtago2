@@ -41,36 +41,36 @@ export default function AdminDashboard() {
   const [onboardingStatus, setOnboardingStatus] = useState<OnboardingStatus | null>(null);
   const [isLoadingOnboarding, setIsLoadingOnboarding] = useState(true);
 
-  // 🔐 Estado para mensaje de redirección
+  // Estado para mensaje de redireccion
   const [showAuthRedirect, setShowAuthRedirect] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
 
-  // 🆕 Hook de dashboard - solo cargar datos después de verificar autenticación
+  // Hook de dashboard - solo cargar datos despues de verificar autenticacion
   const { data: dashboardData, loading: loadingDashboard, error: dashboardError, refetch } = useDashboard({
     enabled: authChecked
   });
 
-  // 🔐 GUARD: Verificar autenticación - Solo verificar localStorage
+  // GUARD: Verificar autenticacion - Solo verificar localStorage
   useEffect(() => {
     const checkAuth = async () => {
-      // Delay mínimo para evitar hydration issues
+      // Delay minimo para evitar hydration issues
       await new Promise(resolve => setTimeout(resolve, 100));
       
-      console.log('🔐 [AUTH CHECK] Ejecutando verificación de autenticación...');
+      console.log('[AUTH CHECK] Ejecutando verificacion de autenticacion...');
       
       if (typeof window !== 'undefined') {
         const token = localStorage.getItem('token');
         const userStr = localStorage.getItem('user');
         
-        console.log('🔐 [AUTH CHECK] Token:', token ? `✅ Presente (${token.substring(0, 20)}...)` : '❌ Faltante');
-        console.log('🔐 [AUTH CHECK] User localStorage:', userStr ? '✅ Presente' : '❌ Faltante');
-        console.log('🔐 [AUTH CHECK] Zustand user:', user ? `✅ Presente (${user.email})` : '❌ Faltante');
+        console.log('[AUTH CHECK] Token:', token ? `Presente (${token.substring(0, 20)}...)` : 'Faltante');
+        console.log('[AUTH CHECK] User localStorage:', userStr ? 'Presente' : 'Faltante');
+        console.log('[AUTH CHECK] Zustand user:', user ? `Presente (${user.email})` : 'Faltante');
         
-        // ✅ LÓGICA SIMPLE: Si hay token Y usuario en localStorage, tiene sesión válida
+        // Logica simple: si hay token y usuario en localStorage, tiene sesion valida
         if (!token || !userStr) {
-          console.error('❌ [AUTH CHECK] NO HAY SESIÓN en localStorage - Redirigiendo a login...');
+          console.error('[AUTH CHECK] NO HAY SESION en localStorage - Redirigiendo a login...');
           
-          // 🧹 Limpiar completamente el estado de autenticación
+          // Limpiar completamente el estado de autenticacion
           logout();
           
           setShowAuthRedirect(true);
@@ -81,13 +81,13 @@ export default function AdminDashboard() {
           return;
         }
         
-        // Validar que el usuario en localStorage sea válido JSON
+        // Validar que el usuario en localStorage sea valido JSON
         try {
           const parsedUser = JSON.parse(userStr);
           if (!parsedUser.distributorCode && !parsedUser.email) {
-            console.error('❌ [AUTH CHECK] Usuario en localStorage inválido');
+            console.error('[AUTH CHECK] Usuario en localStorage invalido');
             
-            // 🧹 Limpiar completamente el estado de autenticación
+            // Limpiar completamente el estado de autenticacion
             logout();
             
             setShowAuthRedirect(true);
@@ -97,9 +97,9 @@ export default function AdminDashboard() {
             return;
           }
         } catch (err) {
-          console.error('❌ [AUTH CHECK] Error parseando usuario:', err);
+          console.error('[AUTH CHECK] Error parseando usuario:', err);
           
-          // 🧹 Limpiar completamente el estado de autenticación
+          // Limpiar completamente el estado de autenticacion
           logout();
           
           setShowAuthRedirect(true);
@@ -109,7 +109,7 @@ export default function AdminDashboard() {
           return;
         }
         
-        console.log('✅ [AUTH CHECK] Autenticación válida - Permitiendo acceso');
+        console.log('[AUTH CHECK] Autenticacion valida - Permitiendo acceso');
         setAuthChecked(true);
       }
     };
@@ -128,10 +128,10 @@ export default function AdminDashboard() {
     );
   }, []);
 
-  // Cargar estado de onboarding solo después de verificar autenticación
+  // Cargar estado de onboarding solo despues de verificar autenticacion
   useEffect(() => {
     if (!authChecked) {
-      console.log('[Onboarding] Esperando verificación de autenticación...');
+      console.log('[Onboarding] Esperando verificacion de autenticacion...');
       return;
     }
 
@@ -150,13 +150,13 @@ export default function AdminDashboard() {
     loadOnboardingStatus();
   }, [authChecked]);
 
-  // Función para recargar el estado (útil después del wizard)
+  // Funcion para recargar el estado (util despues del wizard)
   const reloadOnboardingStatus = async () => {
     setIsLoadingOnboarding(true);
     try {
       const status = await getOnboardingStatus();
       setOnboardingStatus(status);
-      // También recargar datos del dashboard
+      // Tambien recargar datos del dashboard
       await refetch();
     } catch (error) {
       console.error("Error recargando estado:", error);
@@ -165,25 +165,25 @@ export default function AdminDashboard() {
     }
   };
 
-  // 🔍 DEBUG COMPLETO
+  // DEBUG COMPLETO
   console.log('====================================');
-  console.log('🔍 [ADMIN DASHBOARD] USUARIO COMPLETO:');
+  console.log('[ADMIN DASHBOARD] USUARIO COMPLETO:');
   console.log(JSON.stringify(user, null, 2));
   console.log('====================================');
-  console.log('🔍 [ADMIN DASHBOARD] user existe?', !!user);
-  console.log('🔍 [ADMIN DASHBOARD] user.role:', user?.role);
-  console.log('🔍 [ADMIN DASHBOARD] user.userType:', user?.userType);
-  console.log('🔍 [ADMIN DASHBOARD] typeof user.role:', typeof user?.role);
+  console.log('[ADMIN DASHBOARD] user existe?', !!user);
+  console.log('[ADMIN DASHBOARD] user.role:', user?.role);
+  console.log('[ADMIN DASHBOARD] user.userType:', user?.userType);
+  console.log('[ADMIN DASHBOARD] typeof user.role:', typeof user?.role);
 
-  // ✅ Verificar si el usuario tiene permiso de acceso
+  // Verificar si el usuario tiene permiso de acceso
   const hasAccess = user && (
     user.role === "distributor" || 
     user.role === "admin" || 
     user.userType === "distributor"
   );
 
-  console.log('🔍 [ADMIN DASHBOARD] hasAccess:', hasAccess);
-  console.log('🔍 [ADMIN DASHBOARD] Verificación detallada:', {
+  console.log('[ADMIN DASHBOARD] hasAccess:', hasAccess);
+  console.log('[ADMIN DASHBOARD] Verificacion detallada:', {
     userExists: !!user,
     roleIsDistributor: user?.role === "distributor",
     roleIsAdmin: user?.role === "admin",
@@ -210,22 +210,22 @@ export default function AdminDashboard() {
           animate={{ opacity: 1, scale: 1 }}
           className="text-center p-8 backdrop-blur-lg rounded-2xl shadow-xl border"
           style={{
-            backgroundColor: themeColors.surface + "80",
-            borderColor: themeColors.primary + "20"
+            backgroundColor: "#ffffff",
+            borderColor: themeColors.border
           }}
         >
           <div 
             className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
             style={{
-              background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`
+              backgroundColor: themeColors.primary
             }}
           >
             <Users className="w-8 h-8 text-white" />
           </div>
           <h1 
-            className="text-2xl font-bold mb-4 bg-gradient-to-r bg-clip-text text-transparent"
+            className="text-2xl font-bold mb-4"
             style={{
-              backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+              color: themeColors.primary
             }}
           >
             Acceso Denegado
@@ -240,7 +240,7 @@ export default function AdminDashboard() {
             href="/"
             className="inline-block px-6 py-3 rounded-lg transition-all hover:scale-105"
             style={{
-              background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`,
+              backgroundColor: themeColors.primary,
               color: "white"
             }}
           >
@@ -251,7 +251,7 @@ export default function AdminDashboard() {
     );
   }
 
-  // 🎯 Preparar stats con datos reales del backend
+  // Preparar stats con datos reales del backend
   const stats = dashboardData ? [
     {
       title: "Ventas Totales",
@@ -334,13 +334,13 @@ export default function AdminDashboard() {
     },
   ];
 
-  // Función para obtener colores del tema
+  // Funcion para obtener colores del tema
   const getThemeColor = (index: number) => {
     const colors = [themeColors.primary, themeColors.secondary, themeColors.accent];
     return colors[index % colors.length];
   };
 
-  // 🔐 Mostrar mensaje estético de redirección si no hay autenticación
+  // Mostrar mensaje estetico de redireccion si no hay autenticacion
   if (showAuthRedirect) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: themeColors.background }}>
@@ -377,7 +377,7 @@ export default function AdminDashboard() {
               <Activity className="w-10 h-10 text-white" strokeWidth={2.5} />
             </motion.div>
 
-            {/* Título */}
+            {/* Titulo */}
             <h2 className="text-2xl font-bold text-white mb-3">
               Sesión no encontrada
             </h2>
@@ -397,7 +397,7 @@ export default function AdminDashboard() {
               />
             </div>
 
-            {/* Texto pequeño */}
+            {/* Texto pequeno */}
             <p className="mt-4 text-white/70 text-sm">
               Serás redirigido automáticamente en 2 segundos
             </p>
@@ -407,7 +407,7 @@ export default function AdminDashboard() {
     );
   }
 
-  // 🔄 Mostrar loading mientras verifica autenticación
+  // Mostrar loading mientras verifica autenticacion
   if (!authChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: themeColors.background }}>
@@ -441,9 +441,9 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 
-                className="text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
+                className="text-3xl font-bold"
                 style={{
-                  backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+                  color: themeColors.primary
                 }}
               >
                 ¡Bienvenido, {user.firstName} {user.lastName}!
@@ -465,7 +465,7 @@ export default function AdminDashboard() {
               {currentDate}
             </div>
             
-            {/* Debug: Botón para recargar estado (temporal durante desarrollo) */}
+            {/* Debug: Boton para recargar estado (temporal durante desarrollo) */}
             {!isLoadingOnboarding && (
               <button
                 onClick={reloadOnboardingStatus}
@@ -477,7 +477,7 @@ export default function AdminDashboard() {
                 }}
                 title="Recargar estado de onboarding"
               >
-                🔄 Actualizar
+                Actualizar
               </button>
             )}
           </div>
@@ -503,10 +503,10 @@ export default function AdminDashboard() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-6 backdrop-blur-lg rounded-2xl shadow-lg border text-center"
+            className="p-6 rounded-2xl shadow-lg border text-center"
             style={{
-              backgroundColor: themeColors.surface + "80",
-              borderColor: `${themeColors.primary}20`,
+              backgroundColor: "#ffffff",
+              borderColor: themeColors.border,
             }}
           >
             <p style={{ color: themeColors.text.secondary }} className="mb-4">
@@ -516,11 +516,11 @@ export default function AdminDashboard() {
               onClick={refetch}
               className="px-4 py-2 rounded-lg transition-all hover:scale-105"
               style={{
-                background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`,
+                backgroundColor: themeColors.primary,
                 color: "white"
               }}
             >
-              🔄 Reintentar
+              Reintentar
             </button>
           </motion.div>
         )}
@@ -550,17 +550,17 @@ export default function AdminDashboard() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 + index * 0.1 }}
                     whileHover={{ scale: 1.02, y: -2 }}
-                    className="p-6 backdrop-blur-lg rounded-2xl shadow-lg border hover:shadow-xl transition-all duration-300"
+                    className="p-6 rounded-2xl shadow-lg border hover:shadow-xl transition-all duration-300"
                     style={{
-                      backgroundColor: themeColors.surface + "80",
-                      borderColor: themeColors.primary + "20"
+                      backgroundColor: "#ffffff",
+                      borderColor: themeColors.border
                     }}
                   >
                     <div className="flex items-center justify-between mb-4">
                       <div
                         className="p-3 rounded-xl"
                         style={{
-                          background: `linear-gradient(45deg, ${statColor}, ${statColor}90)`
+                          backgroundColor: statColor
                         }}
                       >
                         <IconComponent className="w-6 h-6 text-white" />
@@ -624,16 +624,16 @@ export default function AdminDashboard() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 + index * 0.1 }}
                     whileHover={{ scale: 1.02, y: -2 }}
-                    className="p-6 backdrop-blur-lg rounded-2xl shadow-lg border hover:shadow-xl transition-all duration-300 cursor-pointer group"
+                    className="p-6 rounded-2xl shadow-lg border hover:shadow-xl transition-all duration-300 cursor-pointer group"
                     style={{
-                      backgroundColor: themeColors.surface + "80",
-                      borderColor: themeColors.primary + "20"
+                      backgroundColor: "#ffffff",
+                      borderColor: themeColors.border
                     }}
                   >
                     <div
                       className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300"
                       style={{
-                        background: `linear-gradient(45deg, ${actionColor}, ${actionColor}90)`
+                        backgroundColor: actionColor
                       }}
                     >
                       <IconComponent className="w-6 h-6 text-white" />
@@ -666,17 +666,17 @@ export default function AdminDashboard() {
         >
           {/* Sales Chart */}
           <div 
-            className="p-6 backdrop-blur-lg rounded-2xl shadow-lg border"
+            className="p-6 rounded-2xl shadow-lg border"
             style={{
-              backgroundColor: themeColors.surface + "80",
-              borderColor: themeColors.primary + "20"
+              backgroundColor: "#ffffff",
+              borderColor: themeColors.border
             }}
           >
             <div className="flex items-center gap-3 mb-6">
               <div 
                 className="p-2 rounded-lg"
                 style={{
-                  background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`
+                  backgroundColor: themeColors.primary
                 }}
               >
                 <BarChart3 className="w-5 h-5 text-white" />
@@ -697,14 +697,14 @@ export default function AdminDashboard() {
                   transition={{ delay: 0.6 + index * 0.1 }}
                   className="rounded-t-lg flex-1 min-w-0 relative group"
                   style={{
-                    background: `linear-gradient(to top, ${themeColors.primary}, ${themeColors.secondary})`
+                    backgroundColor: themeColors.primary
                   }}
                   title={`${monthData.month}: $${monthData.value.toLocaleString()}`}
                 >
                   {/* Tooltip en hover */}
                   <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity text-xs whitespace-nowrap pointer-events-none"
                     style={{
-                      backgroundColor: themeColors.surface + "F0",
+                      backgroundColor: "#ffffff",
                       color: themeColors.text.primary,
                       boxShadow: `0 2px 8px ${themeColors.primary}40`
                     }}
@@ -726,17 +726,17 @@ export default function AdminDashboard() {
 
           {/* Recent Activity */}
           <div 
-            className="p-6 backdrop-blur-lg rounded-2xl shadow-lg border"
+            className="p-6 rounded-2xl shadow-lg border"
             style={{
-              backgroundColor: themeColors.surface + "80",
-              borderColor: themeColors.primary + "20"
+              backgroundColor: "#ffffff",
+              borderColor: themeColors.border
             }}
           >
             <div className="flex items-center gap-3 mb-6">
               <div 
                 className="p-2 rounded-lg"
                 style={{
-                  background: `linear-gradient(45deg, ${themeColors.secondary}, ${themeColors.accent})`
+                  backgroundColor: themeColors.primary
                 }}
               >
                 <TrendingUp className="w-5 h-5 text-white" />

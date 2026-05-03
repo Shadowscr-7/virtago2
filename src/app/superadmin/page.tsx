@@ -38,8 +38,8 @@ export default function SuperadminDashboard() {
       <div className="p-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <h1
-            className="text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent"
-            style={{ backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})` }}
+            className="text-3xl font-bold"
+            style={{ color: themeColors.primary }}
           >
             Panel de Super Admin
           </h1>
@@ -59,15 +59,15 @@ export default function SuperadminDashboard() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 whileHover={{ scale: 1.02, y: -2 }}
-                className="p-6 rounded-2xl border backdrop-blur-lg shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer block"
+                className="p-6 rounded-2xl border shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer block"
                 style={{
-                  backgroundColor: themeColors.surface + "80",
-                  borderColor: themeColors.primary + "20",
+                  backgroundColor: "#ffffff",
+                  borderColor: themeColors.border,
                 }}
               >
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
-                  style={{ background: `linear-gradient(45deg, ${link.color}, ${link.color}90)` }}
+                  style={{ backgroundColor: link.color }}
                 >
                   <Icon className="w-6 h-6 text-white" />
                 </div>

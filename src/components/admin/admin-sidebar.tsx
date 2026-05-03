@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -155,13 +155,20 @@ interface AdminSidebarProps {
   className?: string;
 }
 
+let hasPlayedAdminSidebarIntro = false;
+
 export function AdminSidebar({ className = "" }: AdminSidebarProps) {
   const { themeColors } = useTheme();
   const { user } = useAuthStore();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [shouldPlayIntro] = useState(() => !hasPlayedAdminSidebarIntro);
   const pathname = usePathname();
   const isDistributor = user?.role === "distributor";
   const visibleItems = menuItems.filter((item) => !(item.adminOnly && isDistributor));
+
+  useEffect(() => {
+    hasPlayedAdminSidebarIntro = true;
+  }, []);
 
   const isActive = (href: string) => {
     if (href === "/admin") {
@@ -170,54 +177,33 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
     return pathname.startsWith(href);
   };
 
-  // Colores dinámicos para cada item basados en el tema
-  const getItemColor = (index: number) => {
-    const colors = [
-      themeColors.primary,
-      themeColors.secondary,
-      themeColors.accent,
-      themeColors.primary,
-      themeColors.secondary,
-      themeColors.accent,
-      themeColors.primary,
-      themeColors.secondary,
-      themeColors.accent,
-      themeColors.primary,
-    ];
-    return colors[index % colors.length];
-  };
-
   return (
     <motion.aside
-      initial={{ x: -100 }}
+      initial={shouldPlayIntro ? { x: -100 } : false}
       animate={{ x: 0 }}
       transition={{ duration: 0.3 }}
       className={`
-        relative h-screen border-r backdrop-blur-xl
+        relative h-screen border-r bg-white
         ${isCollapsed ? "w-16" : "w-64"}
         transition-all duration-300 ease-in-out
         ${className}
       `}
       style={{
-        background: `linear-gradient(180deg,
-          ${themeColors.surface}90 0%,
-          ${themeColors.primary}20 50%,
-          ${themeColors.surface}80 100%)`,
-        borderColor: themeColors.primary + "20"
+        borderColor: themeColors.border
       }}
     >
       {/* Header */}
       <div
         className="flex items-center justify-between p-4 border-b"
-        style={{ borderColor: themeColors.primary + "20" }}
+        style={{ borderColor: themeColors.border }}
       >
         {!isCollapsed && (
           <motion.h2
-            initial={{ opacity: 0 }}
+            initial={shouldPlayIntro ? { opacity: 0 } : false}
             animate={{ opacity: 1 }}
-            className="text-lg font-bold bg-gradient-to-r bg-clip-text text-transparent"
+            className="text-lg font-bold"
             style={{
-              backgroundImage: `linear-gradient(to right, ${themeColors.primary}, ${themeColors.secondary})`
+              color: themeColors.primary
             }}
           >
             Panel Admin
@@ -229,8 +215,8 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="p-2 rounded-lg transition-colors"
           style={{
-            backgroundColor: themeColors.primary + "20",
-            color: themeColors.text.primary
+            backgroundColor: themeColors.primary,
+            color: "#ffffff"
           }}
         >
           {isCollapsed ? (
@@ -246,7 +232,7 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
         {visibleItems.map((item, index) => {
           const IconComponent = item.icon;
           const active = isActive(item.href);
-          const itemColor = getItemColor(index);
+          const itemColor = themeColors.primary;
 
           const linkContent = (
             <motion.div
@@ -255,13 +241,14 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
               className={`
                 relative group flex items-center gap-3 p-3 rounded-xl transition-all duration-300
                 ${isCollapsed ? "justify-center" : ""}
+                ${active ? "shadow-sm" : "hover:bg-gray-50"}
               `}
               style={{
                 backgroundColor: active
-                  ? itemColor + "40"
+                  ? itemColor
                   : "transparent",
                 color: active
-                  ? themeColors.text.primary
+                  ? "#ffffff"
                   : themeColors.text.secondary
               }}
             >
@@ -279,21 +266,13 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
                 />
               )}
 
-              {/* Efecto de brillo al hacer hover */}
-              <div
-                className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                style={{
-                  background: `linear-gradient(90deg, transparent, ${itemColor}15, transparent)`
-                }}
-              />
-
               {/* Icono */}
               <div
                 className="relative z-10 p-2 rounded-lg transition-all duration-300"
                 style={{
                   backgroundColor: active
-                    ? itemColor + "30"
-                    : themeColors.surface + "20"
+                    ? themeColors.accent
+                    : "#ffffff"
                 }}
               >
                 <IconComponent className="w-5 h-5" />
@@ -302,7 +281,7 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
               {/* Texto */}
               {!isCollapsed && (
                 <motion.span
-                  initial={{ opacity: 0 }}
+                  initial={shouldPlayIntro ? { opacity: 0 } : false}
                   animate={{ opacity: 1 }}
                   className="relative z-10 font-medium"
                 >
@@ -317,17 +296,17 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
                   whileHover={{ opacity: 1, x: 0 }}
                   className="absolute left-full ml-4 px-3 py-2 text-sm rounded-lg shadow-lg border z-50 whitespace-nowrap pointer-events-none group-hover:pointer-events-auto"
                   style={{
-                    backgroundColor: themeColors.surface + "95",
+                    backgroundColor: "#ffffff",
                     color: themeColors.text.primary,
-                    borderColor: themeColors.primary + "30"
+                    borderColor: themeColors.border
                   }}
                 >
                   {item.label}
                   <div
                     className="absolute left-0 top-1/2 transform -translate-x-1 -translate-y-1/2 w-2 h-2 rotate-45 border-l border-b"
                     style={{
-                      backgroundColor: themeColors.surface + "95",
-                      borderColor: themeColors.primary + "30"
+                      backgroundColor: "#ffffff",
+                      borderColor: themeColors.border
                     }}
                   />
                 </motion.div>
@@ -338,9 +317,9 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
           return (
             <motion.div
               key={item.id}
-              initial={{ opacity: 0, x: -20 }}
+              initial={shouldPlayIntro ? { opacity: 0, x: -20 } : false}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
+              transition={shouldPlayIntro ? { delay: index * 0.05 } : undefined}
             >
               {item.external ? (
                 <a href={item.href} target="_blank" rel="noopener noreferrer">
@@ -360,12 +339,12 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
       <div className="absolute bottom-4 left-0 right-0 px-2">
         {!isCollapsed ? (
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={shouldPlayIntro ? { opacity: 0 } : false}
             animate={{ opacity: 1 }}
             className="mx-2 p-3 rounded-lg border"
             style={{
-              backgroundColor: themeColors.surface + "30",
-              borderColor: themeColors.primary + "20"
+              backgroundColor: "#ffffff",
+              borderColor: themeColors.border
             }}
           >
             <div className="text-xs text-center">
@@ -382,21 +361,21 @@ export function AdminSidebar({ className = "" }: AdminSidebarProps) {
           </motion.div>
         ) : (
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={shouldPlayIntro ? { opacity: 0 } : false}
             animate={{ opacity: 1 }}
             className="flex justify-center"
           >
             <div
               className="w-8 h-8 rounded-lg border flex items-center justify-center"
               style={{
-                backgroundColor: themeColors.primary + "20",
-                borderColor: themeColors.primary + "30"
+                backgroundColor: themeColors.primary,
+                borderColor: themeColors.border
               }}
             >
               <div
                 className="w-2 h-2 rounded-full"
                 style={{
-                  background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary})`
+                  backgroundColor: "#ffffff"
                 }}
               />
             </div>

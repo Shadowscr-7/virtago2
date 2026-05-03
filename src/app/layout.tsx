@@ -66,7 +66,24 @@ export default function RootLayout({
           <ThemeProvider>
             <ToastProvider>
               <ToastIntegration />
-              <Toaster position="top-right" richColors />
+              <Toaster
+                position="top-right"
+                richColors={false}
+                toastOptions={{
+                  style: {
+                    background: "#B91C1C",
+                    color: "#ffffff",
+                    border: "1px solid #991B1B",
+                  },
+                  classNames: {
+                    title: "text-white",
+                    description: "text-white",
+                    actionButton: "bg-white text-red-700",
+                    cancelButton: "bg-red-800 text-white",
+                    closeButton: "bg-red-800 text-white border-red-900",
+                  },
+                }}
+              />
               <LoadingProvider>
                 <GlobalErrorBoundary name="RootLayout">
                   <ClientLayout>{children}</ClientLayout>

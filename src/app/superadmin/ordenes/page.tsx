@@ -7,9 +7,10 @@ import { SuperadminLayout } from "@/components/superadmin/superadmin-layout";
 import { useTheme } from "@/contexts/theme-context";
 import { useAuthStore } from "@/store/auth";
 import { useRouter } from "next/navigation";
-import { listOrders } from "@/services/superadmin.service";
+import { listOrders, listUsers } from "@/services/superadmin.service";
 
 const ORDER_STATUSES = ["", "pending", "processing", "shipped", "delivered", "completed", "cancelled"];
+const RED = "#C8102E";
 
 interface OrderRow {
   id: string;
@@ -22,16 +23,57 @@ interface OrderRow {
   createdAt: string;
 }
 
+interface DistributorUser {
+  id: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  distributorCode?: string | null;
+  businessName?: string | null;
+  distributorInfo?: {
+    distributorCode?: string;
+    businessName?: string;
+    distributorName?: string;
+  };
+}
+
+interface DistributorOption {
+  code: string;
+  label: string;
+}
+
+const toDistributorOption = (distributor: DistributorUser): DistributorOption | null => {
+  const code = distributor.distributorCode || distributor.distributorInfo?.distributorCode || "";
+  if (!code) return null;
+
+  const fullName = `${distributor.firstName || ""} ${distributor.lastName || ""}`.trim();
+  const name =
+    distributor.businessName ||
+    distributor.distributorInfo?.businessName ||
+    distributor.distributorInfo?.distributorName ||
+    fullName ||
+    distributor.email ||
+    code;
+
+  return {
+    code,
+    label: `${name} (${code})`,
+  };
+};
+
 export default function SuperadminOrdenes() {
   const { themeColors } = useTheme();
   const { user, isAuthenticated } = useAuthStore();
   const router = useRouter();
 
   const [orders, setOrders] = useState<OrderRow[]>([]);
+  const [distributors, setDistributors] = useState<DistributorOption[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [loadingDistributors, setLoadingDistributors] = useState(false);
   const [statusFilter, setStatusFilter] = useState("");
   const [distFilter, setDistFilter] = useState("");
+  const [distributorSearch, setDistributorSearch] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<OrderRow | null>(null);
@@ -43,6 +85,29 @@ export default function SuperadminOrdenes() {
       router.replace("/login");
     }
   }, [mounted, isAuthenticated, user, router]);
+
+  const fetchDistributors = useCallback(async () => {
+    setLoadingDistributors(true);
+    try {
+      const res = await listUsers({ role: "distributor", limit: "1000" });
+      const seen = new Set<string>();
+      const options = ((res.data || []) as DistributorUser[])
+        .map(toDistributorOption)
+        .filter((option): option is DistributorOption => {
+          if (!option || seen.has(option.code)) return false;
+          seen.add(option.code);
+          return true;
+        })
+        .sort((a, b) => a.label.localeCompare(b.label, "es"));
+
+      setDistributors(options);
+    } catch (e) {
+      console.error(e);
+      setDistributors([]);
+    } finally {
+      setLoadingDistributors(false);
+    }
+  }, []);
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
@@ -66,6 +131,10 @@ export default function SuperadminOrdenes() {
     if (mounted && isAuthenticated) fetchOrders();
   }, [mounted, isAuthenticated, fetchOrders]);
 
+  useEffect(() => {
+    if (mounted && isAuthenticated) fetchDistributors();
+  }, [mounted, isAuthenticated, fetchDistributors]);
+
   if (!mounted || !user) return null;
 
   const statusColor = (s: string) => {
@@ -79,6 +148,19 @@ export default function SuperadminOrdenes() {
     };
     return map[s] || { bg: "#f3f4f6", text: "#6b7280" };
   };
+
+  const normalizedDistributorSearch = distributorSearch.trim().toLowerCase();
+  const filteredDistributors = normalizedDistributorSearch
+    ? distributors.filter((distributor) =>
+        distributor.label.toLowerCase().includes(normalizedDistributorSearch) ||
+        distributor.code.toLowerCase().includes(normalizedDistributorSearch)
+      )
+    : distributors;
+  const selectedDistributor = distributors.find((distributor) => distributor.code === distFilter);
+  const visibleDistributors =
+    selectedDistributor && !filteredDistributors.some((distributor) => distributor.code === selectedDistributor.code)
+      ? [selectedDistributor, ...filteredDistributors]
+      : filteredDistributors;
 
   return (
     <SuperadminLayout>
@@ -97,23 +179,45 @@ export default function SuperadminOrdenes() {
           className="flex flex-wrap gap-3 mb-6"
         >
           <div
-            className="flex items-center gap-2 px-3 py-2 rounded-xl border"
-            style={{ borderColor: themeColors.border, backgroundColor: "#fff" }}
+            className="flex flex-wrap items-center gap-2 px-3 py-2 rounded-xl border bg-white"
+            style={{ borderColor: RED }}
           >
-            <Search className="w-4 h-4" style={{ color: themeColors.text.muted }} />
+            <Search className="w-4 h-4" style={{ color: RED }} />
             <input
-              value={distFilter}
-              onChange={(e) => setDistFilter(e.target.value)}
-              placeholder="Codigo distribuidor..."
-              className="text-sm outline-none bg-transparent w-40"
+              value={distributorSearch}
+              onChange={(e) => setDistributorSearch(e.target.value)}
+              placeholder="Buscar distribuidor..."
+              className="w-48 bg-white text-sm outline-none placeholder:text-gray-400"
               style={{ color: themeColors.text.primary }}
+              disabled={loadingDistributors}
             />
+            <select
+              value={distFilter}
+              onChange={(e) => {
+                const nextCode = e.target.value;
+                setDistFilter(nextCode);
+                const nextDistributor = distributors.find((distributor) => distributor.code === nextCode);
+                if (nextDistributor) setDistributorSearch(nextDistributor.label);
+              }}
+              className="w-64 border-l bg-white pl-2 text-sm outline-none"
+              style={{ borderColor: themeColors.border, color: themeColors.text.primary }}
+              disabled={loadingDistributors}
+            >
+              <option value="">
+                {loadingDistributors ? "Cargando distribuidores..." : "Todos los distribuidores"}
+              </option>
+              {visibleDistributors.map((distributor) => (
+                <option key={distributor.code} value={distributor.code}>
+                  {distributor.label}
+                </option>
+              ))}
+            </select>
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 rounded-xl border text-sm outline-none"
-            style={{ borderColor: themeColors.border, color: themeColors.text.primary }}
+            className="px-3 py-2 rounded-xl border text-sm outline-none bg-white"
+            style={{ borderColor: RED, color: themeColors.text.primary }}
           >
             {ORDER_STATUSES.map((s) => (
               <option key={s} value={s}>{s || "Todos los estados"}</option>
@@ -123,20 +227,20 @@ export default function SuperadminOrdenes() {
             type="date"
             value={dateFrom}
             onChange={(e) => setDateFrom(e.target.value)}
-            className="px-3 py-2 rounded-xl border text-sm outline-none"
-            style={{ borderColor: themeColors.border, color: themeColors.text.primary }}
+            className="px-3 py-2 rounded-xl border text-sm outline-none bg-white"
+            style={{ borderColor: RED, color: themeColors.text.primary }}
           />
           <input
             type="date"
             value={dateTo}
             onChange={(e) => setDateTo(e.target.value)}
-            className="px-3 py-2 rounded-xl border text-sm outline-none"
-            style={{ borderColor: themeColors.border, color: themeColors.text.primary }}
+            className="px-3 py-2 rounded-xl border text-sm outline-none bg-white"
+            style={{ borderColor: RED, color: themeColors.text.primary }}
           />
           <button
             onClick={fetchOrders}
             className="px-4 py-2 rounded-xl text-sm font-medium text-white transition-all hover:scale-105"
-            style={{ background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})` }}
+            style={{ backgroundColor: RED }}
           >
             <Filter className="w-4 h-4 inline mr-1" />
             Filtrar
@@ -149,20 +253,20 @@ export default function SuperadminOrdenes() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
           className="rounded-2xl border overflow-hidden shadow-lg"
-          style={{ borderColor: themeColors.primary + "20", backgroundColor: "#fff" }}
+          style={{ borderColor: RED, backgroundColor: "#fff" }}
         >
           {loading ? (
             <div className="flex items-center justify-center py-16">
               <div
                 className="w-8 h-8 border-4 rounded-full animate-spin"
-                style={{ borderColor: themeColors.primary + "30", borderTopColor: themeColors.primary }}
+                style={{ borderColor: `${RED}30`, borderTopColor: RED }}
               />
             </div>
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr style={{ backgroundColor: themeColors.surface }}>
-                  {["N° Orden", "Cliente", "Distribuidor", "Monto", "Estado", "Fecha"].map((h) => (
+                <tr style={{ backgroundColor: "#fff" }}>
+                  {["Nro. Orden", "Cliente", "Distribuidor", "Monto", "Estado", "Fecha"].map((h) => (
                     <th key={h} className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wide" style={{ color: themeColors.text.secondary }}>
                       {h}
                     </th>
@@ -185,12 +289,12 @@ export default function SuperadminOrdenes() {
                         className="border-t hover:bg-gray-50 transition-colors"
                         style={{ borderColor: themeColors.border }}
                       >
-                        <td className="px-4 py-3 font-medium" style={{ color: themeColors.primary }}>
+                        <td className="px-4 py-3 font-medium" style={{ color: RED }}>
                           {o.orderNo || o.id.substring(0, 8)}
                         </td>
                         <td className="px-4 py-3" style={{ color: themeColors.text.primary }}>{o.client}</td>
                         <td className="px-4 py-3 text-xs" style={{ color: themeColors.text.secondary }}>
-                          {o.distributorCode}{o.distributorName ? ` — ${o.distributorName}` : ""}
+                          {o.distributorCode}{o.distributorName ? ` - ${o.distributorName}` : ""}
                         </td>
                         <td className="px-4 py-3 font-semibold" style={{ color: themeColors.text.primary }}>
                           ${(o.total || 0).toFixed(2)}
@@ -201,7 +305,7 @@ export default function SuperadminOrdenes() {
                           </span>
                         </td>
                         <td className="px-4 py-3 text-xs" style={{ color: themeColors.text.muted }}>
-                          {o.createdAt ? new Date(o.createdAt).toLocaleDateString("es-ES") : "—"}
+                          {o.createdAt ? new Date(o.createdAt).toLocaleDateString("es-ES") : "-"}
                         </td>
                       </tr>
                     );

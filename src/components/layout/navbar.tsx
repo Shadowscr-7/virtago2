@@ -101,12 +101,6 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                 animate={{ scale: isSearchFocused ? 1.02 : 1 }}
                 className={cn("relative transition-all duration-300 w-full", isSearchFocused && "drop-shadow-lg")}
               >
-                <div
-                  className="absolute inset-0 rounded-full blur-sm opacity-30"
-                  style={{
-                    background: `linear-gradient(90deg, ${themeColors.primary}20, ${themeColors.secondary}20, ${themeColors.accent}20)`,
-                  }}
-                />
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                   <input
@@ -117,14 +111,15 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                     onFocus={() => setIsSearchFocused(true)}
                     onBlur={() => setIsSearchFocused(false)}
                     className={cn(
-                      "w-full pl-10 pr-4 py-2 rounded-full border bg-background/50 backdrop-blur",
+                      "w-full pl-10 pr-4 py-2 rounded-full border bg-white",
                       "transition-all duration-300 focus:outline-none focus:ring-2",
-                      isSearchFocused && "bg-background/80 shadow-lg",
+                      isSearchFocused && "shadow-lg",
                     )}
                     style={{
+                      borderColor: themeColors.border,
                       ...(isSearchFocused && {
-                        borderColor: themeColors.primary + "50",
-                        boxShadow: `0 0 0 2px ${themeColors.primary}50`,
+                        borderColor: themeColors.primary,
+                        boxShadow: `0 0 0 2px ${themeColors.primary}`,
                       }),
                     }}
                   />
@@ -319,8 +314,8 @@ export function Navbar({ isAdminMode = false }: NavbarProps = {}) {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   autoFocus
-                  className="w-full pl-10 pr-4 py-2.5 rounded-full border bg-background/80 focus:outline-none focus:ring-2"
-                  style={{ borderColor: themeColors.border, boxShadow: `0 0 0 2px ${themeColors.primary}30` }}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-full border bg-white focus:outline-none focus:ring-2"
+                  style={{ borderColor: themeColors.border, boxShadow: `0 0 0 2px ${themeColors.primary}` }}
                 />
                 {searchQuery && (
                   <button onClick={() => setSearchQuery("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">×</button>
