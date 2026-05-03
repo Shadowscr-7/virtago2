@@ -271,17 +271,27 @@ export const useAuthStore = create<AuthState>()(
             oauthProvider: null,
           };
 
-          // Store temp token; login page will trigger OTP step
-          localStorage.setItem("temp_auth_token", token);
+          get().setToken(token);
           localStorage.setItem("user", JSON.stringify(loggedUser));
+
+          const isNewUser = !user.isVerified;
 
           set({
             isLoading: false,
-            loginOtpStep: true,
-            loginEmail: email,
-            // Store user temporarily to have it available after OTP
+            loginOtpStep: false,
+            loginEmail: null,
             user: loggedUser,
+            isAuthenticated: true,
+            rolePending: isNewUser,
           });
+
+          if (!isNewUser) {
+            showToast({
+              title: "¡Bienvenido!",
+              description: `Sesión iniciada como ${loggedUser.firstName} ${loggedUser.lastName}`,
+              type: "success",
+            });
+          }
 
         } catch (error: unknown) {
           console.error("Error en login:", error);

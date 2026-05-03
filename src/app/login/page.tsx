@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, ArrowLeft } from "lucide-react";
 import { useAuthStore, getRedirectForRole, UserRole } from "@/store/auth";
 import { useTheme } from "@/contexts/theme-context";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { OTPVerification } from "@/components/auth/otp-verification";
 import { RoleSelection } from "@/components/auth/role-selection";
 
 export default function LoginPage() {
@@ -17,16 +16,16 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const { login, loginWithOAuth, loginOtpStep, rolePending, user, isAuthenticated } = useAuthStore();
+  const { login, loginWithOAuth, rolePending, user, isAuthenticated } = useAuthStore();
   const { themeColors } = useTheme();
   const router = useRouter();
 
   // Redirect when auth complete and no role pending
   useEffect(() => {
-    if (isAuthenticated && !rolePending && !loginOtpStep && user?.role) {
+    if (isAuthenticated && !rolePending && user?.role) {
       router.push(getRedirectForRole(user.role as UserRole));
     }
-  }, [isAuthenticated, rolePending, loginOtpStep, user, router]);
+  }, [isAuthenticated, rolePending, user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +33,6 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await login(email, password);
-      // After login(), loginOtpStep will be true — component will render OTP screen
     } catch {
       // Errors shown via toast
     } finally {
@@ -67,26 +65,6 @@ export default function LoginPage() {
     const scope = encodeURIComponent("openid email profile User.Read");
     window.location.href = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${msClientId}&redirect_uri=${redirectUri}&response_type=code&scope=${scope}`;
   };
-
-  // Step: OTP verification after email+password login
-  if (loginOtpStep && user?.email) {
-    return (
-      <div
-        className="min-h-screen flex items-center justify-center p-4"
-        style={{
-          background: `linear-gradient(135deg, ${themeColors.surface} 0%, #ffffff 40%, ${themeColors.primary}10 100%)`,
-        }}
-      >
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full opacity-10 blur-3xl" style={{ backgroundColor: themeColors.primary }} />
-          <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full opacity-10 blur-3xl" style={{ backgroundColor: themeColors.secondary }} />
-        </div>
-        <div className="relative z-10 w-full">
-          <LoginOTPStep email={user.email} />
-        </div>
-      </div>
-    );
-  }
 
   // Step: Role selection for new users
   if (rolePending) {
@@ -340,153 +318,6 @@ export default function LoginPage() {
           </div>
         </motion.div>
       </div>
-    </div>
-  );
-}
-
-/** OTP step shown after email+password login */
-function LoginOTPStep({ email }: { email: string }) {
-  const { verifyLoginOTP, rolePending, user, isLoading } = useAuthStore();
-  const { themeColors } = useTheme();
-  const router = useRouter();
-  const [otp, setOtp] = useState<string[]>(new Array(6).fill(""));
-  const [timeLeft, setTimeLeft] = useState(1800);
-
-  useEffect(() => {
-    if (timeLeft > 0) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [timeLeft]);
-
-  const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`;
-
-  const handleOTPChange = (element: HTMLInputElement, index: number) => {
-    const raw = element.value.replace(/\D/g, "");
-    if (!raw) return;
-    const digit = raw.slice(-1);
-    const newOtp = [...otp];
-    newOtp[index] = digit;
-    setOtp(newOtp);
-    if (digit && element.nextSibling) (element.nextSibling as HTMLInputElement).focus();
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
-    if (e.key === "Backspace") {
-      if (otp[index] === "" && e.currentTarget.previousSibling) (e.currentTarget.previousSibling as HTMLInputElement).focus();
-      setOtp([...otp.map((d, idx) => (idx === index ? "" : d))]);
-    }
-  };
-
-  const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const digits = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6).split("");
-    if (!digits.length) return;
-    const newOtp = new Array(6).fill("");
-    digits.forEach((d, i) => { newOtp[i] = d; });
-    setOtp(newOtp);
-  };
-
-  const handleVerify = async () => {
-    const code = otp.join("");
-    if (code.length !== 6) return;
-    try {
-      await verifyLoginOTP(code);
-      // After OTP: if rolePending, the parent component handles showing RoleSelection
-      // If not, useEffect in LoginPage will redirect
-    } catch {
-      setOtp(new Array(6).fill(""));
-    }
-  };
-
-  const isComplete = otp.every((d) => d !== "");
-
-  return (
-    <div className="w-full max-w-md mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl overflow-hidden bg-white"
-        style={{
-          boxShadow: `0 20px 60px ${themeColors.primary}20`,
-          border: `1px solid ${themeColors.border}`,
-        }}
-      >
-        <div
-          className="px-8 pt-8 pb-6 text-white"
-          style={{ background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})` }}
-        >
-          <div className="text-center">
-            <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-3">
-              <Mail className="w-6 h-6 text-white" />
-            </div>
-            <h2 className="text-xl font-bold text-white">Verificá tu email</h2>
-            <p className="text-white/80 text-sm mt-1">Código enviado a {email}</p>
-          </div>
-        </div>
-
-        <div className="px-8 py-7">
-          <p className="text-sm text-center mb-5" style={{ color: themeColors.text.secondary }}>
-            Ingresá el código de 6 dígitos. Expira en{" "}
-            <span className="font-semibold" style={{ color: timeLeft < 300 ? "#dc2626" : themeColors.primary }}>
-              {formatTime(timeLeft)}
-            </span>
-          </p>
-
-          {/* OTP inputs */}
-          <div className="flex justify-center gap-2.5 mb-6">
-            {otp.map((data, index) => (
-              <input
-                key={index}
-                className="otp-input w-11 h-12 text-center text-lg font-bold rounded-lg border-2 focus:outline-none transition-all duration-200 bg-white"
-                style={{
-                  backgroundColor: data ? `${themeColors.primary}10` : "#ffffff",
-                  borderColor: data ? themeColors.primary : themeColors.border,
-                  color: themeColors.text.primary,
-                }}
-                type="text"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                maxLength={6}
-                value={data}
-                onChange={(e) => handleOTPChange(e.target, index)}
-                onKeyDown={(e) => handleKeyDown(e, index)}
-                onPaste={handlePaste}
-                onFocus={(e) => {
-                  e.target.select();
-                  e.target.style.borderColor = themeColors.primary;
-                  e.target.style.boxShadow = `0 0 0 3px ${themeColors.primary}20`;
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = data ? themeColors.primary : themeColors.border;
-                  e.target.style.boxShadow = "none";
-                }}
-              />
-            ))}
-          </div>
-
-          <motion.button
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
-            onClick={handleVerify}
-            disabled={!isComplete || isLoading}
-            className="w-full py-3 px-6 rounded-lg font-semibold text-white text-sm transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
-            style={{
-              background: `linear-gradient(135deg, ${themeColors.primary}, ${themeColors.secondary})`,
-              boxShadow: `0 4px 14px ${themeColors.primary}40`,
-            }}
-          >
-            {isLoading ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Verificando...
-              </span>
-            ) : (
-              "Verificar código"
-            )}
-          </motion.button>
-        </div>
-      </motion.div>
     </div>
   );
 }
